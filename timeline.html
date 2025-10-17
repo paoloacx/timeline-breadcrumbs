@@ -4,16 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Breadcrumbs Timeline</title>
-  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Courier New', monospace;
-      background: repeating-linear-gradient(0deg, #c0c0c0, #c0c0c0 1px, #d0d0d0 1px, #d0d0d0 2px);
-      padding: 20px;
-      padding-bottom: 100px;
-    }
+    body { font-family: 'Courier New', monospace; background: repeating-linear-gradient(0deg, #c0c0c0, #c0c0c0 1px, #d0d0d0 1px, #d0d0d0 2px); padding: 20px; padding-bottom: 100px; }
     .container { max-width: 800px; margin: 0 auto; }
     .mac-window { background: white; border: 3px solid #000; box-shadow: 5px 5px 0 rgba(0,0,0,0.3); margin-bottom: 20px; }
     .mac-title-bar { background: #000; color: white; padding: 8px; font-size: 14px; font-weight: bold; text-align: center; }
@@ -38,7 +31,10 @@
     .hidden { display: none; }
     .footer { position: fixed; bottom: 0; left: 0; right: 0; background: #000; color: white; padding: 12px 20px; border-top: 3px solid #666; display: flex; justify-content: center; gap: 12px; box-shadow: 0 -3px 10px rgba(0,0,0,0.3); }
     .footer .mac-button { margin: 0; }
+    #map { height: 240px; border: 3px ridge #999; margin-top: 12px; }
+    .leaflet-container { font-family: 'Courier New', monospace; }
   </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
 <body>
   <div class="container">
@@ -56,18 +52,15 @@
       <div class="mac-content">
         <label class="mac-label">Nota:</label>
         <textarea class="mac-textarea" id="note-input" placeholder="¿Qué está pasando?"></textarea>
-
         <label class="mac-label">📍 Ubicación:</label>
-        <input class="mac-input" id="location-input" placeholder="Lugar" type="text" />
+        <input class="mac-input" id="location-input" placeholder="Lugar o 'lat, lon'" type="text"/>
         <button class="mac-button" id="gps-btn" onclick="getGPS()">🌍 Usar GPS</button>
-
         <label class="mac-label">☁️ Clima:</label>
-        <input class="mac-input" id="weather-input" placeholder="Soleado, nublado..." type="text" />
-
+        <input class="mac-input" id="weather-input" placeholder="Soleado, nublado..." type="text"/>
         <label class="mac-label">🖼️ Imágenes:</label>
-        <input accept="image/*" multiple type="file" onchange="handleImages(event)" style="margin-bottom: 12px;" />
+        <input accept="image/*" multiple type="file" onchange="handleImages(event)" style="margin-bottom: 12px;"/>
         <div id="image-previews"></div>
-
+        <div id="map" class="hidden" aria-label="Mapa de ubicación"></div>
         <button class="mac-button mac-button-primary" onclick="saveEntry()">💾 Guardar</button>
         <button class="mac-button" onclick="toggleForm()">Cancelar</button>
       </div>
@@ -89,20 +82,14 @@
     <button class="mac-button" onclick="exportICS()">📅 Exportar iCal</button>
   </div>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
     let entries = [];
     let currentImages = [];
+    let map, mapMarker;
 
-    function loadData() {
-      const saved = localStorage.getItem('timeline-entries');
-      if (saved) entries = JSON.parse(saved);
-      renderTimeline();
-    }
-
-    function saveData() {
-      localStorage.setItem('timeline-entries', JSON.stringify(entries));
-    }
-
+    function loadData() { const saved = localStorage.getItem('timeline-entries'); if (saved) entries = JSON.parse(saved); renderTimeline(); }
+    function saveData() { localStorage.setItem('timeline-entries', JSON.stringify(entries)); }
     function toggleForm() {
       const form = document.getElementById('form-window');
       form.classList.toggle('hidden');
@@ -112,47 +99,28 @@
         document.getElementById('weather-input').value = '';
         currentImages = [];
         document.getElementById('image-previews').innerHTML = '';
+        hideMap();
       }
     }
-
     function getGPS() {
       const btn = document.getElementById('gps-btn');
-      btn.textContent = '⏳ Buscando...';
-      btn.disabled = true;
-      if (!navigator.geolocation) {
-        alert('Geolocalización no disponible');
-        btn.textContent = '🌍 Usar GPS';
-        btn.disabled = false;
-        return;
-      }
+      btn.textContent = '⏳ Buscando...'; btn.disabled = true;
+      if (!navigator.geolocation) { alert('Geolocalización no disponible'); btn.textContent = '🌍 Usar GPS'; btn.disabled = false; return; }
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const lat = position.coords.latitude.toFixed(6);
           const lon = position.coords.longitude.toFixed(6);
           document.getElementById('location-input').value = `${lat}, ${lon}`;
-          btn.textContent = '🌍 Usar GPS';
-          btn.disabled = false;
+          btn.textContent = '🌍 Usar GPS'; btn.disabled = false;
+          showMapWithCoords(parseFloat(lat), parseFloat(lon));
         },
-        (error) => {
-          alert('Error obteniendo ubicación: ' + error.message);
-          btn.textContent = '🌍 Usar GPS';
-          btn.disabled = false;
-        }
+        (error) => { alert('Error obteniendo ubicación: ' + error.message); btn.textContent = '🌍 Usar GPS'; btn.disabled = false; }
       );
     }
-
     function handleImages(event) {
       const files = Array.from(event.target.files);
-      files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          currentImages.push(e.target.result);
-          renderImagePreviews();
-        };
-        reader.readAsDataURL(file);
-      });
+      files.forEach(file => { const reader = new FileReader(); reader.onload = (e) => { currentImages.push(e.target.result); renderImagePreviews(); }; reader.readAsDataURL(file); });
     }
-
     function renderImagePreviews() {
       const container = document.getElementById('image-previews');
       container.innerHTML = currentImages.map((img, idx) => `
@@ -162,70 +130,28 @@
         </div>
       `).join('');
     }
-
-    function removeImage(index) {
-      currentImages.splice(index, 1);
-      renderImagePreviews();
-    }
-
+    function removeImage(index) { currentImages.splice(index, 1); renderImagePreviews(); }
     function saveEntry() {
       const note = document.getElementById('note-input').value.trim();
-      if (!note) {
-        alert('Por favor escribe una nota');
-        return;
-      }
-      const entry = {
-        id: Date.now(),
-        timestamp: new Date().toISOString(),
-        note: note,
-        location: document.getElementById('location-input').value,
-        weather: document.getElementById('weather-input').value,
-        images: [...currentImages]
-      };
-      entries.unshift(entry);
-      saveData();
-      renderTimeline();
-      toggleForm();
+      if (!note) { alert('Por favor escribe una nota'); return; }
+      const entry = { id: Date.now(), timestamp: new Date().toISOString(), note, location: document.getElementById('location-input').value, weather: document.getElementById('weather-input').value, images: [...currentImages] };
+      entries.unshift(entry); saveData(); renderTimeline(); toggleForm();
     }
-
-    function deleteEntry(id) {
-      if (confirm('¿Eliminar esta entrada?')) {
-        entries = entries.filter(e => e.id !== id);
-        saveData();
-        renderTimeline();
-      }
-    }
-
+    function deleteEntry(id) { if (confirm('¿Eliminar esta entrada?')) { entries = entries.filter(e => e.id !== id); saveData(); renderTimeline(); } }
     function formatDate(timestamp) {
-      const date = new Date(timestamp);
-      const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-      const isToday = date.toDateString() === today.toDateString();
-      const isYesterday = date.toDateString() === yesterday.toDateString();
-      if (isToday) {
-        return `Hoy ${date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}`;
-      } else if (isYesterday) {
-        return `Ayer ${date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}`;
-      } else {
-        return date.toLocaleString('es', {
-          day: '2-digit', month: '2-digit', year: 'numeric',
-          hour: '2-digit', minute: '2-digit'
-        });
-      }
+      const date = new Date(timestamp); const today = new Date(); const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+      const isToday = date.toDateString() === today.toDateString(); const isYesterday = date.toDateString() === yesterday.toDateString();
+      if (isToday) { return `Hoy ${date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}`; }
+      else if (isYesterday) { return `Ayer ${date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}`; }
+      else { return date.toLocaleString('es', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
     }
-
     function renderTimeline() {
       const container = document.getElementById('timeline-container');
       const emptyState = document.getElementById('empty-state');
       const footer = document.getElementById('footer');
-      if (entries.length === 0) {
-        container.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        footer.style.display = 'none';
-      } else {
-        emptyState.classList.add('hidden');
-        footer.style.display = 'flex';
+      if (entries.length === 0) { container.innerHTML = ''; emptyState.classList.remove('hidden'); footer.style.display = 'none'; }
+      else {
+        emptyState.classList.add('hidden'); footer.style.display = 'flex';
         container.innerHTML = entries.map(entry => `
           <div class="timeline-entry">
             <div class="timeline-header">
@@ -246,40 +172,49 @@
         `).join('');
       }
     }
-
     function exportCSV() {
       const headers = ['Fecha y Hora', 'Nota', 'Ubicación', 'Clima', 'Imágenes'];
-      const rows = entries.map(e => [
-        new Date(e.timestamp).toLocaleString(),
-        e.note,
-        e.location || '',
-        e.weather || '',
-        e.images.length
-      ]);
+      const rows = entries.map(e => [ new Date(e.timestamp).toLocaleString(), e.note, e.location || '', e.weather || '', e.images.length ]);
       const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `breadcrumbs-${Date.now()}.csv`;
-      a.click();
+      const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `breadcrumbs-${Date.now()}.csv`; a.click();
     }
-
     function exportICS() {
       const icsEvents = entries.map(e => {
-        const date = new Date(e.timestamp);
-        const dateStr = date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        const date = new Date(e.timestamp); const dateStr = date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
         return `BEGIN:VEVENT\nUID:${e.id}@breadcrumbs\nDTSTAMP:${dateStr}\nDTSTART:${dateStr}\nSUMMARY:${e.note.substring(0, 50)}\nDESCRIPTION:${e.note}\nLOCATION:${e.location || ''}\nEND:VEVENT`;
       }).join('\n');
       const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Breadcrumbs Timeline//ES\n${icsEvents}\nEND:VCALENDAR`;
-      const blob = new Blob([ics], { type: 'text/calendar' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `breadcrumbs-${Date.now()}.ics`;
-      a.click();
+      const blob = new Blob([ics], { type: 'text/calendar' }); const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `breadcrumbs-${Date.now()}.ics`; a.click();
+    }
+    // Leaflet helpers
+    function ensureMap() {
+      const mapEl = document.getElementById('map');
+      if (!map) {
+        map = L.map(mapEl).setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(map);
+      }
+      setTimeout(() => { map.invalidateSize(); }, 0);
+    }
+    function showMap() { const mapEl = document.getElementById('map'); mapEl.classList.remove('hidden'); ensureMap(); }
+    function hideMap() { const mapEl = document.getElementById('map'); mapEl.classList.add('hidden'); }
+    function showMapWithCoords(lat, lon) {
+      showMap(); ensureMap(); map.setView([lat, lon], 14);
+      if (mapMarker) { map.removeLayer(mapMarker); }
+      mapMarker = L.marker([lat, lon]).addTo(map);
     }
 
+    // Allow manual lat,lon typing to update map
+    document.addEventListener('input', (e) => {
+      if (e.target && e.target.id === 'location-input') {
+        const val = e.target.value.trim();
+        const m = val.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+        if (m) { const lat = parseFloat(m[1]); const lon = parseFloat(m[2]); showMapWithCoords(lat, lon); }
+      }
+    });
+
+    // Init
     loadData();
   </script>
 </body>
