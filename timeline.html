@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Breadcrumbs Timeline</title>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
     <style>
         * {
             margin: 0;
@@ -13,8 +15,15 @@
 
         body {
             font-family: 'Courier New', monospace;
-            background: #c0c0c0;
+            background: repeating-linear-gradient(
+                0deg,
+                #c0c0c0,
+                #c0c0c0 1px,
+                #d0d0d0 1px,
+                #d0d0d0 2px
+            );
             padding: 20px;
+            padding-bottom: 100px;
         }
 
         .container {
@@ -166,6 +175,25 @@
         .hidden {
             display: none;
         }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #000;
+            color: white;
+            padding: 12px 20px;
+            border-top: 3px solid #666;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 -3px 10px rgba(0,0,0,0.3);
+        }
+
+        .footer .mac-button {
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -175,8 +203,6 @@
             <div class="mac-content">
                 <div id="buttons-container">
                     <button class="mac-button mac-button-primary" onclick="toggleForm()">➕ Nueva Entrada</button>
-                    <button class="mac-button" onclick="exportCSV()" id="csv-btn" style="display:none;">💾 CSV</button>
-                    <button class="mac-button" onclick="exportICS()" id="ics-btn" style="display:none;">📅 iCal</button>
                 </div>
             </div>
         </div>
@@ -212,6 +238,11 @@
                 <p style="color: #666; margin-top: 8px;">Crea tu primera anotación</p>
             </div>
         </div>
+    </div>
+
+    <div class="footer" id="footer" style="display: none;">
+        <button class="mac-button" onclick="exportCSV()">💾 Exportar CSV</button>
+        <button class="mac-button" onclick="exportICS()">📅 Exportar iCal</button>
     </div>
 
     <script>
@@ -363,18 +394,15 @@
         function renderTimeline() {
             const container = document.getElementById('timeline-container');
             const emptyState = document.getElementById('empty-state');
-            const csvBtn = document.getElementById('csv-btn');
-            const icsBtn = document.getElementById('ics-btn');
+            const footer = document.getElementById('footer');
 
             if (entries.length === 0) {
                 container.innerHTML = '';
                 emptyState.classList.remove('hidden');
-                csvBtn.style.display = 'none';
-                icsBtn.style.display = 'none';
+                footer.style.display = 'none';
             } else {
                 emptyState.classList.add('hidden');
-                csvBtn.style.display = 'inline-block';
-                icsBtn.style.display = 'inline-block';
+                footer.style.display = 'flex';
 
                 container.innerHTML = entries.map(entry => `
                     <div class="timeline-entry">
