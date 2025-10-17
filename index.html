@@ -1,37 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timeline Breadcrumbs</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .breadcrumb {
-            padding: 10px;
-            background-color: #f4f4f4;
-            border-radius: 5px;
-        }
-        .breadcrumb-item {
-            display: inline;
-            margin-right: 5px;
-        }
-        .breadcrumb-item + .breadcrumb-item::before {
-            content: "/";
-            padding-right: 5px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timeline Breadcrumbs</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .breadcrumb {
+      padding: 10px;
+      background-color: #f4f4f4;
+      border-radius: 5px;
+    }
+    .breadcrumb-item {
+      display: inline;
+      margin-right: 5px;
+    }
+    .breadcrumb-item + .breadcrumb-item::before {
+      content: "/";
+      padding-right: 5px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Timeline Breadcrumbs</h1>
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item"><a href="#">Timeline</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Current</li>
-        </ol>
-    </nav>
+  <h1>Timeline Breadcrumbs</h1>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="#">Home</a></li>
+      <li class="breadcrumb-item"><a href="#">Timeline</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Current</li>
+    </ol>
+  </nav>
 </body>
 </html>
