@@ -4,12 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Breadcrumbs Timeline</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Chicago&display=swap');
-        
         * {
             margin: 0;
             padding: 0;
@@ -17,56 +12,29 @@
         }
 
         body {
-            font-family: 'Chicago', 'Courier New', monospace;
-            background: repeating-linear-gradient(
-                0deg,
-                #d4d4d4,
-                #d4d4d4 1px,
-                #e8e8e8 1px,
-                #e8e8e8 2px
-            );
-            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            background: #c0c0c0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .mac-window {
             background: white;
-            border: 2px solid black;
-            box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
-            margin: 20px;
+            border: 3px solid #000;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+            margin-bottom: 20px;
         }
 
         .mac-title-bar {
-            background: white;
-            border-bottom: 2px solid black;
+            background: #000;
+            color: white;
             padding: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .mac-title-bar-stripes {
-            flex: 1;
-            height: 20px;
-            background: repeating-linear-gradient(
-                90deg,
-                black,
-                black 1px,
-                white 1px,
-                white 2px
-            );
-        }
-
-        .mac-close-btn {
-            width: 12px;
-            height: 12px;
-            border: 2px solid black;
-            background: white;
-            cursor: pointer;
-        }
-
-        .mac-title {
-            font-weight: bold;
             font-size: 14px;
+            font-weight: bold;
             text-align: center;
         }
 
@@ -74,118 +42,98 @@
             padding: 20px;
         }
 
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
         .mac-button {
-            background: white;
-            border: 2px solid black;
+            background: #ddd;
+            border: 3px outset #fff;
             padding: 8px 16px;
-            font-family: 'Chicago', 'Courier New', monospace;
-            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
             cursor: pointer;
-            box-shadow: 2px 2px 0 black;
-            transition: all 0.1s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            margin-right: 8px;
+            margin-bottom: 8px;
         }
 
         .mac-button:hover {
-            background: #f0f0f0;
+            background: #eee;
         }
 
         .mac-button:active {
-            box-shadow: 1px 1px 0 black;
-            transform: translate(1px, 1px);
-        }
-
-        .mac-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+            border-style: inset;
         }
 
         .mac-button-primary {
-            background: black;
+            background: #000;
             color: white;
-        }
-
-        .mac-button-primary:hover {
-            background: #333;
         }
 
         .mac-input,
         .mac-textarea {
             width: 100%;
-            border: 2px solid black;
+            border: 2px inset #999;
             padding: 8px;
-            font-family: 'Chicago', 'Courier New', monospace;
-            font-size: 12px;
-            background: white;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 12px;
         }
 
         .mac-textarea {
+            min-height: 100px;
             resize: vertical;
-            min-height: 80px;
         }
 
         .mac-label {
             display: block;
-            font-size: 12px;
             font-weight: bold;
             margin-bottom: 6px;
-        }
-
-        .mac-field {
-            margin-bottom: 16px;
+            font-size: 14px;
         }
 
         .timeline-entry {
-            background: white;
-            border: 2px solid black;
+            background: #f0f0f0;
+            border: 3px ridge #999;
             padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+            margin-bottom: 16px;
         }
 
-        .timeline-entry-header {
+        .timeline-header {
             display: flex;
             justify-content: space-between;
-            align-items: start;
+            align-items: center;
             margin-bottom: 12px;
             padding-bottom: 8px;
-            border-bottom: 2px dashed black;
+            border-bottom: 2px solid #999;
         }
 
         .timeline-date {
-            font-size: 11px;
             font-weight: bold;
+            font-size: 13px;
         }
 
         .timeline-note {
-            font-size: 13px;
-            line-height: 1.5;
+            font-size: 14px;
+            line-height: 1.6;
             margin-bottom: 12px;
         }
 
         .timeline-meta {
-            font-size: 11px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .timeline-meta-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            font-size: 13px;
+            margin-bottom: 8px;
         }
 
         .image-preview {
             display: inline-block;
-            width: 60px;
-            height: 60px;
-            border: 2px solid black;
+            width: 80px;
+            height: 80px;
+            border: 2px solid #000;
             margin: 4px;
             position: relative;
-            cursor: pointer;
         }
 
         .image-preview img {
@@ -196,454 +144,314 @@
 
         .image-remove {
             position: absolute;
-            top: -8px;
-            right: -8px;
-            width: 16px;
-            height: 16px;
-            background: black;
+            top: -10px;
+            right: -10px;
+            width: 24px;
+            height: 24px;
+            background: #000;
             color: white;
-            border: none;
+            border: 2px solid white;
             cursor: pointer;
-            font-size: 10px;
-            line-height: 16px;
             text-align: center;
-        }
-
-        .timeline-images {
-            margin-top: 12px;
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        .timeline-image {
-            width: 80px;
-            height: 80px;
-            border: 2px solid black;
-            margin: 4px;
-            cursor: pointer;
-        }
-
-        .timeline-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            line-height: 20px;
+            font-weight: bold;
         }
 
         .empty-state {
             text-align: center;
-            padding: 40px;
+            padding: 60px 20px;
+            font-size: 16px;
         }
 
-        .icon-box {
-            width: 32px;
-            height: 32px;
-            border: 2px solid black;
-            background: white;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 16px;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-
-        .file-input-wrapper input[type="file"] {
-            position: absolute;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-            .mac-window {
-                margin: 10px;
-            }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
-
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-
-        function TimelineBreadcrumbs() {
-            const [entries, setEntries] = useState([]);
-            const [showForm, setShowForm] = useState(false);
-            const [currentEntry, setCurrentEntry] = useState({
-                note: '',
-                location: '',
-                weather: '',
-                images: [],
-                useGPS: false
-            });
-
-            useEffect(() => {
-                const saved = localStorage.getItem('timeline-entries');
-                if (saved) {
-                    setEntries(JSON.parse(saved));
-                }
-            }, []);
-
-            useEffect(() => {
-                localStorage.setItem('timeline-entries', JSON.stringify(entries));
-            }, [entries]);
-
-            const requestLocation = () => {
-                if (!navigator.geolocation) {
-                    alert('Tu navegador no soporta geolocalización');
-                    return;
-                }
-
-                setCurrentEntry(prev => ({ ...prev, useGPS: true }));
-                
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const { latitude, longitude } = position.coords;
-                        setCurrentEntry(prev => ({
-                            ...prev,
-                            location: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-                            useGPS: false
-                        }));
-                    },
-                    (error) => {
-                        let errorMsg = 'No se pudo obtener la ubicación';
-                        if (error.code === 1) {
-                            errorMsg = 'Permiso denegado. Por favor permite el acceso a tu ubicación.';
-                        } else if (error.code === 2) {
-                            errorMsg = 'Ubicación no disponible.';
-                        } else if (error.code === 3) {
-                            errorMsg = 'Tiempo de espera agotado.';
-                        }
-                        alert(errorMsg);
-                        setCurrentEntry(prev => ({ ...prev, useGPS: false }));
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
-                );
-            };
-
-            const handleImageUpload = (e) => {
-                const files = Array.from(e.target.files);
-                files.forEach(file => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        setCurrentEntry(prev => ({
-                            ...prev,
-                            images: [...prev.images, reader.result]
-                        }));
-                    };
-                    reader.readAsDataURL(file);
-                });
-            };
-
-            const removeImage = (index) => {
-                setCurrentEntry(prev => ({
-                    ...prev,
-                    images: prev.images.filter((_, i) => i !== index)
-                }));
-            };
-
-            const saveEntry = () => {
-                if (!currentEntry.note.trim()) {
-                    alert('Por favor escribe una nota');
-                    return;
-                }
-
-                const newEntry = {
-                    id: Date.now(),
-                    timestamp: new Date().toISOString(),
-                    note: currentEntry.note,
-                    location: currentEntry.location,
-                    weather: currentEntry.weather,
-                    images: currentEntry.images
-                };
-
-                setEntries(prev => [newEntry, ...prev]);
-                setCurrentEntry({ note: '', location: '', weather: '', images: [], useGPS: false });
-                setShowForm(false);
-            };
-
-            const deleteEntry = (id) => {
-                if (confirm('¿Eliminar esta entrada?')) {
-                    setEntries(prev => prev.filter(e => e.id !== id));
-                }
-            };
-
-            const exportToCSV = () => {
-                const headers = ['Fecha y Hora', 'Nota', 'Ubicación', 'Clima', 'Imágenes'];
-                const rows = entries.map(e => [
-                    new Date(e.timestamp).toLocaleString(),
-                    e.note,
-                    e.location || '',
-                    e.weather || '',
-                    e.images.length
-                ]);
-                
-                const csv = [headers, ...rows].map(row => 
-                    row.map(cell => `"${cell}"`).join(',')
-                ).join('\n');
-                
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `breadcrumbs-${Date.now()}.csv`;
-                a.click();
-            };
-
-            const exportToICS = () => {
-                const icsEvents = entries.map(e => {
-                    const date = new Date(e.timestamp);
-                    const dateStr = date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-                    
-                    return `BEGIN:VEVENT
-UID:${e.id}@breadcrumbs-timeline
-DTSTAMP:${dateStr}
-DTSTART:${dateStr}
-SUMMARY:${e.note.substring(0, 50)}
-DESCRIPTION:${e.note}${e.location ? '\\nUbicación: ' + e.location : ''}${e.weather ? '\\nClima: ' + e.weather : ''}
-LOCATION:${e.location || ''}
-END:VEVENT`;
-                }).join('\n');
-
-                const ics = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Breadcrumbs Timeline//ES
-CALSCALE:GREGORIAN
-METHOD:PUBLISH
-${icsEvents}
-END:VCALENDAR`;
-
-                const blob = new Blob([ics], { type: 'text/calendar' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `breadcrumbs-${Date.now()}.ics`;
-                a.click();
-            };
-
-            const formatDate = (timestamp) => {
-                const date = new Date(timestamp);
-                const today = new Date();
-                const yesterday = new Date(today);
-                yesterday.setDate(yesterday.getDate() - 1);
-
-                const isToday = date.toDateString() === today.toDateString();
-                const isYesterday = date.toDateString() === yesterday.toDateString();
-
-                if (isToday) {
-                    return `Hoy ${date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}`;
-                } else if (isYesterday) {
-                    return `Ayer ${date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}`;
-                } else {
-                    return date.toLocaleString('es', { 
-                        day: '2-digit', 
-                        month: '2-digit', 
-                        year: 'numeric',
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                    });
-                }
-            };
-
-            return (
-                <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-                    <div className="mac-window">
-                        <div className="mac-title-bar">
-                            <div className="mac-close-btn"></div>
-                            <div className="mac-title-bar-stripes"></div>
-                        </div>
-                        <div className="mac-content">
-                            <h1 style={{ fontSize: '20px', marginBottom: '20px', textAlign: 'center' }}>
-                                Breadcrumbs Timeline
-                            </h1>
-                            
-                            <div className="button-group">
-                                <button onClick={() => setShowForm(!showForm)} className="mac-button mac-button-primary">
-                                    <span>➕</span> Nueva Entrada
-                                </button>
-                                
-                                {entries.length > 0 && (
-                                    <>
-                                        <button onClick={exportToCSV} className="mac-button">
-                                            <span>💾</span> Exportar CSV
-                                        </button>
-                                        <button onClick={exportToICS} className="mac-button">
-                                            <span>📅</span> Exportar iCal
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {showForm && (
-                        <div className="mac-window" style={{ marginTop: '20px' }}>
-                            <div className="mac-title-bar">
-                                <div className="mac-close-btn" onClick={() => setShowForm(false)}></div>
-                                <div className="mac-title-bar-stripes"></div>
-                            </div>
-                            <div className="mac-content">
-                                <div className="mac-field">
-                                    <label className="mac-label">Nota:</label>
-                                    <textarea
-                                        value={currentEntry.note}
-                                        onChange={(e) => setCurrentEntry(prev => ({ ...prev, note: e.target.value }))}
-                                        placeholder="¿Qué está pasando?"
-                                        className="mac-textarea"
-                                    />
-                                </div>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                                    <div className="mac-field">
-                                        <label className="mac-label">📍 Ubicación:</label>
-                                        <input
-                                            type="text"
-                                            value={currentEntry.location}
-                                            onChange={(e) => setCurrentEntry(prev => ({ ...prev, location: e.target.value }))}
-                                            placeholder="Lugar"
-                                            className="mac-input"
-                                        />
-                                        <button
-                                            onClick={requestLocation}
-                                            disabled={currentEntry.useGPS}
-                                            className="mac-button"
-                                            style={{ marginTop: '8px', width: '100%' }}
-                                        >
-                                            {currentEntry.useGPS ? '⏳ Buscando...' : '🌍 Usar GPS'}
-                                        </button>
-                                    </div>
-
-                                    <div className="mac-field">
-                                        <label className="mac-label">☁️ Clima:</label>
-                                        <input
-                                            type="text"
-                                            value={currentEntry.weather}
-                                            onChange={(e) => setCurrentEntry(prev => ({ ...prev, weather: e.target.value }))}
-                                            placeholder="Soleado, nublado..."
-                                            className="mac-input"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="mac-field">
-                                    <label className="mac-label">🖼️ Imágenes:</label>
-                                    <div className="file-input-wrapper">
-                                        <button className="mac-button" style={{ width: '100%' }}>
-                                            Seleccionar archivos
-                                        </button>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            multiple
-                                            onChange={handleImageUpload}
-                                        />
-                                    </div>
-                                    
-                                    {currentEntry.images.length > 0 && (
-                                        <div style={{ marginTop: '12px' }}>
-                                            {currentEntry.images.map((img, idx) => (
-                                                <div key={idx} className="image-preview">
-                                                    <img src={img} alt="" />
-                                                    <button
-                                                        onClick={() => removeImage(idx)}
-                                                        className="image-remove"
-                                                    >
-                                                        ✕
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="button-group">
-                                    <button onClick={saveEntry} className="mac-button mac-button-primary">
-                                        💾 Guardar
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setShowForm(false);
-                                            setCurrentEntry({ note: '', location: '', weather: '', images: [], useGPS: false });
-                                        }}
-                                        className="mac-button"
-                                    >
-                                        Cancelar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div style={{ marginTop: '20px' }}>
-                        {entries.length === 0 ? (
-                            <div className="mac-window">
-                                <div className="mac-content empty-state">
-                                    <div className="icon-box" style={{ margin: '0 auto 16px' }}>📝</div>
-                                    <p style={{ fontSize: '14px', marginBottom: '8px' }}>No hay entradas</p>
-                                    <p style={{ fontSize: '11px', color: '#666' }}>Crea tu primera anotación</p>
-                                </div>
-                            </div>
-                        ) : (
-                            entries.map((entry) => (
-                                <div key={entry.id} className="timeline-entry">
-                                    <div className="timeline-entry-header">
-                                        <div className="timeline-date">{formatDate(entry.timestamp)}</div>
-                                        <button onClick={() => deleteEntry(entry.id)} className="mac-button" style={{ padding: '4px 8px' }}>
-                                            🗑️
-                                        </button>
-                                    </div>
-                                    
-                                    <div className="timeline-note">{entry.note}</div>
-                                    
-                                    <div className="timeline-meta">
-                                        {entry.location && (
-                                            <div className="timeline-meta-item">
-                                                <span>📍</span>
-                                                <span>{entry.location}</span>
-                                            </div>
-                                        )}
-                                        {entry.weather && (
-                                            <div className="timeline-meta-item">
-                                                <span>☁️</span>
-                                                <span>{entry.weather}</span>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {entry.images.length > 0 && (
-                                        <div className="timeline-images">
-                                            {entry.images.map((img, idx) => (
-                                                <div key={idx} className="timeline-image" onClick={() => window.open(img)}>
-                                                    <img src={img} alt="" />
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            ))
-                        )}
-                    </div>
+    <div class="container">
+        <div class="mac-window">
+            <div class="mac-title-bar">Breadcrumbs Timeline</div>
+            <div class="mac-content">
+                <div id="buttons-container">
+                    <button class="mac-button mac-button-primary" onclick="toggleForm()">➕ Nueva Entrada</button>
+                    <button class="mac-button" onclick="exportCSV()" id="csv-btn" style="display:none;">💾 CSV</button>
+                    <button class="mac-button" onclick="exportICS()" id="ics-btn" style="display:none;">📅 iCal</button>
                 </div>
+            </div>
+        </div>
+
+        <div class="mac-window hidden" id="form-window">
+            <div class="mac-title-bar">Nueva Anotación</div>
+            <div class="mac-content">
+                <label class="mac-label">Nota:</label>
+                <textarea class="mac-textarea" id="note-input" placeholder="¿Qué está pasando?"></textarea>
+
+                <label class="mac-label">📍 Ubicación:</label>
+                <input type="text" class="mac-input" id="location-input" placeholder="Lugar">
+                <button class="mac-button" onclick="getGPS()" id="gps-btn">🌍 Usar GPS</button>
+
+                <label class="mac-label">☁️ Clima:</label>
+                <input type="text" class="mac-input" id="weather-input" placeholder="Soleado, nublado...">
+
+                <label class="mac-label">🖼️ Imágenes:</label>
+                <input type="file" accept="image/*" multiple onchange="handleImages(event)" style="margin-bottom: 12px;">
+                <div id="image-previews"></div>
+
+                <button class="mac-button mac-button-primary" onclick="saveEntry()">💾 Guardar</button>
+                <button class="mac-button" onclick="toggleForm()">Cancelar</button>
+            </div>
+        </div>
+
+        <div id="timeline-container"></div>
+
+        <div class="mac-window hidden" id="empty-state">
+            <div class="mac-content empty-state">
+                <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
+                <p><strong>No hay entradas</strong></p>
+                <p style="color: #666; margin-top: 8px;">Crea tu primera anotación</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let entries = [];
+        let currentImages = [];
+
+        // Cargar datos
+        function loadData() {
+            const saved = localStorage.getItem('timeline-entries');
+            if (saved) {
+                entries = JSON.parse(saved);
+            }
+            renderTimeline();
+        }
+
+        // Guardar datos
+        function saveData() {
+            localStorage.setItem('timeline-entries', JSON.stringify(entries));
+        }
+
+        // Toggle formulario
+        function toggleForm() {
+            const form = document.getElementById('form-window');
+            form.classList.toggle('hidden');
+            if (!form.classList.contains('hidden')) {
+                document.getElementById('note-input').value = '';
+                document.getElementById('location-input').value = '';
+                document.getElementById('weather-input').value = '';
+                currentImages = [];
+                document.getElementById('image-previews').innerHTML = '';
+            }
+        }
+
+        // GPS
+        function getGPS() {
+            const btn = document.getElementById('gps-btn');
+            btn.textContent = '⏳ Buscando...';
+            btn.disabled = true;
+
+            if (!navigator.geolocation) {
+                alert('Geolocalización no disponible');
+                btn.textContent = '🌍 Usar GPS';
+                btn.disabled = false;
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude.toFixed(6);
+                    const lon = position.coords.longitude.toFixed(6);
+                    document.getElementById('location-input').value = `${lat}, ${lon}`;
+                    btn.textContent = '🌍 Usar GPS';
+                    btn.disabled = false;
+                },
+                (error) => {
+                    alert('Error obteniendo ubicación: ' + error.message);
+                    btn.textContent = '🌍 Usar GPS';
+                    btn.disabled = false;
+                }
             );
         }
 
-        ReactDOM.render(<TimelineBreadcrumbs />, document.getElementById('root'));
+        // Manejar imágenes
+        function handleImages(event) {
+            const files = Array.from(event.target.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    currentImages.push(e.target.result);
+                    renderImagePreviews();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderImagePreviews() {
+            const container = document.getElementById('image-previews');
+            container.innerHTML = currentImages.map((img, idx) => `
+                <div class="image-preview">
+                    <img src="${img}" alt="">
+                    <div class="image-remove" onclick="removeImage(${idx})">✕</div>
+                </div>
+            `).join('');
+        }
+
+        function removeImage(index) {
+            currentImages.splice(index, 1);
+            renderImagePreviews();
+        }
+
+        // Guardar entrada
+        function saveEntry() {
+            const note = document.getElementById('note-input').value.trim();
+            if (!note) {
+                alert('Por favor escribe una nota');
+                return;
+            }
+
+            const entry = {
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                note: note,
+                location: document.getElementById('location-input').value,
+                weather: document.getElementById('weather-input').value,
+                images: [...currentImages]
+            };
+
+            entries.unshift(entry);
+            saveData();
+            renderTimeline();
+            toggleForm();
+        }
+
+        // Eliminar entrada
+        function deleteEntry(id) {
+            if (confirm('¿Eliminar esta entrada?')) {
+                entries = entries.filter(e => e.id !== id);
+                saveData();
+                renderTimeline();
+            }
+        }
+
+        // Formatear fecha
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            const isToday = date.toDateString() === today.toDateString();
+            const isYesterday = date.toDateString() === yesterday.toDateString();
+
+            if (isToday) {
+                return `Hoy ${date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}`;
+            } else if (isYesterday) {
+                return `Ayer ${date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}`;
+            } else {
+                return date.toLocaleString('es', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            }
+        }
+
+        // Renderizar timeline
+        function renderTimeline() {
+            const container = document.getElementById('timeline-container');
+            const emptyState = document.getElementById('empty-state');
+            const csvBtn = document.getElementById('csv-btn');
+            const icsBtn = document.getElementById('ics-btn');
+
+            if (entries.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                csvBtn.style.display = 'none';
+                icsBtn.style.display = 'none';
+            } else {
+                emptyState.classList.add('hidden');
+                csvBtn.style.display = 'inline-block';
+                icsBtn.style.display = 'inline-block';
+
+                container.innerHTML = entries.map(entry => `
+                    <div class="timeline-entry">
+                        <div class="timeline-header">
+                            <div class="timeline-date">${formatDate(entry.timestamp)}</div>
+                            <button class="mac-button" onclick="deleteEntry(${entry.id})" style="padding: 4px 12px;">🗑️</button>
+                        </div>
+                        <div class="timeline-note">${entry.note}</div>
+                        ${entry.location ? `<div class="timeline-meta">📍 ${entry.location}</div>` : ''}
+                        ${entry.weather ? `<div class="timeline-meta">☁️ ${entry.weather}</div>` : ''}
+                        ${entry.images.length > 0 ? `
+                            <div style="margin-top: 12px;">
+                                ${entry.images.map(img => `
+                                    <img src="${img}" style="width: 100px; height: 100px; object-fit: cover; border: 2px solid #000; margin: 4px; cursor: pointer;" onclick="window.open('${img}')">
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Exportar CSV
+        function exportCSV() {
+            const headers = ['Fecha y Hora', 'Nota', 'Ubicación', 'Clima', 'Imágenes'];
+            const rows = entries.map(e => [
+                new Date(e.timestamp).toLocaleString(),
+                e.note,
+                e.location || '',
+                e.weather || '',
+                e.images.length
+            ]);
+            
+            const csv = [headers, ...rows].map(row => 
+                row.map(cell => `"${cell}"`).join(',')
+            ).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `breadcrumbs-${Date.now()}.csv`;
+            a.click();
+        }
+
+        // Exportar iCal
+        function exportICS() {
+            const icsEvents = entries.map(e => {
+                const date = new Date(e.timestamp);
+                const dateStr = date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+                
+                return `BEGIN:VEVENT
+UID:${e.id}@breadcrumbs
+DTSTAMP:${dateStr}
+DTSTART:${dateStr}
+SUMMARY:${e.note.substring(0, 50)}
+DESCRIPTION:${e.note}
+LOCATION:${e.location || ''}
+END:VEVENT`;
+            }).join('\n');
+
+            const ics = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Breadcrumbs Timeline//ES
+${icsEvents}
+END:VCALENDAR`;
+
+            const blob = new Blob([ics], { type: 'text/calendar' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `breadcrumbs-${Date.now()}.ics`;
+            a.click();
+        }
+
+        // Iniciar
+        loadData();
     </script>
 </body>
 </html>
