@@ -104,36 +104,133 @@
             font-size: 14px;
         }
 
-        .timeline-entry {
-            background: #f0f0f0;
-            border: 3px ridge #999;
-            padding: 16px;
-            margin-bottom: 16px;
+        /* Timeline styles */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
         }
 
-        .timeline-header {
+        .timeline-line {
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #000;
+        }
+
+        .day-block {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .day-header {
+            background: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 3px solid #000;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #999;
+            position: relative;
         }
 
-        .timeline-date {
+        .day-header::before {
+            content: '';
+            position: absolute;
+            left: -35px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            background: #000;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px #000;
+        }
+
+        .day-header:hover {
+            background: #333;
+        }
+
+        .day-content {
+            display: none;
+            padding-top: 12px;
+        }
+
+        .day-content.expanded {
+            display: block;
+        }
+
+        .breadcrumb-entry {
+            background: #f0f0f0;
+            border: 3px ridge #999;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .breadcrumb-time {
             font-weight: bold;
             font-size: 13px;
+            margin-bottom: 8px;
+            color: #666;
         }
 
-        .timeline-note {
+        .breadcrumb-note {
             font-size: 14px;
             line-height: 1.6;
             margin-bottom: 12px;
         }
 
-        .timeline-meta {
+        .breadcrumb-meta {
             font-size: 13px;
             margin-bottom: 8px;
+        }
+
+        .mini-map {
+            width: 100%;
+            height: 200px;
+            border: 3px solid #000;
+            margin-top: 12px;
+            background: #e0e0e0;
+        }
+
+        .breadcrumb-preview {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .preview-item {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #000;
+            overflow: hidden;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-map {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #000;
+        }
+
+        .edit-button {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            padding: 6px 12px;
+            font-size: 12px;
         }
 
         .image-preview {
@@ -195,12 +292,94 @@
             margin: 0;
         }
 
-        .mini-map {
-            width: 100%;
-            height: 200px;
+        .edit-mode {
+            background: #fff8dc;
+        }
+
+        .delete-button {
+            background: #ff6b6b;
+            color: white;
+            border-color: #ff0000;
+        }
+
+        .chevron {
+            transition: transform 0.3s;
+        }
+
+        .chevron.expanded {
+            transform: rotate(180deg);
+        }
+
+        .mood-selector {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .mood-option {
+            background: white;
+            border: 3px outset #999;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.2s;
+        }
+
+        .mood-option:hover {
+            background: #f0f0f0;
+        }
+
+        .mood-option.selected {
+            background: #000;
+            border-style: inset;
+            transform: scale(0.95);
+        }
+
+        .mood-label {
+            font-size: 10px;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .mood-display {
+            font-size: 24px;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .mood-config-btn {
+            font-size: 12px;
+            padding: 4px 8px;
+            margin-left: 8px;
+        }
+
+        .config-panel {
+            background: #ffffcc;
             border: 3px solid #000;
-            margin-top: 12px;
-            background: #e0e0e0;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .config-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .config-item input[type="text"] {
+            flex: 1;
+            padding: 4px;
+            border: 2px inset #999;
+            font-family: 'Courier New', monospace;
+        }
+
+        .config-item input[type="text"]:first-child {
+            flex: 0 0 60px;
+            text-align: center;
+            font-size: 20px;
         }
     </style>
 </head>
@@ -209,15 +388,26 @@
         <div class="mac-window">
             <div class="mac-title-bar">Breadcrumbs Timeline</div>
             <div class="mac-content">
-                <div id="buttons-container">
-                    <button class="mac-button mac-button-primary" onclick="toggleForm()">➕ Nueva Entrada</button>
-                </div>
+                <button class="mac-button mac-button-primary" onclick="toggleForm()">➕ New Breadcrumb</button>
             </div>
         </div>
 
         <div class="mac-window hidden" id="form-window">
             <div class="mac-title-bar">Nueva Anotación</div>
             <div class="mac-content">
+                <label class="mac-label">
+                    😊 Estado de ánimo:
+                    <button class="mac-button mood-config-btn" onclick="toggleMoodConfig()">⚙️</button>
+                </label>
+                
+                <div id="mood-config" class="config-panel hidden">
+                    <div style="margin-bottom: 12px; font-weight: bold;">Configurar estados de ánimo:</div>
+                    <div id="mood-config-list"></div>
+                    <button class="mac-button" onclick="saveMoodConfig()" style="margin-top: 8px;">💾 Guardar configuración</button>
+                </div>
+
+                <div class="mood-selector" id="mood-selector"></div>
+
                 <label class="mac-label">Nota:</label>
                 <textarea class="mac-textarea" id="note-input" placeholder="¿Qué está pasando?"></textarea>
 
@@ -233,8 +423,9 @@
                 <input type="file" accept="image/*" multiple onchange="handleImages(event)" style="margin-bottom: 12px;">
                 <div id="image-previews"></div>
 
-                <button class="mac-button mac-button-primary" onclick="saveEntry()">💾 Guardar</button>
-                <button class="mac-button" onclick="toggleForm()">Cancelar</button>
+                <button class="mac-button mac-button-primary" onclick="saveEntry()" id="save-btn">💾 Guardar</button>
+                <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-btn">🗑️ Eliminar</button>
+                <button class="mac-button" onclick="cancelEdit()">Cancelar</button>
             </div>
         </div>
 
@@ -255,44 +446,131 @@
     </div>
 
     <script>
+        const WEATHER_API_KEY = '317f7bcb07cf05e2c6265176c502a4bb';
+        
         let entries = [];
         let currentImages = [];
         let currentCoords = null;
+        let editingEntryId = null;
+        let selectedMood = null;
 
-        // Cargar datos
+        // Estados de ánimo por defecto
+        const defaultMoods = [
+            { emoji: '😊', label: 'Feliz' },
+            { emoji: '😢', label: 'Triste' },
+            { emoji: '😡', label: 'Enojado' },
+            { emoji: '😰', label: 'Ansioso' },
+            { emoji: '😴', label: 'Cansado' },
+            { emoji: '🤩', label: 'Emocionado' },
+            { emoji: '😌', label: 'Relajado' },
+            { emoji: '🤔', label: 'Pensativo' },
+            { emoji: '😎', label: 'Genial' },
+            { emoji: '🥰', label: 'Enamorado' }
+        ];
+
+        let moods = [...defaultMoods];
+
+        function loadMoodConfig() {
+            const saved = localStorage.getItem('mood-config');
+            if (saved) {
+                moods = JSON.parse(saved);
+            }
+        }
+
+        function saveMoodConfigData() {
+            localStorage.setItem('mood-config', JSON.stringify(moods));
+        }
+
         function loadData() {
             const saved = localStorage.getItem('timeline-entries');
             if (saved) {
                 entries = JSON.parse(saved);
             }
+            loadMoodConfig();
             renderTimeline();
         }
 
-        // Guardar datos
         function saveData() {
             localStorage.setItem('timeline-entries', JSON.stringify(entries));
         }
 
-        // Toggle formulario
         function toggleForm() {
             const form = document.getElementById('form-window');
             form.classList.toggle('hidden');
             if (!form.classList.contains('hidden')) {
-                document.getElementById('note-input').value = '';
-                document.getElementById('location-input').value = '';
-                document.getElementById('weather-input').value = '';
-                currentImages = [];
-                currentCoords = null;
-                document.getElementById('image-previews').innerHTML = '';
-                const mapContainer = document.getElementById('form-map');
-                if (mapContainer) {
-                    mapContainer.style.display = 'none';
-                    mapContainer.innerHTML = '';
-                }
+                clearForm();
+                renderMoodSelector();
             }
         }
 
-        // GPS
+        function renderMoodSelector() {
+            const container = document.getElementById('mood-selector');
+            container.innerHTML = moods.map((mood, index) => `
+                <div class="mood-option ${selectedMood === index ? 'selected' : ''}" onclick="selectMood(${index})">
+                    ${mood.emoji}
+                    <span class="mood-label">${mood.label}</span>
+                </div>
+            `).join('');
+        }
+
+        function selectMood(index) {
+            selectedMood = index;
+            renderMoodSelector();
+        }
+
+        function toggleMoodConfig() {
+            const panel = document.getElementById('mood-config');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                renderMoodConfig();
+            }
+        }
+
+        function renderMoodConfig() {
+            const container = document.getElementById('mood-config-list');
+            container.innerHTML = moods.map((mood, index) => `
+                <div class="config-item">
+                    <input type="text" value="${mood.emoji}" id="mood-emoji-${index}" maxlength="2">
+                    <input type="text" value="${mood.label}" id="mood-label-${index}" placeholder="Etiqueta">
+                </div>
+            `).join('');
+        }
+
+        function saveMoodConfig() {
+            moods = moods.map((mood, index) => ({
+                emoji: document.getElementById(`mood-emoji-${index}`).value || mood.emoji,
+                label: document.getElementById(`mood-label-${index}`).value || mood.label
+            }));
+            saveMoodConfigData();
+            renderMoodSelector();
+            toggleMoodConfig();
+            alert('✅ Configuración guardada');
+        }
+
+        function clearForm() {
+            document.getElementById('note-input').value = '';
+            document.getElementById('location-input').value = '';
+            document.getElementById('weather-input').value = '';
+            currentImages = [];
+            currentCoords = null;
+            editingEntryId = null;
+            selectedMood = null;
+            document.getElementById('image-previews').innerHTML = '';
+            document.getElementById('delete-btn').classList.add('hidden');
+            document.getElementById('save-btn').textContent = '💾 Guardar';
+            document.getElementById('mood-config').classList.add('hidden');
+            const mapContainer = document.getElementById('form-map');
+            if (mapContainer) {
+                mapContainer.style.display = 'none';
+                mapContainer.innerHTML = '';
+            }
+        }
+
+        function cancelEdit() {
+            clearForm();
+            toggleForm();
+        }
+
         function getGPS() {
             const btn = document.getElementById('gps-btn');
             btn.textContent = '⏳ Buscando...';
@@ -312,8 +590,8 @@
                     currentCoords = { lat, lon };
                     document.getElementById('location-input').value = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
                     
-                    // Mostrar minimapa
                     showMiniMap(lat, lon, 'form-map');
+                    getWeather(lat, lon);
                     
                     btn.textContent = '🌍 Usar GPS';
                     btn.disabled = false;
@@ -326,7 +604,40 @@
             );
         }
 
-        // Mostrar minimapa con Leaflet (100% gratis, sin API key)
+        async function getWeather(lat, lon) {
+            const weatherInput = document.getElementById('weather-input');
+            weatherInput.value = '⏳ Obteniendo clima...';
+            
+            try {
+                const response = await fetch(
+                    `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric&lang=es`
+                );
+                
+                if (!response.ok) throw new Error('Error al obtener clima');
+                
+                const data = await response.json();
+                const temp = Math.round(data.main.temp);
+                const description = data.weather[0].description;
+                const emoji = getWeatherEmoji(data.weather[0].id);
+                
+                weatherInput.value = `${emoji} ${description}, ${temp}°C`;
+            } catch (error) {
+                console.error('Error obteniendo clima:', error);
+                weatherInput.value = '';
+            }
+        }
+
+        function getWeatherEmoji(code) {
+            if (code >= 200 && code < 300) return '⛈️';
+            if (code >= 300 && code < 400) return '🌦️';
+            if (code >= 500 && code < 600) return '🌧️';
+            if (code >= 600 && code < 700) return '❄️';
+            if (code >= 700 && code < 800) return '🌫️';
+            if (code === 800) return '☀️';
+            if (code > 800) return '☁️';
+            return '🌤️';
+        }
+
         function showMiniMap(lat, lon, containerId) {
             const mapContainer = document.getElementById(containerId);
             if (!mapContainer) return;
@@ -334,25 +645,20 @@
             mapContainer.innerHTML = '';
             mapContainer.style.display = 'block';
 
-            // Crear mapa
             const map = L.map(containerId).setView([lat, lon], 13);
 
-            // Añadir capa de OpenStreetMap (gratis, sin API key)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
+                attribution: '© OpenStreetMap',
                 maxZoom: 19
             }).addTo(map);
 
-            // Añadir marcador
             L.marker([lat, lon]).addTo(map);
 
-            // Pequeño retraso para que el mapa se renderice correctamente
             setTimeout(() => {
                 map.invalidateSize();
             }, 100);
         }
 
-        // Manejar imágenes
         function handleImages(event) {
             const files = Array.from(event.target.files);
             files.forEach(file => {
@@ -380,7 +686,6 @@
             renderImagePreviews();
         }
 
-        // Guardar entrada
         function saveEntry() {
             const note = document.getElementById('note-input').value.trim();
             if (!note) {
@@ -388,57 +693,107 @@
                 return;
             }
 
-            const entry = {
-                id: Date.now(),
-                timestamp: new Date().toISOString(),
-                note: note,
-                location: document.getElementById('location-input').value,
-                weather: document.getElementById('weather-input').value,
-                images: [...currentImages],
-                coords: currentCoords ? { ...currentCoords } : null
-            };
+            if (editingEntryId) {
+                // Editar entrada existente
+                const entryIndex = entries.findIndex(e => e.id === editingEntryId);
+                if (entryIndex !== -1) {
+                    entries[entryIndex] = {
+                        ...entries[entryIndex],
+                        note: note,
+                        location: document.getElementById('location-input').value,
+                        weather: document.getElementById('weather-input').value,
+                        images: [...currentImages],
+                        coords: currentCoords ? { ...currentCoords } : entries[entryIndex].coords
+                    };
+                }
+            } else {
+                // Nueva entrada
+                const entry = {
+                    id: Date.now(),
+                    timestamp: new Date().toISOString(),
+                    note: note,
+                    location: document.getElementById('location-input').value,
+                    weather: document.getElementById('weather-input').value,
+                    images: [...currentImages],
+                    coords: currentCoords ? { ...currentCoords } : null
+                };
+                entries.unshift(entry);
+            }
 
-            entries.unshift(entry);
             saveData();
             renderTimeline();
             toggleForm();
         }
 
-        // Eliminar entrada
-        function deleteEntry(id) {
+        function editEntry(id) {
+            const entry = entries.find(e => e.id === id);
+            if (!entry) return;
+
+            editingEntryId = id;
+            document.getElementById('note-input').value = entry.note;
+            document.getElementById('location-input').value = entry.location || '';
+            document.getElementById('weather-input').value = entry.weather || '';
+            currentImages = [...entry.images];
+            currentCoords = entry.coords ? { ...entry.coords } : null;
+
+            if (entry.mood) {
+                const moodIndex = moods.findIndex(m => m.emoji === entry.mood.emoji && m.label === entry.mood.label);
+                selectedMood = moodIndex !== -1 ? moodIndex : null;
+            } else {
+                selectedMood = null;
+            }
+
+            renderImagePreviews();
+            renderMoodSelector();
+
+            if (entry.coords) {
+                showMiniMap(entry.coords.lat, entry.coords.lon, 'form-map');
+            }
+
+            document.getElementById('delete-btn').classList.remove('hidden');
+            document.getElementById('save-btn').textContent = '💾 Actualizar';
+            document.getElementById('form-window').classList.remove('hidden');
+        }
+
+        function deleteCurrentEntry() {
+            if (!editingEntryId) return;
+            
             if (confirm('¿Eliminar esta entrada?')) {
-                entries = entries.filter(e => e.id !== id);
+                entries = entries.filter(e => e.id !== editingEntryId);
                 saveData();
                 renderTimeline();
+                toggleForm();
             }
         }
 
-        // Formatear fecha
         function formatDate(timestamp) {
             const date = new Date(timestamp);
-            const today = new Date();
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-
-            const isToday = date.toDateString() === today.toDateString();
-            const isYesterday = date.toDateString() === yesterday.toDateString();
-
-            if (isToday) {
-                return `Hoy ${date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}`;
-            } else if (isYesterday) {
-                return `Ayer ${date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}`;
-            } else {
-                return date.toLocaleString('es', { 
-                    day: '2-digit', 
-                    month: '2-digit', 
-                    year: 'numeric',
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                });
-            }
+            return date.toLocaleDateString('es', { 
+                weekday: 'long',
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric'
+            });
         }
 
-        // Renderizar timeline
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function getDayKey(timestamp) {
+            const date = new Date(timestamp);
+            return date.toISOString().split('T')[0];
+        }
+
+        function toggleDay(dayKey) {
+            const content = document.getElementById(`day-content-${dayKey}`);
+            const chevron = document.getElementById(`chevron-${dayKey}`);
+            
+            content.classList.toggle('expanded');
+            chevron.classList.toggle('expanded');
+        }
+
         function renderTimeline() {
             const container = document.getElementById('timeline-container');
             const emptyState = document.getElementById('empty-state');
@@ -448,42 +803,91 @@
                 container.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 footer.style.display = 'none';
-            } else {
-                emptyState.classList.add('hidden');
-                footer.style.display = 'flex';
+                return;
+            }
 
-                container.innerHTML = entries.map(entry => `
-                    <div class="timeline-entry">
-                        <div class="timeline-header">
-                            <div class="timeline-date">${formatDate(entry.timestamp)}</div>
-                            <button class="mac-button" onclick="deleteEntry(${entry.id})" style="padding: 4px 12px;">🗑️</button>
-                        </div>
-                        <div class="timeline-note">${entry.note}</div>
-                        ${entry.location ? `<div class="timeline-meta">📍 ${entry.location}</div>` : ''}
-                        ${entry.weather ? `<div class="timeline-meta">☁️ ${entry.weather}</div>` : ''}
-                        ${entry.coords ? `<div id="map-${entry.id}" class="mini-map"></div>` : ''}
-                        ${entry.images.length > 0 ? `
-                            <div style="margin-top: 12px;">
-                                ${entry.images.map(img => `
-                                    <img src="${img}" style="width: 100px; height: 100px; object-fit: cover; border: 2px solid #000; margin: 4px; cursor: pointer;" onclick="window.open('${img}')">
-                                `).join('')}
+            emptyState.classList.add('hidden');
+            footer.style.display = 'flex';
+
+            // Agrupar por días
+            const groupedByDay = {};
+            entries.forEach(entry => {
+                const dayKey = getDayKey(entry.timestamp);
+                if (!groupedByDay[dayKey]) {
+                    groupedByDay[dayKey] = [];
+                }
+                groupedByDay[dayKey].push(entry);
+            });
+
+            const html = `
+                <div class="timeline">
+                    <div class="timeline-line"></div>
+                    ${Object.keys(groupedByDay).map(dayKey => {
+                        const dayEntries = groupedByDay[dayKey];
+                        const firstEntry = dayEntries[0];
+                        
+                        return `
+                            <div class="day-block">
+                                <div class="day-header" onclick="toggleDay('${dayKey}')">
+                                    <span>${formatDate(firstEntry.timestamp)}</span>
+                                    <span class="chevron" id="chevron-${dayKey}">▼</span>
+                                </div>
+                                <div class="day-content" id="day-content-${dayKey}">
+                                    ${dayEntries.map(entry => `
+                                        <div class="breadcrumb-entry">
+                                            <div class="breadcrumb-time">
+                                                ${entry.mood ? `<span class="mood-display" title="${entry.mood.label}">${entry.mood.emoji}</span>` : ''}
+                                                ⏰ ${formatTime(entry.timestamp)}
+                                            </div>
+                                            <div class="breadcrumb-note">${entry.note}</div>
+                                            ${entry.location ? `<div class="breadcrumb-meta">📍 ${entry.location}</div>` : ''}
+                                            ${entry.weather ? `<div class="breadcrumb-meta">☁️ ${entry.weather}</div>` : ''}
+                                            
+                                            <div class="breadcrumb-preview">
+                                                ${entry.coords ? `<div class="preview-map" id="preview-map-${entry.id}"></div>` : ''}
+                                                ${entry.images.map(img => `
+                                                    <div class="preview-item">
+                                                        <img src="${img}" onclick="window.open('${img}')">
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                            
+                                            <button class="mac-button edit-button" onclick="editEntry(${entry.id})">✏️ Editar</button>
+                                        </div>
+                                    `).join('')}
+                                </div>
                             </div>
-                        ` : ''}
-                    </div>
-                `).join('');
+                        `;
+                    }).join('')}
+                </div>
+            `;
 
-                // Renderizar mapas para entradas con coordenadas
+            container.innerHTML = html;
+
+            // Renderizar mapas pequeños
+            setTimeout(() => {
                 entries.forEach(entry => {
                     if (entry.coords) {
-                        setTimeout(() => {
-                            showMiniMap(entry.coords.lat, entry.coords.lon, `map-${entry.id}`);
-                        }, 100);
+                        const mapEl = document.getElementById(`preview-map-${entry.id}`);
+                        if (mapEl && mapEl.innerHTML === '') {
+                            const map = L.map(`preview-map-${entry.id}`, {
+                                dragging: false,
+                                scrollWheelZoom: false,
+                                doubleClickZoom: false,
+                                zoomControl: false
+                            }).setView([entry.coords.lat, entry.coords.lon], 13);
+
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '© OSM'
+                            }).addTo(map);
+
+                            L.marker([entry.coords.lat, entry.coords.lon]).addTo(map);
+                        }
                     }
                 });
-            }
+            }, 200);
         }
 
-        // Exportar CSV
         function exportCSV() {
             const headers = ['Fecha y Hora', 'Nota', 'Ubicación', 'Clima', 'Imágenes'];
             const rows = entries.map(e => [
@@ -506,7 +910,6 @@
             a.click();
         }
 
-        // Exportar iCal
         function exportICS() {
             const icsEvents = entries.map(e => {
                 const date = new Date(e.timestamp);
@@ -536,7 +939,6 @@ END:VCALENDAR`;
             a.click();
         }
 
-        // Iniciar
         loadData();
     </script>
 </body>
