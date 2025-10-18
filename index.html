@@ -521,9 +521,9 @@
         </div>
 
         <div class="mac-window hidden" id="timer-window">
-            <div class="mac-title-bar">Time Tracking</div>
+            <div class="mac-title-bar">Time Event</div>
             <div class="mac-content">
-                <label class="mac-label">Select Duration:</label>
+                <label class="mac-label">Duration:</label>
                 <div class="duration-selector" id="duration-selector">
                     <div class="duration-option" onclick="selectDuration(15); event.stopPropagation();">15 min</div>
                     <div class="duration-option" onclick="selectDuration(30); event.stopPropagation();">30 min</div>
@@ -532,7 +532,7 @@
                     <div class="duration-option" onclick="selectDuration(180); event.stopPropagation();">3 hours</div>
                 </div>
 
-                <label class="mac-label">Select Activity:</label>
+                <label class="mac-label">Activity:</label>
                 <div class="activity-selector" id="activity-selector">
                     <div class="activity-option" onclick="selectActivity('Reading'); event.stopPropagation();">📚 Reading</div>
                     <div class="activity-option" onclick="selectActivity('Sports'); event.stopPropagation();">🏃 Sports</div>
@@ -541,16 +541,8 @@
                     <div class="activity-option" onclick="selectActivity('Errands'); event.stopPropagation();">🛒 Errands</div>
                 </div>
 
-                <div id="timer-section" class="hidden">
-                    <div class="timer-display" id="timer-display">00:00:00</div>
-                    <div class="timer-controls">
-                        <button class="mac-button mac-button-primary" onclick="startTimer()" id="start-btn">▶️ Start</button>
-                        <button class="mac-button" onclick="pauseTimer()" id="pause-btn" disabled>⏸️ Pause</button>
-                        <button class="mac-button" onclick="stopTimer()" id="stop-btn" disabled>⏹️ Stop</button>
-                    </div>
-                </div>
-
-                <button class="mac-button" onclick="toggleTimer()" style="margin-top: 16px;">Close</button>
+                <button class="mac-button mac-button-primary" onclick="createTimeEvent()" id="create-time-btn" disabled style="width: 100%; margin-top: 16px;">Create Event</button>
+                <button class="mac-button" onclick="toggleTimer()" style="width: 100%; margin-top: 8px;">Cancel</button>
             </div>
         </div>
 
@@ -608,6 +600,10 @@
                 <input type="file" accept="image/*" multiple onchange="handleImages(event)" style="margin-bottom: 12px;">
                 <div id="image-previews"></div>
 
+                <label class="mac-label">🎤 Audio:</label>
+                <input type="file" accept="audio/*" onchange="handleAudio(event)" style="margin-bottom: 12px;">
+                <div id="audio-preview"></div>
+
                 <button class="mac-button mac-button-primary" onclick="saveEntry()" id="save-btn">💾 Save</button>
                 <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-btn">🗑️ Delete</button>
                 <button class="mac-button" onclick="cancelEdit()">Cancel</button>
@@ -655,6 +651,7 @@
         
         let entries = [];
         let currentImages = [];
+        let currentAudio = null;
         let currentCoords = null;
         let editingEntryId = null;
         let selectedMood = null;
@@ -662,10 +659,6 @@
         // Timer variables
         let selectedDuration = null;
         let selectedActivity = null;
-        let timerInterval = null;
-        let timerStartTime = null;
-        let timerPausedTime = 0;
-        let timerRunning = false;
 
         // Default moods (simplified to 5)
         const defaultMoods = [
@@ -879,10 +872,9 @@
         function resetTimerSelections() {
             selectedDuration = null;
             selectedActivity = null;
-            document.getElementById('timer-section').classList.add('hidden');
             document.querySelectorAll('.duration-option').forEach(el => el.classList.remove('selected'));
             document.querySelectorAll('.activity-option').forEach(el => el.classList.remove('selected'));
-            stopTimer();
+            document.getElementById('create-time-btn').disabled = true;
         }
 
         function selectDuration(minutes) {
@@ -917,81 +909,19 @@
 
         function checkTimerReady() {
             console.log('Duration:', selectedDuration, 'Activity:', selectedActivity);
+            const createBtn = document.getElementById('create-time-btn');
             if (selectedDuration && selectedActivity) {
-                document.getElementById('timer-section').classList.remove('hidden');
-                updateTimerDisplay(selectedDuration * 60);
+                createBtn.disabled = false;
+            } else {
+                createBtn.disabled = true;
             }
         }
 
-        function updateTimerDisplay(seconds) {
-            const hours = Math.floor(seconds / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const secs = seconds % 60;
-            document.getElementById('timer-display').textContent = 
-                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        }
-
-        function startTimer() {
-            if (timerRunning) return;
+        function createTimeEvent() {
+            if (!selectedDuration || !selectedActivity) return;
             
-            timerRunning = true;
-            timerStartTime = Date.now() - timerPausedTime;
+            console.log('Creating time event:', selectedActivity, selectedDuration);
             
-            document.getElementById('start-btn').disabled = true;
-            document.getElementById('pause-btn').disabled = false;
-            document.getElementById('stop-btn').disabled = false;
-            
-            timerInterval = setInterval(() => {
-                const elapsed = Math.floor((Date.now() - timerStartTime) / 1000);
-                const remaining = Math.max(0, (selectedDuration * 60) - elapsed);
-                
-                updateTimerDisplay(remaining);
-                
-                if (remaining === 0) {
-                    finishTimer();
-                }
-            }, 1000);
-        }
-
-        function pauseTimer() {
-            if (!timerRunning) return;
-            
-            timerRunning = false;
-            timerPausedTime = Date.now() - timerStartTime;
-            clearInterval(timerInterval);
-            
-            document.getElementById('start-btn').disabled = false;
-            document.getElementById('pause-btn').disabled = true;
-        }
-
-        function stopTimer() {
-            clearInterval(timerInterval);
-            timerRunning = false;
-            timerPausedTime = 0;
-            timerStartTime = null;
-            
-            document.getElementById('start-btn').disabled = false;
-            document.getElementById('pause-btn').disabled = true;
-            document.getElementById('stop-btn').disabled = true;
-            
-            if (selectedDuration) {
-                updateTimerDisplay(selectedDuration * 60);
-            }
-            
-            // Ask if user wants to save the activity
-            if (selectedActivity && selectedDuration) {
-                if (confirm('Do you want to save this activity?')) {
-                    finishTimer();
-                }
-            }
-        }
-
-        function finishTimer() {
-            stopTimer();
-            
-            console.log('Creating entry for:', selectedActivity, selectedDuration);
-            
-            // Create automatic entry
             const entry = {
                 id: Date.now(),
                 timestamp: new Date().toISOString(),
@@ -999,6 +929,7 @@
                 location: '',
                 weather: '',
                 images: [],
+                audio: null,
                 coords: null,
                 mood: null,
                 activity: selectedActivity,
@@ -1008,12 +939,11 @@
             
             entries.unshift(entry);
             console.log('Entry created:', entry);
-            console.log('Total entries:', entries.length);
             
             saveData();
             renderTimeline();
             
-            alert(`✅ Activity completed: ${selectedActivity} for ${selectedDuration} minutes!`);
+            alert(`✅ Time event created: ${selectedActivity} for ${selectedDuration} minutes!`);
             toggleTimer();
         }
 
@@ -1105,7 +1035,8 @@
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
                     currentCoords = { lat, lon };
-                    document.getElementById('location-input').value = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+                    // No mostrar coordenadas, solo marcar que tenemos ubicación
+                    document.getElementById('location-input').placeholder = 'Getting location...';
                     
                     showMiniMap(lat, lon, 'form-map');
                     getWeather(lat, lon);
@@ -1129,6 +1060,7 @@
 
         async function getWeather(lat, lon) {
             const weatherInput = document.getElementById('weather-input');
+            const locationInput = document.getElementById('location-input');
             weatherInput.value = '⏳ Getting weather...';
             
             console.log('Fetching weather for:', lat, lon);
@@ -1151,8 +1083,10 @@
                 const temp = Math.round(data.main.temp);
                 const description = data.weather[0].description;
                 const emoji = getWeatherEmoji(data.weather[0].id);
+                const city = data.name; // Nombre de la ciudad
                 
-                weatherInput.value = `${emoji} ${description}, ${temp}°C`;
+                weatherInput.value = `${emoji} ${description}, ${temp}°C in ${city}`;
+                locationInput.value = city; // Solo el nombre de la ciudad
             } catch (error) {
                 console.error('Error getting weather:', error);
                 weatherInput.value = '';
@@ -1202,6 +1136,39 @@
                 };
                 reader.readAsDataURL(file);
             });
+        }
+
+        function handleAudio(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    currentAudio = e.target.result;
+                    renderAudioPreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function renderAudioPreview() {
+            const container = document.getElementById('audio-preview');
+            if (currentAudio) {
+                container.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                        <audio controls style="flex: 1;">
+                            <source src="${currentAudio}">
+                        </audio>
+                        <button class="mac-button" onclick="removeAudio()" style="padding: 4px 8px;">✕</button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = '';
+            }
+        }
+
+        function removeAudio() {
+            currentAudio = null;
+            renderAudioPreview();
         }
 
         function renderImagePreviews() {
@@ -1266,7 +1233,8 @@
             document.getElementById('note-input').value = entry.note;
             document.getElementById('location-input').value = entry.location || '';
             document.getElementById('weather-input').value = entry.weather || '';
-            currentImages = [...entry.images];
+            currentImages = [...(entry.images || [])];
+            currentAudio = entry.audio || null;
             currentCoords = entry.coords ? { ...entry.coords } : null;
 
             if (entry.mood) {
@@ -1277,6 +1245,7 @@
             }
 
             renderImagePreviews();
+            renderAudioPreview();
             renderMoodSelector();
 
             if (entry.coords) {
@@ -1385,9 +1354,9 @@
                                             </div>
                                             ${entry.weather || entry.location ? `
                                                 <div style="font-size: 12px; color: #666; margin-bottom: 8px;">
-                                                    ${entry.weather ? `☁️ ${entry.weather}` : ''}
-                                                    ${entry.weather && entry.location ? ' • ' : ''}
-                                                    ${entry.location ? `📍 ${entry.location}` : ''}
+                                                    ${entry.weather ? `${entry.weather}` : ''}
+                                                    ${entry.weather && entry.location && entry.location.length < 20 ? ` • 📍 ${entry.location}` : ''}
+                                                    ${!entry.weather && entry.location ? `📍 ${entry.location}` : ''}
                                                 </div>
                                             ` : ''}
                                             
@@ -1399,6 +1368,14 @@
                                                     </div>
                                                 `).join('')}
                                             </div>
+                                            
+                                            ${entry.audio ? `
+                                                <div style="margin-top: 12px;">
+                                                    <audio controls style="width: 100%; max-width: 300px;">
+                                                        <source src="${entry.audio}">
+                                                    </audio>
+                                                </div>
+                                            ` : ''}
                                             
                                             <button class="mac-button edit-button" onclick="editEntry(${entry.id})">✏️ Edit</button>
                                         </div>
