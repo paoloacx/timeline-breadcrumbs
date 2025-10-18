@@ -484,6 +484,43 @@
             font-size: 12px;
             margin-bottom: 8px;
         }
+
+        .audio-recorder {
+            border: 2px solid #000;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #f0f0f0;
+        }
+
+        .recording {
+            background: #ffcccc !important;
+        }
+
+        .audio-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .spent-input {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .spent-input input {
+            flex: 1;
+        }
+
+        .spent-badge {
+            background: #4caf50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -513,9 +550,10 @@
             <div class="mac-title-bar">Breadcrumbs Timeline</div>
             <div class="mac-content">
                 <div class="user-info" id="user-info"></div>
-                <button class="mac-button mac-button-primary" onclick="toggleForm()">➕ New Breadcrumb</button>
+                <button class="mac-button mac-button-primary" onclick="toggleForm()">➕ Breadcrumb</button>
                 <button class="mac-button" onclick="toggleTimer()">⏱️ Time</button>
                 <button class="mac-button" onclick="toggleTrack()">📊 Track</button>
+                <button class="mac-button" onclick="toggleSpent()">💰 Spent</button>
                 <button class="mac-button" onclick="signOutUser()" id="signout-btn" style="display:none; float: right;">🚪 Sign Out</button>
             </div>
         </div>
@@ -569,6 +607,23 @@
             </div>
         </div>
 
+        <div class="mac-window hidden" id="spent-window">
+            <div class="mac-title-bar">Spent</div>
+            <div class="mac-content">
+                <label class="mac-label">Description:</label>
+                <input type="text" class="mac-input" id="spent-description" placeholder="What did you buy?">
+
+                <label class="mac-label">Amount:</label>
+                <div class="spent-input">
+                    <input type="number" class="mac-input" id="spent-amount" placeholder="0.00" step="0.01" style="margin: 0;">
+                    <span style="font-weight: bold;">€</span>
+                </div>
+
+                <button class="mac-button mac-button-primary" onclick="saveSpent()" style="width: 100%;">💾 Save</button>
+                <button class="mac-button" onclick="toggleSpent()" style="width: 100%; margin-top: 8px;">Cancel</button>
+            </div>
+        </div>
+
         <div class="mac-window hidden" id="form-window">
             <div class="mac-title-bar">New Entry</div>
             <div class="mac-content">
@@ -601,8 +656,11 @@
                 <div id="image-previews"></div>
 
                 <label class="mac-label">🎤 Audio:</label>
-                <input type="file" accept="audio/*" onchange="handleAudio(event)" style="margin-bottom: 12px;">
-                <div id="audio-preview"></div>
+                <div class="audio-recorder">
+                    <button class="mac-button" onclick="startRecording()" id="record-btn">🔴 Record</button>
+                    <button class="mac-button" onclick="stopRecording()" id="stop-record-btn" disabled>⏹️ Stop</button>
+                    <div id="audio-preview" style="margin-top: 8px;"></div>
+                </div>
 
                 <button class="mac-button mac-button-primary" onclick="saveEntry()" id="save-btn">💾 Save</button>
                 <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-btn">🗑️ Delete</button>
@@ -659,6 +717,10 @@
         // Timer variables
         let selectedDuration = null;
         let selectedActivity = null;
+
+        // Audio recording
+        let mediaRecorder = null;
+        let audioChunks = [];
 
         // Default moods (simplified to 5)
         const defaultMoods = [
@@ -1150,6 +1212,48 @@
             }
         }
 
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        currentAudio = reader.result;
+                        renderAudioPreview();
+                    };
+                    reader.readAsDataURL(audioBlob);
+                    
+                    // Stop all tracks
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                document.getElementById('record-btn').disabled = true;
+                document.getElementById('stop-record-btn').disabled = false;
+                document.querySelector('.audio-recorder').classList.add('recording');
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                alert('Could not access microphone. Please check permissions.');
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                document.getElementById('record-btn').disabled = false;
+                document.getElementById('stop-record-btn').disabled = true;
+                document.querySelector('.audio-recorder').classList.remove('recording');
+            }
+        }
+
         function renderAudioPreview() {
             const container = document.getElementById('audio-preview');
             if (currentAudio) {
@@ -1343,13 +1447,14 @@
                                 </div>
                                 <div class="day-content" id="day-content-${dayKey}">
                                     ${dayEntries.map(entry => `
-                                        <div class="breadcrumb-entry ${entry.isTimedActivity || entry.isQuickTrack ? 'edit-mode' : ''}">
+                                        <div class="breadcrumb-entry ${entry.isTimedActivity || entry.isQuickTrack || entry.isSpent ? 'edit-mode' : ''}">
                                             <div class="breadcrumb-time">
                                                 ⏰ ${formatTime(entry.timestamp)}
                                                 ${entry.isTimedActivity ? `<span style="background: #000; color: white; padding: 2px 6px; margin-left: 8px;">⏱️ ${entry.duration}min</span>` : ''}
+                                                ${entry.isSpent ? `<span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>` : ''}
                                             </div>
                                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                                ${entry.mood ? `<span class="mood-display" title="${entry.mood.label}">${entry.mood.emoji}</span>` : ''}
+                                                ${entry.mood ? `<span style="font-size: 24px;" title="${entry.mood.label}">${entry.mood.emoji}</span>` : ''}
                                                 <div class="breadcrumb-note" style="margin: 0; flex: 1;">${entry.note}</div>
                                             </div>
                                             ${entry.weather || entry.location ? `
@@ -1362,7 +1467,7 @@
                                             
                                             <div class="breadcrumb-preview">
                                                 ${entry.coords ? `<div class="preview-map" id="preview-map-${entry.id}"></div>` : ''}
-                                                ${entry.images.map(img => `
+                                                ${entry.images && entry.images.map(img => `
                                                     <div class="preview-item">
                                                         <img src="${img}" onclick="window.open('${img}')">
                                                     </div>
