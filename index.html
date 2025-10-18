@@ -52,6 +52,52 @@
             font-size: 14px;
             font-weight: bold;
             text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-avatar {
+            font-size: 10px;
+            cursor: pointer;
+            padding: 4px 8px;
+            background: #333;
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .user-avatar:hover {
+            background: #555;
+        }
+
+        .logout-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 2px solid #000;
+            margin-top: 4px;
+            display: none;
+            z-index: 100;
+        }
+
+        .logout-menu.show {
+            display: block;
+        }
+
+        .logout-menu button {
+            width: 100%;
+            text-align: left;
+            border: none;
+            background: white;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .logout-menu button:hover {
+            background: #f0f0f0;
         }
 
         .mac-content {
@@ -185,9 +231,46 @@
             background: white;
             border: 3px ridge #999;
             padding: 16px;
+            padding-bottom: 50px;
             margin-bottom: 12px;
             position: relative;
             color: #000;
+        }
+
+        .breadcrumb-entry.track-event {
+            background: #505050;
+            color: white;
+        }
+
+        .breadcrumb-entry.track-event .breadcrumb-time,
+        .breadcrumb-entry.track-event .breadcrumb-note {
+            color: white;
+        }
+
+        .breadcrumb-note {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            color: #000;
+            max-height: 4.8em;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .breadcrumb-note.expanded {
+            max-height: none;
+        }
+
+        .read-more-btn {
+            font-size: 12px;
+            color: #0066cc;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+            margin-top: 4px;
+            font-family: 'Courier New', monospace;
         }
 
         .breadcrumb-time {
@@ -332,17 +415,17 @@
         .mood-selector {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
+            gap: 6px;
             margin-bottom: 12px;
         }
 
         .mood-option {
             background: white;
             border: 3px outset #999;
-            padding: 12px 8px;
+            padding: 8px 4px;
             text-align: center;
             cursor: pointer;
-            font-size: 24px;
+            font-size: 18px;
             transition: all 0.2s;
         }
 
@@ -357,9 +440,9 @@
         }
 
         .mood-label {
-            font-size: 10px;
+            font-size: 9px;
             display: block;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .mood-display {
