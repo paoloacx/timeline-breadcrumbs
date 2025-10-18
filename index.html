@@ -48,10 +48,9 @@
         .mac-title-bar {
             background: #000;
             color: white;
-            padding: 8px;
+            padding: 8px 16px;
             font-size: 14px;
             font-weight: bold;
-            text-align: center;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -79,6 +78,7 @@
             margin-top: 4px;
             display: none;
             z-index: 100;
+            min-width: 120px;
         }
 
         .logout-menu.show {
@@ -94,6 +94,7 @@
             cursor: pointer;
             font-family: 'Courier New', monospace;
             font-size: 12px;
+            color: #000;
         }
 
         .logout-menu button:hover {
@@ -157,7 +158,6 @@
             font-size: 14px;
         }
 
-        /* Timeline styles */
         .timeline {
             position: relative;
             padding-left: 40px;
@@ -231,46 +231,21 @@
             background: white;
             border: 3px ridge #999;
             padding: 16px;
-            padding-bottom: 50px;
+            padding-bottom: 55px;
             margin-bottom: 12px;
             position: relative;
             color: #000;
         }
 
         .breadcrumb-entry.track-event {
-            background: #505050;
+            background: #4a4a4a;
             color: white;
         }
 
         .breadcrumb-entry.track-event .breadcrumb-time,
-        .breadcrumb-entry.track-event .breadcrumb-note {
-            color: white;
-        }
-
-        .breadcrumb-note {
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 12px;
-            color: #000;
-            max-height: 4.8em;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .breadcrumb-note.expanded {
-            max-height: none;
-        }
-
-        .read-more-btn {
-            font-size: 12px;
-            color: #0066cc;
-            background: none;
-            border: none;
-            cursor: pointer;
-            text-decoration: underline;
-            padding: 0;
-            margin-top: 4px;
-            font-family: 'Courier New', monospace;
+        .breadcrumb-entry.track-event .breadcrumb-note,
+        .breadcrumb-entry.track-event div {
+            color: white !important;
         }
 
         .breadcrumb-time {
@@ -283,8 +258,27 @@
         .breadcrumb-note {
             font-size: 14px;
             line-height: 1.6;
-            margin-bottom: 12px;
             color: #000;
+            max-height: 4.8em;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .breadcrumb-note.expanded {
+            max-height: none !important;
+        }
+
+        .read-more-btn {
+            font-size: 12px;
+            color: #0066cc;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+            margin-top: 4px;
+            font-family: 'Courier New', monospace;
+            display: inline-block;
         }
 
         .breadcrumb-meta {
@@ -322,9 +316,10 @@
         }
 
         .preview-map {
-            width: 100px;
-            height: 100px;
+            width: 120px !important;
+            height: 120px !important;
             border: 2px solid #000;
+            margin-left: auto;
         }
 
         .edit-button {
@@ -422,10 +417,10 @@
         .mood-option {
             background: white;
             border: 3px outset #999;
-            padding: 8px 4px;
+            padding: 6px 4px;
             text-align: center;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
             transition: all 0.2s;
         }
 
@@ -440,15 +435,14 @@
         }
 
         .mood-label {
-            font-size: 9px;
+            font-size: 8px;
             display: block;
             margin-top: 2px;
         }
 
         .mood-display {
-            font-size: 24px;
+            font-size: 28px;
             display: inline-block;
-            margin-right: 8px;
         }
 
         .mood-config-btn {
@@ -515,22 +509,36 @@
             border-style: inset;
         }
 
-        .timer-display {
-            background: #000;
-            color: #00ff00;
-            font-size: 32px;
-            font-weight: bold;
-            text-align: center;
-            padding: 20px;
-            border: 3px solid #000;
-            margin: 16px 0;
-            font-family: 'Courier New', monospace;
+        .audio-recorder {
+            border: 2px solid #000;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #f0f0f0;
         }
 
-        .timer-controls {
+        .recording {
+            background: #ffcccc !important;
+        }
+
+        .spent-input {
             display: flex;
             gap: 8px;
-            justify-content: center;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .spent-input input {
+            flex: 1;
+        }
+
+        .spent-badge {
+            background: #4caf50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 8px;
         }
 
         .auth-panel {
@@ -563,46 +571,11 @@
             z-index: 1000;
         }
 
-        .user-info {
-            font-size: 12px;
-            margin-bottom: 8px;
-        }
-
-        .audio-recorder {
-            border: 2px solid #000;
-            padding: 12px;
-            margin-bottom: 12px;
-            background: #f0f0f0;
-        }
-
-        .recording {
-            background: #ffcccc !important;
-        }
-
-        .audio-controls {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .spent-input {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .spent-input input {
-            flex: 1;
-        }
-
-        .spent-badge {
-            background: #4caf50;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 3px;
-            font-size: 11px;
-            font-weight: bold;
+        @media (max-width: 768px) {
+            .preview-map {
+                width: 100px !important;
+                height: 100px !important;
+            }
         }
     </style>
 </head>
@@ -630,14 +603,64 @@
 
     <div class="container" id="main-app" style="display: none;">
         <div class="mac-window">
-            <div class="mac-title-bar">Breadcrumbs Timeline</div>
+            <div class="mac-title-bar">
+                <span>Breadcrumbs Timeline</span>
+                <div class="user-avatar" id="user-avatar" onclick="toggleUserMenu(event)" style="display: none;">
+                    <span id="user-email-short"></span>
+                    <div class="logout-menu" id="logout-menu">
+                        <button onclick="signOutUser(); event.stopPropagation();">🚪 Sign Out</button>
+                    </div>
+                </div>
+            </div>
             <div class="mac-content">
-                <div class="user-info" id="user-info"></div>
                 <button class="mac-button mac-button-primary" onclick="toggleForm()">➕ Breadcrumb</button>
                 <button class="mac-button" onclick="toggleTimer()">⏱️ Time</button>
                 <button class="mac-button" onclick="toggleTrack()">📊 Track</button>
                 <button class="mac-button" onclick="toggleSpent()">💰 Spent</button>
-                <button class="mac-button" onclick="signOutUser()" id="signout-btn" style="display:none; float: right;">🚪 Sign Out</button>
+            </div>
+        </div>
+
+        <div class="mac-window hidden" id="form-window">
+            <div class="mac-title-bar">New Entry</div>
+            <div class="mac-content">
+                <label class="mac-label">
+                    😊 Mood:
+                    <button class="mac-button mood-config-btn" onclick="toggleMoodConfig()">⚙️</button>
+                </label>
+                
+                <div id="mood-config" class="config-panel hidden">
+                    <div style="margin-bottom: 12px; font-weight: bold;">Configure moods:</div>
+                    <div id="mood-config-list"></div>
+                    <button class="mac-button" onclick="saveMoodConfig()" style="margin-top: 8px;">💾 Save Configuration</button>
+                </div>
+
+                <div class="mood-selector" id="mood-selector"></div>
+
+                <label class="mac-label">Note:</label>
+                <textarea class="mac-textarea" id="note-input" placeholder="What's happening?"></textarea>
+
+                <label class="mac-label">📍 Location:</label>
+                <input type="text" class="mac-input" id="location-input" placeholder="Place">
+                <button class="mac-button" onclick="getGPS()" id="gps-btn">🌍 Use GPS</button>
+                <div id="form-map" class="mini-map" style="display: none;"></div>
+
+                <label class="mac-label">☁️ Weather:</label>
+                <input type="text" class="mac-input" id="weather-input" placeholder="Sunny, cloudy...">
+
+                <label class="mac-label">🖼️ Images:</label>
+                <input type="file" accept="image/*" multiple onchange="handleImages(event)" style="margin-bottom: 12px;">
+                <div id="image-previews"></div>
+
+                <label class="mac-label">🎤 Audio:</label>
+                <div class="audio-recorder">
+                    <button class="mac-button" onclick="startRecording()" id="record-btn">🔴 Record</button>
+                    <button class="mac-button" onclick="stopRecording()" id="stop-record-btn" disabled>⏹️ Stop</button>
+                    <div id="audio-preview" style="margin-top: 8px;"></div>
+                </div>
+
+                <button class="mac-button mac-button-primary" onclick="saveEntry()" id="save-btn">💾 Save</button>
+                <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-btn">🗑️ Delete</button>
+                <button class="mac-button" onclick="cancelEdit()">Cancel</button>
             </div>
         </div>
 
@@ -707,50 +730,6 @@
             </div>
         </div>
 
-        <div class="mac-window hidden" id="form-window">
-            <div class="mac-title-bar">New Entry</div>
-            <div class="mac-content">
-                <label class="mac-label">
-                    😊 Mood:
-                    <button class="mac-button mood-config-btn" onclick="toggleMoodConfig()">⚙️</button>
-                </label>
-                
-                <div id="mood-config" class="config-panel hidden">
-                    <div style="margin-bottom: 12px; font-weight: bold;">Configure moods:</div>
-                    <div id="mood-config-list"></div>
-                    <button class="mac-button" onclick="saveMoodConfig()" style="margin-top: 8px;">💾 Save Configuration</button>
-                </div>
-
-                <div class="mood-selector" id="mood-selector"></div>
-
-                <label class="mac-label">Note:</label>
-                <textarea class="mac-textarea" id="note-input" placeholder="What's happening?"></textarea>
-
-                <label class="mac-label">📍 Location:</label>
-                <input type="text" class="mac-input" id="location-input" placeholder="Place">
-                <button class="mac-button" onclick="getGPS()" id="gps-btn">🌍 Use GPS</button>
-                <div id="form-map" class="mini-map" style="display: none;"></div>
-
-                <label class="mac-label">☁️ Weather:</label>
-                <input type="text" class="mac-input" id="weather-input" placeholder="Sunny, cloudy...">
-
-                <label class="mac-label">🖼️ Images:</label>
-                <input type="file" accept="image/*" multiple onchange="handleImages(event)" style="margin-bottom: 12px;">
-                <div id="image-previews"></div>
-
-                <label class="mac-label">🎤 Audio:</label>
-                <div class="audio-recorder">
-                    <button class="mac-button" onclick="startRecording()" id="record-btn">🔴 Record</button>
-                    <button class="mac-button" onclick="stopRecording()" id="stop-record-btn" disabled>⏹️ Stop</button>
-                    <div id="audio-preview" style="margin-top: 8px;"></div>
-                </div>
-
-                <button class="mac-button mac-button-primary" onclick="saveEntry()" id="save-btn">💾 Save</button>
-                <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-btn">🗑️ Delete</button>
-                <button class="mac-button" onclick="cancelEdit()">Cancel</button>
-            </div>
-        </div>
-
         <div id="timeline-container"></div>
 
         <div class="mac-window hidden" id="empty-state">
@@ -779,7 +758,6 @@
             measurementId: "G-GZYTDYNSRB"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -797,15 +775,12 @@
         let editingEntryId = null;
         let selectedMood = null;
         
-        // Timer variables
         let selectedDuration = null;
         let selectedActivity = null;
 
-        // Audio recording
         let mediaRecorder = null;
         let audioChunks = [];
 
-        // Default moods (simplified to 5)
         const defaultMoods = [
             { emoji: '😊', label: 'Happy' },
             { emoji: '😢', label: 'Sad' },
@@ -816,7 +791,6 @@
 
         let moods = [...defaultMoods];
 
-        // Firebase Authentication
         auth.onAuthStateChanged((user) => {
             if (user) {
                 currentUser = user;
@@ -859,12 +833,25 @@
             document.getElementById('main-app').style.display = 'block';
             
             if (currentUser) {
-                document.getElementById('user-info').textContent = '👤 ' + currentUser.email;
-                document.getElementById('signout-btn').style.display = 'inline-block';
-            } else {
-                document.getElementById('user-info').textContent = '📴 Offline Mode';
+                const email = currentUser.email;
+                const shortEmail = email.length > 20 ? email.substring(0, 17) + '...' : email;
+                document.getElementById('user-email-short').textContent = '👤 ' + shortEmail;
+                document.getElementById('user-avatar').style.display = 'block';
             }
         }
+
+        function toggleUserMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('logout-menu');
+            menu.classList.toggle('show');
+        }
+
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('logout-menu');
+            if (menu && !e.target.closest('.user-avatar')) {
+                menu.classList.remove('show');
+            }
+        });
 
         function updateSyncStatus(status) {
             const statusEl = document.getElementById('sync-status');
@@ -883,781 +870,10 @@
             }
         }
 
-        // Load data from Firebase
         async function loadDataFromFirebase() {
             if (!currentUser) return;
             
             updateSyncStatus('syncing');
             
             try {
-                const snapshot = await db.collection('users').doc(currentUser.uid).collection('entries').orderBy('timestamp', 'desc').get();
-                
-                entries = [];
-                snapshot.forEach((doc) => {
-                    entries.push({ id: doc.id, ...doc.data() });
-                });
-                
-                renderTimeline();
-                updateSyncStatus('online');
-            } catch (error) {
-                console.error('Error loading from Firebase:', error);
-                updateSyncStatus('offline');
-                loadData(); // Fallback to localStorage
-            }
-        }
-
-        // Save data to Firebase
-        async function saveDataToFirebase() {
-            if (!currentUser || isOfflineMode) {
-                saveData(); // Save to localStorage
-                return;
-            }
-            
-            updateSyncStatus('syncing');
-            
-            try {
-                // This would be optimized in production to only update changed entries
-                const batch = db.batch();
-                
-                entries.forEach((entry) => {
-                    const docRef = db.collection('users').doc(currentUser.uid).collection('entries').doc(String(entry.id));
-                    batch.set(docRef, entry);
-                });
-                
-                await batch.commit();
-                updateSyncStatus('online');
-            } catch (error) {
-                console.error('Error saving to Firebase:', error);
-                updateSyncStatus('offline');
-                saveData(); // Fallback to localStorage
-            }
-        }
-
-        function loadMoodConfig() {
-            const saved = localStorage.getItem('mood-config');
-            if (saved) {
-                moods = JSON.parse(saved);
-            }
-        }
-
-        function saveMoodConfigData() {
-            localStorage.setItem('mood-config', JSON.stringify(moods));
-        }
-
-        function loadData() {
-            const saved = localStorage.getItem('timeline-entries');
-            if (saved) {
-                entries = JSON.parse(saved);
-            }
-            loadMoodConfig();
-            renderTimeline();
-        }
-
-        function saveData() {
-            localStorage.setItem('timeline-entries', JSON.stringify(entries));
-            if (!isOfflineMode) {
-                saveDataToFirebase();
-            }
-        }
-
-        function toggleForm() {
-            const form = document.getElementById('form-window');
-            const timer = document.getElementById('timer-window');
-            timer.classList.add('hidden');
-            form.classList.toggle('hidden');
-            if (!form.classList.contains('hidden')) {
-                clearForm();
-                renderMoodSelector();
-            }
-        }
-
-        function toggleTimer() {
-            const timer = document.getElementById('timer-window');
-            const form = document.getElementById('form-window');
-            const track = document.getElementById('track-window');
-            form.classList.add('hidden');
-            track.classList.add('hidden');
-            timer.classList.toggle('hidden');
-            if (!timer.classList.contains('hidden')) {
-                resetTimerSelections();
-            }
-        }
-
-        function toggleTrack() {
-            const track = document.getElementById('track-window');
-            const form = document.getElementById('form-window');
-            const timer = document.getElementById('timer-window');
-            form.classList.add('hidden');
-            timer.classList.add('hidden');
-            track.classList.toggle('hidden');
-        }
-
-        function quickTrack(activity) {
-            const entry = {
-                id: Date.now(),
-                timestamp: new Date().toISOString(),
-                note: activity,
-                location: '',
-                weather: '',
-                images: [],
-                coords: null,
-                mood: null,
-                isQuickTrack: true
-            };
-            
-            entries.unshift(entry);
-            saveData();
-            renderTimeline();
-            toggleTrack();
-            
-            // Visual feedback
-            alert(`✅ Tracked: ${activity}`);
-        }
-
-        function resetTimerSelections() {
-            selectedDuration = null;
-            selectedActivity = null;
-            document.querySelectorAll('.duration-option').forEach(el => el.classList.remove('selected'));
-            document.querySelectorAll('.activity-option').forEach(el => el.classList.remove('selected'));
-            document.getElementById('create-time-btn').disabled = true;
-        }
-
-        function selectDuration(minutes) {
-            selectedDuration = minutes;
-            const options = document.querySelectorAll('.duration-option');
-            options.forEach(el => el.classList.remove('selected'));
-            
-            // Find and select the clicked element
-            options.forEach(el => {
-                if (el.textContent.includes(minutes === 15 ? '15' : minutes === 30 ? '30' : minutes === 60 ? '1' : minutes === 120 ? '2' : '3')) {
-                    el.classList.add('selected');
-                }
-            });
-            
-            checkTimerReady();
-        }
-
-        function selectActivity(activity) {
-            selectedActivity = activity;
-            const options = document.querySelectorAll('.activity-option');
-            options.forEach(el => el.classList.remove('selected'));
-            
-            // Find and select the clicked element
-            options.forEach(el => {
-                if (el.textContent.includes(activity)) {
-                    el.classList.add('selected');
-                }
-            });
-            
-            checkTimerReady();
-        }
-
-        function checkTimerReady() {
-            console.log('Duration:', selectedDuration, 'Activity:', selectedActivity);
-            const createBtn = document.getElementById('create-time-btn');
-            if (selectedDuration && selectedActivity) {
-                createBtn.disabled = false;
-            } else {
-                createBtn.disabled = true;
-            }
-        }
-
-        function createTimeEvent() {
-            if (!selectedDuration || !selectedActivity) return;
-            
-            console.log('Creating time event:', selectedActivity, selectedDuration);
-            
-            const entry = {
-                id: Date.now(),
-                timestamp: new Date().toISOString(),
-                note: `${selectedActivity} - ${selectedDuration} minutes`,
-                location: '',
-                weather: '',
-                images: [],
-                audio: null,
-                coords: null,
-                mood: null,
-                activity: selectedActivity,
-                duration: selectedDuration,
-                isTimedActivity: true
-            };
-            
-            entries.unshift(entry);
-            console.log('Entry created:', entry);
-            
-            saveData();
-            renderTimeline();
-            
-            alert(`✅ Time event created: ${selectedActivity} for ${selectedDuration} minutes!`);
-            toggleTimer();
-        }
-
-        function renderMoodSelector() {
-            const container = document.getElementById('mood-selector');
-            container.innerHTML = moods.map((mood, index) => `
-                <div class="mood-option ${selectedMood === index ? 'selected' : ''}" onclick="selectMood(${index})">
-                    ${mood.emoji}
-                    <span class="mood-label">${mood.label}</span>
-                </div>
-            `).join('');
-        }
-
-        function selectMood(index) {
-            selectedMood = index;
-            renderMoodSelector();
-        }
-
-        function toggleMoodConfig() {
-            const panel = document.getElementById('mood-config');
-            panel.classList.toggle('hidden');
-            if (!panel.classList.contains('hidden')) {
-                renderMoodConfig();
-            }
-        }
-
-        function renderMoodConfig() {
-            const container = document.getElementById('mood-config-list');
-            container.innerHTML = moods.map((mood, index) => `
-                <div class="config-item">
-                    <input type="text" value="${mood.emoji}" id="mood-emoji-${index}" maxlength="2">
-                    <input type="text" value="${mood.label}" id="mood-label-${index}" placeholder="Label">
-                </div>
-            `).join('');
-        }
-
-        function saveMoodConfig() {
-            moods = moods.map((mood, index) => ({
-                emoji: document.getElementById(`mood-emoji-${index}`).value || mood.emoji,
-                label: document.getElementById(`mood-label-${index}`).value || mood.label
-            }));
-            saveMoodConfigData();
-            renderMoodSelector();
-            toggleMoodConfig();
-            alert('✅ Configuración guardada');
-        }
-
-        function clearForm() {
-            document.getElementById('note-input').value = '';
-            document.getElementById('location-input').value = '';
-            document.getElementById('weather-input').value = '';
-            currentImages = [];
-            currentCoords = null;
-            editingEntryId = null;
-            selectedMood = null;
-            document.getElementById('image-previews').innerHTML = '';
-            document.getElementById('delete-btn').classList.add('hidden');
-            document.getElementById('save-btn').textContent = '💾 Guardar';
-            document.getElementById('mood-config').classList.add('hidden');
-            const mapContainer = document.getElementById('form-map');
-            if (mapContainer) {
-                mapContainer.style.display = 'none';
-                mapContainer.innerHTML = '';
-            }
-        }
-
-        function cancelEdit() {
-            clearForm();
-            toggleForm();
-        }
-
-        function getGPS() {
-            const btn = document.getElementById('gps-btn');
-            btn.textContent = '⏳ Searching...';
-            btn.disabled = true;
-
-            if (!navigator.geolocation) {
-                alert('Geolocation not available');
-                btn.textContent = '🌍 Use GPS';
-                btn.disabled = false;
-                return;
-            }
-
-            console.log('Requesting geolocation...');
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    console.log('Position received:', position);
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    currentCoords = { lat, lon };
-                    // No mostrar coordenadas, solo marcar que tenemos ubicación
-                    document.getElementById('location-input').placeholder = 'Getting location...';
-                    
-                    showMiniMap(lat, lon, 'form-map');
-                    getWeather(lat, lon);
-                    
-                    btn.textContent = '🌍 Use GPS';
-                    btn.disabled = false;
-                },
-                (error) => {
-                    console.error('Geolocation error:', error);
-                    alert('Error getting location: ' + error.message);
-                    btn.textContent = '🌍 Use GPS';
-                    btn.disabled = false;
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
-            );
-        }
-
-        async function getWeather(lat, lon) {
-            const weatherInput = document.getElementById('weather-input');
-            const locationInput = document.getElementById('location-input');
-            weatherInput.value = '⏳ Getting weather...';
-            
-            console.log('Fetching weather for:', lat, lon);
-            
-            try {
-                const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric&lang=en`;
-                console.log('Weather URL:', url);
-                
-                const response = await fetch(url);
-                
-                console.log('Weather response status:', response.status);
-                
-                if (!response.ok) {
-                    throw new Error('Error getting weather: ' + response.status);
-                }
-                
-                const data = await response.json();
-                console.log('Weather data:', data);
-                
-                const temp = Math.round(data.main.temp);
-                const description = data.weather[0].description;
-                const emoji = getWeatherEmoji(data.weather[0].id);
-                const city = data.name; // Nombre de la ciudad
-                
-                weatherInput.value = `${emoji} ${description}, ${temp}°C in ${city}`;
-                locationInput.value = city; // Solo el nombre de la ciudad
-            } catch (error) {
-                console.error('Error getting weather:', error);
-                weatherInput.value = '';
-                alert('Could not get weather data. You can enter it manually.');
-            }
-        }
-
-        function getWeatherEmoji(code) {
-            if (code >= 200 && code < 300) return '⛈️';
-            if (code >= 300 && code < 400) return '🌦️';
-            if (code >= 500 && code < 600) return '🌧️';
-            if (code >= 600 && code < 700) return '❄️';
-            if (code >= 700 && code < 800) return '🌫️';
-            if (code === 800) return '☀️';
-            if (code > 800) return '☁️';
-            return '🌤️';
-        }
-
-        function showMiniMap(lat, lon, containerId) {
-            const mapContainer = document.getElementById(containerId);
-            if (!mapContainer) return;
-
-            mapContainer.innerHTML = '';
-            mapContainer.style.display = 'block';
-
-            const map = L.map(containerId).setView([lat, lon], 13);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap',
-                maxZoom: 19
-            }).addTo(map);
-
-            L.marker([lat, lon]).addTo(map);
-
-            setTimeout(() => {
-                map.invalidateSize();
-            }, 100);
-        }
-
-        function handleImages(event) {
-            const files = Array.from(event.target.files);
-            files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    currentImages.push(e.target.result);
-                    renderImagePreviews();
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function handleAudio(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    currentAudio = e.target.result;
-                    renderAudioPreview();
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        async function startRecording() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-
-                mediaRecorder.ondataavailable = (event) => {
-                    audioChunks.push(event.data);
-                };
-
-                mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        currentAudio = reader.result;
-                        renderAudioPreview();
-                    };
-                    reader.readAsDataURL(audioBlob);
-                    
-                    // Stop all tracks
-                    stream.getTracks().forEach(track => track.stop());
-                };
-
-                mediaRecorder.start();
-                document.getElementById('record-btn').disabled = true;
-                document.getElementById('stop-record-btn').disabled = false;
-                document.querySelector('.audio-recorder').classList.add('recording');
-            } catch (error) {
-                console.error('Error accessing microphone:', error);
-                alert('Could not access microphone. Please check permissions.');
-            }
-        }
-
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-                document.getElementById('record-btn').disabled = false;
-                document.getElementById('stop-record-btn').disabled = true;
-                document.querySelector('.audio-recorder').classList.remove('recording');
-            }
-        }
-
-        function renderAudioPreview() {
-            const container = document.getElementById('audio-preview');
-            if (currentAudio) {
-                container.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
-                        <audio controls style="flex: 1;">
-                            <source src="${currentAudio}">
-                        </audio>
-                        <button class="mac-button" onclick="removeAudio()" style="padding: 4px 8px;">✕</button>
-                    </div>
-                `;
-            } else {
-                container.innerHTML = '';
-            }
-        }
-
-        function removeAudio() {
-            currentAudio = null;
-            renderAudioPreview();
-        }
-
-        function renderImagePreviews() {
-            const container = document.getElementById('image-previews');
-            container.innerHTML = currentImages.map((img, idx) => `
-                <div class="image-preview">
-                    <img src="${img}" alt="">
-                    <div class="image-remove" onclick="removeImage(${idx})">✕</div>
-                </div>
-            `).join('');
-        }
-
-        function removeImage(index) {
-            currentImages.splice(index, 1);
-            renderImagePreviews();
-        }
-
-        function saveEntry() {
-            const note = document.getElementById('note-input').value.trim();
-            if (!note) {
-                alert('Por favor escribe una nota');
-                return;
-            }
-
-            if (editingEntryId) {
-                // Editar entrada existente
-                const entryIndex = entries.findIndex(e => e.id === editingEntryId);
-                if (entryIndex !== -1) {
-                    entries[entryIndex] = {
-                        ...entries[entryIndex],
-                        note: note,
-                        location: document.getElementById('location-input').value,
-                        weather: document.getElementById('weather-input').value,
-                        images: [...currentImages],
-                        coords: currentCoords ? { ...currentCoords } : entries[entryIndex].coords
-                    };
-                }
-            } else {
-                // Nueva entrada
-                const entry = {
-                    id: Date.now(),
-                    timestamp: new Date().toISOString(),
-                    note: note,
-                    location: document.getElementById('location-input').value,
-                    weather: document.getElementById('weather-input').value,
-                    images: [...currentImages],
-                    coords: currentCoords ? { ...currentCoords } : null
-                };
-                entries.unshift(entry);
-            }
-
-            saveData();
-            renderTimeline();
-            toggleForm();
-        }
-
-        function editEntry(id) {
-            const entry = entries.find(e => e.id === id);
-            if (!entry) return;
-
-            editingEntryId = id;
-            document.getElementById('note-input').value = entry.note;
-            document.getElementById('location-input').value = entry.location || '';
-            document.getElementById('weather-input').value = entry.weather || '';
-            currentImages = [...(entry.images || [])];
-            currentAudio = entry.audio || null;
-            currentCoords = entry.coords ? { ...entry.coords } : null;
-
-            if (entry.mood) {
-                const moodIndex = moods.findIndex(m => m.emoji === entry.mood.emoji && m.label === entry.mood.label);
-                selectedMood = moodIndex !== -1 ? moodIndex : null;
-            } else {
-                selectedMood = null;
-            }
-
-            renderImagePreviews();
-            renderAudioPreview();
-            renderMoodSelector();
-
-            if (entry.coords) {
-                showMiniMap(entry.coords.lat, entry.coords.lon, 'form-map');
-            }
-
-            document.getElementById('delete-btn').classList.remove('hidden');
-            document.getElementById('save-btn').textContent = '💾 Update';
-            document.getElementById('form-window').classList.remove('hidden');
-        }
-
-        function deleteCurrentEntry() {
-            if (!editingEntryId) return;
-            
-            if (confirm('Delete this entry?')) {
-                entries = entries.filter(e => e.id !== editingEntryId);
-                
-                // Delete from Firebase if online
-                if (currentUser && !isOfflineMode) {
-                    db.collection('users').doc(currentUser.uid).collection('entries').doc(String(editingEntryId)).delete()
-                        .catch(error => console.error('Error deleting from Firebase:', error));
-                }
-                
-                saveData();
-                renderTimeline();
-                toggleForm();
-            }
-        }
-
-        function formatDate(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleDateString('en', { 
-                weekday: 'long',
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric'
-            });
-        }
-
-        function formatTime(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function getDayKey(timestamp) {
-            const date = new Date(timestamp);
-            return date.toISOString().split('T')[0];
-        }
-
-        function toggleDay(dayKey) {
-            const content = document.getElementById(`day-content-${dayKey}`);
-            const chevron = document.getElementById(`chevron-${dayKey}`);
-            
-            content.classList.toggle('expanded');
-            chevron.classList.toggle('expanded');
-        }
-
-        function renderTimeline() {
-            const container = document.getElementById('timeline-container');
-            const emptyState = document.getElementById('empty-state');
-            const footer = document.getElementById('footer');
-
-            if (entries.length === 0) {
-                container.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                footer.style.display = 'none';
-                return;
-            }
-
-            emptyState.classList.add('hidden');
-            footer.style.display = 'flex';
-
-            // Agrupar por días
-            const groupedByDay = {};
-            entries.forEach(entry => {
-                const dayKey = getDayKey(entry.timestamp);
-                if (!groupedByDay[dayKey]) {
-                    groupedByDay[dayKey] = [];
-                }
-                groupedByDay[dayKey].push(entry);
-            });
-
-            const html = `
-                <div class="timeline">
-                    <div class="timeline-line"></div>
-                    ${Object.keys(groupedByDay).map(dayKey => {
-                        const dayEntries = groupedByDay[dayKey];
-                        const firstEntry = dayEntries[0];
-                        
-                        return `
-                            <div class="day-block">
-                                <div class="day-header" onclick="toggleDay('${dayKey}')">
-                                    <span>${formatDate(firstEntry.timestamp)}</span>
-                                    <span class="chevron" id="chevron-${dayKey}">▼</span>
-                                </div>
-                                <div class="day-content" id="day-content-${dayKey}">
-                                    ${dayEntries.map(entry => `
-                                        <div class="breadcrumb-entry ${entry.isTimedActivity || entry.isQuickTrack || entry.isSpent ? 'edit-mode' : ''}">
-                                            <div class="breadcrumb-time">
-                                                ⏰ ${formatTime(entry.timestamp)}
-                                                ${entry.isTimedActivity ? `<span style="background: #000; color: white; padding: 2px 6px; margin-left: 8px;">⏱️ ${entry.duration}min</span>` : ''}
-                                                ${entry.isSpent ? `<span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>` : ''}
-                                            </div>
-                                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                                ${entry.mood ? `<span style="font-size: 24px;" title="${entry.mood.label}">${entry.mood.emoji}</span>` : ''}
-                                                <div class="breadcrumb-note" style="margin: 0; flex: 1;">${entry.note}</div>
-                                            </div>
-                                            ${entry.weather || entry.location ? `
-                                                <div style="font-size: 12px; color: #666; margin-bottom: 8px;">
-                                                    ${entry.weather ? `${entry.weather}` : ''}
-                                                    ${entry.weather && entry.location && entry.location.length < 20 ? ` • 📍 ${entry.location}` : ''}
-                                                    ${!entry.weather && entry.location ? `📍 ${entry.location}` : ''}
-                                                </div>
-                                            ` : ''}
-                                            
-                                            <div class="breadcrumb-preview">
-                                                ${entry.coords ? `<div class="preview-map" id="preview-map-${entry.id}"></div>` : ''}
-                                                ${entry.images && entry.images.map(img => `
-                                                    <div class="preview-item">
-                                                        <img src="${img}" onclick="window.open('${img}')">
-                                                    </div>
-                                                `).join('')}
-                                            </div>
-                                            
-                                            ${entry.audio ? `
-                                                <div style="margin-top: 12px;">
-                                                    <audio controls style="width: 100%; max-width: 300px;">
-                                                        <source src="${entry.audio}">
-                                                    </audio>
-                                                </div>
-                                            ` : ''}
-                                            
-                                            <button class="mac-button edit-button" onclick="editEntry(${entry.id})">✏️ Edit</button>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            `;
-
-            container.innerHTML = html;
-
-            // Renderizar mapas pequeños
-            setTimeout(() => {
-                entries.forEach(entry => {
-                    if (entry.coords) {
-                        const mapEl = document.getElementById(`preview-map-${entry.id}`);
-                        if (mapEl && mapEl.innerHTML === '') {
-                            const map = L.map(`preview-map-${entry.id}`, {
-                                dragging: false,
-                                scrollWheelZoom: false,
-                                doubleClickZoom: false,
-                                zoomControl: false
-                            }).setView([entry.coords.lat, entry.coords.lon], 13);
-
-                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                attribution: '© OSM'
-                            }).addTo(map);
-
-                            L.marker([entry.coords.lat, entry.coords.lon]).addTo(map);
-                        }
-                    }
-                });
-            }, 200);
-        }
-
-        function exportCSV() {
-            const headers = ['Date and Time', 'Note', 'Activity', 'Duration (min)', 'Location', 'Weather', 'Mood', 'Images'];
-            const rows = entries.map(e => [
-                new Date(e.timestamp).toLocaleString(),
-                e.note,
-                e.activity || '',
-                e.duration || '',
-                e.location || '',
-                e.weather || '',
-                e.mood ? `${e.mood.emoji} ${e.mood.label}` : '',
-                e.images.length
-            ]);
-            
-            const csv = [headers, ...rows].map(row => 
-                row.map(cell => `"${cell}"`).join(',')
-            ).join('\n');
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `breadcrumbs-${Date.now()}.csv`;
-            a.click();
-        }
-
-        function exportICS() {
-            const icsEvents = entries.map(e => {
-                const date = new Date(e.timestamp);
-                const dateStr = date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-                
-                return `BEGIN:VEVENT
-UID:${e.id}@breadcrumbs
-DTSTAMP:${dateStr}
-DTSTART:${dateStr}
-SUMMARY:${e.note.substring(0, 50)}
-DESCRIPTION:${e.note}
-LOCATION:${e.location || ''}
-END:VEVENT`;
-            }).join('\n');
-
-            const ics = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Breadcrumbs Timeline//ES
-${icsEvents}
-END:VCALENDAR`;
-
-            const blob = new Blob([ics], { type: 'text/calendar' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `breadcrumbs-${Date.now()}.ics`;
-            a.click();
-        }
-
-        loadData();
-        
-        // Don't auto-load on startup, wait for auth
-    </script>
-</body>
-</html>
+                const snapshot = await db.collection('users').doc(currentUser.uid).
