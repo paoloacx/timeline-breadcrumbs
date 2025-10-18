@@ -495,14 +495,14 @@
             <p style="font-size: 12px; color: #666;">Sign in to sync your data</p>
         </div>
         
-        <input type="email" id="auth-email" class="auth-input" placeholder="Email">
-        <input type="password" id="auth-password" class="auth-input" placeholder="Password">
-        
-        <button class="mac-button mac-button-primary" onclick="signIn()" style="width: 100%; margin-bottom: 8px;">Sign In</button>
-        <button class="mac-button" onclick="signUp()" style="width: 100%;">Create Account</button>
+        <button class="mac-button mac-button-primary" onclick="signInWithGoogle()" style="width: 100%; margin-bottom: 12px; font-size: 16px;">
+            🔐 Sign in with Google
+        </button>
         
         <div style="text-align: center; margin-top: 16px; font-size: 11px; color: #666;">
-            Or continue without account (data saved locally only)
+            Or continue without account
+            <br>
+            <span style="font-size: 10px;">(data saved locally only)</span>
             <br>
             <button class="mac-button" onclick="continueOffline()" style="margin-top: 8px; font-size: 11px;">Continue Offline</button>
         </div>
@@ -688,45 +688,16 @@
             }
         });
 
-        function signIn() {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-
-            if (!email || !password) {
-                alert('Please enter email and password');
-                return;
-            }
-
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    console.log('Signed in:', userCredential.user.email);
+        function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    console.log('Signed in with Google:', result.user.email);
                 })
                 .catch((error) => {
+                    console.error('Google sign-in error:', error);
                     alert('Sign in error: ' + error.message);
-                });
-        }
-
-        function signUp() {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-
-            if (!email || !password) {
-                alert('Please enter email and password');
-                return;
-            }
-
-            if (password.length < 6) {
-                alert('Password must be at least 6 characters');
-                return;
-            }
-
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    console.log('Account created:', userCredential.user.email);
-                    alert('Account created successfully!');
-                })
-                .catch((error) => {
-                    alert('Sign up error: ' + error.message);
                 });
         }
 
