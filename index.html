@@ -231,7 +231,7 @@
             background: white;
             border: 3px ridge #999;
             padding: 16px;
-            padding-bottom: 60px;
+            padding-top: 50px;
             margin-bottom: 12px;
             position: relative;
             color: #000;
@@ -304,19 +304,19 @@
 
         .edit-button {
             position: absolute;
-            bottom: 12px;
-            right: 12px;
-            padding: 6px 12px;
-            font-size: 12px;
+            top: 12px;
+            left: 12px;
+            padding: 4px 10px;
+            font-size: 11px;
             z-index: 10;
         }
 
         .preview-button {
             position: absolute;
-            bottom: 12px;
-            right: 90px;
-            padding: 6px 12px;
-            font-size: 12px;
+            top: 12px;
+            left: 80px;
+            padding: 4px 10px;
+            font-size: 11px;
             z-index: 10;
         }
 
@@ -377,6 +377,7 @@
             border: 2px solid #000;
             margin: 4px;
             position: relative;
+            overflow: hidden;
         }
 
         .image-preview img {
@@ -602,15 +603,7 @@
         }
 
         .sync-status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #000;
-            color: #00ff00;
-            padding: 8px 12px;
-            border: 2px solid #00ff00;
-            font-size: 12px;
-            z-index: 1000;
+            display: none;
         }
 
         @media (max-width: 768px) {
@@ -793,9 +786,31 @@
         </div>
     </div>
 
+    <div id="settings-modal" class="preview-modal" onclick="closeSettings(event)">
+        <div class="preview-content" onclick="event.stopPropagation()">
+            <div class="mac-title-bar">
+                <span>Settings</span>
+                <button onclick="closeSettings()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
+            </div>
+            <div class="mac-content">
+                <h3 style="margin-bottom: 16px;">Time Durations</h3>
+                <div id="time-durations-config"></div>
+                
+                <h3 style="margin-top: 24px; margin-bottom: 16px;">Time Activities</h3>
+                <div id="time-activities-config"></div>
+                
+                <h3 style="margin-top: 24px; margin-bottom: 16px;">Track Items</h3>
+                <div id="track-items-config"></div>
+                
+                <button class="mac-button mac-button-primary" onclick="saveSettings()" style="width: 100%; margin-top: 24px;">💾 Save Settings</button>
+            </div>
+        </div>
+    </div>
+
     <div class="footer" id="footer" style="display: none;">
         <button class="mac-button" onclick="exportCSV()">💾 Export CSV</button>
         <button class="mac-button" onclick="exportICS()">📅 Export iCal</button>
+        <button class="mac-button" onclick="openSettings()">⚙️ Settings</button>
     </div>
 
     <script>
@@ -832,6 +847,30 @@
 
         let mediaRecorder = null;
         let audioChunks = [];
+
+        // Settings
+        let timeDurations = [15, 30, 60, 120, 180];
+        let timeActivities = ['Reading', 'Sports', 'Work', 'Cleaning', 'Errands'];
+        let trackItems = {
+            meals: ['🍳 Breakfast', '🥗 Lunch', '🍽️ Dinner', '☕ Snack'],
+            tasks: ['💊 Medicine', '💧 Water', '🚶 Walk', '📞 Call']
+        };
+
+        function loadSettings() {
+            const savedDurations = localStorage.getItem('time-durations');
+            const savedActivities = localStorage.getItem('time-activities');
+            const savedTrackItems = localStorage.getItem('track-items');
+            
+            if (savedDurations) timeDurations = JSON.parse(savedDurations);
+            if (savedActivities) timeActivities = JSON.parse(savedActivities);
+            if (savedTrackItems) trackItems = JSON.parse(savedTrackItems);
+        }
+
+        function saveSettingsToStorage() {
+            localStorage.setItem('time-durations', JSON.stringify(timeDurations));
+            localStorage.setItem('time-activities', JSON.stringify(timeActivities));
+            localStorage.setItem('track-items', JSON.stringify(trackItems));
+        }
 
         const defaultMoods = [
             { emoji: '😊', label: 'Happy' },
@@ -1201,8 +1240,35 @@
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    currentImages.push(e.target.result);
-                    renderImagePreviews();
+                    // Reescalar imagen
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Calcular nuevo tamaño manteniendo aspecto
+                        let width = img.width;
+                        let height = img.height;
+                        const maxSize = 800;
+                        
+                        if (width > height && width > maxSize) {
+                            height = (height * maxSize) / width;
+                            width = maxSize;
+                        } else if (height > maxSize) {
+                            width = (width * maxSize) / height;
+                            height = maxSize;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Convertir a base64
+                        const resizedImage = canvas.toDataURL('image/jpeg', 0.8);
+                        currentImages.push(resizedImage);
+                        renderImagePreviews();
+                    };
+                    img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             });
@@ -1516,6 +1582,183 @@
             const modal = document.getElementById('preview-modal');
             modal.classList.remove('show');
             document.getElementById('preview-body').innerHTML = '';
+        }
+
+        function openSettings() {
+            const modal = document.getElementById('settings-modal');
+            modal.classList.add('show');
+            renderSettingsConfig();
+        }
+
+        function closeSettings(event) {
+            if (event && event.target.id !== 'settings-modal') return;
+            const modal = document.getElementById('settings-modal');
+            modal.classList.remove('show');
+        }
+
+        function renderSettingsConfig() {
+            // Time durations
+            const durationsContainer = document.getElementById('time-durations-config');
+            durationsContainer.innerHTML = timeDurations.map((duration, index) => `
+                <div class="config-item">
+                    <input type="number" value="${duration}" id="duration-${index}" style="flex: 0 0 100px;">
+                    <span>minutes</span>
+                    <button class="mac-button" onclick="removeDuration(${index})" style="padding: 4px 8px; margin-left: auto;">✕</button>
+                </div>
+            `).join('') + `
+                <button class="mac-button" onclick="addDuration()" style="margin-top: 8px;">➕ Add Duration</button>
+            `;
+
+            // Time activities
+            const activitiesContainer = document.getElementById('time-activities-config');
+            activitiesContainer.innerHTML = timeActivities.map((activity, index) => `
+                <div class="config-item">
+                    <input type="text" value="${activity}" id="activity-${index}">
+                    <button class="mac-button" onclick="removeActivity(${index})" style="padding: 4px 8px;">✕</button>
+                </div>
+            `).join('') + `
+                <button class="mac-button" onclick="addActivity()" style="margin-top: 8px;">➕ Add Activity</button>
+            `;
+
+            // Track items
+            const trackContainer = document.getElementById('track-items-config');
+            trackContainer.innerHTML = `
+                <div style="margin-bottom: 16px;">
+                    <strong>Meals:</strong>
+                    ${trackItems.meals.map((item, index) => `
+                        <div class="config-item">
+                            <input type="text" value="${item}" id="meal-${index}">
+                            <button class="mac-button" onclick="removeMeal(${index})" style="padding: 4px 8px;">✕</button>
+                        </div>
+                    `).join('')}
+                    <button class="mac-button" onclick="addMeal()" style="margin-top: 8px;">➕ Add Meal</button>
+                </div>
+                <div>
+                    <strong>Tasks:</strong>
+                    ${trackItems.tasks.map((item, index) => `
+                        <div class="config-item">
+                            <input type="text" value="${item}" id="task-${index}">
+                            <button class="mac-button" onclick="removeTask(${index})" style="padding: 4px 8px;">✕</button>
+                        </div>
+                    `).join('')}
+                    <button class="mac-button" onclick="addTask()" style="margin-top: 8px;">➕ Add Task</button>
+                </div>
+            `;
+        }
+
+        function addDuration() {
+            timeDurations.push(60);
+            renderSettingsConfig();
+        }
+
+        function removeDuration(index) {
+            timeDurations.splice(index, 1);
+            renderSettingsConfig();
+        }
+
+        function addActivity() {
+            timeActivities.push('New Activity');
+            renderSettingsConfig();
+        }
+
+        function removeActivity(index) {
+            timeActivities.splice(index, 1);
+            renderSettingsConfig();
+        }
+
+        function addMeal() {
+            trackItems.meals.push('🍴 New Meal');
+            renderSettingsConfig();
+        }
+
+        function removeMeal(index) {
+            trackItems.meals.splice(index, 1);
+            renderSettingsConfig();
+        }
+
+        function addTask() {
+            trackItems.tasks.push('✓ New Task');
+            renderSettingsConfig();
+        }
+
+        function removeTask(index) {
+            trackItems.tasks.splice(index, 1);
+            renderSettingsConfig();
+        }
+
+        function saveSettings() {
+            // Guardar duraciones
+            timeDurations = timeDurations.map((_, index) => {
+                const val = document.getElementById(`duration-${index}`);
+                return val ? parseInt(val.value) || 60 : 60;
+            });
+
+            // Guardar actividades
+            timeActivities = timeActivities.map((_, index) => {
+                const val = document.getElementById(`activity-${index}`);
+                return val ? val.value : 'Activity';
+            });
+
+            // Guardar track items
+            trackItems.meals = trackItems.meals.map((_, index) => {
+                const val = document.getElementById(`meal-${index}`);
+                return val ? val.value : 'Meal';
+            });
+
+            trackItems.tasks = trackItems.tasks.map((_, index) => {
+                const val = document.getElementById(`task-${index}`);
+                return val ? val.value : 'Task';
+            });
+
+            saveSettingsToStorage();
+            updateTimerOptions();
+            updateTrackOptions();
+            closeSettings();
+            alert('✅ Settings saved!');
+        }
+
+        function updateTimerOptions() {
+            const container = document.getElementById('duration-selector');
+            if (!container) return;
+            
+            container.innerHTML = timeDurations.map(duration => `
+                <div class="duration-option" onclick="selectDuration(${duration}); event.stopPropagation();">
+                    ${duration < 60 ? duration + ' min' : (duration / 60) + ' hour' + (duration > 60 ? 's' : '')}
+                </div>
+            `).join('');
+
+            const actContainer = document.getElementById('activity-selector');
+            if (!actContainer) return;
+            
+            actContainer.innerHTML = timeActivities.map(activity => `
+                <div class="activity-option" onclick="selectActivity('${activity}'); event.stopPropagation();">
+                    ${activity}
+                </div>
+            `).join('');
+        }
+
+        function updateTrackOptions() {
+            const trackWindow = document.getElementById('track-window');
+            if (!trackWindow) return;
+            
+            const content = trackWindow.querySelector('.mac-content');
+            content.innerHTML = `
+                <label class="mac-label">Meals:</label>
+                <div class="activity-selector">
+                    ${trackItems.meals.map(item => `
+                        <div class="activity-option" onclick="quickTrack('${item}')">${item}</div>
+                    `).join('')}
+                </div>
+
+                <label class="mac-label" style="margin-top: 16px;">Tasks:</label>
+                <div class="activity-selector">
+                    ${trackItems.tasks.map(item => `
+                        <div class="activity-option" onclick="quickTrack('${item}')">${item}</div>
+                    `).join('')}
+                </div>
+
+                <button class="mac-button" onclick="toggleTrack()" style="margin-top: 16px;">Close</button>
+            `;
         }
 
         function deleteCurrentEntry() {
@@ -1856,6 +2099,7 @@ END:VCALENDAR`;
         }
 
         loadData();
+        loadSettings();
     </script>
 </body>
 </html>
