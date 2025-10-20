@@ -322,10 +322,12 @@
         .preview-button {
             position: absolute;
             top: 12px;
-            left: 80px;
+            left: 70px;
             padding: 4px 10px;
             font-size: 11px;
             z-index: 10;
+            background: #ddd;
+            border: 3px outset #fff;
         }
 
         .preview-modal {
@@ -1245,39 +1247,72 @@
 
         function handleImages(event) {
             const files = Array.from(event.target.files);
+            console.log('Files selected:', files.length);
+            
             files.forEach(file => {
+                console.log('Processing image:', file.name, 'Original size:', file.size, 'bytes');
+                
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    // Reescalar imagen
+                    console.log('File loaded into reader');
                     const img = new Image();
+                    
                     img.onload = function() {
+                        console.log('Image loaded. Original dimensions:', img.width, 'x', img.height);
+                        
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
                         
-                        // Calcular nuevo tamaño manteniendo aspecto
                         let width = img.width;
                         let height = img.height;
                         const maxSize = 800;
                         
-                        if (width > height && width > maxSize) {
-                            height = (height * maxSize) / width;
-                            width = maxSize;
-                        } else if (height > maxSize) {
-                            width = (width * maxSize) / height;
-                            height = maxSize;
+                        // Calculate new size
+                        if (width > maxSize || height > maxSize) {
+                            if (width > height) {
+                                height = (height * maxSize) / width;
+                                width = maxSize;
+                            } else {
+                                width = (width * maxSize) / height;
+                                height = maxSize;
+                            }
+                            console.log('Resizing to:', Math.round(width), 'x', Math.round(height));
+                        } else {
+                            console.log('No resizing needed (image smaller than 800px)');
                         }
                         
                         canvas.width = width;
                         canvas.height = height;
+                        
+                        // Draw image on canvas
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // Convertir a base64
+                        // Convert to JPEG with 80% quality
                         const resizedImage = canvas.toDataURL('image/jpeg', 0.8);
+                        const originalLength = e.target.result.length;
+                        const newLength = resizedImage.length;
+                        console.log('Compression result:', 
+                            'Original:', Math.round(originalLength / 1024), 'KB',
+                            'Compressed:', Math.round(newLength / 1024), 'KB',
+                            'Reduction:', Math.round((1 - newLength / originalLength) * 100) + '%'
+                        );
+                        
                         currentImages.push(resizedImage);
+                        console.log('Image added. Total images:', currentImages.length);
                         renderImagePreviews();
                     };
+                    
+                    img.onerror = function() {
+                        console.error('Failed to load image');
+                    };
+                    
                     img.src = e.target.result;
                 };
+                
+                reader.onerror = function() {
+                    console.error('Failed to read file');
+                };
+                
                 reader.readAsDataURL(file);
             });
         }
