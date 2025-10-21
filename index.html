@@ -303,10 +303,18 @@
         }
 
         .preview-image-thumb {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             object-fit: cover;
             border: 2px solid #000;
+            cursor: pointer;
+        }
+
+        .preview-map-thumb {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #000;
+            background: #e0e0e0;
             cursor: pointer;
         }
 
@@ -615,9 +623,10 @@
         }
 
         @media (max-width: 768px) {
-            .preview-map {
-                width: 100px !important;
-                height: 100px !important;
+            .preview-image-thumb,
+            .preview-map-thumb {
+                width: 50px !important;
+                height: 50px !important;
             }
         }
     </style>
@@ -777,7 +786,7 @@
 
         <div class="mac-window hidden" id="empty-state">
             <div class="mac-content empty-state">
-                <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
+                <div style="font-size: 48px; margin-bottom: 16px;">📍</div>
                 <p><strong>No entries yet</strong></p>
                 <p style="color: #666; margin-top: 8px;">Create your first breadcrumb</p>
             </div>
@@ -1137,11 +1146,8 @@
                 return;
             }
 
-            console.log('Requesting GPS...');
-
             navigator.geolocation.getCurrentPosition(
                 (position) => {
-                    console.log('GPS Success:', position.coords);
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
                     currentCoords = { lat, lon };
@@ -1172,37 +1178,26 @@
             const weatherInput = document.getElementById('weather-input');
             const locationInput = document.getElementById('location-input');
             
-            console.log('Fetching weather for:', lat, lon);
             weatherInput.value = '⏳ Getting weather...';
             
             try {
                 const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric&lang=en`;
-                console.log('Weather API URL:', url);
                 
                 const response = await fetch(url);
-                console.log('Weather Response Status:', response.status);
                 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('Weather API Error:', errorText);
                     throw new Error('Weather API returned ' + response.status);
                 }
                 
                 const data = await response.json();
-                console.log('Weather Data:', data);
                 
                 const temp = Math.round(data.main.temp);
                 const description = data.weather[0].description;
                 const emoji = getWeatherEmoji(data.weather[0].id);
                 const city = data.name || 'Unknown';
                 
-                console.log('City:', city, 'Temp:', temp, 'Description:', description);
-                
                 weatherInput.value = `${emoji} ${description}, ${temp}°C in ${city}`;
                 locationInput.value = city;
-                
-                console.log('Weather input value set to:', weatherInput.value);
-                console.log('Location input value set to:', locationInput.value);
             } catch (error) {
                 console.error('Error getting weather:', error);
                 weatherInput.value = '';
@@ -1247,14 +1242,10 @@
             const files = Array.from(event.target.files);
             
             files.forEach(file => {
-                console.log('Processing image:', file.name, 'Size:', file.size);
-                
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const img = new Image();
                     img.onload = function() {
-                        console.log('Original size:', img.width, 'x', img.height);
-                        
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
                         
@@ -1270,14 +1261,11 @@
                             height = maxSize;
                         }
                         
-                        console.log('Resized to:', width, 'x', height);
-                        
                         canvas.width = width;
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
                         
                         const resizedImage = canvas.toDataURL('image/jpeg', 0.8);
-                        console.log('Resized image size:', resizedImage.length, 'characters');
                         
                         currentImages.push(resizedImage);
                         renderImagePreviews();
@@ -1453,12 +1441,8 @@
         }
 
         function editEntry(id) {
-            console.log('Editing entry:', id);
             const entry = entries.find(e => e.id === id);
-            if (!entry) {
-                console.error('Entry not found:', id);
-                return;
-            }
+            if (!entry) return;
 
             editingEntryId = id;
             document.getElementById('note-input').value = entry.note;
@@ -1489,17 +1473,11 @@
             const formWindow = document.getElementById('form-window');
             formWindow.classList.remove('hidden');
             formWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            
-            console.log('Form opened for editing');
         }
 
         function previewEntry(id) {
-            console.log('Previewing entry:', id);
             const entry = entries.find(e => e.id === id);
-            if (!entry) {
-                console.error('Entry not found:', id);
-                return;
-            }
+            if (!entry) return;
 
             const modal = document.getElementById('preview-modal');
             const body = document.getElementById('preview-body');
@@ -1611,7 +1589,6 @@
         }
 
         function renderSettingsConfig() {
-            // Time durations
             const durationsContainer = document.getElementById('time-durations-config');
             durationsContainer.innerHTML = timeDurations.map((duration, index) => `
                 <div class="config-item">
@@ -1623,7 +1600,6 @@
                 <button class="mac-button" onclick="addDuration()" style="margin-top: 8px;">➕ Add Duration</button>
             `;
 
-            // Time activities
             const activitiesContainer = document.getElementById('time-activities-config');
             activitiesContainer.innerHTML = timeActivities.map((activity, index) => `
                 <div class="config-item">
@@ -1634,7 +1610,6 @@
                 <button class="mac-button" onclick="addActivity()" style="margin-top: 8px;">➕ Add Activity</button>
             `;
 
-            // Track items
             const trackContainer = document.getElementById('track-items-config');
             trackContainer.innerHTML = `
                 <div style="margin-bottom: 16px;">
@@ -1701,19 +1676,16 @@
         }
 
         function saveSettings() {
-            // Guardar duraciones
             timeDurations = timeDurations.map((_, index) => {
                 const val = document.getElementById(`duration-${index}`);
                 return val ? parseInt(val.value) || 60 : 60;
             });
 
-            // Guardar actividades
             timeActivities = timeActivities.map((_, index) => {
                 const val = document.getElementById(`activity-${index}`);
                 return val ? val.value : 'Activity';
             });
 
-            // Guardar track items
             trackItems.meals = trackItems.meals.map((_, index) => {
                 const val = document.getElementById(`meal-${index}`);
                 return val ? val.value : 'Meal';
@@ -1798,7 +1770,12 @@
             options.forEach(el => el.classList.remove('selected'));
             
             options.forEach(el => {
-                if (el.textContent.includes(minutes === 15 ? '15' : minutes === 30 ? '30' : minutes === 60 ? '1' : minutes === 120 ? '2' : '3')) {
+                const text = el.textContent.trim();
+                if ((minutes === 15 && text.includes('15')) ||
+                    (minutes === 30 && text.includes('30')) ||
+                    (minutes === 60 && text.includes('1 hour')) ||
+                    (minutes === 120 && text.includes('2')) ||
+                    (minutes === 180 && text.includes('3'))) {
                     el.classList.add('selected');
                 }
             });
@@ -2006,6 +1983,9 @@
                                         
                                         return `
                                         <div class="breadcrumb-entry ${entry.isTimedActivity || entry.isSpent ? 'edit-mode' : ''} ${trackClass}" style="${heightStyle}">
+                                            <button class="mac-button edit-button" onclick="editEntry(${entry.id})">✏️ Edit</button>
+                                            <button class="mac-button preview-button" onclick="previewEntry(${entry.id})">🔍 Preview</button>
+                                            
                                             <div class="breadcrumb-time">
                                                 ⏰ ${formatTime(entry.timestamp)}
                                                 ${entry.isSpent ? `<span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>` : ''}
@@ -2035,14 +2015,10 @@
                                             
                                             <div class="breadcrumb-preview">
                                                 ${entry.images && entry.images.length > 0 ? entry.images.map(img => `
-                                                    <div class="preview-item">
-                                                        <img src="${img}" onclick="window.open('${img}')">
-                                                    </div>
+                                                    <img src="${img}" class="preview-image-thumb" onclick="window.open('${img}')">
                                                 `).join('') : ''}
-                                                ${entry.coords ? `<div class="preview-map" id="preview-map-${entry.id}"></div>` : ''}
+                                                ${entry.coords ? `<div class="preview-map-thumb" onclick="previewEntry(${entry.id})" style="display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px;">🗺️</div>` : ''}
                                             </div>
-                                            
-                                            <button class="mac-button edit-button" onclick="editEntry(${entry.id})">✏️ Edit</button>
                                         </div>
                                     `}).join('')}
                                 </div>
@@ -2053,8 +2029,6 @@
             `;
 
             container.innerHTML = html;
-
-            // No renderizar minimapas en timeline, solo en preview
         }
 
         function exportCSV() {
