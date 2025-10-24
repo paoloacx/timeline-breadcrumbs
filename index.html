@@ -2,637 +2,42 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Breadcrumbs Timeline</title>
+    
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon.png">
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="./styles.css">
+    
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- Firebase -->
+    <!-- SVG Icons -->
+    <script>
+        fetch('./icons.svg')
+            .then(response => response.text())
+            .then(data => {
+                const div = document.createElement('div');
+                div.innerHTML = data;
+                document.body.insertBefore(div.firstChild, document.body.firstChild);
+            });
+    </script>
+    
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Courier New', monospace;
-            background: repeating-linear-gradient(
-                0deg,
-                #c0c0c0,
-                #c0c0c0 1px,
-                #d0d0d0 1px,
-                #d0d0d0 2px
-            );
-            padding: 20px;
-            padding-bottom: 100px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .mac-window {
-            background: white;
-            border: 3px solid #000;
-            box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
-            margin-bottom: 20px;
-        }
-
-        .mac-title-bar {
-            background: #000;
-            color: white;
-            padding: 8px 16px;
-            font-size: 14px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .user-avatar {
-            font-size: 10px;
-            cursor: pointer;
-            padding: 4px 8px;
-            background: #333;
-            border-radius: 3px;
-            position: relative;
-        }
-
-        .user-avatar:hover {
-            background: #555;
-        }
-
-        .logout-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: white;
-            border: 2px solid #000;
-            margin-top: 4px;
-            display: none;
-            z-index: 100;
-            min-width: 120px;
-        }
-
-        .logout-menu.show {
-            display: block;
-        }
-
-        .logout-menu button {
-            width: 100%;
-            text-align: left;
-            border: none;
-            background: white;
-            padding: 8px 12px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            color: #000;
-        }
-
-        .logout-menu button:hover {
-            background: #f0f0f0;
-        }
-
-        .mac-content {
-            padding: 20px;
-        }
-
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .mac-button {
-            background: #ddd;
-            border: 3px outset #fff;
-            padding: 8px 16px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-right: 8px;
-            margin-bottom: 8px;
-        }
-
-        .mac-button:hover {
-            background: #eee;
-        }
-
-        .mac-button:active {
-            border-style: inset;
-        }
-
-        .mac-button-primary {
-            background: #000;
-            color: white;
-        }
-
-        .mac-input,
-        .mac-textarea {
-            width: 100%;
-            border: 2px inset #999;
-            padding: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-
-        .mac-textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .mac-label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 6px;
-            font-size: 14px;
-        }
-
-        .timeline {
-            position: relative;
-            padding-left: 40px;
-        }
-
-        .timeline-line {
-            position: absolute;
-            left: 20px;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: #000;
-        }
-
-        .day-block {
-            margin-bottom: 30px;
-            position: relative;
-        }
-
-        .day-header {
-            background: #000;
-            color: white;
-            padding: 12px 16px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            border: 3px solid #000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-        }
-
-        .day-header::before {
-            content: '';
-            position: absolute;
-            left: -35px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 16px;
-            height: 16px;
-            background: #000;
-            border: 3px solid white;
-            border-radius: 50%;
-            box-shadow: 0 0 0 3px #000;
-        }
-
-        .day-header:hover {
-            background: #333;
-        }
-
-        .day-content {
-            display: none;
-            padding-top: 12px;
-            background: repeating-radial-gradient(
-                circle at 0 0,
-                transparent 0,
-                #e8e8e8 1px,
-                #e8e8e8 2px,
-                transparent 2px
-            );
-            background-size: 4px 4px;
-            padding: 16px;
-        }
-
-        .day-content.expanded {
-            display: block;
-        }
-
-        .breadcrumb-entry {
-            background: white;
-            border: 3px ridge #999;
-            padding: 16px;
-            padding-top: 50px;
-            margin-bottom: 12px;
-            position: relative;
-            color: #000;
-        }
-
-        .breadcrumb-entry.track-event {
-            background: #4a4a4a;
-            color: white;
-        }
-
-        .breadcrumb-entry.track-event .breadcrumb-time,
-        .breadcrumb-entry.track-event .breadcrumb-note,
-        .breadcrumb-entry.track-event div {
-            color: white !important;
-        }
-
-        .breadcrumb-time {
-            font-weight: bold;
-            font-size: 13px;
-            margin-bottom: 8px;
-            color: #000;
-        }
-
-        .breadcrumb-note {
-            font-size: 14px;
-            line-height: 1.6;
-            color: #000;
-            max-height: 4.8em;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .breadcrumb-note.expanded {
-            max-height: none !important;
-        }
-
-        .read-more-btn {
-            font-size: 12px;
-            color: #0066cc;
-            background: none;
-            border: none;
-            cursor: pointer;
-            text-decoration: underline;
-            padding: 0;
-            margin-top: 4px;
-            font-family: 'Courier New', monospace;
-            display: inline-block;
-        }
-
-        .breadcrumb-meta {
-            font-size: 13px;
-            margin-bottom: 8px;
-            color: #000;
-        }
-
-        .mini-map {
-            width: 100%;
-            height: 200px;
-            border: 3px solid #000;
-            margin-top: 12px;
-            background: #e0e0e0;
-        }
-
-        .breadcrumb-preview {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-
-        .preview-image-thumb {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border: 2px solid #000;
-            cursor: pointer;
-        }
-
-        .preview-map-thumb {
-            width: 60px;
-            height: 60px;
-            border: 2px solid #000;
-            background: #e0e0e0;
-            cursor: pointer;
-        }
-
-        .edit-button {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            padding: 4px 10px;
-            font-size: 11px;
-            z-index: 10;
-        }
-
-        .preview-button {
-            position: absolute;
-            top: 12px;
-            left: 80px;
-            padding: 4px 10px;
-            font-size: 11px;
-            z-index: 10;
-        }
-
-        .preview-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            overflow-y: auto;
-            padding: 20px;
-        }
-
-        .preview-modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .preview-content {
-            background: white;
-            border: 3px solid #000;
-            max-width: 800px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .preview-map-full {
-            width: 100%;
-            height: 300px;
-            border: 3px solid #000;
-            margin: 16px 0;
-        }
-
-        .preview-images-full {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 12px;
-            margin: 16px 0;
-        }
-
-        .preview-image-full {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border: 2px solid #000;
-            cursor: pointer;
-        }
-
-        .image-preview {
-            display: inline-block;
-            width: 80px;
-            height: 80px;
-            border: 2px solid #000;
-            margin: 4px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .image-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .image-remove {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            width: 24px;
-            height: 24px;
-            background: #000;
-            color: white;
-            border: 2px solid white;
-            cursor: pointer;
-            text-align: center;
-            line-height: 20px;
-            font-weight: bold;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            font-size: 16px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #000;
-            color: white;
-            padding: 12px 20px;
-            border-top: 3px solid #666;
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            box-shadow: 0 -3px 10px rgba(0,0,0,0.3);
-        }
-
-        .footer .mac-button {
-            margin: 0;
-        }
-
-        .edit-mode {
-            background: #fff8dc;
-        }
-
-        .delete-button {
-            background: #ff6b6b;
-            color: white;
-            border-color: #ff0000;
-        }
-
-        .chevron {
-            transition: transform 0.3s;
-        }
-
-        .chevron.expanded {
-            transform: rotate(180deg);
-        }
-
-        .mood-selector {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
-            margin-bottom: 12px;
-        }
-
-        .mood-option {
-            background: white;
-            border: 3px outset #999;
-            padding: 6px 4px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.2s;
-        }
-
-        .mood-option:hover {
-            background: #f0f0f0;
-        }
-
-        .mood-option.selected {
-            background: #000;
-            border-style: inset;
-            transform: scale(0.95);
-        }
-
-        .mood-label {
-            font-size: 8px;
-            display: block;
-            margin-top: 2px;
-        }
-
-        .mood-display {
-            font-size: 20px;
-            display: inline-block;
-            vertical-align: middle;
-            margin-right: 6px;
-        }
-
-        .mood-config-btn {
-            font-size: 12px;
-            padding: 4px 8px;
-            margin-left: 8px;
-        }
-
-        .config-panel {
-            background: #ffffcc;
-            border: 3px solid #000;
-            padding: 16px;
-            margin-bottom: 12px;
-        }
-
-        .config-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .config-item input[type="text"] {
-            flex: 1;
-            padding: 4px;
-            border: 2px inset #999;
-            font-family: 'Courier New', monospace;
-        }
-
-        .config-item input[type="text"]:first-child {
-            flex: 0 0 60px;
-            text-align: center;
-            font-size: 20px;
-        }
-
-        .duration-selector,
-        .activity-selector {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .duration-option,
-        .activity-option {
-            background: white;
-            border: 3px outset #999;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .duration-option:hover,
-        .activity-option:hover {
-            background: #f0f0f0;
-        }
-
-        .duration-option.selected,
-        .activity-option.selected {
-            background: #000;
-            color: white;
-            border-style: inset;
-        }
-
-        .audio-recorder {
-            border: 2px solid #000;
-            padding: 12px;
-            margin-bottom: 12px;
-            background: #f0f0f0;
-        }
-
-        .recording {
-            background: #ffcccc !important;
-        }
-
-        .spent-input {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .spent-input input {
-            flex: 1;
-        }
-
-        .spent-badge {
-            background: #4caf50;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 3px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-left: 8px;
-        }
-
-        .auth-panel {
-            background: white;
-            border: 3px solid #000;
-            padding: 20px;
-            max-width: 400px;
-            margin: 100px auto;
-            box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
-        }
-
-        .auth-input {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 12px;
-            border: 2px inset #999;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-        }
-
-        .sync-status {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .preview-image-thumb,
-            .preview-map-thumb {
-                width: 50px !important;
-                height: 50px !important;
-            }
-        }
-    </style>
 </head>
 <body>
-    <div class="sync-status" id="sync-status">● Offline</div>
+    <div class="header-container">
+        <img class="header-image" src="./header.png" alt="Breadcrumbs Timeline Header">
+    </div>
+    
+    <div class="sync-status" id="sync-status">
+        <svg width="12" height="12" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-sync"/></svg>
+        Offline
+    </div>
 
     <div id="auth-container" class="auth-panel">
         <div style="text-align: center; margin-bottom: 20px;">
@@ -641,7 +46,13 @@
         </div>
         
         <button class="mac-button mac-button-primary" onclick="signInWithGoogle()" style="width: 100%; margin-bottom: 12px; font-size: 16px;">
-            🔐 Sign in with Google
+            <svg width="16" height="16" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-user"/></svg>
+            Sign in with Google
+        </button>
+        
+        <button class="mac-button" onclick="signInWithEmail()" style="width: 100%; margin-bottom: 12px; font-size: 14px;">
+            <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-note"/></svg>
+            Sign in with Email
         </button>
         
         <div style="text-align: center; margin-top: 16px; font-size: 11px; color: #666;">
@@ -654,36 +65,109 @@
     </div>
 
     <div class="container" id="main-app" style="display: none;">
+        
+        <!-- Main Header -->
         <div class="mac-window">
             <div class="mac-title-bar">
-                <span>Breadcrumbs Timeline</span>
+                <div class="title-left">
+                    <span>Breadcrumbs Timeline</span>
+                    <button class="sync-button" onclick="refreshApp()" title="Refresh & Sync">
+                        <svg width="18" height="18"><use href="#icon-sync"/></svg>
+                    </button>
+                </div>
                 <div class="user-avatar" id="user-avatar" onclick="toggleUserMenu(event)" style="display: none;">
-                    <span id="user-email-short"></span>
+                    <svg width="22" height="22"><use href="#icon-user"/></svg>
                     <div class="logout-menu" id="logout-menu">
-                        <button onclick="signOutUser(); event.stopPropagation();">🚪 Sign Out</button>
+                        <div class="user-email-display" id="user-email-full"></div>
+                        <button onclick="signOutUser(); event.stopPropagation();">
+                            <svg width="12" height="12" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-chevron-right"/></svg>
+                            Sign Out
+                        </button>
                     </div>
                 </div>
             </div>
-            <div class="mac-content">
-                <button class="mac-button mac-button-primary" onclick="toggleForm()">➕ Breadcrumb</button>
-                <button class="mac-button" onclick="toggleTimer()">⏱️ Time</button>
-                <button class="mac-button" onclick="toggleTrack()">📊 Track</button>
-                <button class="mac-button" onclick="toggleSpent()">💰 Spent</button>
+        </div>
+        
+    <!-- Recap Form -->
+    <div id="recap-form" class="mac-window hidden">
+        <div class="mac-title-bar">
+            <span>
+                <svg width="18" height="18" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-calendar"/></svg>
+                Day Recap
+            </span>
+            <button onclick="closeRecapForm()" style="background: transparent; border: none; color: white; cursor: pointer; font-size: 18px;">✖</button>
+        </div>
+        <div class="mac-content">
+            <label class="mac-label">
+                <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-calendar"/></svg>
+                Recap Date
+            </label>
+            <input type="date" class="mac-input" id="recap-date" style="margin-bottom: 16px;">
+            
+            <label class="mac-label">Day Reflection</label>
+            <textarea id="recap-reflection" class="mac-textarea" placeholder="How was your day?"></textarea>
+            
+            <label class="mac-label">Day Rating (1-10)</label>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <input type="range" id="recap-rating" min="1" max="10" value="5" 
+                    style="flex: 1; height: 8px; border: 2px inset #999; background: #ddd;">
+                <span id="recap-rating-value" style="font-size: 24px; font-weight: bold; min-width: 40px;">5</span>
+            </div>
+            
+            <label class="mac-label">3 Day Highlights</label>
+            <input type="text" id="recap-highlight-1" class="mac-input" placeholder="1. Best thing today">
+            <input type="text" id="recap-highlight-2" class="mac-input" placeholder="2. Something you learned">
+            <input type="text" id="recap-highlight-3" class="mac-input" placeholder="3. Favorite moment">
+            
+            <label class="mac-label">Day Soundtrack</label>
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                <input type="text" id="recap-bso" class="mac-input" placeholder="Search song..." style="margin-bottom: 0;">
+                <button class="mac-button mac-button-primary" onclick="buscarBSO()">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-note"/></svg>
+                    Search
+                </button>
+            </div>
+            <div id="recap-bso-results" style="max-height: 200px; overflow-y: auto;"></div>
+            <input type="hidden" id="recap-selected-track">
+            
+            <div style="margin-top: 16px;">
+                <button class="mac-button mac-button-primary" onclick="saveRecap()" id="save-recap-btn">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-save"/></svg>
+                    Save Recap
+                </button>
+                <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-recap-btn">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-delete"/></svg>
+                    Delete
+                </button>
+                <button class="mac-button" onclick="closeRecapForm()">Cancel</button>
             </div>
         </div>
+    </div>
 
         <div class="mac-window hidden" id="form-window">
             <div class="mac-title-bar">New Entry</div>
             <div class="mac-content">
                 <label class="mac-label">
-                    😊 Mood:
-                    <button class="mac-button mood-config-btn" onclick="toggleMoodConfig()">⚙️</button>
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-calendar"/></svg>
+                    Date & Time:
+                </label>
+                <input type="datetime-local" class="mac-input" id="datetime-input">
+
+                <label class="mac-label">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-mood-happy"/></svg>
+                    Mood:
+                    <button class="mac-button mood-config-btn" onclick="toggleMoodConfig()">
+                        <svg width="12" height="12"><use href="#icon-settings"/></svg>
+                    </button>
                 </label>
                 
                 <div id="mood-config" class="config-panel hidden">
                     <div style="margin-bottom: 12px; font-weight: bold;">Configure moods:</div>
                     <div id="mood-config-list"></div>
-                    <button class="mac-button" onclick="saveMoodConfig()" style="margin-top: 8px;">💾 Save Configuration</button>
+                    <button class="mac-button" onclick="saveMoodConfig()" style="margin-top: 8px;">
+                        <svg width="12" height="12" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-save"/></svg>
+                        Save Configuration
+                    </button>
                 </div>
 
                 <div class="mood-selector" id="mood-selector"></div>
@@ -691,27 +175,54 @@
                 <label class="mac-label">Note:</label>
                 <textarea class="mac-textarea" id="note-input" placeholder="What's happening?"></textarea>
 
-                <label class="mac-label">📍 Location:</label>
+                <label class="mac-label">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-location"/></svg>
+                    Location:
+                </label>
                 <input type="text" class="mac-input" id="location-input" placeholder="Place">
-                <button class="mac-button" onclick="getGPS()" id="gps-btn">🌍 Use GPS</button>
+                <button class="mac-button" onclick="getGPS()" id="gps-btn">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-map"/></svg>
+                    Use GPS
+                </button>
                 <div id="form-map" class="mini-map" style="display: none;"></div>
 
-                <label class="mac-label">☁️ Weather:</label>
+                <label class="mac-label">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-weather"/></svg>
+                    Weather:
+                </label>
                 <input type="text" class="mac-input" id="weather-input" placeholder="Sunny, cloudy...">
 
-                <label class="mac-label">🖼️ Images:</label>
+                <label class="mac-label">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-image"/></svg>
+                    Images:
+                </label>
                 <input type="file" accept="image/*" multiple onchange="handleImages(event)" style="margin-bottom: 12px;">
                 <div id="image-previews"></div>
 
-                <label class="mac-label">🎤 Audio:</label>
+                <label class="mac-label">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-audio"/></svg>
+                    Audio:
+                </label>
                 <div class="audio-recorder">
-                    <button class="mac-button" onclick="startRecording()" id="record-btn">🔴 Record</button>
-                    <button class="mac-button" onclick="stopRecording()" id="stop-record-btn" disabled>⏹️ Stop</button>
+                    <button class="mac-button" onclick="startRecording()" id="record-btn">
+                        <svg width="12" height="12" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-audio"/></svg>
+                        Record
+                    </button>
+                    <button class="mac-button" onclick="stopRecording()" id="stop-record-btn" disabled>
+                        <svg width="12" height="12" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-timer"/></svg>
+                        Stop
+                    </button>
                     <div id="audio-preview" style="margin-top: 8px;"></div>
                 </div>
 
-                <button class="mac-button mac-button-primary" onclick="saveEntry()" id="save-btn">💾 Save</button>
-                <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-btn">🗑️ Delete</button>
+                <button class="mac-button mac-button-primary" onclick="saveEntry()" id="save-btn">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-save"/></svg>
+                    Save
+                </button>
+                <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-btn">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-delete"/></svg>
+                    Delete
+                </button>
                 <button class="mac-button" onclick="cancelEdit()">Cancel</button>
             </div>
         </div>
@@ -719,55 +230,63 @@
         <div class="mac-window hidden" id="timer-window">
             <div class="mac-title-bar">Time Event</div>
             <div class="mac-content">
+                <label class="mac-label">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-calendar"/></svg>
+                    Date & Time:
+                </label>
+                <input type="datetime-local" class="mac-input" id="datetime-input-time">
+
                 <label class="mac-label">Duration:</label>
-                <div class="duration-selector" id="duration-selector">
-                    <div class="duration-option" onclick="selectDuration(15); event.stopPropagation();">15 min</div>
-                    <div class="duration-option" onclick="selectDuration(30); event.stopPropagation();">30 min</div>
-                    <div class="duration-option" onclick="selectDuration(60); event.stopPropagation();">1 hour</div>
-                    <div class="duration-option" onclick="selectDuration(120); event.stopPropagation();">2 hours</div>
-                    <div class="duration-option" onclick="selectDuration(180); event.stopPropagation();">3 hours</div>
-                </div>
+                <div class="duration-selector" id="duration-selector"></div>
 
                 <label class="mac-label">Activity:</label>
-                <div class="activity-selector" id="activity-selector">
-                    <div class="activity-option" onclick="selectActivity('Reading'); event.stopPropagation();">📚 Reading</div>
-                    <div class="activity-option" onclick="selectActivity('Sports'); event.stopPropagation();">🏃 Sports</div>
-                    <div class="activity-option" onclick="selectActivity('Work'); event.stopPropagation();">💼 Work</div>
-                    <div class="activity-option" onclick="selectActivity('Cleaning'); event.stopPropagation();">🧹 Cleaning</div>
-                    <div class="activity-option" onclick="selectActivity('Errands'); event.stopPropagation();">🛒 Errands</div>
-                </div>
+                <div class="activity-selector" id="activity-selector"></div>
+
+                <label class="mac-label">Optional Note:</label>
+                <input type="text" class="mac-input" id="time-optional-note" placeholder="Add a short note (optional)">
 
                 <button class="mac-button mac-button-primary" onclick="createTimeEvent()" id="create-time-btn" disabled style="width: 100%; margin-top: 16px;">Create Event</button>
+                <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-time-btn" style="width: 100%; margin-top: 8px;">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-delete"/></svg>
+                    Delete
+                </button>
                 <button class="mac-button" onclick="toggleTimer()" style="width: 100%; margin-top: 8px;">Cancel</button>
             </div>
         </div>
 
         <div class="mac-window hidden" id="track-window">
-            <div class="mac-title-bar">Quick Track</div>
+            <div class="mac-title-bar">Quick Mark</div>
             <div class="mac-content">
-                <label class="mac-label">Meals:</label>
-                <div class="activity-selector">
-                    <div class="activity-option" onclick="quickTrack('🍳 Breakfast')">🍳 Breakfast</div>
-                    <div class="activity-option" onclick="quickTrack('🥗 Lunch')">🥗 Lunch</div>
-                    <div class="activity-option" onclick="quickTrack('🍽️ Dinner')">🍽️ Dinner</div>
-                    <div class="activity-option" onclick="quickTrack('☕ Snack')">☕ Snack</div>
-                </div>
+                <label class="mac-label">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-calendar"/></svg>
+                    Date & Time:
+                </label>
+                <input type="datetime-local" class="mac-input" id="datetime-input-track">
 
-                <label class="mac-label" style="margin-top: 16px;">Tasks:</label>
-                <div class="activity-selector">
-                    <div class="activity-option" onclick="quickTrack('💊 Medicine')">💊 Medicine</div>
-                    <div class="activity-option" onclick="quickTrack('💧 Water')">💧 Water</div>
-                    <div class="activity-option" onclick="quickTrack('🚶 Walk')">🚶 Walk</div>
-                    <div class="activity-option" onclick="quickTrack('📞 Call')">📞 Call</div>
-                </div>
+                <label class="mac-label">Select Mark Type:</label>
+                <div class="activity-selector" id="track-selector"></div>
 
-                <button class="mac-button" onclick="toggleTrack()" style="margin-top: 16px;">Close</button>
+                <label class="mac-label">Optional Note:</label>
+                <input type="text" class="mac-input" id="track-optional-note" placeholder="Add a short note (optional)">
+
+                <button class="mac-button mac-button-primary" onclick="saveTrackEvent()" id="save-track-btn" disabled style="width: 100%; margin-top: 16px;">Save Mark</button>
+                <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-track-btn" style="width: 100%; margin-top: 8px;">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-delete"/></svg>
+                    Delete
+                </button>
+                <button class="mac-button" onclick="toggleTrack()" style="width: 100%; margin-top: 8px;">Cancel</button>
             </div>
         </div>
 
         <div class="mac-window hidden" id="spent-window">
             <div class="mac-title-bar">Spent</div>
             <div class="mac-content">
+                <label class="mac-label">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-calendar"/></svg>
+                    Date & Time:
+                </label>
+                <input type="datetime-local" class="mac-input" id="datetime-input-spent">
+
                 <label class="mac-label">Description:</label>
                 <input type="text" class="mac-input" id="spent-description" placeholder="What did you buy?">
 
@@ -777,7 +296,14 @@
                     <span style="font-weight: bold;">€</span>
                 </div>
 
-                <button class="mac-button mac-button-primary" onclick="saveSpent()" style="width: 100%;">💾 Save</button>
+                <button class="mac-button mac-button-primary" onclick="saveSpent()" style="width: 100%;">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-save"/></svg>
+                    Save
+                </button>
+                <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-spent-btn" style="width: 100%; margin-top: 8px;">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-delete"/></svg>
+                    Delete
+                </button>
                 <button class="mac-button" onclick="toggleSpent()" style="width: 100%; margin-top: 8px;">Cancel</button>
             </div>
         </div>
@@ -786,7 +312,9 @@
 
         <div class="mac-window hidden" id="empty-state">
             <div class="mac-content empty-state">
-                <div style="font-size: 48px; margin-bottom: 16px;">📍</div>
+                <div style="font-size: 48px; margin-bottom: 16px;">
+                    <svg width="48" height="48"><use href="#icon-note"/></svg>
+                </div>
                 <p><strong>No entries yet</strong></p>
                 <p style="color: #666; margin-top: 8px;">Create your first breadcrumb</p>
             </div>
@@ -797,7 +325,7 @@
         <div class="preview-content" onclick="event.stopPropagation()">
             <div class="mac-title-bar">
                 <span>Preview</span>
-                <button onclick="closePreview()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
+                <button onclick="closePreview()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✖</button>
             </div>
             <div class="mac-content" id="preview-body"></div>
         </div>
@@ -806,8 +334,11 @@
     <div id="settings-modal" class="preview-modal" onclick="closeSettings(event)">
         <div class="preview-content" onclick="event.stopPropagation()">
             <div class="mac-title-bar">
-                <span>Settings</span>
-                <button onclick="closeSettings()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
+                <span>
+                    <svg width="18" height="18" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-settings"/></svg>
+                    Settings
+                </span>
+                <button onclick="closeSettings()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✖</button>
             </div>
             <div class="mac-content">
                 <h3 style="margin-bottom: 16px;">Time Durations</h3>
@@ -819,1275 +350,70 @@
                 <h3 style="margin-top: 24px; margin-bottom: 16px;">Track Items</h3>
                 <div id="track-items-config"></div>
                 
-                <button class="mac-button mac-button-primary" onclick="saveSettings()" style="width: 100%; margin-top: 24px;">💾 Save Settings</button>
+                <button class="mac-button mac-button-primary" onclick="saveSettings()" style="width: 100%; margin-top: 24px;">
+                    <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-save"/></svg>
+                    Save Settings
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="footer" id="footer" style="display: none;">
-        <button class="mac-button" onclick="exportCSV()">💾 Export CSV</button>
-        <button class="mac-button" onclick="exportICS()">📅 Export iCal</button>
-        <button class="mac-button" onclick="openSettings()">⚙️ Settings</button>
+    <div id="stats-modal" class="preview-modal" onclick="closeStats(event)">
+        <div class="preview-content" onclick="event.stopPropagation()">
+            <div class="mac-title-bar">
+                <span>
+                    <svg width="18" height="18" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-stats"/></svg>
+                    Statistics
+                </span>
+                <button onclick="closeStats()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✖</button>
+            </div>
+            <div class="mac-content">
+                <div class="stats-grid" id="stats-content"></div>
+            </div>
+        </div>
     </div>
 
-    <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAb-MLu8atl5hruOPLDhgftjkjc_1M2038",
-            authDomain: "breadcrumbs-8b59e.firebaseapp.com",
-            projectId: "breadcrumbs-8b59e",
-            storageBucket: "breadcrumbs-8b59e.firebasestorage.app",
-            messagingSenderId: "912286191427",
-            appId: "1:912286191427:web:e78b665df6a6ff6d8529f6",
-            measurementId: "G-GZYTDYNSRB"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const storage = firebase.storage();
-
-        let currentUser = null;
-        let isOfflineMode = false;
-
-        const WEATHER_API_KEY = '317f7bcb07cf05e2c6265176c502a4bb';
-        
-        let entries = [];
-        let currentImages = [];
-        let currentAudio = null;
-        let currentCoords = null;
-        let editingEntryId = null;
-        let selectedMood = null;
-        
-        let selectedDuration = null;
-        let selectedActivity = null;
-
-        let mediaRecorder = null;
-        let audioChunks = [];
-
-        // Settings
-        let timeDurations = [15, 30, 60, 120, 180];
-        let timeActivities = ['Reading', 'Sports', 'Work', 'Cleaning', 'Errands'];
-        let trackItems = {
-            meals: ['🍳 Breakfast', '🥗 Lunch', '🍽️ Dinner', '☕ Snack'],
-            tasks: ['💊 Medicine', '💧 Water', '🚶 Walk', '📞 Call']
-        };
-
-        function loadSettings() {
-            const savedDurations = localStorage.getItem('time-durations');
-            const savedActivities = localStorage.getItem('time-activities');
-            const savedTrackItems = localStorage.getItem('track-items');
-            
-            if (savedDurations) timeDurations = JSON.parse(savedDurations);
-            if (savedActivities) timeActivities = JSON.parse(savedActivities);
-            if (savedTrackItems) trackItems = JSON.parse(savedTrackItems);
-        }
-
-        function saveSettingsToStorage() {
-            localStorage.setItem('time-durations', JSON.stringify(timeDurations));
-            localStorage.setItem('time-activities', JSON.stringify(timeActivities));
-            localStorage.setItem('track-items', JSON.stringify(trackItems));
-        }
-
-        const defaultMoods = [
-            { emoji: '😊', label: 'Happy' },
-            { emoji: '😢', label: 'Sad' },
-            { emoji: '😡', label: 'Angry' },
-            { emoji: '😰', label: 'Anxious' },
-            { emoji: '😴', label: 'Tired' }
-        ];
-
-        let moods = [...defaultMoods];
-
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                currentUser = user;
-                showMainApp();
-                updateSyncStatus('online');
-                loadDataFromFirebase();
-            }
-        });
-
-        function signInWithGoogle() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            
-            auth.signInWithPopup(provider)
-                .then((result) => {
-                    console.log('Signed in with Google:', result.user.email);
-                })
-                .catch((error) => {
-                    console.error('Google sign-in error:', error);
-                    alert('Sign in error: ' + error.message);
-                });
-        }
-
-        function signOutUser() {
-            if (confirm('Sign out?')) {
-                auth.signOut().then(() => {
-                    location.reload();
-                });
-            }
-        }
-
-        function continueOffline() {
-            isOfflineMode = true;
-            showMainApp();
-            updateSyncStatus('offline');
-            loadData();
-        }
-
-        function showMainApp() {
-            document.getElementById('auth-container').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            
-            if (currentUser) {
-                const email = currentUser.email;
-                const shortEmail = email.length > 20 ? email.substring(0, 17) + '...' : email;
-                document.getElementById('user-email-short').textContent = '👤 ' + shortEmail;
-                document.getElementById('user-avatar').style.display = 'block';
-            }
-        }
-
-        function toggleUserMenu(e) {
-            e.stopPropagation();
-            const menu = document.getElementById('logout-menu');
-            menu.classList.toggle('show');
-        }
-
-        document.addEventListener('click', (e) => {
-            const menu = document.getElementById('logout-menu');
-            if (menu && !e.target.closest('.user-avatar')) {
-                menu.classList.remove('show');
-            }
-        });
-
-        function updateSyncStatus(status) {
-            const statusEl = document.getElementById('sync-status');
-            if (status === 'online') {
-                statusEl.textContent = '● Online';
-                statusEl.style.color = '#00ff00';
-                statusEl.style.borderColor = '#00ff00';
-            } else if (status === 'syncing') {
-                statusEl.textContent = '↻ Syncing...';
-                statusEl.style.color = '#ffff00';
-                statusEl.style.borderColor = '#ffff00';
-            } else {
-                statusEl.textContent = '● Offline';
-                statusEl.style.color = '#ff0000';
-                statusEl.style.borderColor = '#ff0000';
-            }
-        }
-
-        async function loadDataFromFirebase() {
-            if (!currentUser) return;
-            
-            updateSyncStatus('syncing');
-            
-            try {
-                const snapshot = await db.collection('users').doc(currentUser.uid).collection('entries').orderBy('timestamp', 'desc').get();
-                
-                entries = [];
-                snapshot.forEach((doc) => {
-                    entries.push({ id: doc.id, ...doc.data() });
-                });
-                
-                renderTimeline();
-                updateSyncStatus('online');
-            } catch (error) {
-                console.error('Error loading from Firebase:', error);
-                updateSyncStatus('offline');
-                loadData();
-            }
-        }
-
-        async function saveDataToFirebase() {
-            if (!currentUser || isOfflineMode) {
-                saveData();
-                return;
-            }
-            
-            updateSyncStatus('syncing');
-            
-            try {
-                const batch = db.batch();
-                
-                entries.forEach((entry) => {
-                    const docRef = db.collection('users').doc(currentUser.uid).collection('entries').doc(String(entry.id));
-                    batch.set(docRef, entry);
-                });
-                
-                await batch.commit();
-                updateSyncStatus('online');
-            } catch (error) {
-                console.error('Error saving to Firebase:', error);
-                updateSyncStatus('offline');
-                saveData();
-            }
-        }
-
-        function loadMoodConfig() {
-            const saved = localStorage.getItem('mood-config');
-            if (saved) {
-                moods = JSON.parse(saved);
-            }
-        }
-
-        function saveMoodConfigData() {
-            localStorage.setItem('mood-config', JSON.stringify(moods));
-        }
-
-        function loadData() {
-            const saved = localStorage.getItem('timeline-entries');
-            if (saved) {
-                entries = JSON.parse(saved);
-            }
-            loadMoodConfig();
-            renderTimeline();
-        }
-
-        function saveData() {
-            localStorage.setItem('timeline-entries', JSON.stringify(entries));
-            if (!isOfflineMode) {
-                saveDataToFirebase();
-            }
-        }
-
-        function toggleForm() {
-            const form = document.getElementById('form-window');
-            const timer = document.getElementById('timer-window');
-            const track = document.getElementById('track-window');
-            const spent = document.getElementById('spent-window');
-            timer.classList.add('hidden');
-            track.classList.add('hidden');
-            spent.classList.add('hidden');
-            form.classList.toggle('hidden');
-            if (!form.classList.contains('hidden')) {
-                clearForm();
-                renderMoodSelector();
-            }
-        }
-
-        function toggleTimer() {
-            const timer = document.getElementById('timer-window');
-            const form = document.getElementById('form-window');
-            const track = document.getElementById('track-window');
-            const spent = document.getElementById('spent-window');
-            form.classList.add('hidden');
-            track.classList.add('hidden');
-            spent.classList.add('hidden');
-            timer.classList.toggle('hidden');
-            if (!timer.classList.contains('hidden')) {
-                resetTimerSelections();
-            }
-        }
-
-        function toggleTrack() {
-            const track = document.getElementById('track-window');
-            const form = document.getElementById('form-window');
-            const timer = document.getElementById('timer-window');
-            const spent = document.getElementById('spent-window');
-            form.classList.add('hidden');
-            timer.classList.add('hidden');
-            spent.classList.add('hidden');
-            track.classList.toggle('hidden');
-        }
-
-        function toggleSpent() {
-            const spent = document.getElementById('spent-window');
-            const form = document.getElementById('form-window');
-            const timer = document.getElementById('timer-window');
-            const track = document.getElementById('track-window');
-            form.classList.add('hidden');
-            timer.classList.add('hidden');
-            track.classList.add('hidden');
-            spent.classList.toggle('hidden');
-            if (!spent.classList.contains('hidden')) {
-                document.getElementById('spent-description').value = '';
-                document.getElementById('spent-amount').value = '';
-            }
-        }
-
-        function clearForm() {
-            document.getElementById('note-input').value = '';
-            document.getElementById('location-input').value = '';
-            document.getElementById('weather-input').value = '';
-            currentImages = [];
-            currentAudio = null;
-            currentCoords = null;
-            editingEntryId = null;
-            selectedMood = null;
-            document.getElementById('image-previews').innerHTML = '';
-            document.getElementById('audio-preview').innerHTML = '';
-            document.getElementById('delete-btn').classList.add('hidden');
-            document.getElementById('save-btn').textContent = '💾 Save';
-            document.getElementById('mood-config').classList.add('hidden');
-            const mapContainer = document.getElementById('form-map');
-            if (mapContainer) {
-                mapContainer.style.display = 'none';
-                mapContainer.innerHTML = '';
-            }
-        }
-
-        function cancelEdit() {
-            clearForm();
-            toggleForm();
-        }
-
-        function getGPS() {
-            const btn = document.getElementById('gps-btn');
-            const locationInput = document.getElementById('location-input');
-            btn.textContent = '⏳ Searching...';
-            btn.disabled = true;
-
-            if (!navigator.geolocation) {
-                alert('Geolocation not available');
-                btn.textContent = '🌍 Use GPS';
-                btn.disabled = false;
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    currentCoords = { lat, lon };
-                    
-                    locationInput.placeholder = 'Getting location...';
-                    
-                    showMiniMap(lat, lon, 'form-map');
-                    getWeather(lat, lon);
-                    
-                    btn.textContent = '🌍 GPS OK';
-                    btn.disabled = false;
-                },
-                (error) => {
-                    console.error('GPS Error:', error);
-                    alert('Error getting location: ' + error.message);
-                    btn.textContent = '🌍 Use GPS';
-                    btn.disabled = false;
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
-            );
-        }
-
-        async function getWeather(lat, lon) {
-            const weatherInput = document.getElementById('weather-input');
-            const locationInput = document.getElementById('location-input');
-            
-            weatherInput.value = '⏳ Getting weather...';
-            
-            try {
-                const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric&lang=en`;
-                
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error('Weather API returned ' + response.status);
-                }
-                
-                const data = await response.json();
-                
-                const temp = Math.round(data.main.temp);
-                const description = data.weather[0].description;
-                const emoji = getWeatherEmoji(data.weather[0].id);
-                const city = data.name || 'Unknown';
-                
-                weatherInput.value = `${emoji} ${description}, ${temp}°C in ${city}`;
-                locationInput.value = city;
-            } catch (error) {
-                console.error('Error getting weather:', error);
-                weatherInput.value = '';
-                locationInput.value = '';
-                alert('Could not get weather data: ' + error.message);
-            }
-        }
-
-        function getWeatherEmoji(code) {
-            if (code >= 200 && code < 300) return '⛈️';
-            if (code >= 300 && code < 400) return '🌦️';
-            if (code >= 500 && code < 600) return '🌧️';
-            if (code >= 600 && code < 700) return '❄️';
-            if (code >= 700 && code < 800) return '🌫️';
-            if (code === 800) return '☀️';
-            if (code > 800) return '☁️';
-            return '🌤️';
-        }
-
-        function showMiniMap(lat, lon, containerId) {
-            const mapContainer = document.getElementById(containerId);
-            if (!mapContainer) return;
-
-            mapContainer.innerHTML = '';
-            mapContainer.style.display = 'block';
-
-            const map = L.map(containerId).setView([lat, lon], 13);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap',
-                maxZoom: 19
-            }).addTo(map);
-
-            L.marker([lat, lon]).addTo(map);
-
-            setTimeout(() => {
-                map.invalidateSize();
-            }, 100);
-        }
-
-        function handleImages(event) {
-            const files = Array.from(event.target.files);
-            
-            files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        let width = img.width;
-                        let height = img.height;
-                        const maxSize = 800;
-                        
-                        if (width > height && width > maxSize) {
-                            height = (height * maxSize) / width;
-                            width = maxSize;
-                        } else if (height > maxSize) {
-                            width = (width * maxSize) / height;
-                            height = maxSize;
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        const resizedImage = canvas.toDataURL('image/jpeg', 0.8);
-                        
-                        currentImages.push(resizedImage);
-                        renderImagePreviews();
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        async function startRecording() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-
-                mediaRecorder.ondataavailable = (event) => {
-                    audioChunks.push(event.data);
-                };
-
-                mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        currentAudio = reader.result;
-                        renderAudioPreview();
-                    };
-                    reader.readAsDataURL(audioBlob);
-                    
-                    stream.getTracks().forEach(track => track.stop());
-                };
-
-                mediaRecorder.start();
-                document.getElementById('record-btn').disabled = true;
-                document.getElementById('stop-record-btn').disabled = false;
-                document.querySelector('.audio-recorder').classList.add('recording');
-            } catch (error) {
-                console.error('Error accessing microphone:', error);
-                alert('Could not access microphone.');
-            }
-        }
-
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-                document.getElementById('record-btn').disabled = false;
-                document.getElementById('stop-record-btn').disabled = true;
-                document.querySelector('.audio-recorder').classList.remove('recording');
-            }
-        }
-
-        function renderImagePreviews() {
-            const container = document.getElementById('image-previews');
-            container.innerHTML = currentImages.map((img, idx) => `
-                <div class="image-preview">
-                    <img src="${img}" alt="">
-                    <div class="image-remove" onclick="removeImage(${idx})">✕</div>
-                </div>
-            `).join('');
-        }
-
-        function renderAudioPreview() {
-            const container = document.getElementById('audio-preview');
-            if (currentAudio) {
-                container.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
-                        <audio controls style="flex: 1;">
-                            <source src="${currentAudio}" type="audio/webm">
-                        </audio>
-                        <button class="mac-button" onclick="removeAudio()" style="padding: 4px 8px;">✕</button>
-                    </div>
-                `;
-            } else {
-                container.innerHTML = '';
-            }
-        }
-
-        function removeImage(index) {
-            currentImages.splice(index, 1);
-            renderImagePreviews();
-        }
-
-        function removeAudio() {
-            currentAudio = null;
-            renderAudioPreview();
-        }
-
-        function renderMoodSelector() {
-            const container = document.getElementById('mood-selector');
-            container.innerHTML = moods.map((mood, index) => `
-                <div class="mood-option ${selectedMood === index ? 'selected' : ''}" onclick="selectMood(${index})">
-                    ${mood.emoji}
-                    <span class="mood-label">${mood.label}</span>
-                </div>
-            `).join('');
-        }
-
-        function selectMood(index) {
-            selectedMood = index;
-            renderMoodSelector();
-        }
-
-        function toggleMoodConfig() {
-            const panel = document.getElementById('mood-config');
-            panel.classList.toggle('hidden');
-            if (!panel.classList.contains('hidden')) {
-                renderMoodConfig();
-            }
-        }
-
-        function renderMoodConfig() {
-            const container = document.getElementById('mood-config-list');
-            container.innerHTML = moods.map((mood, index) => `
-                <div class="config-item">
-                    <input type="text" value="${mood.emoji}" id="mood-emoji-${index}" maxlength="2">
-                    <input type="text" value="${mood.label}" id="mood-label-${index}" placeholder="Label">
-                </div>
-            `).join('');
-        }
-
-        function saveMoodConfig() {
-            moods = moods.map((mood, index) => ({
-                emoji: document.getElementById(`mood-emoji-${index}`).value || mood.emoji,
-                label: document.getElementById(`mood-label-${index}`).value || mood.label
-            }));
-            saveMoodConfigData();
-            renderMoodSelector();
-            toggleMoodConfig();
-            alert('✅ Configuration saved');
-        }
-
-        function saveEntry() {
-            const note = document.getElementById('note-input').value.trim();
-            if (!note) {
-                alert('Please write a note');
-                return;
-            }
-
-            const moodData = selectedMood !== null ? moods[selectedMood] : null;
-
-            if (editingEntryId) {
-                const entryIndex = entries.findIndex(e => e.id === editingEntryId);
-                if (entryIndex !== -1) {
-                    entries[entryIndex] = {
-                        ...entries[entryIndex],
-                        note: note,
-                        location: document.getElementById('location-input').value,
-                        weather: document.getElementById('weather-input').value,
-                        images: [...currentImages],
-                        audio: currentAudio,
-                        coords: currentCoords ? { ...currentCoords } : entries[entryIndex].coords,
-                        mood: moodData
-                    };
-                }
-            } else {
-                const entry = {
-                    id: Date.now(),
-                    timestamp: new Date().toISOString(),
-                    note: note,
-                    location: document.getElementById('location-input').value,
-                    weather: document.getElementById('weather-input').value,
-                    images: [...currentImages],
-                    audio: currentAudio,
-                    coords: currentCoords ? { ...currentCoords } : null,
-                    mood: moodData
-                };
-                entries.unshift(entry);
-            }
-
-            saveData();
-            renderTimeline();
-            toggleForm();
-        }
-
-        function editEntry(id) {
-            const entry = entries.find(e => e.id === id);
-            if (!entry) return;
-
-            editingEntryId = id;
-            document.getElementById('note-input').value = entry.note;
-            document.getElementById('location-input').value = entry.location || '';
-            document.getElementById('weather-input').value = entry.weather || '';
-            currentImages = [...(entry.images || [])];
-            currentAudio = entry.audio || null;
-            currentCoords = entry.coords ? { ...entry.coords } : null;
-
-            if (entry.mood) {
-                const moodIndex = moods.findIndex(m => m.emoji === entry.mood.emoji && m.label === entry.mood.label);
-                selectedMood = moodIndex !== -1 ? moodIndex : null;
-            } else {
-                selectedMood = null;
-            }
-
-            renderImagePreviews();
-            renderAudioPreview();
-            renderMoodSelector();
-
-            if (entry.coords) {
-                showMiniMap(entry.coords.lat, entry.coords.lon, 'form-map');
-            }
-
-            document.getElementById('delete-btn').classList.remove('hidden');
-            document.getElementById('save-btn').textContent = '💾 Update';
-            
-            const formWindow = document.getElementById('form-window');
-            formWindow.classList.remove('hidden');
-            formWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        function previewEntry(id) {
-            const entry = entries.find(e => e.id === id);
-            if (!entry) return;
-
-            const modal = document.getElementById('preview-modal');
-            const body = document.getElementById('preview-body');
-            
-            let html = `
-                <div style="margin-bottom: 16px;">
-                    <strong>Time:</strong> ${formatDate(entry.timestamp)} at ${formatTime(entry.timestamp)}
-                </div>
-                
-                ${entry.mood ? `
-                    <div style="margin-bottom: 16px;">
-                        <strong>Mood:</strong> <span style="font-size: 24px;">${entry.mood.emoji}</span> ${entry.mood.label}
-                    </div>
-                ` : ''}
-                
-                <div style="margin-bottom: 16px;">
-                    <strong>Note:</strong>
-                    <div style="margin-top: 8px; line-height: 1.6;">${entry.note}</div>
-                </div>
-                
-                ${entry.location ? `
-                    <div style="margin-bottom: 16px;">
-                        <strong>Location:</strong> ${entry.location}
-                    </div>
-                ` : ''}
-                
-                ${entry.weather ? `
-                    <div style="margin-bottom: 16px;">
-                        <strong>Weather:</strong> ${entry.weather}
-                    </div>
-                ` : ''}
-                
-                ${entry.coords ? `
-                    <div style="margin-bottom: 16px;">
-                        <strong>Map:</strong>
-                        <div class="preview-map-full" id="preview-map-modal"></div>
-                    </div>
-                ` : ''}
-                
-                ${entry.audio ? `
-                    <div style="margin-bottom: 16px;">
-                        <strong>Audio:</strong>
-                        <audio controls style="width: 100%; margin-top: 8px;">
-                            <source src="${entry.audio}" type="audio/webm">
-                        </audio>
-                    </div>
-                ` : ''}
-                
-                ${entry.images && entry.images.length > 0 ? `
-                    <div style="margin-bottom: 16px;">
-                        <strong>Images:</strong>
-                        <div class="preview-images-full">
-                            ${entry.images.map(img => `
-                                <img src="${img}" class="preview-image-full" onclick="window.open('${img}')">
-                            `).join('')}
-                        </div>
-                    </div>
-                ` : ''}
-                
-                ${entry.isTimedActivity ? `
-                    <div style="margin-bottom: 16px;">
-                        <strong>Activity:</strong> ${entry.activity} (${entry.duration} minutes)
-                    </div>
-                ` : ''}
-                
-                ${entry.isSpent ? `
-                    <div style="margin-bottom: 16px;">
-                        <strong>Amount Spent:</strong> €${entry.spentAmount.toFixed(2)}
-                    </div>
-                ` : ''}
-            `;
-            
-            body.innerHTML = html;
-            modal.classList.add('show');
-            
-            if (entry.coords) {
-                setTimeout(() => {
-                    const mapContainer = document.getElementById('preview-map-modal');
-                    if (mapContainer) {
-                        const map = L.map('preview-map-modal').setView([entry.coords.lat, entry.coords.lon], 13);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '© OpenStreetMap'
-                        }).addTo(map);
-                        L.marker([entry.coords.lat, entry.coords.lon]).addTo(map);
-                        
-                        setTimeout(() => map.invalidateSize(), 100);
-                    }
-                }, 100);
-            }
-        }
-
-        function closePreview(event) {
-            if (event && event.target.id !== 'preview-modal') return;
-            const modal = document.getElementById('preview-modal');
-            modal.classList.remove('show');
-            document.getElementById('preview-body').innerHTML = '';
-        }
-
-        function openSettings() {
-            const modal = document.getElementById('settings-modal');
-            modal.classList.add('show');
-            renderSettingsConfig();
-        }
-
-        function closeSettings(event) {
-            if (event && event.target.id !== 'settings-modal') return;
-            const modal = document.getElementById('settings-modal');
-            modal.classList.remove('show');
-        }
-
-        function renderSettingsConfig() {
-            const durationsContainer = document.getElementById('time-durations-config');
-            durationsContainer.innerHTML = timeDurations.map((duration, index) => `
-                <div class="config-item">
-                    <input type="number" value="${duration}" id="duration-${index}" style="flex: 0 0 100px;">
-                    <span>minutes</span>
-                    <button class="mac-button" onclick="removeDuration(${index})" style="padding: 4px 8px; margin-left: auto;">✕</button>
-                </div>
-            `).join('') + `
-                <button class="mac-button" onclick="addDuration()" style="margin-top: 8px;">➕ Add Duration</button>
-            `;
-
-            const activitiesContainer = document.getElementById('time-activities-config');
-            activitiesContainer.innerHTML = timeActivities.map((activity, index) => `
-                <div class="config-item">
-                    <input type="text" value="${activity}" id="activity-${index}">
-                    <button class="mac-button" onclick="removeActivity(${index})" style="padding: 4px 8px;">✕</button>
-                </div>
-            `).join('') + `
-                <button class="mac-button" onclick="addActivity()" style="margin-top: 8px;">➕ Add Activity</button>
-            `;
-
-            const trackContainer = document.getElementById('track-items-config');
-            trackContainer.innerHTML = `
-                <div style="margin-bottom: 16px;">
-                    <strong>Meals:</strong>
-                    ${trackItems.meals.map((item, index) => `
-                        <div class="config-item">
-                            <input type="text" value="${item}" id="meal-${index}">
-                            <button class="mac-button" onclick="removeMeal(${index})" style="padding: 4px 8px;">✕</button>
-                        </div>
-                    `).join('')}
-                    <button class="mac-button" onclick="addMeal()" style="margin-top: 8px;">➕ Add Meal</button>
-                </div>
-                <div>
-                    <strong>Tasks:</strong>
-                    ${trackItems.tasks.map((item, index) => `
-                        <div class="config-item">
-                            <input type="text" value="${item}" id="task-${index}">
-                            <button class="mac-button" onclick="removeTask(${index})" style="padding: 4px 8px;">✕</button>
-                        </div>
-                    `).join('')}
-                    <button class="mac-button" onclick="addTask()" style="margin-top: 8px;">➕ Add Task</button>
-                </div>
-            `;
-        }
-
-        function addDuration() {
-            timeDurations.push(60);
-            renderSettingsConfig();
-        }
-
-        function removeDuration(index) {
-            timeDurations.splice(index, 1);
-            renderSettingsConfig();
-        }
-
-        function addActivity() {
-            timeActivities.push('New Activity');
-            renderSettingsConfig();
-        }
-
-        function removeActivity(index) {
-            timeActivities.splice(index, 1);
-            renderSettingsConfig();
-        }
-
-        function addMeal() {
-            trackItems.meals.push('🍴 New Meal');
-            renderSettingsConfig();
-        }
-
-        function removeMeal(index) {
-            trackItems.meals.splice(index, 1);
-            renderSettingsConfig();
-        }
-
-        function addTask() {
-            trackItems.tasks.push('✓ New Task');
-            renderSettingsConfig();
-        }
-
-        function removeTask(index) {
-            trackItems.tasks.splice(index, 1);
-            renderSettingsConfig();
-        }
-
-        function saveSettings() {
-            timeDurations = timeDurations.map((_, index) => {
-                const val = document.getElementById(`duration-${index}`);
-                return val ? parseInt(val.value) || 60 : 60;
-            });
-
-            timeActivities = timeActivities.map((_, index) => {
-                const val = document.getElementById(`activity-${index}`);
-                return val ? val.value : 'Activity';
-            });
-
-            trackItems.meals = trackItems.meals.map((_, index) => {
-                const val = document.getElementById(`meal-${index}`);
-                return val ? val.value : 'Meal';
-            });
-
-            trackItems.tasks = trackItems.tasks.map((_, index) => {
-                const val = document.getElementById(`task-${index}`);
-                return val ? val.value : 'Task';
-            });
-
-            saveSettingsToStorage();
-            updateTimerOptions();
-            updateTrackOptions();
-            closeSettings();
-            alert('✅ Settings saved!');
-        }
-
-        function updateTimerOptions() {
-            const container = document.getElementById('duration-selector');
-            if (!container) return;
-            
-            container.innerHTML = timeDurations.map(duration => `
-                <div class="duration-option" onclick="selectDuration(${duration}); event.stopPropagation();">
-                    ${duration < 60 ? duration + ' min' : (duration / 60) + ' hour' + (duration > 60 ? 's' : '')}
-                </div>
-            `).join('');
-
-            const actContainer = document.getElementById('activity-selector');
-            if (!actContainer) return;
-            
-            actContainer.innerHTML = timeActivities.map(activity => `
-                <div class="activity-option" onclick="selectActivity('${activity}'); event.stopPropagation();">
-                    ${activity}
-                </div>
-            `).join('');
-        }
-
-        function updateTrackOptions() {
-            const trackWindow = document.getElementById('track-window');
-            if (!trackWindow) return;
-            
-            const content = trackWindow.querySelector('.mac-content');
-            content.innerHTML = `
-                <label class="mac-label">Meals:</label>
-                <div class="activity-selector">
-                    ${trackItems.meals.map(item => `
-                        <div class="activity-option" onclick="quickTrack('${item}')">${item}</div>
-                    `).join('')}
-                </div>
-
-                <label class="mac-label" style="margin-top: 16px;">Tasks:</label>
-                <div class="activity-selector">
-                    ${trackItems.tasks.map(item => `
-                        <div class="activity-option" onclick="quickTrack('${item}')">${item}</div>
-                    `).join('')}
-                </div>
-
-                <button class="mac-button" onclick="toggleTrack()" style="margin-top: 16px;">Close</button>
-            `;
-        }
-
-        function deleteCurrentEntry() {
-            if (!editingEntryId) return;
-            
-            if (confirm('Delete this entry?')) {
-                entries = entries.filter(e => e.id !== editingEntryId);
-                
-                if (currentUser && !isOfflineMode) {
-                    db.collection('users').doc(currentUser.uid).collection('entries').doc(String(editingEntryId)).delete()
-                        .catch(error => console.error('Error deleting from Firebase:', error));
-                }
-                
-                saveData();
-                renderTimeline();
-                toggleForm();
-            }
-        }
-
-        function selectDuration(minutes) {
-            selectedDuration = minutes;
-            const options = document.querySelectorAll('.duration-option');
-            options.forEach(el => el.classList.remove('selected'));
-            
-            options.forEach(el => {
-                const text = el.textContent.trim();
-                if ((minutes === 15 && text.includes('15')) ||
-                    (minutes === 30 && text.includes('30')) ||
-                    (minutes === 60 && text.includes('1 hour')) ||
-                    (minutes === 120 && text.includes('2')) ||
-                    (minutes === 180 && text.includes('3'))) {
-                    el.classList.add('selected');
-                }
-            });
-            
-            checkTimerReady();
-        }
-
-        function selectActivity(activity) {
-            selectedActivity = activity;
-            const options = document.querySelectorAll('.activity-option');
-            options.forEach(el => el.classList.remove('selected'));
-            
-            options.forEach(el => {
-                if (el.textContent.includes(activity)) {
-                    el.classList.add('selected');
-                }
-            });
-            
-            checkTimerReady();
-        }
-
-        function checkTimerReady() {
-            const createBtn = document.getElementById('create-time-btn');
-            if (selectedDuration && selectedActivity) {
-                createBtn.disabled = false;
-            } else {
-                createBtn.disabled = true;
-            }
-        }
-
-        function createTimeEvent() {
-            if (!selectedDuration || !selectedActivity) return;
-            
-            const entry = {
-                id: Date.now(),
-                timestamp: new Date().toISOString(),
-                note: `${selectedActivity} - ${selectedDuration} minutes`,
-                location: '',
-                weather: '',
-                images: [],
-                audio: null,
-                coords: null,
-                mood: null,
-                activity: selectedActivity,
-                duration: selectedDuration,
-                isTimedActivity: true
-            };
-            
-            entries.unshift(entry);
-            saveData();
-            renderTimeline();
-            
-            alert(`✅ Time event created!`);
-            toggleTimer();
-        }
-
-        function resetTimerSelections() {
-            selectedDuration = null;
-            selectedActivity = null;
-            document.querySelectorAll('.duration-option').forEach(el => el.classList.remove('selected'));
-            document.querySelectorAll('.activity-option').forEach(el => el.classList.remove('selected'));
-            document.getElementById('create-time-btn').disabled = true;
-        }
-
-        function quickTrack(activity) {
-            const entry = {
-                id: Date.now(),
-                timestamp: new Date().toISOString(),
-                note: activity,
-                location: '',
-                weather: '',
-                images: [],
-                audio: null,
-                coords: null,
-                mood: null,
-                isQuickTrack: true
-            };
-            
-            entries.unshift(entry);
-            saveData();
-            renderTimeline();
-            toggleTrack();
-            
-            alert(`✅ Tracked: ${activity}`);
-        }
-
-        function saveSpent() {
-            const description = document.getElementById('spent-description').value.trim();
-            const amount = parseFloat(document.getElementById('spent-amount').value);
-
-            if (!description) {
-                alert('Please enter a description');
-                return;
-            }
-
-            if (!amount || amount <= 0) {
-                alert('Please enter a valid amount');
-                return;
-            }
-
-            const entry = {
-                id: Date.now(),
-                timestamp: new Date().toISOString(),
-                note: description,
-                location: '',
-                weather: '',
-                images: [],
-                audio: null,
-                coords: null,
-                mood: null,
-                spentAmount: amount,
-                isSpent: true
-            };
-            
-            entries.unshift(entry);
-            saveData();
-            renderTimeline();
-            toggleSpent();
-            
-            alert(`✅ Spent tracked: €${amount.toFixed(2)}`);
-        }
-
-        function toggleReadMore(id) {
-            const noteEl = document.getElementById(`note-${id}`);
-            const btnEl = document.getElementById(`read-more-${id}`);
-            
-            if (noteEl.classList.contains('expanded')) {
-                noteEl.classList.remove('expanded');
-                btnEl.textContent = 'Read more';
-            } else {
-                noteEl.classList.add('expanded');
-                btnEl.textContent = 'Show less';
-            }
-        }
-
-        function formatDate(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleDateString('en', { 
-                weekday: 'long',
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric'
-            });
-        }
-
-        function formatTime(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function getDayKey(timestamp) {
-            const date = new Date(timestamp);
-            return date.toISOString().split('T')[0];
-        }
-
-        function toggleDay(dayKey) {
-            const content = document.getElementById(`day-content-${dayKey}`);
-            const chevron = document.getElementById(`chevron-${dayKey}`);
-            
-            content.classList.toggle('expanded');
-            chevron.classList.toggle('expanded');
-        }
-
-        function renderTimeline() {
-            const container = document.getElementById('timeline-container');
-            const emptyState = document.getElementById('empty-state');
-            const footer = document.getElementById('footer');
-
-            if (entries.length === 0) {
-                container.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                footer.style.display = 'none';
-                return;
-            }
-
-            emptyState.classList.add('hidden');
-            footer.style.display = 'flex';
-
-            const groupedByDay = {};
-            entries.forEach(entry => {
-                const dayKey = getDayKey(entry.timestamp);
-                if (!groupedByDay[dayKey]) {
-                    groupedByDay[dayKey] = [];
-                }
-                groupedByDay[dayKey].push(entry);
-            });
-
-            const html = `
-                <div class="timeline">
-                    <div class="timeline-line"></div>
-                    ${Object.keys(groupedByDay).map(dayKey => {
-                        const dayEntries = groupedByDay[dayKey];
-                        const firstEntry = dayEntries[0];
-                        
-                        return `
-                            <div class="day-block">
-                                <div class="day-header" onclick="toggleDay('${dayKey}')">
-                                    <span>${formatDate(firstEntry.timestamp)}</span>
-                                    <span class="chevron" id="chevron-${dayKey}">▼</span>
-                                </div>
-                                <div class="day-content" id="day-content-${dayKey}">
-                                    ${dayEntries.map(entry => {
-                                        const heightStyle = entry.isTimedActivity && entry.duration ? `min-height: ${Math.min(150 + entry.duration * 0.5, 300)}px;` : '';
-                                        const trackClass = entry.isQuickTrack ? 'track-event' : '';
-                                        
-                                        return `
-                                        <div class="breadcrumb-entry ${entry.isTimedActivity || entry.isSpent ? 'edit-mode' : ''} ${trackClass}" style="${heightStyle}">
-                                            <button class="mac-button edit-button" onclick="editEntry(${entry.id})">✏️ Edit</button>
-                                            <button class="mac-button preview-button" onclick="previewEntry(${entry.id})">🔍 Preview</button>
-                                            
-                                            <div class="breadcrumb-time">
-                                                ⏰ ${formatTime(entry.timestamp)}
-                                                ${entry.isSpent ? `<span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>` : ''}
-                                            </div>
-                                            <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
-                                                ${entry.mood ? `<span class="mood-display">${entry.mood.emoji}</span>` : ''}
-                                                <div style="flex: 1;">
-                                                    <div class="breadcrumb-note" id="note-${entry.id}">${entry.note}</div>
-                                                    ${entry.note.length > 150 ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
-                                                </div>
-                                            </div>
-                                            ${entry.weather || entry.location ? `
-                                                <div style="font-size: 12px; color: ${entry.isQuickTrack ? '#ccc' : '#666'}; margin-bottom: 8px;">
-                                                    ${entry.weather ? `${entry.weather}` : ''}
-                                                    ${entry.weather && entry.location && entry.location.length < 20 ? ` • 📍 ${entry.location}` : ''}
-                                                    ${!entry.weather && entry.location ? `📍 ${entry.location}` : ''}
-                                                </div>
-                                            ` : ''}
-                                            
-                                            ${entry.audio ? `
-                                                <div style="margin-top: 12px; margin-bottom: 12px;">
-                                                    <audio controls style="width: 100%; max-width: 300px;">
-                                                        <source src="${entry.audio}" type="audio/webm">
-                                                    </audio>
-                                                </div>
-                                            ` : ''}
-                                            
-                                            <div class="breadcrumb-preview">
-                                                ${entry.images && entry.images.length > 0 ? entry.images.map(img => `
-                                                    <img src="${img}" class="preview-image-thumb" onclick="window.open('${img}')">
-                                                `).join('') : ''}
-                                                ${entry.coords ? `<div class="preview-map-thumb" onclick="previewEntry(${entry.id})" style="display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px;">🗺️</div>` : ''}
-                                            </div>
-                                        </div>
-                                    `}).join('')}
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            `;
-
-            container.innerHTML = html;
-        }
-
-        function exportCSV() {
-            const headers = ['Date and Time', 'Note', 'Activity', 'Duration (min)', 'Location', 'Weather', 'Mood', 'Spent', 'Images'];
-            const rows = entries.map(e => [
-                new Date(e.timestamp).toLocaleString(),
-                e.note,
-                e.activity || '',
-                e.duration || '',
-                e.location || '',
-                e.weather || '',
-                e.mood ? `${e.mood.emoji} ${e.mood.label}` : '',
-                e.spentAmount ? `€${e.spentAmount}` : '',
-                e.images ? e.images.length : 0
-            ]);
-            
-            const csv = [headers, ...rows].map(row => 
-                row.map(cell => `"${cell}"`).join(',')
-            ).join('\n');
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `breadcrumbs-${Date.now()}.csv`;
-            a.click();
-        }
-
-        function exportICS() {
-            const icsEvents = entries.map(e => {
-                const date = new Date(e.timestamp);
-                const dateStr = date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-                
-                return `BEGIN:VEVENT
-UID:${e.id}@breadcrumbs
-DTSTAMP:${dateStr}
-DTSTART:${dateStr}
-SUMMARY:${e.note.substring(0, 50)}
-DESCRIPTION:${e.note}
-LOCATION:${e.location || ''}
-END:VEVENT`;
-            }).join('\n');
-
-            const ics = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Breadcrumbs Timeline//ES
-${icsEvents}
-END:VCALENDAR`;
-
-            const blob = new Blob([ics], { type: 'text/calendar' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `breadcrumbs-${Date.now()}.ics`;
-            a.click();
-        }
-
-        loadData();
-        loadSettings();
-    </script>
+    <div class="fab-container">
+        <button class="fab fab-main" onclick="toggleFabMenu()" id="fab-main">
+            <span id="fab-icon">+</span>
+        </button>
+        <button class="fab fab-action hidden" onclick="toggleCrumb()" title="Breadcrumb">
+            <svg width="24" height="24"><use href="#icon-note"/></svg>
+        </button>
+        <button class="fab fab-action hidden" onclick="toggleTimer()" title="Time Event">
+            <svg width="24" height="24"><use href="#icon-clock"/></svg>
+        </button>
+        <button class="fab fab-action hidden" onclick="toggleTrack()" title="Quick Mark">
+            <svg width="24" height="24"><use href="#icon-food"/></svg>
+        </button>
+        <button class="fab fab-action hidden" onclick="toggleSpent()" title="Spent">
+            <svg width="24" height="24"><use href="#icon-money"/></svg>
+        </button>
+        <button class="fab fab-action hidden" onclick="showRecapForm()" title="Day Recap">
+            <svg width="24" height="24"><use href="#icon-calendar"/></svg>
+        </button>
+    </div>
+
+    <div class="footer" id="footer" style="display: none;">
+        <button class="mac-button" onclick="openStats()">
+            <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-stats"/></svg>
+            Stats
+        </button>
+        <button class="mac-button" onclick="exportCSV()">
+            <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-export"/></svg>
+            CSV
+        </button>
+        <button class="mac-button" onclick="exportICS()">
+            <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-calendar"/></svg>
+            iCal
+        </button>
+        <button class="mac-button" onclick="openSettings()">
+            <svg width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><use href="#icon-settings"/></svg>
+            Settings
+        </button>
+    </div>
+
+    <script src="./firebase-config.js"></script>
+    <script src="./app.js"></script>
 </body>
 </html>
