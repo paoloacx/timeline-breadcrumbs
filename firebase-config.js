@@ -109,7 +109,7 @@ function showMainApp() {
     if (currentUser) {
         const email = currentUser.email;
         // Mostrar solo icono en el avatar
-        document.getElementById('user-icon').textContent = 'Ã°Å¸â€˜Â¤';
+        document.getElementById('user-icon').textContent = 'ðŸ‘¤';
         // Guardar el email completo en el dropdown
         document.getElementById('user-email-full').textContent = email;
         document.getElementById('user-avatar').style.display = 'block';
@@ -135,21 +135,21 @@ document.addEventListener('click', (e) => {
 function updateSyncStatus(status) {
     const statusEl = document.getElementById('sync-status');
     if (status === 'online') {
-        statusEl.textContent = 'Ã¢â€”Â Online';
+        statusEl.textContent = 'â— Online';
         statusEl.style.color = '#00ff00';
         statusEl.style.borderColor = '#00ff00';
     } else if (status === 'syncing') {
-        statusEl.textContent = 'Ã¢â€ Â» Syncing...';
+        statusEl.textContent = 'â†» Syncing...';
         statusEl.style.color = '#ffff00';
         statusEl.style.borderColor = '#ffff00';
     } else {
-        statusEl.textContent = 'Ã¢â€”Â Offline';
+        statusEl.textContent = 'â— Offline';
         statusEl.style.color = '#ff0000';
         statusEl.style.borderColor = '#ff0000';
     }
 }
 
-// Load data from Firebase - AHORA ESPECÃƒÂFICO POR USUARIO
+// Load data from Firebase - AHORA ESPECÃFICO POR USUARIO
 async function loadDataFromFirebase() {
     if (!currentUser) return;
     
@@ -186,7 +186,7 @@ async function loadDataFromFirebase() {
     }
 }
 
-// Save data to Firebase - AHORA ESPECÃƒÂFICO POR USUARIO
+// Save data to Firebase - AHORA ESPECÃFICO POR USUARIO
 async function saveDataToFirebase() {
     if (!currentUser || isOfflineMode) {
         if (typeof saveData === 'function') {
@@ -224,7 +224,7 @@ async function saveDataToFirebase() {
     }
 }
 
-// Load settings from Firebase - AHORA ESPECÃƒÂFICO POR USUARIO
+// Load settings from Firebase - AHORA ESPECÃFICO POR USUARIO
 async function loadSettingsFromFirebase() {
     if (!currentUser) return;
     
@@ -243,7 +243,7 @@ async function loadSettingsFromFirebase() {
             if (data.trackItems) trackItems = data.trackItems;
             if (data.moods) moods = data.moods;
             
-            console.log('ConfiguraciÃƒÂ³n cargada para', currentUser.email);
+            console.log('ConfiguraciÃ³n cargada para', currentUser.email);
             
             if (typeof updateTimerOptions === 'function') {
                 updateTimerOptions();
@@ -260,7 +260,7 @@ async function loadSettingsFromFirebase() {
     }
 }
 
-// Save settings to Firebase - AHORA ESPECÃƒÂFICO POR USUARIO
+// Save settings to Firebase - AHORA ESPECÃFICO POR USUARIO
 async function saveSettingsToFirebase() {
     if (!currentUser || isOfflineMode) {
         if (typeof saveSettingsToStorage === 'function') {
@@ -294,7 +294,7 @@ async function saveSettingsToFirebase() {
     }
 }
 
-// Delete entry from Firebase - AHORA ESPECÃƒÂFICO POR USUARIO
+// Delete entry from Firebase - AHORA ESPECÃFICO POR USUARIO
 async function deleteEntryFromFirebase(entryId) {
     if (!currentUser || isOfflineMode) return;
     
