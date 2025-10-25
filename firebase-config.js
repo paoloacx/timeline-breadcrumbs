@@ -10,10 +10,22 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+try {
+    firebase.initializeApp(firebaseConfig);
 
-// Definir y "exportar" las variables para que otros scripts las usen
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
+    // CAMBIO: Adjuntar a 'window' para hacerlas globales
+    // Esto arregla el error "auth is not defined" en app.js
+    window.auth = firebase.auth();
+    window.db = firebase.firestore();
+    window.storage = firebase.storage();
+    
+    console.log("Firebase initialized and services attached to window.");
+
+} catch (error) {
+    console.error("Error initializing Firebase:", error);
+    // Si Firebase falla, informamos y preparamos para modo offline
+    window.auth = null;
+    window.db = null;
+    window.storage = null;
+}
 
