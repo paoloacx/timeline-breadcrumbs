@@ -50,12 +50,16 @@
 
     <div class="container" id="main-app" style="display: none;">
         
+    <!-- Recap Form -->
     <div id="recap-form" class="mac-window hidden">
         <div class="mac-title-bar">
             <span>🌟 Day Recap</span>
             <button onclick="closeRecapForm()" style="background: transparent; border: none; color: white; cursor: pointer; font-size: 18px;">✕</button>
         </div>
         <div class="mac-content">
+            <label class="mac-label">📅 Date & Time:</label>
+            <input type="datetime-local" class="mac-input" id="datetime-input-recap">
+
             <label class="mac-label">Reflexión del día</label>
             <textarea id="recap-reflection" class="mac-textarea" placeholder="¿Cómo fue tu día?"></textarea>
             
@@ -270,39 +274,24 @@
     </div>
 
     <div class="fab-container">
-        <div class="fab-action-wrapper hidden">
-            <span class="fab-label">Recap</span>
-            <button class="fab fab-action" onclick="showRecapForm()" title="Day Recap">
-                🌟
-            </button>
-        </div>
-        <div class="fab-action-wrapper hidden">
-            <span class="fab-label">Spent</span>
-            <button class="fab fab-action" onclick="toggleSpent()" title="Spent">
-                💰
-            </button>
-        </div>
-        <div class="fab-action-wrapper hidden">
-            <span class="fab-label">Track</span>
-            <button class="fab fab-action" onclick="toggleTrack()" title="Quick Track">
-                📊
-            </button>
-        </div>
-        <div class="fab-action-wrapper hidden">
-            <span class="fab-label">Time</span>
-            <button class="fab fab-action" onclick="toggleTimer()" title="Time Event">
-                ⏱️
-            </button>
-        </div>
-        <div class="fab-action-wrapper hidden">
-            <span class="fab-label">Crumb</span>
-            <button class="fab fab-action" onclick="toggleForm()" title="Breadcrumb">
-                📍
-            </button>
-        </div>
-        
         <button class="fab fab-main" onclick="toggleFabMenu()" id="fab-main">
             <span id="fab-icon">+</span>
+        </button>
+        <!-- FIX: Corregidos los onclick para llamar a las funciones correctas y cerrar el menú -->
+        <button class="fab fab-action hidden" onclick="toggleForm(); closeFabMenu();" title="Breadcrumb">
+            📍
+        </button>
+        <button class="fab fab-action hidden" onclick="toggleTimer(); closeFabMenu();" title="Time Event">
+            ⏰
+        </button>
+        <button class="fab fab-action hidden" onclick="toggleTrack(); closeFabMenu();" title="Quick Track">
+            🎵
+        </button>
+        <button class="fab fab-action hidden" onclick="toggleSpent(); closeFabMenu();" title="Spent">
+            💰
+        </button>
+        <button class="fab fab-action hidden" onclick="showRecapForm(); closeFabMenu();" title="Day Recap">
+            🌟
         </button>
     </div>
 
@@ -314,7 +303,9 @@
     </div>
 
     <script src="./firebase-config.js"></script>
-    <script src="./ui.js"></script>
+    <!-- FIX: Añadido el nuevo script de API -->
+    <script src="./api-services.js"></script>
     <script src="./app.js"></script>
+    <script src="./ui-renderer.js"></script>
 </body>
 </html>
