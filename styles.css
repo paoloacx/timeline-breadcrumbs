@@ -295,7 +295,7 @@ h1 {
     background: #333;
 }
 
-/* ANIMACIÃƒâ€œN PANEL DESPLEGABLE */
+/* ANIMACIÃ“N PANEL DESPLEGABLE */
 .day-content {
     max-height: 0;
     overflow: hidden;
@@ -323,7 +323,7 @@ h1 {
     padding: 16px !important;
 }
 
-/* ANIMACIÃƒâ€œN CHEVRON */
+/* ANIMACIÃ“N CHEVRON */
 .chevron {
     display: inline-block;
     transition: transform 0.3s ease;
@@ -467,7 +467,7 @@ h1 {
     font-size: 11px;
 }
 
-/* ANIMACIÃƒâ€œN MODAL (pop-in suave) */
+/* ANIMACIÃ“N MODAL (pop-in suave) */
 .preview-modal {
     display: none;
     position: fixed;
@@ -861,11 +861,11 @@ h1 {
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     transition: all 0.3s ease;
+    /* --- FIX: Estas propiedades estaban fuera de la regla --- */
     border: 2px solid #cc9900 !important;
     border-radius: 4px !important;
     line-height: 1.6 !important;
     background: #fffacd !important;
-    display: block !important;
 }
 
 .optional-note.expanded {
@@ -873,7 +873,8 @@ h1 {
     display: block;
     -webkit-line-clamp: unset;
     animation: slideDown 0.3s ease;
-} /* <-- ESTA LLAVE FALTABA */
+}
+/* --- FIX: Se eliminó una llave '}' extra de aquí --- */
 
 .breadcrumb-entry.track-event .optional-note {
     color: #000 !important;
@@ -950,11 +951,10 @@ h1 {
 }
 
 /* Formularios de creaciÃƒÂ³n (Crumb, Time, Track, Spent) */
-#form-window,
-#timer-window,
-#track-window,
-#spent-window,
-#recap-form {
+#crumb-form,
+#time-form,
+#track-form,
+#spent-form {
     max-height: 0;
     overflow: hidden;
     opacity: 0;
@@ -965,12 +965,11 @@ h1 {
         transform 0.4s ease;
 }
 
-#form-window:not(.hidden),
-#timer-window:not(.hidden),
-#track-window:not(.hidden),
-#spent-window:not(.hidden),
-#recap-form:not(.hidden) {
-    max-height: 4000px; /* Aumentado para formularios largos */
+#crumb-form:not(.hidden),
+#time-form:not(.hidden),
+#track-form:not(.hidden),
+#spent-form:not(.hidden) {
+    max-height: 3000px;
     opacity: 1;
     transform: translateY(0);
 }
@@ -1151,7 +1150,7 @@ input[type="range"]:active::-moz-range-thumb {
 
 .fab-container {
     position: fixed;
-    bottom: 100px;
+    bottom: 80px; /* MODIFICADO: Estaba en 100px, ahora 80px */
     right: 20px;
     z-index: 9998;
     display: flex;
@@ -1203,14 +1202,14 @@ input[type="range"]:active::-moz-range-thumb {
     width: 48px;
     height: 48px;
     font-size: 20px;
+    /* --- FIX: Propiedades de animación movidas aquí --- */
+    opacity: 0;
+    transform: scale(0) translateY(20px);
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-.fab-action-wrapper .fab-action {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    pointer-events: all;
-}
-
+/* --- FIX: Esta regla ahora apunta a .fab-action.show --- */
 .fab-action.show {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -1220,7 +1219,7 @@ input[type="range"]:active::-moz-range-thumb {
 @media (max-width: 768px) {
     .fab-container {
         right: 16px;
-        bottom: 70px;
+        bottom: 85px; /* MODIFICADO: Estaba en 70px, ahora 85px para más espacio */
     }
     
     .fab-main {
@@ -1286,38 +1285,5 @@ input[type="range"]:active::-moz-range-thumb {
     transform: rotate(180deg);
 }
 
-/* FAB Action with label */
-.fab-action-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    opacity: 0;
-    transform: scale(0) translateY(20px);
-    pointer-events: none;
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
+/* --- FIX: Eliminadas las reglas .fab-action-wrapper y .fab-label --- */
 
-.fab-action-wrapper.show {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    pointer-events: all;
-}
-
-.fab-label {
-    background: #fff;
-    color: #000;
-    padding: 8px 12px;
-    border: 2px solid #000;
-    font-size: 14px;
-    font-weight: bold;
-    white-space: nowrap;
-    box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
-    font-family: 'Courier New', monospace;
-}
-
-@media (max-width: 768px) {
-    .fab-label {
-        font-size: 10px;
-        padding: 6px 10px;
-    }
-}
