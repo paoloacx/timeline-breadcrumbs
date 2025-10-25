@@ -172,7 +172,7 @@ async function loadDataFromFirebase() {
             console.log(`Cargadas ${entries.length} entradas del usuario ${currentUser.email}`);
             
             if (typeof renderTimeline === 'function') {
-                renderTimeline();
+                renderTimeline(entries); // MODIFICADO
             }
         }
         
