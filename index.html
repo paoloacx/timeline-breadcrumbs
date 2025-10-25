@@ -70,7 +70,10 @@
                 <span id="recap-rating-value" style="font-size: 24px; font-weight: bold; min-width: 40px;">5</span>
             </div>
             
-            <label class="mac-label">3 cosas destacadas del día</label>
+            <label class="mac-label" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>3 cosas destacadas del día</span>
+                <button class="mac-button mac-button-primary" onclick="handleGenerateHighlights()" style="font-size: 11px; padding: 4px 8px; margin: 0;">✨ Generar</button>
+            </label>
             <input type="text" id="recap-highlight-1" class="mac-input" placeholder="1. Lo mejor del día">
             <input type="text" id="recap-highlight-2" class="mac-input" placeholder="2. Algo que aprendiste">
             <input type="text" id="recap-highlight-3" class="mac-input" placeholder="3. Momento favorito">
@@ -85,8 +88,7 @@
             
             <div style="margin-top: 16px;">
                 <button class="mac-button mac-button-primary" onclick="saveRecap()">💾 Save Recap</button>
-                <button class="mac-button delete-button" onclick="deleteCurrentEntry()" style="margin-left: 8px;">🗑️ Delete</button>
-                <button class="mac-button" onclick="closeRecapForm()" style="float: right;">Cancel</button>
+                <button class="mac-button" onclick="closeRecapForm()">Cancel</button>
             </div>
         </div>
     </div>
@@ -95,7 +97,7 @@
             <div class="mac-title-bar">
                 <div class="title-left">
                     <span>Breadcrumbs Timeline</span>
-                    <button class="sync-button" onclick="syncData()" title="Refresh & Sync">🔄</button>
+                    <button class="sync-button" onclick="refreshApp()" title="Refresh & Sync">🔄</button>
                 </div>
                 <div class="user-avatar" id="user-avatar" onclick="toggleUserMenu(event)" style="display: none;">
                     <span id="user-icon">👤</span>
@@ -104,13 +106,6 @@
                         <button onclick="signOutUser(); event.stopPropagation();">🚪 Sign Out</button>
                     </div>
                 </div>
-            </div>
-            <!-- Estos botones se ocultan en móvil y se reemplazan por el FAB -->
-            <div class="mac-content main-controls">
-                <button class="mac-button mac-button-primary" onclick="toggleForm()">➕ Crumb</button>
-                <button class="mac-button" onclick="toggleTimer()">⏱️ Time</button>
-                <button class="mac-button" onclick="toggleTrack()">📊 Track</button>
-                <button class="mac-button" onclick="toggleSpent()">💰 Spent</button>
             </div>
         </div>
 
@@ -157,7 +152,7 @@
 
                 <button class="mac-button mac-button-primary" onclick="saveEntry()" id="save-btn">💾 Save</button>
                 <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-btn">🗑️ Delete</button>
-                <button class="mac-button" onclick="cancelEdit()" style="float: right;">Cancel</button>
+                <button class="mac-button" onclick="cancelEdit()">Cancel</button>
             </div>
         </div>
 
@@ -236,7 +231,7 @@
         <div class="preview-content" onclick="event.stopPropagation()">
             <div class="mac-title-bar">
                 <span>Preview</span>
-                <button onclick="forceClosePreview()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
+                <button onclick="closePreview()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
             </div>
             <div class="mac-content" id="preview-body"></div>
         </div>
@@ -246,7 +241,7 @@
         <div class="preview-content" onclick="event.stopPropagation()">
             <div class="mac-title-bar">
                 <span>Settings</span>
-                <button onclick="forceCloseSettings()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
+                <button onclick="closeSettings()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
             </div>
             <div class="mac-content">
                 <h3 style="margin-bottom: 16px;">Time Durations</h3>
@@ -267,7 +262,7 @@
         <div class="preview-content" onclick="event.stopPropagation()">
             <div class="mac-title-bar">
                 <span>📊 Statistics</span>
-                <button onclick="forceCloseStats()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
+                <button onclick="closeStats()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
             </div>
             <div class="mac-content">
                 <div class="stats-grid" id="stats-content"></div>
@@ -276,25 +271,40 @@
     </div>
 
     <div class="fab-container">
-        <button class="fab fab-main" id="fab-main">
+        <button class="fab fab-main" onclick="toggleFabMenu()" id="fab-main">
             <span id="fab-icon">+</span>
         </button>
-        <!-- Los onclick aquí llaman a las funciones de app.js -->
-        <button class="fab fab-action hidden" title="Breadcrumb">
-            📍
-        </button>
-        <button class="fab fab-action hidden" title="Time Event">
-            ⏰
-        </button>
-        <button class="fab fab-action hidden" title="Quick Track">
-            📊
-        </button>
-        <button class="fab fab-action hidden" title="Spent">
-            💰
-        </button>
-        <button class="fab fab-action hidden" title="Day Recap">
-            🌟
-        </button>
+        <!-- CAMBIO: Corregidos los onclicks y las clases -->
+        <div class="fab-action-wrapper hidden">
+            <span class="fab-label">Crumb</span>
+            <button class="fab fab-action" onclick="toggleForm(); closeFabMenu();" title="Breadcrumb">
+                📍
+            </button>
+        </div>
+        <div class="fab-action-wrapper hidden">
+            <span class="fab-label">Time</span>
+            <button class="fab fab-action" onclick="toggleTimer(); closeFabMenu();" title="Time Event">
+                ⏰
+            </button>
+        </div>
+        <div class="fab-action-wrapper hidden">
+            <span class="fab-label">Track</span>
+            <button class="fab fab-action" onclick="toggleTrack(); closeFabMenu();" title="Quick Track">
+                🎵
+            </button>
+        </div>
+        <div class="fab-action-wrapper hidden">
+            <span class="fab-label">Spent</span>
+            <button class="fab fab-action" onclick="toggleSpent(); closeFabMenu();" title="Spent">
+                💰
+            </button>
+        </div>
+        <div class="fab-action-wrapper hidden">
+            <span class="fab-label">Recap</span>
+            <button class="fab fab-action" onclick="showRecapForm(); closeFabMenu();" title="Day Recap">
+                🌟
+            </abutton>
+        </div>
     </div>
 
     <div class="footer" id="footer" style="display: none;">
@@ -304,16 +314,19 @@
         <button class="mac-button" onclick="openSettings()">⚙️ Settings</button>
     </div>
 
-    <!-- Scripts de Firebase -->
+    <!-- 
+      CAMBIO: Orden de scripts corregido
+      1. firebase-config.js (Define db, auth)
+      2. app.js (Define variables GLOBALES y listeners principales)
+      3. El resto de scripts (que USAN las variables y funciones de app.js)
+    -->
     <script src="./firebase-config.js"></script>
+    <script src="./app.js"></script>
     
-    <!-- Scripts de Módulos de la App -->
-    <script src="./ui-renderer.js"></script>
     <script src="./api-services.js"></script>
     <script src="./media-handlers.js"></script>
-    
-    <!-- CAMBIO: app.js (core) se carga ANTES que crud-handlers.js -->
-    <script src="./app.js"></script>
+    <script src="./ui-handlers.js"></script>
+    <script src="./ui-renderer.js"></script>
     <script src="./crud-handlers.js"></script>
     
 </body>
