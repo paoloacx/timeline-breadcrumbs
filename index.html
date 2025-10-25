@@ -59,7 +59,7 @@
         <div class="mac-content">
             <label class="mac-label">📅 Date & Time:</label>
             <input type="datetime-local" class="mac-input" id="datetime-input-recap">
-
+            
             <label class="mac-label">Reflexión del día</label>
             <textarea id="recap-reflection" class="mac-textarea" placeholder="¿Cómo fue tu día?"></textarea>
             
@@ -85,7 +85,8 @@
             
             <div style="margin-top: 16px;">
                 <button class="mac-button mac-button-primary" onclick="saveRecap()">💾 Save Recap</button>
-                <button class="mac-button" onclick="closeRecapForm()">Cancel</button>
+                <button class="mac-button delete-button" onclick="deleteCurrentEntry()" style="margin-left: 8px;">🗑️ Delete</button>
+                <button class="mac-button" onclick="closeRecapForm()" style="float: right;">Cancel</button>
             </div>
         </div>
     </div>
@@ -104,7 +105,8 @@
                     </div>
                 </div>
             </div>
-            <div class="mac-content">
+            <!-- Estos botones se ocultan en móvil y se reemplazan por el FAB -->
+            <div class="mac-content main-controls">
                 <button class="mac-button mac-button-primary" onclick="toggleForm()">➕ Crumb</button>
                 <button class="mac-button" onclick="toggleTimer()">⏱️ Time</button>
                 <button class="mac-button" onclick="toggleTrack()">📊 Track</button>
@@ -155,7 +157,7 @@
 
                 <button class="mac-button mac-button-primary" onclick="saveEntry()" id="save-btn">💾 Save</button>
                 <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-btn">🗑️ Delete</button>
-                <button class="mac-button" onclick="cancelEdit()">Cancel</button>
+                <button class="mac-button" onclick="cancelEdit()" style="float: right;">Cancel</button>
             </div>
         </div>
 
@@ -234,7 +236,7 @@
         <div class="preview-content" onclick="event.stopPropagation()">
             <div class="mac-title-bar">
                 <span>Preview</span>
-                <button onclick="closePreview()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
+                <button onclick="forceClosePreview()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
             </div>
             <div class="mac-content" id="preview-body"></div>
         </div>
@@ -244,7 +246,7 @@
         <div class="preview-content" onclick="event.stopPropagation()">
             <div class="mac-title-bar">
                 <span>Settings</span>
-                <button onclick="closeSettings()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
+                <button onclick="forceCloseSettings()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
             </div>
             <div class="mac-content">
                 <h3 style="margin-bottom: 16px;">Time Durations</h3>
@@ -265,7 +267,7 @@
         <div class="preview-content" onclick="event.stopPropagation()">
             <div class="mac-title-bar">
                 <span>📊 Statistics</span>
-                <button onclick="closeStats()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
+                <button onclick="forceCloseStats()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
             </div>
             <div class="mac-content">
                 <div class="stats-grid" id="stats-content"></div>
@@ -274,23 +276,23 @@
     </div>
 
     <div class="fab-container">
-        <button class="fab fab-main" onclick="toggleFabMenu()" id="fab-main">
+        <button class="fab fab-main" id="fab-main">
             <span id="fab-icon">+</span>
         </button>
-        <!-- FIX: Corregidos los onclick para llamar a las funciones correctas y cerrar el menú -->
-        <button class="fab fab-action hidden" onclick="toggleForm(); closeFabMenu();" title="Breadcrumb">
+        <!-- Los onclick aquí llaman a las funciones de app.js -->
+        <button class="fab fab-action hidden" title="Breadcrumb">
             📍
         </button>
-        <button class="fab fab-action hidden" onclick="toggleTimer(); closeFabMenu();" title="Time Event">
+        <button class="fab fab-action hidden" title="Time Event">
             ⏰
         </button>
-        <button class="fab fab-action hidden" onclick="toggleTrack(); closeFabMenu();" title="Quick Track">
-            🎵
+        <button class="fab fab-action hidden" title="Quick Track">
+            📊
         </button>
-        <button class="fab fab-action hidden" onclick="toggleSpent(); closeFabMenu();" title="Spent">
+        <button class="fab fab-action hidden" title="Spent">
             💰
         </button>
-        <button class="fab fab-action hidden" onclick="showRecapForm(); closeFabMenu();" title="Day Recap">
+        <button class="fab fab-action hidden" title="Day Recap">
             🌟
         </button>
     </div>
@@ -302,12 +304,18 @@
         <button class="mac-button" onclick="openSettings()">⚙️ Settings</button>
     </div>
 
+    <!-- Scripts de Firebase -->
     <script src="./firebase-config.js"></script>
-    <script src="./api-services.js"></script>
-    <!-- AÑADIDO: Cargar el nuevo script de media -->
-    <script src="./media-handlers.js"></script>
-    <script src="./app.js"></script>
+    
+    <!-- Scripts de Módulos de la App -->
     <script src="./ui-renderer.js"></script>
+    <script src="./api-services.js"></script>
+    <script src="./media-handlers.js"></script>
+    
+    <!-- CAMBIO: app.js (core) se carga ANTES que crud-handlers.js -->
+    <script src="./app.js"></script>
+    <script src="./crud-handlers.js"></script>
+    
 </body>
 </html>
 
