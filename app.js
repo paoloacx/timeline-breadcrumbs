@@ -1,5 +1,9 @@
 // Global variables
 let entries = [];
+// currentImages, currentAudio, currentCoords, mediaRecorder, y audioChunks
+// se manejan ahora en media-handlers.js, pero las declaramos aquí
+// para que sigan siendo accesibles globalmente por ahora.
+// En un futuro, las moveremos a un objeto de "estado" (state).
 let currentImages = [];
 let currentAudio = null;
 let currentCoords = null;
@@ -9,8 +13,9 @@ let selectedDuration = null;
 let selectedActivity = null;
 let selectedTrackItem = null;
 
-let mediaRecorder = null; // Esta variable es usada por media-handlers.js
-let audioChunks = []; // Esta variable es usada por media-handlers.js
+let mediaRecorder = null;
+let audioChunks = [];
+
 
 // Refresh function
 function refreshApp() {
@@ -85,7 +90,8 @@ function saveData() {
 
 // Sync/Refresh data
 function syncData() {
-    location.reload();
+    // Usar la función de refresco que ya existe
+    refreshApp();
 }
 
 // Toggle forms
@@ -94,14 +100,17 @@ function toggleForm() {
     const timer = document.getElementById('timer-window');
     const track = document.getElementById('track-window');
     const spent = document.getElementById('spent-window');
+    const recap = document.getElementById('recap-form');
     timer.classList.add('hidden');
     track.classList.add('hidden');
     spent.classList.add('hidden');
+    recap.classList.add('hidden');
     form.classList.toggle('hidden');
     if (!form.classList.contains('hidden')) {
         clearForm();
         renderMoodSelector();
         setCurrentDateTime('datetime-input');
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
 
@@ -110,13 +119,16 @@ function toggleTimer() {
     const form = document.getElementById('form-window');
     const track = document.getElementById('track-window');
     const spent = document.getElementById('spent-window');
+    const recap = document.getElementById('recap-form');
     form.classList.add('hidden');
     track.classList.add('hidden');
     spent.classList.add('hidden');
+    recap.classList.add('hidden');
     timer.classList.toggle('hidden');
     if (!timer.classList.contains('hidden')) {
         resetTimerSelections();
         setCurrentDateTime('datetime-input-time');
+        timer.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
 
@@ -125,9 +137,11 @@ function toggleTrack() {
     const form = document.getElementById('form-window');
     const timer = document.getElementById('timer-window');
     const spent = document.getElementById('spent-window');
+    const recap = document.getElementById('recap-form');
     form.classList.add('hidden');
     timer.classList.add('hidden');
     spent.classList.add('hidden');
+    recap.classList.add('hidden');
     track.classList.toggle('hidden');
     if (!track.classList.contains('hidden')) {
         renderTrackSelector();
@@ -136,6 +150,7 @@ function toggleTrack() {
         document.getElementById('save-track-btn').disabled = true;
         document.getElementById('delete-track-btn').classList.add('hidden');
         document.getElementById('track-optional-note').value = '';
+        track.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
 
@@ -144,29 +159,36 @@ function toggleSpent() {
     const form = document.getElementById('form-window');
     const timer = document.getElementById('timer-window');
     const track = document.getElementById('track-window');
+    const recap = document.getElementById('recap-form');
     form.classList.add('hidden');
     timer.classList.add('hidden');
     track.classList.add('hidden');
+    recap.classList.add('hidden');
     spent.classList.toggle('hidden');
     if (!spent.classList.contains('hidden')) {
         document.getElementById('spent-description').value = '';
         document.getElementById('spent-amount').value = '';
         setCurrentDateTime('datetime-input-spent');
         document.getElementById('delete-spent-btn').classList.add('hidden');
+        spent.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
 
 // Set current date/time in input
 function setCurrentDateTime(inputId) {
     const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
+    // Ajustar a la zona horaria local
+    const offset = now.getTimezoneOffset();
+    const localDate = new Date(now.getTime() - (offset * 60 * 1000));
+    // Formatear a ISO string y cortar en 'T'HH:mm
+    const dateTimeString = localDate.toISOString().substring(0, 16);
     
-    const dateTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
-    document.getElementById(inputId).value = dateTimeString;
+    const inputEl = document.getElementById(inputId);
+    if (inputEl) {
+        inputEl.value = dateTimeString;
+    } else {
+        console.error("Input element not found:", inputId);
+    }
 }
 
 // Get timestamp from datetime input
@@ -226,13 +248,15 @@ function getGPS() {
             locationInput.placeholder = 'Getting location...';
             
             showMiniMap(lat, lon, 'form-map');
-            getWeather(lat, lon); // Esta función ahora vive en api-services.js
+            // Llama a la función que ahora está en api-services.js
+            getWeather(lat, lon); 
             
             btn.textContent = '🌍 GPS OK';
             btn.disabled = false;
         },
         (error) => {
             console.error('GPS Error:', error);
+            alert('GPS Error: ' + error.message);
             btn.textContent = '🌍 Use GPS';
             btn.disabled = false;
         },
@@ -244,38 +268,34 @@ function getGPS() {
     );
 }
 
+
 function showMiniMap(lat, lon, containerId) {
     const mapContainer = document.getElementById(containerId);
     if (!mapContainer) return;
 
-    mapContainer.innerHTML = '';
+    mapContainer.innerHTML = ''; // Limpiar mapa anterior si existe
     mapContainer.style.display = 'block';
 
-    const map = L.map(containerId).setView([lat, lon], 13);
+    try {
+        const map = L.map(containerId).setView([lat, lon], 13);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap',
-        maxZoom: 19
-    }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19
+        }).addTo(map);
 
-    L.marker([lat, lon]).addTo(map);
+        L.marker([lat, lon]).addTo(map);
 
-    setTimeout(() => {
-        map.invalidateSize();
-    }, 100);
+        // Forzar actualización de tamaño de Leaflet
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+    } catch (e) {
+        console.error("Error initializing Leaflet map:", e);
+        mapContainer.innerHTML = "Error loading map.";
+    }
 }
 
-/* REMOVED: 
-- handleImages(event)
-- startRecording()
-- stopRecording()
-- renderImagePreviews()
-- renderAudioPreview()
-- removeImage(index)
-- removeAudio()
-
-Estas funciones ahora viven en media-handlers.js
-*/
 
 // Mood functions
 function renderMoodSelector() {
@@ -316,185 +336,25 @@ function saveMoodConfig() {
         emoji: document.getElementById(`mood-emoji-${index}`).value || mood.emoji,
         label: document.getElementById(`mood-label-${index}`).value || mood.label
     }));
-    localStorage.setItem('mood-config', JSON.stringify(moods));
+    
+    saveSettingsToStorage(); // Guardar en localStorage
     if (currentUser && !isOfflineMode) {
-        saveSettingsToFirebase();
+        saveSettingsToFirebase(); // Guardar en Firebase
     }
+    
     renderMoodSelector();
     toggleMoodConfig();
     alert('✅ Configuration saved');
 }
 
-// Save/Edit entry functions
-function saveEntry() {
-    const note = document.getElementById('note-input').value.trim();
-    if (!note) {
-        alert('Please write a note');
-        return;
-    }
-
-    const moodData = selectedMood !== null ? moods[selectedMood] : null;
-    const timestamp = getTimestampFromInput('datetime-input');
-
-    if (editingEntryId) {
-        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
-        if (entryIndex !== -1) {
-            entries[entryIndex] = {
-                ...entries[entryIndex],
-                timestamp: timestamp,
-                note: note,
-                location: document.getElementById('location-input').value,
-                weather: document.getElementById('weather-input').value,
-                images: [...currentImages],
-                audio: currentAudio,
-                coords: currentCoords ? { ...currentCoords } : entries[entryIndex].coords,
-                mood: moodData
-            };
-        }
-    } else {
-        const entry = {
-            id: Date.now(),
-            timestamp: timestamp,
-            note: note,
-            location: document.getElementById('location-input').value,
-            weather: document.getElementById('weather-input').value,
-            images: [...currentImages],
-            audio: currentAudio,
-            coords: currentCoords ? { ...currentCoords } : null,
-            mood: moodData
-        };
-        entries.unshift(entry);
-    }
-
-    saveData();
-    renderTimeline();
-    toggleForm();
-}
-
-function editEntry(id) {
-    const entry = entries.find(e => e.id === id);
-    if (!entry) return;
-
-    // --- FIX: Añadido chequeo para RECAP ---
-    if (entry.type === 'recap') {
-        editRecapEvent(entry);
-        return;
-    }
-    // --- FIN DEL FIX ---
-
-    if (entry.isTimedActivity) {
-        editTimeEvent(entry);
-        return;
-    }
-    
-    if (entry.isQuickTrack) {
-        editTrackEvent(entry);
-        return;
-    }
-    
-    if (entry.isSpent) {
-        editSpentEvent(entry);
-        return;
-    }
-
-    // Default: Edit as a normal 'crumb'
-    editingEntryId = id;
-    document.getElementById('note-input').value = entry.note;
-    document.getElementById('location-input').value = entry.location || '';
-    document.getElementById('weather-input').value = entry.weather || '';
-    currentImages = [...(entry.images || [])];
-    currentAudio = entry.audio || null;
-    currentCoords = entry.coords ? { ...entry.coords } : null;
-
-    // Set datetime
-    const date = new Date(entry.timestamp);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    document.getElementById('datetime-input').value = `${year}-${month}-${day}T${hours}:${minutes}`;
-
-    if (entry.mood) {
-        const moodIndex = moods.findIndex(m => m.emoji === entry.mood.emoji && m.label === entry.mood.label);
-        selectedMood = moodIndex !== -1 ? moodIndex : null;
-    } else {
-        selectedMood = null;
-    }
-
-    renderImagePreviews();
-    renderAudioPreview();
-    renderMoodSelector();
-
-    if (entry.coords) {
-        showMiniMap(entry.coords.lat, entry.coords.lon, 'form-map');
-    }
-
-    document.getElementById('delete-btn').classList.remove('hidden');
-    document.getElementById('save-btn').textContent = '💾 Update';
-    
-    const formWindow = document.getElementById('form-window');
-    formWindow.classList.remove('hidden');
-    formWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
 // Time Event functions
-function editTimeEvent(entry) {
-    editingEntryId = entry.id;
-    
-    selectedDuration = entry.duration;
-    selectedActivity = entry.activity;
-    
-    // Set datetime
-    const date = new Date(entry.timestamp);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    document.getElementById('datetime-input-time').value = `${year}-${month}-${day}T${hours}:${minutes}`;
-    
-    document.querySelectorAll('.duration-option').forEach(el => {
-        el.classList.remove('selected');
-        const text = el.textContent.trim();
-        if ((selectedDuration === 15 && text.includes('15')) ||
-            (selectedDuration === 30 && text.includes('30')) ||
-            (selectedDuration === 60 && text.includes('1 hour')) ||
-            (selectedDuration === 120 && text.includes('2')) ||
-            (selectedDuration === 180 && text.includes('3'))) {
-            el.classList.add('selected');
-        }
-    });
-    
-    document.querySelectorAll('#activity-selector .activity-option').forEach(el => {
-        el.classList.remove('selected');
-        if (el.textContent.includes(selectedActivity)) {
-            el.classList.add('selected');
-        }
-    });
-    
-    checkTimerReady();
-    
-    const timerWindow = document.getElementById('timer-window');
-    const createBtn = document.getElementById('create-time-btn');
-    createBtn.textContent = '💾 Update Event';
-    document.getElementById('delete-time-btn').classList.remove('hidden');
-    
-    timerWindow.classList.remove('hidden');
-    timerWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
 function selectDuration(minutes) {
     selectedDuration = minutes;
     const options = document.querySelectorAll('.duration-option');
     options.forEach(el => {
         el.classList.remove('selected');
-        const text = el.textContent.trim();
-        if ((minutes === 15 && text.includes('15')) ||
-            (minutes === 30 && text.includes('30')) ||
-            (minutes === 60 && text.includes('1 hour')) ||
-            (minutes === 120 && text.includes('2')) ||
-            (minutes === 180 && text.includes('3'))) {
+        const durationMinutes = parseInt(el.dataset.minutes || 0, 10);
+        if (durationMinutes === minutes) {
             el.classList.add('selected');
         }
     });
@@ -507,7 +367,7 @@ function selectActivity(activity) {
     const options = document.querySelectorAll('#activity-selector .activity-option');
     options.forEach(el => {
         el.classList.remove('selected');
-        if (el.textContent.includes(activity)) {
+        if (el.textContent.trim() === activity) {
             el.classList.add('selected');
         }
     });
@@ -522,56 +382,6 @@ function checkTimerReady() {
     } else {
         createBtn.disabled = true;
     }
-}
-
-function createTimeEvent() {
-    if (!selectedDuration || !selectedActivity) return;
-    
-    const timestamp = getTimestampFromInput('datetime-input-time');
-    const optionalNote = document.getElementById('time-optional-note').value.trim();
-    
-    if (editingEntryId) {
-        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
-        if (entryIndex !== -1) {
-            entries[entryIndex] = {
-                ...entries[entryIndex],
-                timestamp: timestamp,
-                note: `${selectedActivity} - ${selectedDuration} minutes`,
-                activity: selectedActivity,
-                duration: selectedDuration,
-                optionalNote: optionalNote
-            };
-        }
-        editingEntryId = null;
-    } else {
-        const entry = {
-            id: Date.now(),
-            timestamp: timestamp,
-            note: `${selectedActivity} - ${selectedDuration} minutes`,
-            location: '',
-            weather: '',
-            images: [],
-            audio: null,
-            coords: null,
-            mood: null,
-            activity: selectedActivity,
-            duration: selectedDuration,
-            isTimedActivity: true,
-            optionalNote: optionalNote
-        };
-        
-        entries.unshift(entry);
-    }
-    
-    saveData();
-    renderTimeline();
-    
-    alert(`✅ Time event ${editingEntryId ? 'updated' : 'created'}!`);
-    toggleTimer();
-    
-    document.getElementById('create-time-btn').textContent = 'Create Event';
-    document.getElementById('delete-time-btn').classList.add('hidden');
-    document.getElementById('time-optional-note').value = '';
 }
 
 function resetTimerSelections() {
@@ -591,8 +401,8 @@ function renderTrackSelector() {
     const container = document.getElementById('track-selector');
     const allItems = [...trackItems.meals, ...trackItems.tasks];
     
-    container.innerHTML = allItems.map((item, index) => `
-        <div class="activity-option" onclick="selectTrackItem('${item}')">
+    container.innerHTML = allItems.map((item) => `
+        <div class="activity-option" onclick="selectTrackItem('${item.replace(/'/g, "\\'")}')">
             ${item}
         </div>
     `).join('');
@@ -609,182 +419,7 @@ function selectTrackItem(item) {
     document.getElementById('save-track-btn').disabled = false;
 }
 
-function editTrackEvent(entry) {
-    editingEntryId = entry.id;
-    selectedTrackItem = entry.note;
-    
-    // Set datetime
-    const date = new Date(entry.timestamp);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    document.getElementById('datetime-input-track').value = `${year}-${month}-${day}T${hours}:${minutes}`;
-    
-    document.getElementById('track-optional-note').value = entry.optionalNote || '';
-    
-    renderTrackSelector();
-    
-    document.querySelectorAll('#track-selector .activity-option').forEach(el => {
-        if (el.textContent.trim() === selectedTrackItem) {
-            el.classList.add('selected');
-        }
-    });
-    
-    document.getElementById('save-track-btn').disabled = false;
-    document.getElementById('save-track-btn').textContent = '💾 Update Track';
-    document.getElementById('delete-track-btn').classList.remove('hidden');
-    
-    const trackWindow = document.getElementById('track-window');
-    trackWindow.classList.remove('hidden');
-    trackWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
 
-function saveTrackEvent() {
-    if (!selectedTrackItem) return;
-    
-    const timestamp = getTimestampFromInput('datetime-input-track');
-    const optionalNote = document.getElementById('track-optional-note').value.trim();
-    
-    if (editingEntryId) {
-        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
-        if (entryIndex !== -1) {
-            entries[entryIndex] = {
-                ...entries[entryIndex],
-                timestamp: timestamp,
-                note: selectedTrackItem,
-                optionalNote: optionalNote
-            };
-        }
-        editingEntryId = null;
-        alert(`✅ Track updated: ${selectedTrackItem}`);
-    } else {
-        const entry = {
-            id: Date.now(),
-            timestamp: timestamp,
-            note: selectedTrackItem,
-            location: '',
-            weather: '',
-            images: [],
-            audio: null,
-            coords: null,
-            mood: null,
-            isQuickTrack: true,
-            optionalNote: optionalNote
-        };
-        
-        entries.unshift(entry);
-        alert(`✅ Tracked: ${selectedTrackItem}`);
-    }
-    
-    saveData();
-    renderTimeline();
-    toggleTrack();
-    
-    document.getElementById('save-track-btn').textContent = 'Save Track';
-    document.getElementById('delete-track-btn').classList.add('hidden');
-}
-
-// Spent Event functions
-function editSpentEvent(entry) {
-    editingEntryId = entry.id;
-    
-    document.getElementById('spent-description').value = entry.note;
-    document.getElementById('spent-amount').value = entry.spentAmount;
-    
-    // Set datetime
-    const date = new Date(entry.timestamp);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    document.getElementById('datetime-input-spent').value = `${year}-${month}-${day}T${hours}:${minutes}`;
-    
-    document.getElementById('delete-spent-btn').classList.remove('hidden');
-    
-    const spentWindow = document.getElementById('spent-window');
-    spentWindow.classList.remove('hidden');
-    spentWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function saveSpent() {
-    const description = document.getElementById('spent-description').value.trim();
-    const amount = parseFloat(document.getElementById('spent-amount').value);
-
-    if (!description) {
-        alert('Please enter a description');
-        return;
-    }
-
-    if (!amount || amount <= 0) {
-        alert('Please enter a valid amount');
-        return;
-    }
-
-    const timestamp = getTimestampFromInput('datetime-input-spent');
-
-    if (editingEntryId) {
-        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
-        if (entryIndex !== -1) {
-            entries[entryIndex] = {
-                ...entries[entryIndex],
-                timestamp: timestamp,
-                note: description,
-                spentAmount: amount
-            };
-        }
-        editingEntryId = null;
-        alert(`✅ Spent updated: €${amount.toFixed(2)}`);
-    } else {
-        const entry = {
-            id: Date.now(),
-            timestamp: timestamp,
-            note: description,
-            location: '',
-            weather: '',
-            images: [],
-            audio: null,
-            coords: null,
-            mood: null,
-            spentAmount: amount,
-            isSpent: true
-        };
-        
-        entries.unshift(entry);
-        alert(`✅ Spent tracked: €${amount.toFixed(2)}`);
-    }
-    
-    saveData();
-    renderTimeline();
-    toggleSpent();
-    document.getElementById('delete-spent-btn').classList.add('hidden');
-}
-
-// Delete entry
-function deleteCurrentEntry() {
-    if (!editingEntryId) return;
-    
-    if (confirm('Delete this entry?')) {
-        entries = entries.filter(e => e.id !== editingEntryId);
-        
-        if (currentUser && !isOfflineMode) {
-            deleteEntryFromFirebase(editingEntryId);
-        }
-        
-        saveData();
-        renderTimeline();
-        
-        // Close all windows
-        document.getElementById('form-window').classList.add('hidden');
-        document.getElementById('timer-window').classList.add('hidden');
-        document.getElementById('track-window').classList.add('hidden');
-        document.getElementById('spent-window').classList.add('hidden');
-        
-        editingEntryId = null;
-    }
-}
 // Preview functions
 function previewEntry(id) {
     const entry = entries.find(e => e.id === id);
@@ -806,7 +441,7 @@ function previewEntry(id) {
         
         <div style="margin-bottom: 16px;">
             <strong>Note:</strong>
-            <div style="margin-top: 8px; line-height: 1.6;">${entry.note}</div>
+            <div style="margin-top: 8px; line-height: 1.6;">${entry.note.replace(/\n/g, '<br>')}</div>
         </div>
         
         ${entry.location ? `
@@ -832,7 +467,7 @@ function previewEntry(id) {
             <div style="margin-bottom: 16px;">
                 <strong>Audio:</strong>
                 <audio controls style="width: 100%; margin-top: 8px;">
-                    <source src="${entry.audio}" type="audio/webm">
+                    <source src="${entry.audio}">
                 </audio>
             </div>
         ` : ''}
@@ -841,8 +476,8 @@ function previewEntry(id) {
             <div style="margin-bottom: 16px;">
                 <strong>Images:</strong>
                 <div class="preview-images-full">
-                    ${entry.images.map(img => `
-                        <img src="${img}" class="preview-image-full" onclick="event.stopPropagation(); showImageInModal('${entry.id}', ${entry.images.indexOf(img)});">
+                    ${entry.images.map((img, index) => `
+                        <img src="${img}" class="preview-image-full" onclick="event.stopPropagation(); showImageInModal('${entry.id}', ${index});">
                     `).join('')}
                 </div>
             </div>
@@ -851,6 +486,13 @@ function previewEntry(id) {
         ${entry.isTimedActivity ? `
             <div style="margin-bottom: 16px;">
                 <strong>Activity:</strong> ${entry.activity} (${entry.duration} minutes)
+                ${entry.optionalNote ? `<div style="margin-top: 8px; line-height: 1.6; font-style: italic;">${entry.optionalNote.replace(/\n/g, '<br>')}</div>` : ''}
+            </div>
+        ` : ''}
+
+        ${entry.isQuickTrack ? `
+            <div style="margin-bottom: 16px;">
+                ${entry.optionalNote ? `<div style="margin-top: 8px; line-height: 1.6; font-style: italic;">${entry.optionalNote.replace(/\n/g, '<br>')}</div>` : ''}
             </div>
         ` : ''}
         
@@ -867,25 +509,40 @@ function previewEntry(id) {
     if (entry.coords) {
         setTimeout(() => {
             const mapContainer = document.getElementById('preview-map-modal');
-            if (mapContainer) {
-                const map = L.map('preview-map-modal').setView([entry.coords.lat, entry.coords.lon], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
-                L.marker([entry.coords.lat, entry.coords.lon]).addTo(map);
-                
-                setTimeout(() => map.invalidateSize(), 100);
+            if (mapContainer && !mapContainer.classList.contains('leaflet-container')) {
+                try {
+                    const map = L.map('preview-map-modal').setView([entry.coords.lat, entry.coords.lon], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap'
+                    }).addTo(map);
+                    L.marker([entry.coords.lat, entry.coords.lon]).addTo(map);
+                    
+                    setTimeout(() => map.invalidateSize(), 100);
+                } catch(e) {
+                    console.error("Error initializing preview map:", e);
+                    mapContainer.innerHTML = "Error loading map.";
+                }
             }
         }, 100);
     }
 }
 
 function closePreview(event) {
-    if (event && event.target.id !== 'preview-modal') return;
+    if (event && event.target.id !== 'preview-modal' && !event.target.closest('.preview-content')) return;
+    if (event && event.target.id === 'preview-modal') { // Solo cerrar si se hace clic en el fondo
+        const modal = document.getElementById('preview-modal');
+        modal.classList.remove('show');
+        document.getElementById('preview-body').innerHTML = '';
+    }
+}
+
+// Función para cerrar el modal desde un botón (si se añade)
+function forceClosePreview() {
     const modal = document.getElementById('preview-modal');
     modal.classList.remove('show');
     document.getElementById('preview-body').innerHTML = '';
 }
+
 
 // Settings functions
 function openSettings() {
@@ -894,9 +551,39 @@ function openSettings() {
     renderSettingsConfig();
 }
 
+// Show image preview
+function showImageInModal(entryId, imageIndex) {
+    const entry = entries.find(e => e.id == entryId);
+    if (!entry || !entry.images || !entry.images[imageIndex]) {
+        console.error('Image not found:', entryId, imageIndex);
+        return;
+    }
+    
+    const modal = document.getElementById('preview-modal');
+    const body = document.getElementById('preview-body');
+    
+    // Re-usamos el modal de preview para mostrar la imagen en grande
+    body.innerHTML = `
+        <div style="text-align: center; padding: 20px;">
+            <img src="${entry.images[imageIndex]}" style="max-width: 100%; max-height: 80vh; border: 2px solid #000;">
+        </div>
+    `;
+    
+    modal.classList.add('show');
+}
+
+
 function closeSettings(event) {
-    if (event && event.target.id !== 'settings-modal') return;
-    const modal = document.getElementById('settings-modal');
+    if (event && event.target.id !== 'settings-modal' && !event.target.closest('.preview-content')) return;
+    if (event && event.target.id === 'settings-modal') {
+        const modal = document.getElementById('settings-modal');
+        modal.classList.remove('show');
+    }
+}
+
+// Función para cerrar el modal desde un botón
+function forceCloseSettings() {
+     const modal = document.getElementById('settings-modal');
     modal.classList.remove('show');
 }
 
@@ -991,22 +678,22 @@ function saveSettings() {
     timeDurations = timeDurations.map((_, index) => {
         const val = document.getElementById(`duration-${index}`);
         return val ? parseInt(val.value) || 60 : 60;
-    });
+    }).filter(d => d > 0); // Filtrar valores no válidos
 
     timeActivities = timeActivities.map((_, index) => {
         const val = document.getElementById(`activity-${index}`);
         return val ? val.value : 'Activity';
-    });
+    }).filter(a => a.trim() !== ''); // Filtrar valores vacíos
 
     trackItems.meals = trackItems.meals.map((_, index) => {
         const val = document.getElementById(`meal-${index}`);
         return val ? val.value : 'Meal';
-    });
+    }).filter(m => m.trim() !== ''); // Filtrar valores vacíos
 
     trackItems.tasks = trackItems.tasks.map((_, index) => {
         const val = document.getElementById(`task-${index}`);
         return val ? val.value : 'Task';
-    });
+    }).filter(t => t.trim() !== ''); // Filtrar valores vacíos
 
     saveSettingsToStorage();
     
@@ -1016,7 +703,7 @@ function saveSettings() {
     
     updateTimerOptions();
     updateTrackOptions();
-    closeSettings();
+    forceCloseSettings(); // Usar la función de cierre forzado
     alert('✅ Settings saved!');
 }
 
@@ -1025,7 +712,7 @@ function updateTimerOptions() {
     if (!container) return;
     
     container.innerHTML = timeDurations.map(duration => `
-        <div class="duration-option" onclick="selectDuration(${duration})">
+        <div class="duration-option" data-minutes="${duration}" onclick="selectDuration(${duration})">
             ${duration < 60 ? duration + ' min' : (duration / 60) + ' hour' + (duration > 60 ? 's' : '')}
         </div>
     `).join('');
@@ -1034,7 +721,7 @@ function updateTimerOptions() {
     if (!actContainer) return;
     
     actContainer.innerHTML = timeActivities.map(activity => `
-        <div class="activity-option" onclick="selectActivity('${activity}')">
+        <div class="activity-option" onclick="selectActivity('${activity.replace(/'/g, "\\'")}')">
             ${activity}
         </div>
     `).join('');
@@ -1044,283 +731,6 @@ function updateTrackOptions() {
     renderTrackSelector();
 }
 
-// Timeline rendering
-function toggleReadMore(id) {
-    const noteEl = document.getElementById(`note-${id}`);
-    const btnEl = document.getElementById(`read-more-${id}`);
-    
-    if (noteEl.classList.contains('expanded')) {
-        noteEl.classList.remove('expanded');
-        btnEl.textContent = 'Read more';
-    } else {
-        noteEl.classList.add('expanded');
-        btnEl.textContent = 'Show less';
-    }
-}
-
-function formatDate(timestamp) {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('en', { 
-        weekday: 'long',
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric'
-    });
-}
-
-function formatTime(timestamp) {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-}
-
-function calculateEndTime(timestamp, durationMinutes) {
-    const date = new Date(timestamp);
-    date.setMinutes(date.getMinutes() + durationMinutes);
-    return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-}
-
-function getDayKey(timestamp) {
-    const date = new Date(timestamp);
-    return date.toISOString().split('T')[0];
-}
-
-function toggleDay(dayKey) {
-    const content = document.getElementById(`day-content-${dayKey}`);
-    const chevron = document.getElementById(`chevron-${dayKey}`);
-    
-    content.classList.toggle('expanded');
-    chevron.classList.toggle('expanded');
-}
-
-function toggleRecap(recapId) {
-    const content = document.getElementById(`recap-content-${recapId}`);
-    const chevron = document.getElementById(`chevron-recap-${recapId}`);
-    
-    content.classList.toggle('hidden');
-    chevron.classList.toggle('expanded');
-}
-
-
-// Show image in modal
-function showImageInModal(entryId, imageIndex) {
-    const entry = entries.find(e => e.id == entryId);
-    if (!entry || !entry.images || !entry.images[imageIndex]) {
-        console.error('Image not found');
-        return;
-    }
-    
-    const modal = document.getElementById('preview-modal');
-    const body = document.getElementById('preview-body');
-    
-    body.innerHTML = `
-        <div style="text-align: center; padding: 20px;">
-            <img src="${entry.images[imageIndex]}" style="max-width: 100%; max-height: 80vh; border: 2px solid #000;">
-        </div>
-    `;
-    
-    modal.classList.add('show');
-}
-
-
-function renderTimeline() {
-    const container = document.getElementById('timeline-container');
-    const emptyState = document.getElementById('empty-state');
-    const footer = document.getElementById('footer');
-
-    if (entries.length === 0) {
-        container.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        footer.style.display = 'none';
-        return;
-    }
-
-    emptyState.classList.add('hidden');
-    footer.style.display = 'flex';
-
-    const groupedByDay = {};
-    entries.forEach(entry => {
-        const dayKey = getDayKey(entry.timestamp);
-        if (!groupedByDay[dayKey]) {
-            groupedByDay[dayKey] = [];
-        }
-        groupedByDay[dayKey].push(entry);
-    });
-
-    const html = `
-        <div class="timeline">
-            <div class="timeline-line"></div>
-            ${Object.keys(groupedByDay).map(dayKey => {
-                const dayEntries = groupedByDay[dayKey];
-                const firstEntry = dayEntries[0];
-                
-                // Separar recaps de otros eventos
-                const recaps = dayEntries.filter(e => e.type === 'recap');
-                const regularEntries = dayEntries.filter(e => e.type !== 'recap');
-                
-                return `
-                    <div class="day-block">
-                        <div class="day-header" onclick="toggleDay('${dayKey}')">
-                            <span>${formatDate(firstEntry.timestamp)}</span>
-                            <span class="chevron" id="chevron-${dayKey}">▼</span>
-                        </div>
-                        
-                        ${recaps.map(recap => `
-                            <div class="recap-block">
-                                <div class="recap-header" onclick="toggleRecap('${recap.id}')">
-                                    <span>Day Recap</span>
-                                    <span class="chevron-recap" id="chevron-recap-${recap.id}">▼</span>
-                                </div>
-                                <div class="recap-content hidden" id="recap-content-${recap.id}">
-                                    <button class="mac-button edit-button" onclick="editEntry(${recap.id})" style="position: absolute; top: 12px; right: 12px;">✏️ Edit</button>
-                                    
-                                    <div style="margin-bottom: 16px;">
-                                        <strong>Rating:</strong> ${recap.rating}/10 ${'⭐'.repeat(Math.round(recap.rating / 2))}
-                                    </div>
-                                    
-                                    ${recap.reflection ? `
-                                        <div style="margin-bottom: 16px;">
-                                            <strong>Reflection:</strong>
-                                            <div style="margin-top: 8px; line-height: 1.6;">${recap.reflection}</div>
-                                        </div>
-                                    ` : ''}
-                                    
-                                    ${recap.highlights && recap.highlights.length > 0 ? `
-                                        <div style="margin-bottom: 16px;">
-                                            <strong>Highlights:</strong>
-                                            <ul style="margin-top: 8px; padding-left: 20px;">
-                                                ${recap.highlights.map(h => `<li style="margin-bottom: 4px;">${h}</li>`).join('')}
-                                            </ul>
-                                        </div>
-                                    ` : ''}
-                                    
-                                    ${recap.track ? `
-                                        <div style="margin-bottom: 16px;">
-                                            <strong>Day's Soundtrack:</strong>
-                                            <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 12px; border: 2px solid #000; background: #f9f9f9;">
-                                                <img src="${recap.track.artwork}" style="width: 50px; height: 50px; border: 2px solid #000;">
-                                                <div style="flex: 1;">
-                                                    <div style="font-weight: bold; font-size: 13px;">${recap.track.name}</div>
-                                                    <div style="font-size: 11px; color: #666;">${recap.track.artist}</div>
-                                                </div>
-                                                <a href="${recap.track.url}" target="_blank" style="text-decoration: none; font-size: 18px;">🔗</a>
-                                            </div>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            </div>
-                        `).join('')}
-                        
-                        <div class="day-content" id="day-content-${dayKey}">
-                            ${regularEntries.map(entry => {
-                                const heightStyle = entry.isTimedActivity && entry.duration ? `min-height: ${Math.min(150 + entry.duration * 0.5, 300)}px;` : '';
-                                const trackClass = entry.isQuickTrack ? 'track-event' : '';
-                                const spentClass = entry.isSpent ? 'spent-event' : '';
-                                
-                                return `
-                                <div class="breadcrumb-entry ${entry.isTimedActivity ? 'edit-mode' : ''} ${trackClass} ${spentClass}" style="${heightStyle}">
-                                    <button class="mac-button edit-button" onclick="editEntry(${entry.id})">✏️ Edit</button>
-                                    
-                                    ${entry.isTimedActivity ? 
-                                        `<div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div>
-                                        <div class="activity-label">${entry.activity}</div>
-                                        <div style="font-size: 13px; color: #666; margin-top: 8px;">Duration: ${entry.duration} minutes</div>
-                                        ${entry.optionalNote ? `
-                                            <div class="optional-note" id="note-${entry.id}">${entry.optionalNote}</div>
-                                            ${entry.optionalNote.length > 200 ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
-                                        ` : ''}` :
-                                        `<div class="breadcrumb-time">
-                                            ${entry.isQuickTrack ?
-                                                `<span class="compact-time">⏰ ${formatTime(entry.timestamp)} ${entry.note}</span>` :
-                                                `⏰ ${formatTime(entry.timestamp)}`
-                                            }
-                                            ${entry.isSpent ? `<span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>` : ''}
-                                        </div>`
-                                    }
-                                    
-                                    ${entry.isTimedActivity ? '' : ''}
-                                    ${entry.isQuickTrack && entry.optionalNote ? `
-                                        <div class="optional-note" id="note-${entry.id}">${entry.optionalNote}</div>
-                                        ${entry.optionalNote.length > 200 ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
-                                    ` : ''}
-                                    
-                                    ${!entry.isTimedActivity && !entry.isQuickTrack ? `
-                                        <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
-                                            ${entry.mood ? `<span class="mood-display">${entry.mood.emoji}</span>` : ''}
-                                            <div style="flex: 1;">
-                                                <div class="breadcrumb-note" id="note-${entry.id}">${entry.note}</div>
-                                                ${entry.note && entry.note.length > 200 ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
-                                            </div>
-                                        </div>
-                                    ` : ''}
-                                    
-                                    ${entry.weather || entry.location ? `
-                                        <div style="font-size: 12px; color: ${entry.isQuickTrack ? '#ccc' : '#666'}; margin-bottom: 8px;">
-                                            ${entry.weather ? `${entry.weather}` : ''}
-                                            ${entry.weather && entry.location && entry.location.length < 20 ? ` • 📍 ${entry.location}` : ''}
-                                            ${!entry.weather && entry.location ? `📍 ${entry.location}` : ''}
-                                        </div>
-                                    ` : ''}
-                                    
-                                    ${entry.audio ? `
-                                        <div style="margin-top: 12px; margin-bottom: 12px;">
-                                            <audio controls style="width: 100%; max-width: 300px;">
-                                                <source src="${entry.audio}" type="audio/webm">
-                                            </audio>
-                                        </div>
-                                    ` : ''}
-                                    
-                                    <div class="breadcrumb-preview">
-                                        ${entry.images && entry.images.length > 0 ? entry.images.map(img => `
-                                            <img src="${img}" class="preview-image-thumb" onclick="event.stopPropagation(); showImageInModal('${entry.id}', ${entry.images.indexOf(img)});">
-                                        `).join('') : ''}
-                                        ${entry.coords ? `<div class="preview-map-thumb" id="mini-map-${entry.id}"></div>` : ''}
-                                        ${(entry.images && entry.images.length > 0) || entry.coords || entry.audio ? `
-                                            <button class="mac-button preview-button" onclick="previewEntry(${entry.id})">🔍</button>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                            `}).join('')}
-                        </div>
-                    </div>
-                `;
-            }).join('')}
-        </div>
-    `;
-
-    container.innerHTML = html;
-    
-    entries.forEach(entry => {
-        if (entry.coords) {
-            setTimeout(() => {
-                const mapEl = document.getElementById(`mini-map-${entry.id}`);
-                if (mapEl && !mapEl.classList.contains('leaflet-container')) {
-                    try {
-                        const miniMap = L.map(`mini-map-${entry.id}`, {
-                            zoomControl: false,
-                            attributionControl: false,
-                            dragging: false,
-                            scrollWheelZoom: false,
-                            doubleClickZoom: false,
-                            boxZoom: false,
-                            keyboard: false
-                        }).setView([entry.coords.lat, entry.coords.lon], 13);
-                        
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            maxZoom: 19
-                        }).addTo(miniMap);
-                        
-                        L.marker([entry.coords.lat, entry.coords.lon]).addTo(miniMap);
-                        
-                        mapEl.style.cursor = 'pointer';
-                        mapEl.onclick = () => previewEntry(entry.id);
-                    } catch (e) {
-                        console.error('Error creating mini map:', e);
-                    }
-                }
-            }, 100);
-        }
-    });
-}
 
 // Export functions
 function exportCSV() {
@@ -1334,12 +744,23 @@ function exportICS() {
 function openExportModal(format) {
     const modal = document.getElementById('export-modal');
     if (!modal) {
-        createExportModal();
+        createExportModal(); // Crear el modal si no existe
     }
     
     // Configurar el modal según el formato
     document.getElementById('export-format-type').textContent = format === 'csv' ? 'CSV' : 'iCal';
     document.getElementById('export-modal').classList.add('show');
+    
+    // Actualizar opciones de fecha por defecto
+    const today = new Date();
+    const monthInput = document.getElementById('export-month');
+    const dayInput = document.getElementById('export-day');
+    
+    const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60 * 1000));
+    const isoDate = localDate.toISOString();
+
+    monthInput.value = isoDate.substring(0, 7); // YYYY-MM
+    dayInput.value = isoDate.substring(0, 10); // YYYY-MM-DD
 }
 
 function createExportModal() {
@@ -1348,54 +769,56 @@ function createExportModal() {
             <div class="preview-content" onclick="event.stopPropagation()">
                 <div class="mac-title-bar">
                     <span>📤 Export <span id="export-format-type">CSV</span></span>
-                    <button onclick="closeExportModal()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
+                    <button onclick="forceCloseExportModal()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
                 </div>
                 <div class="mac-content">
                     <h3 style="margin-bottom: 16px;">Select Export Range</h3>
                     
                     <div style="margin-bottom: 20px;">
-                        <label class="mac-label">
+                        <label class="mac-label" style="display: flex; align-items: center; gap: 8px;">
                             <input type="radio" name="export-range" value="all" checked onchange="updateExportOptions()"> 
                             Export All Entries
                         </label>
                     </div>
                     
                     <div style="margin-bottom: 20px;">
-                        <label class="mac-label">
+                        <label class="mac-label" style="display: flex; align-items: center; gap: 8px;">
                             <input type="radio" name="export-range" value="month" onchange="updateExportOptions()"> 
                             Export Specific Month
                         </label>
-                        <div id="month-selector" style="margin-left: 20px; margin-top: 8px; display: none;">
+                        <div id="month-selector" style="margin-left: 28px; margin-top: 8px; display: none;">
                             <input type="month" class="mac-input" id="export-month" style="max-width: 200px;">
                         </div>
                     </div>
                     
                     <div style="margin-bottom: 20px;">
-                        <label class="mac-label">
+                        <label class="mac-label" style="display: flex; align-items: center; gap: 8px;">
                             <input type="radio" name="export-range" value="day" onchange="updateExportOptions()"> 
                             Export Specific Day
                         </label>
-                        <div id="day-selector" style="margin-left: 20px; margin-top: 8px; display: none;">
+                        <div id="day-selector" style="margin-left: 28px; margin-top: 8px; display: none;">
                             <input type="date" class="mac-input" id="export-day" style="max-width: 200px;">
                         </div>
                     </div>
                     
-                    <hr style="margin: 20px 0; border: 1px solid #ddd;">
+                    <hr style="margin: 20px 0; border: none; border-top: 2px solid #000;">
                     
-                    <h3 style="margin-bottom: 16px;">iCal Options (Only for iCal export)</h3>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label class="mac-label">
-                            <input type="radio" name="ical-grouping" value="individual" checked> 
-                            Each event as separate calendar entry
-                        </label>
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label class="mac-label">
-                            <input type="radio" name="ical-grouping" value="daily"> 
-                            Group all events per day as one calendar entry
-                        </label>
+                    <div id="ical-options" style="display: none;">
+                        <h3 style="margin-bottom: 16px;">iCal Options</h3>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label class="mac-label" style="display: flex; align-items: center; gap: 8px;">
+                                <input type="radio" name="ical-grouping" value="individual" checked> 
+                                Each event as separate calendar entry
+                            </label>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label class="mac-label" style="display: flex; align-items: center; gap: 8px;">
+                                <input type="radio" name="ical-grouping" value="daily"> 
+                                Group all events per day as one calendar entry
+                            </label>
+                        </div>
                     </div>
                     
                     <button class="mac-button mac-button-primary" onclick="performExport()" style="width: 100%; margin-top: 24px;">
@@ -1406,25 +829,26 @@ function createExportModal() {
         </div>
     `;
     document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
-    // Establecer fechas por defecto
-    const today = new Date();
-    const monthInput = document.getElementById('export-month');
-    const dayInput = document.getElementById('export-day');
-    
-    monthInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-    dayInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 }
 
 function updateExportOptions() {
     const range = document.querySelector('input[name="export-range"]:checked').value;
+    const format = document.getElementById('export-format-type').textContent.toLowerCase();
     
     document.getElementById('month-selector').style.display = range === 'month' ? 'block' : 'none';
     document.getElementById('day-selector').style.display = range === 'day' ? 'block' : 'none';
+    document.getElementById('ical-options').style.display = format === 'ical' ? 'block' : 'none';
 }
 
 function closeExportModal(event) {
     if (event && event.target.id !== 'export-modal') return;
+    const modal = document.getElementById('export-modal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+function forceCloseExportModal() {
     const modal = document.getElementById('export-modal');
     if (modal) {
         modal.classList.remove('show');
@@ -1471,22 +895,36 @@ function performExport() {
         exportICSData(filteredEntries, filenameSuffix, icalGrouping);
     }
     
-    closeExportModal();
+    forceCloseExportModal();
 }
 
 function exportCSVData(data, suffix) {
-    const headers = ['Date and Time', 'Note', 'Activity', 'Duration (min)', 'Location', 'Weather', 'Mood', 'Spent', 'Images'];
-    const rows = data.map(e => [
-        new Date(e.timestamp).toLocaleString(),
-        e.note || '',
-        e.activity || '',
-        e.duration || '',
-        e.location || '',
-        e.weather || '',
-        e.mood ? `${e.mood.emoji} ${e.mood.label}` : '',
-        e.spentAmount ? `€${e.spentAmount}` : '',
-        e.images ? e.images.length : 0
-    ]);
+    const headers = ['Date and Time', 'Note', 'Type', 'Activity', 'Duration (min)', 'Location', 'Weather', 'Mood', 'Spent', 'Images', 'Audio', 'Optional Note', 'Highlights', 'Rating', 'BSO'];
+    const rows = data.map(e => {
+        let type = 'Crumb';
+        if (e.isTimedActivity) type = 'Time';
+        if (e.isQuickTrack) type = 'Track';
+        if (e.isSpent) type = 'Spent';
+        if (e.type === 'recap') type = 'Recap';
+
+        return [
+            new Date(e.timestamp).toLocaleString(),
+            e.note || '',
+            type,
+            e.activity || '',
+            e.duration || '',
+            e.location || '',
+            e.weather || '',
+            e.mood ? `${e.mood.emoji} ${e.mood.label}` : '',
+            e.spentAmount ? `€${e.spentAmount.toFixed(2)}` : '',
+            e.images ? e.images.length : 0,
+            e.audio ? 'Yes' : 'No',
+            e.optionalNote || '',
+            e.highlights ? e.highlights.join('; ') : '',
+            e.rating || '',
+            e.track ? `${e.track.name} - ${e.track.artist}` : ''
+        ];
+    });
     
     const csv = [headers, ...rows].map(row => 
         row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
@@ -1504,6 +942,14 @@ function exportCSVData(data, suffix) {
 function exportICSData(data, suffix, grouping) {
     let icsEvents = '';
     
+    // Helper para escapar texto de iCal
+    const escapeICS = (str = '') => {
+        return str.replace(/\\/g, '\\\\')
+                  .replace(/;/g, '\\;')
+                  .replace(/,/g, '\\,')
+                  .replace(/\n/g, '\\n');
+    }
+
     if (grouping === 'daily') {
         // Agrupar por día
         const groupedByDay = {};
@@ -1526,19 +972,33 @@ function exportICSData(data, suffix, grouping) {
             // Crear descripción con todos los eventos del día
             const description = dayEntries.map(e => {
                 const time = new Date(e.timestamp).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-                let text = `${time}: ${e.note || e.activity || 'Event'}`;
-                if (e.duration) text += ` (${e.duration} min)`;
+                let text = `${time}: `;
+                
+                if (e.type === 'recap') {
+                    text += `🌟 DAY RECAP (Rating: ${e.rating}/10)`;
+                    if(e.reflection) text += `\\nReflexión: ${escapeICS(e.reflection)}`;
+                    if(e.highlights) text += `\\nHighlights: ${escapeICS(e.highlights.join(', '))}`;
+                } else if (e.isTimedActivity) {
+                    text += `⏱️ ${escapeICS(e.activity)} (${e.duration} min)`;
+                } else if (e.isQuickTrack) {
+                    text += `📊 ${escapeICS(e.note)}`;
+                } else if (e.isSpent) {
+                    text += `💰 €${e.spentAmount.toFixed(2)} - ${escapeICS(e.note)}`;
+                } else {
+                    text += `📝 ${escapeICS(e.note)}`;
+                }
                 return text;
-            }).join('\\n');
+            }).join('\\n\\n');
             
             return `BEGIN:VEVENT
 UID:${dayKey}@breadcrumbs
 DTSTAMP:${dateStr}
 DTSTART;VALUE=DATE:${dayKey.replace(/-/g, '')}
-SUMMARY:Breadcrumbs - ${dayEntries.length} events
-DESCRIPTION:${description.replace(/\n/g, '\\n')}
+SUMMARY:Breadcrumbs - ${dayEntries.length} entries on ${dayKey}
+DESCRIPTION:${description}
 END:VEVENT`;
         }).join('\n');
+
     } else {
         // Evento individual por cada entrada
         icsEvents = data.map(e => {
@@ -1548,22 +1008,45 @@ END:VEVENT`;
             let endDate = new Date(date);
             if (e.duration) {
                 endDate.setMinutes(endDate.getMinutes() + e.duration);
+            } else if (e.type === 'recap') {
+                endDate.setMinutes(endDate.getMinutes() + 60); // 1 hora para recaps
             } else {
                 endDate.setMinutes(endDate.getMinutes() + 30); // 30 min por defecto
             }
             const endDateStr = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
             
-            const summary = e.activity || e.note?.substring(0, 50) || 'Breadcrumb Event';
-            const description = (e.note || '') + (e.location ? `\\nLocation: ${e.location}` : '') + (e.weather ? `\\nWeather: ${e.weather}` : '');
+            let summary = '';
+            let description = '';
+
+            if (e.type === 'recap') {
+                summary = `🌟 Day Recap (Rating: ${e.rating}/10)`;
+                if(e.reflection) description += `Reflexión: ${escapeICS(e.reflection)}\\n`;
+                if(e.highlights) description += `Highlights: ${escapeICS(e.highlights.join(', '))}\\n`;
+                if(e.track) description += `BSO: ${escapeICS(e.track.name)} - ${escapeICS(e.track.artist)}\\n`;
+            } else if (e.isTimedActivity) {
+                summary = `⏱️ ${escapeICS(e.activity)} (${e.duration} min)`;
+                description = escapeICS(e.optionalNote || e.note);
+            } else if (e.isQuickTrack) {
+                summary = `📊 ${escapeICS(e.note)}`;
+                description = escapeICS(e.optionalNote || '');
+            } else if (e.isSpent) {
+                summary = `💰 €${e.spentAmount.toFixed(2)} - ${escapeICS(e.note)}`;
+            } else {
+                summary = `📝 ${escapeICS(e.note?.substring(0, 50))}`;
+                description = escapeICS(e.note || '');
+            }
             
+            if(e.location) description += `\\n📍 Location: ${escapeICS(e.location)}`;
+            if(e.weather) description += `\\n☁️ Weather: ${escapeICS(e.weather)}`;
+
             return `BEGIN:VEVENT
 UID:${e.id}@breadcrumbs
 DTSTAMP:${dateStr}
 DTSTART:${dateStr}
 DTEND:${endDateStr}
-SUMMARY:${summary.replace(/\n/g, ' ')}
-DESCRIPTION:${description.replace(/\n/g, '\\n')}
-LOCATION:${e.location || ''}
+SUMMARY:${summary}
+DESCRIPTION:${description}
+LOCATION:${escapeICS(e.location || '')}
 END:VEVENT`;
         }).join('\n');
     }
@@ -1596,10 +1079,11 @@ function openStats() {
 
 function calculateStats() {
     const totalEntries = entries.length;
-    const breadcrumbs = entries.filter(e => !e.isTimedActivity && !e.isQuickTrack && !e.isSpent).length;
+    const recaps = entries.filter(e => e.type === 'recap').length;
     const timeEvents = entries.filter(e => e.isTimedActivity).length;
     const trackEvents = entries.filter(e => e.isQuickTrack).length;
     const spentEvents = entries.filter(e => e.isSpent).length;
+    const breadcrumbs = totalEntries - recaps - timeEvents - trackEvents - spentEvents;
     
     const totalSpent = entries
         .filter(e => e.isSpent)
@@ -1610,15 +1094,18 @@ function calculateStats() {
         .reduce((sum, e) => sum + (e.duration || 0), 0);
     
     const totalHours = (totalMinutes / 60).toFixed(1);
+
+    const avgRating = entries.filter(e => e.type === 'recap' && e.rating)
+                             .reduce((sum, e, i, arr) => sum + e.rating / arr.length, 0);
     
     // Actividades más frecuentes
     const activityCount = {};
     entries.filter(e => e.isTimedActivity).forEach(e => {
-        activityCount[e.activity] = (activityCount[e.activity] || 0) + 1;
+        activityCount[e.activity] = (activityCount[e.activity] || 0) + e.duration; // Sumar por duración
     });
     const topActivity = Object.keys(activityCount).length > 0 
         ? Object.keys(activityCount).reduce((a, b) => activityCount[a] > activityCount[b] ? a : b)
-        : 'None';
+        : 'N/A';
     
     // Tracks más frecuentes
     const trackCount = {};
@@ -1627,7 +1114,7 @@ function calculateStats() {
     });
     const topTrack = Object.keys(trackCount).length > 0
         ? Object.keys(trackCount).reduce((a, b) => trackCount[a] > trackCount[b] ? a : b)
-        : 'None';
+        : 'N/A';
     
     const statsHTML = `
         <div class="stat-card">
@@ -1639,12 +1126,32 @@ function calculateStats() {
             <div class="stat-label">📝 Breadcrumbs</div>
         </div>
         <div class="stat-card">
+            <div class="stat-number">${recaps}</div>
+            <div class="stat-label">🌟 Day Recaps</div>
+        </div>
+         <div class="stat-card">
+            <div class="stat-number">${avgRating.toFixed(1)} / 10</div>
+            <div class="stat-label">Avg. Rating</div>
+        </div>
+        <div class="stat-card">
             <div class="stat-number">${timeEvents}</div>
             <div class="stat-label">⏱️ Time Events</div>
         </div>
         <div class="stat-card">
+            <div class="stat-number">${totalHours}h</div>
+            <div class="stat-label">Hours Tracked</div>
+        </div>
+         <div class="stat-card">
+            <div class="stat-number" style="font-size: 18px;">${topActivity}</div>
+            <div class="stat-label">Top Activity (by time)</div>
+        </div>
+        <div class="stat-card">
             <div class="stat-number">${trackEvents}</div>
             <div class="stat-label">📊 Tracked Items</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" style="font-size: 16px;">${topTrack}</div>
+            <div class="stat-label">Most Tracked</div>
         </div>
         <div class="stat-card">
             <div class="stat-number">${spentEvents}</div>
@@ -1654,26 +1161,23 @@ function calculateStats() {
             <div class="stat-number">€${totalSpent.toFixed(2)}</div>
             <div class="stat-label">Total Spent</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">${totalHours}h</div>
-            <div class="stat-label">Hours Tracked</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number" style="font-size: 18px;">${topActivity}</div>
-            <div class="stat-label">Top Activity</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number" style="font-size: 16px;">${topTrack}</div>
-            <div class="stat-label">Most Tracked</div>
-        </div>
     `;
     
     document.getElementById('stats-content').innerHTML = statsHTML;
 }
 
 function closeStats(event) {
-    if (event && event.target.id !== 'stats-modal') return;
-    const modal = document.getElementById('stats-modal');
+    if (event && event.target.id !== 'stats-modal' && !event.target.closest('.preview-content')) return;
+     if (event && event.target.id === 'stats-modal') {
+        const modal = document.getElementById('stats-modal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+    }
+}
+
+function forceCloseStats() {
+     const modal = document.getElementById('stats-modal');
     if (modal) {
         modal.classList.remove('show');
     }
@@ -1686,12 +1190,25 @@ loadSettings();
 
 function showRecapForm() {
     // Ocultar otros formularios
-    ['crumb-form', 'time-form', 'track-form', 'spent-form'].forEach(id => {
-        const form = document.getElementById(id);
-        if (form) form.classList.add('hidden');
-    });
+    document.getElementById('form-window').classList.add('hidden');
+    document.getElementById('timer-window').classList.add('hidden');
+    document.getElementById('track-window').classList.add('hidden');
+    document.getElementById('spent-window').classList.add('hidden');
     
-    document.getElementById('recap-form').classList.remove('hidden');
+    const recapForm = document.getElementById('recap-form');
+    recapForm.classList.remove('hidden');
+    
+    // Limpiar formulario antes de mostrar
+    document.getElementById('recap-reflection').value = '';
+    document.getElementById('recap-rating').value = '5';
+    document.getElementById('recap-rating-value').textContent = '5';
+    document.getElementById('recap-highlight-1').value = '';
+    document.getElementById('recap-highlight-2').value = '';
+    document.getElementById('recap-highlight-3').value = '';
+    document.getElementById('recap-bso').value = '';
+    document.getElementById('recap-bso-results').innerHTML = '';
+    document.getElementById('recap-selected-track').value = '';
+    editingEntryId = null; // Asegurarse de que no estamos editando
     
     // Establecer fecha actual
     setCurrentDateTime('datetime-input-recap');
@@ -1703,11 +1220,13 @@ function showRecapForm() {
     slider.oninput = function() {
         valueDisplay.textContent = this.value;
     };
+
+    recapForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function closeRecapForm() {
     document.getElementById('recap-form').classList.add('hidden');
-    // Limpiar formulario
+    // Limpiar formulario al cerrar
     document.getElementById('recap-reflection').value = '';
     document.getElementById('recap-rating').value = '5';
     document.getElementById('recap-rating-value').textContent = '5';
@@ -1717,128 +1236,16 @@ function closeRecapForm() {
     document.getElementById('recap-bso').value = '';
     document.getElementById('recap-bso-results').innerHTML = '';
     document.getElementById('recap-selected-track').value = '';
+    editingEntryId = null;
 }
 
-/* REMOVED: buscarBSO()
-Esta función ahora vive en api-services.js
-*/
-
-function selectTrack(trackName, artistName, url, artwork) {
-    const trackData = {
-        name: trackName,
-        artist: artistName,
-        url: url,
-        artwork: artwork
-    };
-    
-    document.getElementById('recap-selected-track').value = JSON.stringify(trackData);
-    document.getElementById('recap-bso-results').innerHTML = `
-        <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 3px solid #000; background: #f0f0f0;">
-            <img src="${artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
-            <div style="flex: 1;">
-                <div style="font-weight: bold;">${trackName}</div>
-                <div style="font-size: 12px; color: #666;">${artistName}</div>
-            </div>
-            <a href="${url}" target="_blank" style="text-decoration: none; font-size: 20px;">🔗</a>
-        </div>
-    `;
-}
-
-function editRecapEvent(entry) {
-    editingEntryId = entry.id;
-    
-    // Set datetime
-    const date = new Date(entry.timestamp);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    document.getElementById('datetime-input-recap').value = `${year}-${month}-${day}T${hours}:${minutes}`;
-    
-    document.getElementById('recap-reflection').value = entry.reflection || '';
-    document.getElementById('recap-rating').value = entry.rating || 5;
-    document.getElementById('recap-rating-value').textContent = entry.rating || 5;
-    
-    if (entry.highlights && entry.highlights.length > 0) {
-        document.getElementById('recap-highlight-1').value = entry.highlights[0] || '';
-        document.getElementById('recap-highlight-2').value = entry.highlights[1] || '';
-        document.getElementById('recap-highlight-3').value = entry.highlights[2] || '';
-    }
-    
-    if (entry.track) {
-        document.getElementById('recap-selected-track').value = JSON.stringify(entry.track);
-        document.getElementById('recap-bso-results').innerHTML = `
-            <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 3px solid #000; background: #f0f0f0;">
-                <img src="${entry.track.artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
-                <div style="flex: 1;">
-                    <div style="font-weight: bold;">${entry.track.name}</div>
-                    <div style="font-size: 12px; color: #666;">${entry.track.artist}</div>
-                </div>
-                <a href="${entry.track.url}" target="_blank" style="text-decoration: none; font-size: 20px;">🔗</a>
-            </div>
-        `;
-    }
-    
-    const recapForm = document.getElementById('recap-form');
-    recapForm.classList.remove('hidden');
-    recapForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function saveRecap() {
-    const reflection = document.getElementById('recap-reflection').value.trim();
-    const rating = document.getElementById('recap-rating').value;
-    const highlight1 = document.getElementById('recap-highlight-1').value.trim();
-    const highlight2 = document.getElementById('recap-highlight-2').value.trim();
-    const highlight3 = document.getElementById('recap-highlight-3').value.trim();
-    const selectedTrackJson = document.getElementById('recap-selected-track').value;
-    const timestamp = getTimestampFromInput('datetime-input-recap');
-    
-    if (!reflection && !highlight1 && !highlight2 && !highlight3) {
-        alert('Please add at least one reflection or highlight');
-        return;
-    }
-    
-    if (editingEntryId) {
-        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
-        if (entryIndex !== -1) {
-            entries[entryIndex] = {
-                ...entries[entryIndex],
-                timestamp: timestamp,
-                reflection: reflection,
-                rating: parseInt(rating),
-                highlights: [highlight1, highlight2, highlight3].filter(h => h),
-                track: selectedTrackJson ? JSON.parse(selectedTrackJson) : null
-            };
-        }
-        editingEntryId = null;
-        alert('🌟 Recap updated!');
-    } else {
-        const recap = {
-            id: Date.now(),
-            timestamp: timestamp,
-            type: 'recap',
-            reflection: reflection,
-            rating: parseInt(rating),
-            highlights: [highlight1, highlight2, highlight3].filter(h => h),
-            track: selectedTrackJson ? JSON.parse(selectedTrackJson) : null
-        };
-        
-        entries.unshift(recap);
-        alert('🌟 Recap saved!');
-    }
-    
-    saveData();
-    renderTimeline();
-    closeRecapForm();
-}
 
 // ===== FAB MENU =====
 
 let fabMenuOpen = false;
 
 function toggleFabMenu() {
-    const fabActions = document.querySelectorAll('.fab-action'); // FIX: Apuntar a .fab-action
+    const fabActions = document.querySelectorAll('.fab-action'); // Corregido: .fab-action
     const fabIcon = document.getElementById('fab-icon');
     
     fabMenuOpen = !fabMenuOpen;
@@ -1848,19 +1255,21 @@ function toggleFabMenu() {
         fabIcon.style.transform = 'rotate(45deg)';
         
         fabActions.forEach((wrapper, index) => {
+            wrapper.classList.remove('hidden'); // Quitar 'hidden' para que la animación funcione
             setTimeout(() => {
-                wrapper.classList.remove('hidden');
-                setTimeout(() => wrapper.classList.add('show'), 10); // Aplicar 'show' al botón
-            }, index * 50);
+                wrapper.classList.add('show');
+            }, index * 40 + 20); // Añadir un pequeño retraso escalonado
         });
     } else {
         fabIcon.textContent = '+';
         fabIcon.style.transform = 'rotate(0deg)';
         
-        fabActions.forEach((wrapper, index) => {
+        // Animar en orden inverso
+        Array.from(fabActions).reverse().forEach((wrapper, index) => {
             setTimeout(() => {
-                wrapper.classList.remove('show'); // Quitar 'show' al botón
-                setTimeout(() => wrapper.classList.add('hidden'), 300);
+                wrapper.classList.remove('show');
+                // Añadir 'hidden' después de que termine la animación
+                setTimeout(() => wrapper.classList.add('hidden'), 300); 
             }, index * 30);
         });
     }
@@ -1873,8 +1282,48 @@ function closeFabMenu() {
     }
 }
 
-// --- REMOVED: Lógica de window.toggle... ---
-// Esto se gestionará directamente en el index.html
-// para más claridad.
+// Inicialización de los botones del footer
+document.addEventListener('DOMContentLoaded', () => {
+    // Asignar listeners a los botones del footer
+    const statsBtn = document.querySelector('.footer .mac-button[onclick="openStats()"]');
+    if (statsBtn) statsBtn.onclick = openStats;
+    
+    const csvBtn = document.querySelector('.footer .mac-button[onclick="exportCSV()"]');
+    if (csvBtn) csvBtn.onclick = exportCSV;
 
+    const icsBtn = document.querySelector('.footer .mac-button[onclick="exportICS()"]');
+    if (icsBtn) icsBtn.onclick = exportICS;
+
+    const settingsBtn = document.querySelector('.footer .mac-button[onclick="openSettings()"]');
+    if (settingsBtn) settingsBtn.onclick = openSettings;
+
+    // Asignar listeners a los botones FAB
+    const fabMain = document.getElementById('fab-main');
+    if(fabMain) fabMain.onclick = toggleFabMenu;
+
+    const fabCrumb = document.querySelector('.fab-action[title="Breadcrumb"]');
+    if(fabCrumb) fabCrumb.onclick = () => { toggleForm(); closeFabMenu(); };
+
+    const fabTime = document.querySelector('.fab-action[title="Time Event"]');
+    if(fabTime) fabTime.onclick = () => { toggleTimer(); closeFabMenu(); };
+
+    const fabTrack = document.querySelector('.fab-action[title="Quick Track"]');
+    if(fabTrack) fabTrack.onclick = () => { toggleTrack(); closeFabMenu(); };
+
+    const fabSpent = document.querySelector('.fab-action[title="Spent"]');
+    if(fabSpent) fabSpent.onclick = () => { toggleSpent(); closeFabMenu(); };
+
+    const fabRecap = document.querySelector('.fab-action[title="Day Recap"]');
+    if(fabRecap) fabRecap.onclick = () => { showRecapForm(); closeFabMenu(); };
+
+    // Asignar listeners a los botones principales
+    const syncBtn = document.querySelector('.sync-button');
+    if (syncBtn) syncBtn.onclick = syncData;
+
+    // ... (otros listeners si es necesario) ...
+
+    // Inicializar las opciones de los formularios
+    updateTimerOptions();
+    updateTrackOptions();
+});
 
