@@ -23,7 +23,8 @@
         <img class="header-image" src="./header.png" alt="Breadcrumbs Timeline Header">
     </div>
     
-    <div class="sync-status" id="sync-status">● Offline</div>
+    <!-- CAMBIO: Div sync-status eliminado -->
+    <!-- <div class="sync-status" id="sync-status">● Offline</div> -->
 
     <div id="auth-container" class="auth-panel">
         <div style="text-align: center; margin-bottom: 20px;">
@@ -31,11 +32,11 @@
             <p style="font-size: 12px; color: #666;">Sign in to sync your data</p>
         </div>
         
-        <button class="mac-button mac-button-primary" onclick="signInWithGoogle()" style="width: 100%; margin-bottom: 12px; font-size: 16px;">
+        <button class="mac-button mac-button-primary" onclick="window.signInWithGoogle()" style="width: 100%; margin-bottom: 12px; font-size: 16px;">
             🔐 Sign in with Google
         </button>
         
-        <button class="mac-button" onclick="signInWithEmail()" style="width: 100%; margin-bottom: 12px; font-size: 14px;">
+        <button class="mac-button" onclick="window.signInWithEmail()" style="width: 100%; margin-bottom: 12px; font-size: 14px;">
             📧 Sign in with Email
         </button>
         
@@ -44,7 +45,7 @@
             <br>
             <span style="font-size: 10px;">(data saved locally only)</span>
             <br>
-            <button class="mac-button" onclick="continueOffline()" style="margin-top: 8px; font-size: 11px;">Continue Offline</button>
+            <button class="mac-button" onclick="window.continueOffline()" style="margin-top: 8px; font-size: 11px;">Continue Offline</button>
         </div>
     </div>
 
@@ -54,7 +55,7 @@
     <div id="recap-form" class="mac-window hidden">
         <div class="mac-title-bar">
             <span>🌟 Day Recap</span>
-            <button onclick="closeRecapForm()" style="background: transparent; border: none; color: white; cursor: pointer; font-size: 18px;">✕</button>
+            <button onclick="window.closeRecapForm()" style="background: transparent; border: none; color: white; cursor: pointer; font-size: 18px;">✕</button>
         </div>
         <div class="mac-content">
             <label class="mac-label">📅 Date & Time:</label>
@@ -70,11 +71,7 @@
                 <span id="recap-rating-value" style="font-size: 24px; font-weight: bold; min-width: 40px;">5</span>
             </div>
             
-            <label class="mac-label">
-                3 cosas destacadas del día
-                <!-- El botón de Gemini lo dejamos para después -->
-                <!-- <button class="mac-button" onclick="handleGenerateHighlights()" id="gemini-generate-btn" style="font-size: 11px; padding: 2px 6px; margin-left: 8px;">✨ Generar</button> -->
-            </label>
+            <label class="mac-label">3 cosas destacadas del día</label>
             <input type="text" id="recap-highlight-1" class="mac-input" placeholder="1. Lo mejor del día">
             <input type="text" id="recap-highlight-2" class="mac-input" placeholder="2. Algo que aprendiste">
             <input type="text" id="recap-highlight-3" class="mac-input" placeholder="3. Momento favorito">
@@ -82,14 +79,16 @@
             <label class="mac-label">Banda Sonora del Día (BSO)</label>
             <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                 <input type="text" id="recap-bso" class="mac-input" placeholder="Buscar canción..." style="margin-bottom: 0;">
-                <button class="mac-button mac-button-primary" onclick="buscarBSO()">🔍 Buscar</button>
+                <button class="mac-button mac-button-primary" onclick="window.buscarBSO()">🔍 Buscar</button>
             </div>
             <div id="recap-bso-results" style="max-height: 200px; overflow-y: auto;"></div>
             <input type="hidden" id="recap-selected-track">
             
             <div style="margin-top: 16px;">
-                <button class="mac-button mac-button-primary" onclick="saveRecap()">💾 Save Recap</button>
-                <button class="mac-button" onclick="closeRecapForm()">Cancel</button>
+                <button class="mac-button mac-button-primary" onclick="window.saveRecap()">💾 Save Recap</button>
+                <button class="mac-button" onclick="window.closeRecapForm()">Cancel</button>
+                <!-- Botón Delete para Recap (opcional, necesita window.deleteCurrentEntry en app.js) -->
+                <!-- <button class="mac-button delete-button hidden" onclick="window.deleteCurrentEntry()" id="delete-recap-btn">🗑️ Delete</button> -->
             </div>
         </div>
     </div>
@@ -98,21 +97,21 @@
             <div class="mac-title-bar">
                 <div class="title-left">
                     <span>Breadcrumbs Timeline</span>
-                    <button class="sync-button" onclick="refreshApp()" title="Refresh & Sync">🔄</button>
+                    <button class="sync-button" onclick="window.syncData()" title="Refresh & Sync">🔄</button>
                 </div>
-                <div class="user-avatar" id="user-avatar" onclick="toggleUserMenu(event)" style="display: none;">
+                <div class="user-avatar" id="user-avatar" onclick="window.toggleUserMenu(event)" style="display: none;">
                     <span id="user-icon">👤</span>
                     <div class="logout-menu" id="logout-menu">
                         <div class="user-email-display" id="user-email-full"></div>
-                        <button onclick="signOutUser(); event.stopPropagation();">🚪 Sign Out</button>
+                        <button onclick="window.signOutUser(); event.stopPropagation();">🚪 Sign Out</button>
                     </div>
                 </div>
             </div>
             <div class="mac-content">
-                <button class="mac-button mac-button-primary" onclick="toggleForm()">➕ Crumb</button>
-                <button class="mac-button" onclick="toggleTimer()">⏱️ Time</button>
-                <button class="mac-button" onclick="toggleTrack()">📊 Track</button>
-                <button class="mac-button" onclick="toggleSpent()">💰 Spent</button>
+                <button class="mac-button mac-button-primary" onclick="window.toggleForm()">➕ Crumb</button>
+                <button class="mac-button" onclick="window.toggleTimer()">⏱️ Time</button>
+                <button class="mac-button" onclick="window.toggleTrack()">📊 Track</button>
+                <button class="mac-button" onclick="window.toggleSpent()">💰 Spent</button>
             </div>
         </div>
 
@@ -124,42 +123,42 @@
 
                 <label class="mac-label">
                     😊 Mood:
-                    <button class="mac-button mood-config-btn" onclick="toggleMoodConfig()">⚙️</button>
+                    <button class="mac-button mood-config-btn" onclick="window.toggleMoodConfig()">⚙️</button>
                 </label>
                 
                 <div id="mood-config" class="config-panel hidden">
-                    <div style="margin-bottom: 12px; font-weight: bold;">Configure moods:</div>
-                    <div id="mood-config-list"></div>
-                    <button class="mac-button" onclick="saveMoodConfig()" style="margin-top: 8px;">💾 Save Configuration</button>
+                    <!-- Contenido renderizado por settings-manager.js -->
                 </div>
 
-                <div class="mood-selector" id="mood-selector"></div>
+                <div class="mood-selector" id="mood-selector">
+                    <!-- Contenido renderizado por app.js -->
+                </div>
 
                 <label class="mac-label">Note:</label>
                 <textarea class="mac-textarea" id="note-input" placeholder="What's happening?"></textarea>
 
                 <label class="mac-label">📍 Location:</label>
                 <input type="text" class="mac-input" id="location-input" placeholder="Place">
-                <button class="mac-button" onclick="getGPS()" id="gps-btn">🌍 Use GPS</button>
+                <button class="mac-button" onclick="window.getGPS()" id="gps-btn">🌍 Use GPS</button>
                 <div id="form-map" class="mini-map" style="display: none;"></div>
 
                 <label class="mac-label">☁️ Weather:</label>
                 <input type="text" class="mac-input" id="weather-input" placeholder="Sunny, cloudy...">
 
                 <label class="mac-label">🖼️ Images:</label>
-                <input type="file" accept="image/*" multiple onchange="handleImages(event)" style="margin-bottom: 12px;">
+                <input type="file" accept="image/*" multiple onchange="window.handleImages(event)" style="margin-bottom: 12px;">
                 <div id="image-previews"></div>
 
                 <label class="mac-label">🎤 Audio:</label>
                 <div class="audio-recorder">
-                    <button class="mac-button" onclick="startRecording()" id="record-btn">🔴 Record</button>
-                    <button class="mac-button" onclick="stopRecording()" id="stop-record-btn" disabled>⏹️ Stop</button>
+                    <button class="mac-button" onclick="window.startRecording()" id="record-btn">🔴 Record</button>
+                    <button class="mac-button" onclick="window.stopRecording()" id="stop-record-btn" disabled>⏹️ Stop</button>
                     <div id="audio-preview" style="margin-top: 8px;"></div>
                 </div>
 
-                <button class="mac-button mac-button-primary" onclick="saveEntry()" id="save-btn">💾 Save</button>
-                <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-btn">🗑️ Delete</button>
-                <button class="mac-button" onclick="cancelEdit()">Cancel</button>
+                <button class="mac-button mac-button-primary" onclick="window.saveEntry()" id="save-btn">💾 Save</button>
+                <button class="mac-button delete-button hidden" onclick="window.deleteCurrentEntry()" id="delete-btn">🗑️ Delete</button>
+                <button class="mac-button" onclick="window.cancelEdit()">Cancel</button>
             </div>
         </div>
 
@@ -170,17 +169,21 @@
                 <input type="datetime-local" class="mac-input" id="datetime-input-time">
 
                 <label class="mac-label">Duration:</label>
-                <div class="duration-selector" id="duration-selector"></div>
+                <div class="duration-selector" id="duration-selector">
+                    <!-- Contenido renderizado por settings-manager.js -->
+                </div>
 
                 <label class="mac-label">Activity:</label>
-                <div class="activity-selector" id="activity-selector"></div>
+                <div class="activity-selector" id="activity-selector">
+                     <!-- Contenido renderizado por settings-manager.js -->
+                </div>
 
                 <label class="mac-label">Optional Note:</label>
                 <input type="text" class="mac-input" id="time-optional-note" placeholder="Add a short note (optional)">
 
-                <button class="mac-button mac-button-primary" onclick="createTimeEvent()" id="create-time-btn" disabled style="width: 100%; margin-top: 16px;">Create Event</button>
-                <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-time-btn" style="width: 100%; margin-top: 8px;">🗑️ Delete</button>
-                <button class="mac-button" onclick="toggleTimer()" style="width: 100%; margin-top: 8px;">Cancel</button>
+                <button class="mac-button mac-button-primary" onclick="window.createTimeEvent()" id="create-time-btn" disabled style="width: 100%; margin-top: 16px;">Create Event</button>
+                <button class="mac-button delete-button hidden" onclick="window.deleteCurrentEntry()" id="delete-time-btn" style="width: 100%; margin-top: 8px;">🗑️ Delete</button>
+                <button class="mac-button" onclick="window.toggleTimer()" style="width: 100%; margin-top: 8px;">Cancel</button>
             </div>
         </div>
 
@@ -191,14 +194,16 @@
                 <input type="datetime-local" class="mac-input" id="datetime-input-track">
 
                 <label class="mac-label">Select Track Type:</label>
-                <div class="activity-selector" id="track-selector"></div>
+                <div class="activity-selector" id="track-selector">
+                     <!-- Contenido renderizado por settings-manager.js -->
+                </div>
 
                 <label class="mac-label">Optional Note:</label>
                 <input type="text" class="mac-input" id="track-optional-note" placeholder="Add a short note (optional)">
 
-                <button class="mac-button mac-button-primary" onclick="saveTrackEvent()" id="save-track-btn" disabled style="width: 100%; margin-top: 16px;">Save Track</button>
-                <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-track-btn" style="width: 100%; margin-top: 8px;">🗑️ Delete</button>
-                <button class="mac-button" onclick="toggleTrack()" style="width: 100%; margin-top: 8px;">Cancel</button>
+                <button class="mac-button mac-button-primary" onclick="window.saveTrackEvent()" id="save-track-btn" disabled style="width: 100%; margin-top: 16px;">Save Track</button>
+                <button class="mac-button delete-button hidden" onclick="window.deleteCurrentEntry()" id="delete-track-btn" style="width: 100%; margin-top: 8px;">🗑️ Delete</button>
+                <button class="mac-button" onclick="window.toggleTrack()" style="width: 100%; margin-top: 8px;">Cancel</button>
             </div>
         </div>
 
@@ -217,13 +222,15 @@
                     <span style="font-weight: bold;">€</span>
                 </div>
 
-                <button class="mac-button mac-button-primary" onclick="saveSpent()" style="width: 100%;">💾 Save</button>
-                <button class="mac-button delete-button hidden" onclick="deleteCurrentEntry()" id="delete-spent-btn" style="width: 100%; margin-top: 8px;">🗑️ Delete</button>
-                <button class="mac-button" onclick="toggleSpent()" style="width: 100%; margin-top: 8px;">Cancel</button>
+                <button class="mac-button mac-button-primary" onclick="window.saveSpent()" style="width: 100%;">💾 Save</button>
+                <button class="mac-button delete-button hidden" onclick="window.deleteCurrentEntry()" id="delete-spent-btn" style="width: 100%; margin-top: 8px;">🗑️ Delete</button>
+                <button class="mac-button" onclick="window.toggleSpent()" style="width: 100%; margin-top: 8px;">Cancel</button>
             </div>
         </div>
 
-        <div id="timeline-container"></div>
+        <div id="timeline-container">
+             <!-- Contenido renderizado por app.js (renderTimeline) -->
+        </div>
 
         <div class="mac-window hidden" id="empty-state">
             <div class="mac-content empty-state">
@@ -234,21 +241,21 @@
         </div>
     </div>
 
-    <div id="preview-modal" class="preview-modal" onclick="closePreview(event)">
+    <div id="preview-modal" class="preview-modal" onclick="window.closePreview(event)">
         <div class="preview-content" onclick="event.stopPropagation()">
             <div class="mac-title-bar">
                 <span>Preview</span>
-                <button onclick="closePreview()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
+                <button onclick="window.closePreview()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
             </div>
             <div class="mac-content" id="preview-body"></div>
         </div>
     </div>
 
-    <div id="settings-modal" class="preview-modal" onclick="closeSettings(event)">
+    <div id="settings-modal" class="preview-modal" onclick="window.closeSettings(event)">
         <div class="preview-content" onclick="event.stopPropagation()">
             <div class="mac-title-bar">
                 <span>Settings</span>
-                <button onclick="closeSettings()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
+                <button onclick="window.closeSettings()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
             </div>
             <div class="mac-content">
                 <h3 style="margin-bottom: 16px;">Time Durations</h3>
@@ -259,61 +266,77 @@
                 
                 <h3 style="margin-top: 24px; margin-bottom: 16px;">Track Items</h3>
                 <div id="track-items-config"></div>
-                
-                <button class="mac-button mac-button-primary" onclick="saveSettings()" style="width: 100%; margin-top: 24px;">💾 Save Settings</button>
+
+                <h3 style="margin-top: 24px; margin-bottom: 16px;">Moods</h3>
+                <div id="mood-config-list"></div> <!-- Moved from form-window -->
+
+                <button class="mac-button mac-button-primary" onclick="window.saveSettings()" style="width: 100%; margin-top: 24px;">💾 Save Settings</button>
             </div>
         </div>
     </div>
 
-    <div id="stats-modal" class="preview-modal" onclick="closeStats(event)">
+    <div id="stats-modal" class="preview-modal" onclick="window.closeStats(event)">
         <div class="preview-content" onclick="event.stopPropagation()">
             <div class="mac-title-bar">
                 <span>📊 Statistics</span>
-                <button onclick="closeStats()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
+                <button onclick="window.closeStats()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
             </div>
             <div class="mac-content">
                 <div class="stats-grid" id="stats-content"></div>
             </div>
         </div>
     </div>
+    
+    <!-- El modal de exportación se crea dinámicamente en data-tools.js -->
+    <!-- <div id="export-modal" ... ></div> -->
 
     <div class="fab-container">
-        <button class="fab fab-main" onclick="toggleFabMenu()" id="fab-main">
+        <button class="fab fab-main" onclick="window.toggleFabMenu()" id="fab-main">
             <span id="fab-icon">+</span>
         </button>
-        <!-- ARREGLO: onclick ahora llama a la función correcta Y cierra el menú -->
         <div class="fab-action-wrapper hidden">
-            <span class="fab-label">Recap</span>
-            <button class="fab fab-action" onclick="showRecapForm(); closeFabMenu();" title="Day Recap">🌟</button>
+            <span class="fab-label">Breadcrumb</span>
+            <button class="fab fab-action" onclick="window.toggleCrumb()" title="Breadcrumb">📍</button>
         </div>
         <div class="fab-action-wrapper hidden">
-            <span class="fab-label">Spent</span>
-            <button class="fab fab-action" onclick="toggleSpent(); closeFabMenu();" title="Spent">💰</button>
+             <span class="fab-label">Time Event</span>
+            <button class="fab fab-action" onclick="window.toggleTime()" title="Time Event">⏰</button>
         </div>
         <div class="fab-action-wrapper hidden">
-            <span class="fab-label">Track</span>
-            <button class="fab fab-action" onclick="toggleTrack(); closeFabMenu();" title="Quick Track">🎵</button>
+             <span class="fab-label">Quick Track</span>
+            <button class="fab fab-action" onclick="window.toggleTrack()" title="Quick Track">📊</button>
         </div>
         <div class="fab-action-wrapper hidden">
-            <span class="fab-label">Time</span>
-            <button class="fab fab-action" onclick="toggleTimer(); closeFabMenu();" title="Time Event">⏰</button>
+             <span class="fab-label">Spent</span>
+            <button class="fab fab-action" onclick="window.toggleSpent()" title="Spent">💰</button>
         </div>
-        <div class="fab-action-wrapper hidden">
-            <span class="fab-label">Crumb</span>
-            <button class="fab fab-action" onclick="toggleForm(); closeFabMenu();" title="Breadcrumb">📍</button>
+         <div class="fab-action-wrapper hidden">
+             <span class="fab-label">Day Recap</span>
+            <button class="fab fab-action" onclick="window.showRecapFormWithFab()" title="Day Recap">🌟</button>
         </div>
     </div>
 
     <div class="footer" id="footer" style="display: none;">
-        <button class="mac-button" onclick="openStats()">📊 Stats</button>
-        <button class="mac-button" onclick="exportCSV()">💾 CSV</button>
-        <button class="mac-button" onclick="exportICS()">📅 iCal</button>
-        <button class="mac-button" onclick="openSettings()">⚙️ Settings</button>
+        <button class="mac-button" onclick="window.openStats()">📊 Stats</button>
+        <button class="mac-button" onclick="window.exportCSV()">💾 CSV</button>
+        <button class="mac-button" onclick="window.exportICS()">📅 iCal</button>
+        <button class="mac-button" onclick="window.openSettings()">⚙️ Settings</button>
     </div>
 
-    <!-- ARREGLO: Orden de scripts simple y funcional -->
+    <!-- Orden de scripts FINAL -->
+    <!-- Configuración Firebase -->
     <script src="./firebase-config.js"></script>
+    <!-- Cerebro y variables globales -->
     <script src="./app.js"></script>
+    <!-- Módulos / Handlers -->
+    <script src="./settings-manager.js"></script>
+    <script src="./data-tools.js"></script> 
+    <!-- <script src="./api-services.js"></script> --> <!-- Próximo paso -->
+    <!-- <script src="./media-handlers.js"></script> --> <!-- Próximo paso -->
+    <!-- <script src="./crud-handlers.js"></script> --> <!-- Próximo paso -->
+    <!-- <script src="./ui-renderer.js"></script> --> <!-- Próximo paso -->
+    <!-- <script src="./ui-handlers.js"></script> --> <!-- Próximo paso -->
+
 </body>
 </html>
 
