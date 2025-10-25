@@ -193,13 +193,13 @@ h1 {
 .mac-button {
     background: #ddd;
     border: 3px outset #fff;
-    padding: 8px 16px;
+    padding: 4px 8px;
     font-family: 'Courier New', monospace;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
     cursor: pointer;
-    margin-right: 8px;
-    margin-bottom: 8px;
+    margin-right: 4px;
+    margin-bottom: 4px;
 }
 
 .mac-button:hover {
@@ -295,7 +295,7 @@ h1 {
     background: #333;
 }
 
-/* ANIMACIÓN PANEL DESPLEGABLE */
+/* ANIMACIÃƒâ€œN PANEL DESPLEGABLE */
 .day-content {
     max-height: 0;
     overflow: hidden;
@@ -323,7 +323,7 @@ h1 {
     padding: 16px !important;
 }
 
-/* ANIMACIÓN CHEVRON */
+/* ANIMACIÃƒâ€œN CHEVRON */
 .chevron {
     display: inline-block;
     transition: transform 0.3s ease;
@@ -385,10 +385,17 @@ h1 {
     max-height: 4.8em;
     overflow: hidden;
     position: relative;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    transition: all 0.3s ease;
 }
 
 .breadcrumb-note.expanded {
     max-height: none !important;
+    display: block;
+    -webkit-line-clamp: unset;
+    animation: slideDown 0.3s ease;
 }
 
 .read-more-btn {
@@ -460,7 +467,7 @@ h1 {
     font-size: 11px;
 }
 
-/* ANIMACIÓN MODAL (pop-in suave) */
+/* ANIMACIÃƒâ€œN MODAL (pop-in suave) */
 .preview-modal {
     display: none;
     position: fixed;
@@ -569,21 +576,29 @@ h1 {
     right: 0 !important;
     background: #000;
     color: white;
-    padding: 10px 12px;
+    padding: 6px 8px;
     border-top: 3px solid #666;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 8px;
-    box-shadow: 0 -3px 10px rgba(0,0,0,0.3);
+    gap: 6px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
     z-index: 9999 !important;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
 .footer .mac-button {
-    margin: 0;
-    font-size: 11px;
-    padding: 6px 10px;
+    margin: 0 2px;
+    font-size: 10px;
+    padding: 5px 8px;
+    min-width: fit-content;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.footer .mac-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 3px 3px 0 rgba(255,255,255,0.2);
 }
 
 @media (max-width: 768px) {
@@ -840,12 +855,25 @@ h1 {
     color: #000 !important;
     margin-top: 24px !important;
     padding: 14px !important;
+    max-height: 4.8em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    transition: all 0.3s ease;
     border: 2px solid #cc9900 !important;
     border-radius: 4px !important;
     line-height: 1.6 !important;
     background: #fffacd !important;
     display: block !important;
 }
+
+.optional-note.expanded {
+    max-height: none !important;
+    display: block;
+    -webkit-line-clamp: unset;
+    animation: slideDown 0.3s ease;
+} /* <-- ESTA LLAVE FALTABA */
 
 .breadcrumb-entry.track-event .optional-note {
     color: #000 !important;
@@ -862,5 +890,434 @@ h1 {
     
     .header-image {
         max-height: 150px;
+    }
+}
+
+/* ANIMACIONES PARA TODOS LOS MODALES Y FORMULARIOS */
+
+/* Stats panel */
+#stats-panel {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition:
+        max-height 0.45s ease,
+        opacity 0.4s ease,
+        transform 0.4s ease;
+}
+
+#stats-panel:not(.hidden) {
+    max-height: 2000px;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Settings panel */
+#settings-panel {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition:
+        max-height 0.45s ease,
+        opacity 0.4s ease,
+        transform 0.4s ease;
+}
+
+#settings-panel:not(.hidden) {
+    max-height: 2000px;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Export panel */
+#export-panel {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition:
+        max-height 0.45s ease,
+        opacity 0.4s ease,
+        transform 0.4s ease;
+}
+
+#export-panel:not(.hidden) {
+    max-height: 2000px;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Formularios de creaciÃƒÂ³n (Crumb, Time, Track, Spent) */
+#form-window,
+#timer-window,
+#track-window,
+#spent-window,
+#recap-form {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition:
+        max-height 0.45s ease,
+        opacity 0.4s ease,
+        transform 0.4s ease;
+}
+
+#form-window:not(.hidden),
+#timer-window:not(.hidden),
+#track-window:not(.hidden),
+#spent-window:not(.hidden),
+#recap-form:not(.hidden) {
+    max-height: 4000px; /* Aumentado para formularios largos */
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* AnimaciÃƒÂ³n suave para botones del footer */
+.footer .mac-button {
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.footer .mac-button:active {
+    transform: scale(0.95);
+}
+
+/* AnimaciÃƒÂ³n para mood selector */
+.mood-option {
+    transition: all 0.2s cubic-bezier(.18,.89,.32,1.28);
+}
+
+.mood-option:active {
+    transform: scale(0.9);
+}
+
+/* AnimaciÃƒÂ³n para activity/duration selectors */
+.duration-option,
+.activity-option {
+    transition: all 0.2s cubic-bezier(.18,.89,.32,1.28);
+}
+
+.duration-option:active,
+.activity-option:active {
+    transform: scale(0.95);
+}
+
+/* AnimaciÃƒÂ³n para image preview */
+.preview-image-thumb,
+.preview-map-thumb {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.preview-image-thumb:hover,
+.preview-map-thumb:hover {
+    transform: scale(1.05);
+    box-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+}
+
+.preview-image-thumb:active,
+.preview-map-thumb:active {
+    transform: scale(0.98);
+}
+
+/* AnimaciÃƒÂ³n para edit button */
+.edit-button {
+    transition: all 0.15s ease;
+}
+
+.edit-button:hover {
+    background: #eee;
+    transform: scale(1.05);
+}
+
+.edit-button:active {
+    transform: scale(0.95);
+}
+
+/* AnimaciÃƒÂ³n para read more button */
+.read-more-btn {
+    transition: all 0.2s ease;
+    padding: 4px 8px;
+    margin-top: 4px;
+}
+
+.read-more-btn:hover {
+    color: #0047b3;
+    transform: translateY(-1px);
+}
+
+.note-text {
+    transition: max-height 0.3s ease;
+    overflow: hidden;
+}
+
+.note-text.expanded {
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0.5;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== RECAP STYLES ===== */
+
+.recap-entry {
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3) !important;
+}
+
+/* Slider estilo Mac retro */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 10px;
+    border: 2px inset #999;
+    background: #ddd;
+    outline: none;
+    border-radius: 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #000;
+    border: 3px outset #fff;
+    cursor: pointer;
+    border-radius: 0;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #000;
+    border: 3px outset #fff;
+    cursor: pointer;
+    border-radius: 0;
+}
+
+input[type="range"]:active::-webkit-slider-thumb {
+    border-style: inset;
+}
+
+input[type="range"]:active::-moz-range-thumb {
+    border-style: inset;
+}
+
+/* BSO Results */
+.bso-result:hover {
+    background: #f0f0f0 !important;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.bso-result:active {
+    transform: scale(0.98);
+}
+
+/* Footer responsive con 5 botones */
+@media (max-width: 768px) {
+    .footer {
+        padding: 8px;
+        gap: 8px;
+        justify-content: center;
+    }
+    
+    .footer .mac-button {
+        font-size: 10px;
+        padding: 8px;
+        flex: 0 1 calc(33.33% - 6px);
+        min-width: 0;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer .mac-button {
+        font-size: 9px;
+        padding: 6px;
+    }
+}
+
+/* ===== FAB BUTTONS ===== */
+
+.fab-container {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    z-index: 9998;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.fab {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 3px solid #000;
+    background: #fff;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+    cursor: pointer;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    position: relative;
+}
+
+.fab:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 6px 6px 0 rgba(0,0,0,0.4);
+}
+
+.fab:active {
+    transform: scale(0.95);
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+}
+
+.fab-main {
+    background: #000;
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    width: 64px;
+    height: 64px;
+}
+
+.fab-main:hover {
+    transform: scale(1.1) rotate(90deg);
+}
+
+.fab-action {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+}
+
+.fab-action-wrapper .fab-action {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: all;
+}
+
+.fab-action.show {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: all;
+}
+
+@media (max-width: 768px) {
+    .fab-container {
+        right: 16px;
+        bottom: 70px;
+    }
+    
+    .fab-main {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .fab-action {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+
+#fab-icon {
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+
+
+/* Recap Block Styles */
+.recap-block {
+    margin: 0;
+    border-bottom: 3px solid #000;
+}
+
+.recap-header {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    color: #000;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    border-top: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.3);
+}
+
+.recap-header:hover {
+    background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
+}
+
+.recap-content {
+    background: #fffef0;
+    padding: 16px;
+    position: relative;
+    border-bottom: none;
+}
+
+.recap-content.hidden {
+    display: none;
+}
+
+.chevron-recap {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.chevron-recap.expanded {
+    transform: rotate(180deg);
+}
+
+/* FAB Action with label */
+.fab-action-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    transform: scale(0) translateY(20px);
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.fab-action-wrapper.show {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: all;
+}
+
+.fab-label {
+    background: #fff;
+    color: #000;
+    padding: 8px 12px;
+    border: 2px solid #000;
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+    font-family: 'Courier New', monospace;
+}
+
+@media (max-width: 768px) {
+    .fab-label {
+        font-size: 10px;
+        padding: 6px 10px;
     }
 }
