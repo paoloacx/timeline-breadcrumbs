@@ -25,7 +25,6 @@
     
     <div class="sync-status" id="sync-status">● Offline</div>
 
-    <!-- Los onclick="" ahora encontrarán las funciones en window -->
     <div id="auth-container" class="auth-panel">
         <div style="text-align: center; margin-bottom: 20px;">
             <h2 style="font-size: 20px;">Breadcrumbs Timeline</h2>
@@ -60,7 +59,7 @@
         <div class="mac-content">
             <label class="mac-label">📅 Date & Time:</label>
             <input type="datetime-local" class="mac-input" id="datetime-input-recap">
-            
+
             <label class="mac-label">Reflexión del día</label>
             <textarea id="recap-reflection" class="mac-textarea" placeholder="¿Cómo fue tu día?"></textarea>
             
@@ -73,7 +72,8 @@
             
             <label class="mac-label">
                 3 cosas destacadas del día
-                <button class="mac-button" onclick="handleGenerateHighlights()" id="gemini-generate-btn" style="font-size: 11px; padding: 2px 6px; margin-left: 8px;">✨ Generar</button>
+                <!-- El botón de Gemini lo dejamos para después -->
+                <!-- <button class="mac-button" onclick="handleGenerateHighlights()" id="gemini-generate-btn" style="font-size: 11px; padding: 2px 6px; margin-left: 8px;">✨ Generar</button> -->
             </label>
             <input type="text" id="recap-highlight-1" class="mac-input" placeholder="1. Lo mejor del día">
             <input type="text" id="recap-highlight-2" class="mac-input" placeholder="2. Algo que aprendiste">
@@ -281,7 +281,7 @@
         <button class="fab fab-main" onclick="toggleFabMenu()" id="fab-main">
             <span id="fab-icon">+</span>
         </button>
-        <!-- onclick="" ahora llamará a las funciones de ui-handlers.js -->
+        <!-- ARREGLO: onclick ahora llama a la función correcta Y cierra el menú -->
         <div class="fab-action-wrapper hidden">
             <span class="fab-label">Recap</span>
             <button class="fab fab-action" onclick="showRecapForm(); closeFabMenu();" title="Day Recap">🌟</button>
@@ -311,21 +311,9 @@
         <button class="mac-button" onclick="openSettings()">⚙️ Settings</button>
     </div>
 
-    <!-- 
-      CAMBIO: Orden de scripts corregido y final.
-      1. Firebase (Define window.auth/db)
-      2. app.js (Define funciones de login GLOBALES y el ARRANQUE)
-      3. Todos los "Handlers" (Definen el resto de funciones)
-    -->
+    <!-- ARREGLO: Orden de scripts simple y funcional -->
     <script src="./firebase-config.js"></script>
     <script src="./app.js"></script>
-    
-    <script src="./api-services.js"></script>
-    <script src="./media-handlers.js"></script>
-    <script src="./crud-handlers.js"></script>
-    <script src="./ui-renderer.js"></script>
-    <script src="./ui-handlers.js"></script>
-    
 </body>
 </html>
 
