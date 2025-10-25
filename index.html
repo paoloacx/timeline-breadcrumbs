@@ -316,18 +316,17 @@
     <!-- 
       CAMBIO: Orden de scripts corregido
       1. firebase-config.js (Define db, auth)
-      2. Todos los scripts que DEFINEN funciones (handlers, renderers, etc.)
-      3. app.js (Define el ESTADO GLOBAL y LLAMA a las funciones)
+      2. app.js (Define el ESTADO GLOBAL y las funciones de HTML onclick)
+      3. El resto de scripts (que DEFINEN funciones que app.js llamará)
     -->
     <script src="./firebase-config.js"></script>
+    <script src="./app.js"></script>
     
     <script src="./api-services.js"></script>
     <script src="./media-handlers.js"></script>
     <script src="./ui-handlers.js"></script>
     <script src="./ui-renderer.js"></script>
     <script src="./crud-handlers.js"></script>
-
-    <script src="./app.js"></script>
     
 </body>
 </html>
