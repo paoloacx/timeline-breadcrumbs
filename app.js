@@ -2037,7 +2037,7 @@ function saveRecap() {
 let fabMenuOpen = false;
 
 function toggleFabMenu() {
-    const fabActions = document.querySelectorAll('.fab-action-wrapper');
+    const fabActions = document.querySelectorAll('.fab-action'); // MODIFICADO: '.fab-action' en lugar de '.fab-action-wrapper'
     const fabIcon = document.getElementById('fab-icon');
     
     fabMenuOpen = !fabMenuOpen;
@@ -2106,3 +2106,4 @@ window.showRecapForm = function() {
         document.getElementById(id)?.classList.add('hidden');
     });
 };
+
