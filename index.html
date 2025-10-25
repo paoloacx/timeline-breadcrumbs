@@ -274,7 +274,6 @@
         <button class="fab fab-main" onclick="toggleFabMenu()" id="fab-main">
             <span id="fab-icon">+</span>
         </button>
-        <!-- CAMBIO: Corregidos los onclicks y las clases -->
         <div class="fab-action-wrapper hidden">
             <span class="fab-label">Crumb</span>
             <button class="fab fab-action" onclick="toggleForm(); closeFabMenu();" title="Breadcrumb">
@@ -317,17 +316,18 @@
     <!-- 
       CAMBIO: Orden de scripts corregido
       1. firebase-config.js (Define db, auth)
-      2. app.js (Define variables GLOBALES y listeners principales)
-      3. El resto de scripts (que USAN las variables y funciones de app.js)
+      2. Todos los scripts que DEFINEN funciones (handlers, renderers, etc.)
+      3. app.js (Define el ESTADO GLOBAL y LLAMA a las funciones)
     -->
     <script src="./firebase-config.js"></script>
-    <script src="./app.js"></script>
     
     <script src="./api-services.js"></script>
     <script src="./media-handlers.js"></script>
     <script src="./ui-handlers.js"></script>
     <script src="./ui-renderer.js"></script>
     <script src="./crud-handlers.js"></script>
+
+    <script src="./app.js"></script>
     
 </body>
 </html>
