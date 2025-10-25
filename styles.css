@@ -295,7 +295,7 @@ h1 {
     background: #333;
 }
 
-/* ANIMACIÃ“N PANEL DESPLEGABLE */
+/* ANIMACIÓN PANEL DESPLEGABLE */
 .day-content {
     max-height: 0;
     overflow: hidden;
@@ -323,7 +323,7 @@ h1 {
     padding: 16px !important;
 }
 
-/* ANIMACIÃ“N CHEVRON */
+/* ANIMACIÓN CHEVRON */
 .chevron {
     display: inline-block;
     transition: transform 0.3s ease;
@@ -382,13 +382,14 @@ h1 {
     font-size: 14px;
     line-height: 1.6;
     color: #000;
-    max-height: 4.8em;
+    max-height: 4.8em; /* 3 líneas */
     overflow: hidden;
     position: relative;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     transition: all 0.3s ease;
+    white-space: pre-wrap; /* Respetar saltos de línea */
 }
 
 .breadcrumb-note.expanded {
@@ -414,7 +415,7 @@ h1 {
 .breadcrumb-meta {
     font-size: 13px;
     margin-bottom: 8px;
-    color: #000;
+    color: #666;
 }
 
 .mini-map {
@@ -432,7 +433,7 @@ h1 {
     gap: 8px;
     margin-top: 12px;
     flex-wrap: wrap;
-    align-items: flex-start;
+    align-items: center; /* Alinear botones */
 }
 
 .preview-image-thumb {
@@ -465,9 +466,10 @@ h1 {
 .preview-button {
     padding: 4px 10px;
     font-size: 11px;
+    height: 60px; /* Alinear altura */
 }
 
-/* ANIMACIÃ“N MODAL (pop-in suave) */
+/* ANIMACIÓN MODAL (pop-in suave) */
 .preview-modal {
     display: none;
     position: fixed;
@@ -494,7 +496,7 @@ h1 {
     background: white;
     border: 3px solid #000;
     max-width: 90%;
-    width: auto;
+    width: 600px; /* Ancho fijo para modal */
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
@@ -515,14 +517,14 @@ h1 {
 
 .preview-images-full {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Más pequeño */
     gap: 12px;
     margin: 16px 0;
 }
 
 .preview-image-full {
     width: 100%;
-    height: 200px;
+    height: 150px;
     object-fit: cover;
     border: 2px solid #000;
     cursor: pointer;
@@ -615,6 +617,10 @@ h1 {
         min-width: 0;
         white-space: nowrap;
     }
+
+    .preview-content {
+        width: 90%; /* Ancho flexible en móvil */
+    }
 }
 
 .edit-mode {
@@ -652,6 +658,7 @@ h1 {
     background: #000;
     border-style: inset;
     transform: scale(0.95);
+    color: white;
 }
 
 .mood-label {
@@ -783,7 +790,16 @@ h1 {
 }
 
 .sync-status {
-    display: none;
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    background: #000;
+    color: #ff0000;
+    padding: 4px 8px;
+    border: 2px solid #ff0000;
+    font-size: 10px;
+    font-weight: bold;
+    z-index: 1000;
 }
 
 /* WORK con caja visible */
@@ -855,17 +871,18 @@ h1 {
     color: #000 !important;
     margin-top: 24px !important;
     padding: 14px !important;
-    max-height: 4.8em;
+    max-height: 4.8em; /* 3 líneas */
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     transition: all 0.3s ease;
-    /* --- FIX: Estas propiedades estaban fuera de la regla --- */
     border: 2px solid #cc9900 !important;
     border-radius: 4px !important;
     line-height: 1.6 !important;
     background: #fffacd !important;
+    /* display: block !important; */ /* Quitado para que funcione line-clamp */
+    white-space: pre-wrap; /* Respetar saltos de línea */
 }
 
 .optional-note.expanded {
@@ -874,7 +891,8 @@ h1 {
     -webkit-line-clamp: unset;
     animation: slideDown 0.3s ease;
 }
-/* --- FIX: Se eliminó una llave '}' extra de aquí --- */
+/* ARREGLO: Faltaba esta llave de cierre } */
+}
 
 .breadcrumb-entry.track-event .optional-note {
     color: #000 !important;
@@ -891,6 +909,10 @@ h1 {
     
     .header-image {
         max-height: 150px;
+    }
+    
+    .preview-button {
+        height: 50px; /* Alinear en móvil */
     }
 }
 
@@ -950,11 +972,12 @@ h1 {
     transform: translateY(0);
 }
 
-/* Formularios de creaciÃƒÂ³n (Crumb, Time, Track, Spent) */
-#crumb-form,
-#time-form,
-#track-form,
-#spent-form {
+/* Formularios de creación (Crumb, Time, Track, Spent, Recap) */
+#form-window,
+#timer-window,
+#track-window,
+#spent-window,
+#recap-form {
     max-height: 0;
     overflow: hidden;
     opacity: 0;
@@ -965,16 +988,17 @@ h1 {
         transform 0.4s ease;
 }
 
-#crumb-form:not(.hidden),
-#time-form:not(.hidden),
-#track-form:not(.hidden),
-#spent-form:not(.hidden) {
+#form-window:not(.hidden),
+#timer-window:not(.hidden),
+#track-window:not(.hidden),
+#spent-window:not(.hidden),
+#recap-form:not(.hidden) {
     max-height: 3000px;
     opacity: 1;
     transform: translateY(0);
 }
 
-/* AnimaciÃƒÂ³n suave para botones del footer */
+/* Animación suave para botones del footer */
 .footer .mac-button {
     transition: transform 0.15s ease, background 0.15s ease;
 }
@@ -983,7 +1007,7 @@ h1 {
     transform: scale(0.95);
 }
 
-/* AnimaciÃƒÂ³n para mood selector */
+/* Animación para mood selector */
 .mood-option {
     transition: all 0.2s cubic-bezier(.18,.89,.32,1.28);
 }
@@ -992,7 +1016,7 @@ h1 {
     transform: scale(0.9);
 }
 
-/* AnimaciÃƒÂ³n para activity/duration selectors */
+/* Animación para activity/duration selectors */
 .duration-option,
 .activity-option {
     transition: all 0.2s cubic-bezier(.18,.89,.32,1.28);
@@ -1003,7 +1027,7 @@ h1 {
     transform: scale(0.95);
 }
 
-/* AnimaciÃƒÂ³n para image preview */
+/* Animación para image preview */
 .preview-image-thumb,
 .preview-map-thumb {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -1020,7 +1044,7 @@ h1 {
     transform: scale(0.98);
 }
 
-/* AnimaciÃƒÂ³n para edit button */
+/* Animación para edit button */
 .edit-button {
     transition: all 0.15s ease;
 }
@@ -1034,7 +1058,7 @@ h1 {
     transform: scale(0.95);
 }
 
-/* AnimaciÃƒÂ³n para read more button */
+/* Animación para read more button */
 .read-more-btn {
     transition: all 0.2s ease;
     padding: 4px 8px;
@@ -1150,7 +1174,7 @@ input[type="range"]:active::-moz-range-thumb {
 
 .fab-container {
     position: fixed;
-    bottom: 80px; /* MODIFICADO: Estaba en 100px, ahora 80px */
+    bottom: 80px; /* ARREGLO: Bajado (estaba en 100px) */
     right: 20px;
     z-index: 9998;
     display: flex;
@@ -1202,15 +1226,20 @@ input[type="range"]:active::-moz-range-thumb {
     width: 48px;
     height: 48px;
     font-size: 20px;
-    /* --- FIX: Propiedades de animación movidas aquí --- */
+}
+
+/* fab-action-wrapper se usa para la animación */
+.fab-action-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     opacity: 0;
     transform: scale(0) translateY(20px);
     pointer-events: none;
     transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-/* --- FIX: Esta regla ahora apunta a .fab-action.show --- */
-.fab-action.show {
+.fab-action-wrapper.show {
     opacity: 1;
     transform: scale(1) translateY(0);
     pointer-events: all;
@@ -1219,7 +1248,7 @@ input[type="range"]:active::-moz-range-thumb {
 @media (max-width: 768px) {
     .fab-container {
         right: 16px;
-        bottom: 85px; /* MODIFICADO: Estaba en 70px, ahora 85px para más espacio */
+        bottom: 70px; /* Un poco más bajo en móvil */
     }
     
     .fab-main {
@@ -1285,5 +1314,23 @@ input[type="range"]:active::-moz-range-thumb {
     transform: rotate(180deg);
 }
 
-/* --- FIX: Eliminadas las reglas .fab-action-wrapper y .fab-label --- */
+/* FAB Action with label */
+.fab-label {
+    background: #fff;
+    color: #000;
+    padding: 8px 12px;
+    border: 2px solid #000;
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+    font-family: 'Courier New', monospace;
+}
+
+@media (max-width: 768px) {
+    .fab-label {
+        font-size: 10px;
+        padding: 6px 10px;
+    }
+}
 
