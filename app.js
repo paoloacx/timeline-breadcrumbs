@@ -37,9 +37,10 @@ let moods = [...defaultMoods];
 // --- Authentication Functions (Called from HTML) ---
 
 function signInWithGoogle() {
-    if (!auth) return;
+    // CAMBIO: Usar window.auth
+    if (!window.auth) return;
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
+    window.auth.signInWithPopup(provider)
         .then((result) => {
             console.log('Signed in with Google:', result.user.email);
         })
@@ -50,19 +51,20 @@ function signInWithGoogle() {
 }
 
 function signInWithEmail() {
-    if (!auth) return;
+    // CAMBIO: Usar window.auth
+    if (!window.auth) return;
     const email = prompt('Enter your email:');
     const password = prompt('Enter your password:');
     
     if (!email || !password) return;
     
-    auth.signInWithEmailAndPassword(email, password)
+    window.auth.signInWithEmailAndPassword(email, password)
         .then((result) => {
             console.log('Signed in with email:', result.user.email);
         })
         .catch((error) => {
             if (error.code === 'auth/user-not-found') {
-                auth.createUserWithEmailAndPassword(email, password)
+                window.auth.createUserWithEmailAndPassword(email, password)
                     .then((result) => {
                         console.log('New user created:', result.user.email);
                     })
@@ -78,9 +80,10 @@ function signInWithEmail() {
 }
 
 function signOutUser() {
-    if (!auth) return;
+    // CAMBIO: Usar window.auth
+    if (!window.auth) return;
     if (confirm('Sign out?')) {
-        auth.signOut().then(() => {
+        window.auth.signOut().then(() => {
             location.reload();
         });
     }
@@ -119,7 +122,7 @@ function loadSettings() {
         const savedTrackItems = localStorage.getItem('track-items');
         const savedMoods = localStorage.getItem('mood-config');
         
-        if (savedDurations) timeDurations = JSON.parse(savedDurations);
+        if (savedDurATIONS) timeDurations = JSON.parse(savedDurations);
         if (savedActivities) timeActivities = JSON.parse(savedActivities);
         if (savedTrackItems) trackItems = JSON.parse(savedTrackItems);
         if (savedMoods) moods = JSON.parse(savedMoods);
@@ -180,12 +183,13 @@ function saveData() {
 // --- Firebase Data Functions (called from app.js) ---
 
 async function loadDataFromFirebase() {
-    if (!currentUser || !db) return;
+    // CAMBIO: Usar window.db
+    if (!currentUser || !window.db) return;
     
     updateSyncStatus('syncing');
     
     try {
-        const snapshot = await db.collection('users')
+        const snapshot = await window.db.collection('users')
             .doc(currentUser.uid)
             .collection('entries')
             .orderBy('timestamp', 'desc')
@@ -208,7 +212,8 @@ async function loadDataFromFirebase() {
 }
 
 async function saveDataToFirebase() {
-    if (!currentUser || !db || isOfflineMode) {
+    // CAMBIO: Usar window.db
+    if (!currentUser || !window.db || isOfflineMode) {
         saveData(); // Guardar localmente si no hay usuario o está offline
         return;
     }
@@ -216,10 +221,10 @@ async function saveDataToFirebase() {
     updateSyncStatus('syncing');
     
     try {
-        const batch = db.batch();
+        const batch = window.db.batch();
         
         entries.forEach((entry) => {
-            const docRef = db.collection('users')
+            const docRef = window.db.collection('users')
                 .doc(currentUser.uid)
                 .collection('entries')
                 .doc(String(entry.id)); // Usar ID existente
@@ -237,10 +242,11 @@ async function saveDataToFirebase() {
 }
 
 async function loadSettingsFromFirebase() {
-    if (!currentUser || !db) return;
+    // CAMBIO: Usar window.db
+    if (!currentUser || !window.db) return;
     
     try {
-        const doc = await db.collection('users')
+        const doc = await window.db.collection('users')
             .doc(currentUser.uid)
             .collection('settings')
             .doc('app-settings')
@@ -270,13 +276,14 @@ async function loadSettingsFromFirebase() {
 }
 
 async function saveSettingsToFirebase() {
-    if (!currentUser || !db || isOfflineMode) {
+    // CAMBIO: Usar window.db
+    if (!currentUser || !window.db || isOfflineMode) {
         saveSettingsToStorage(); // Guardar local si no hay usuario o está offline
         return;
     }
     
     try {
-        await db.collection('users')
+        await window.db.collection('users')
             .doc(currentUser.uid)
             .collection('settings')
             .doc('app-settings')
@@ -296,10 +303,11 @@ async function saveSettingsToFirebase() {
 }
 
 async function deleteEntryFromFirebase(entryId) {
-    if (!currentUser || !db || isOfflineMode) return;
+    // CAMBIO: Usar window.db
+    if (!currentUser || !window.db || isOfflineMode) return;
     
     try {
-        await db.collection('users')
+        await window.db.collection('users')
             .doc(currentUser.uid)
             .collection('entries')
             .doc(String(entryId))
@@ -333,8 +341,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Fin de los listeners ---
     
     // Configurar el listener de autenticación de Firebase
-    if (auth) {
-        auth.onAuthStateChanged((user) => {
+    // CAMBIO: Usar window.auth
+    if (window.auth) {
+        window.auth.onAuthStateChanged((user) => {
             if (user) {
                 currentUser = user;
                 isOfflineMode = false;
@@ -357,7 +366,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         // Modo offline si Firebase no se carga
         console.warn("Firebase auth no está disponible. Forzando modo offline.");
-        continueOffline();
+        // No llamamos a continueOffline() aquí, esperamos a que el usuario pulse el botón
+        showAuthContainer();
+        updateSyncStatus('offline');
     }
 
     // Cargar datos locales (se mostrarán si el login falla o se elige offline)
