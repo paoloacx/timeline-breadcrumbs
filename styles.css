@@ -21,7 +21,7 @@ body {
         #d0d0d0 2px
     );
     padding: 0;
-    padding-bottom: 80px;
+    padding-bottom: 80px; /* Space for the fixed footer */
     position: relative;
     min-height: 100vh;
 }
@@ -46,9 +46,9 @@ body {
     .header-image {
         max-height: 120px;
     }
-    
+
     body {
-        padding-bottom: 65px;
+        padding-bottom: 65px; /* Adjust for smaller footer maybe */
     }
 }
 
@@ -72,10 +72,10 @@ body {
     margin-top: 0;
 }
 
-/* FONDO PUNTEADO MAC CLASSIC */
+/* Mac Classic dotted background */
 .mac-title-bar {
     background: #000;
-    background-image: 
+    background-image:
         repeating-linear-gradient(0deg, transparent, transparent 1px, #333 1px, #333 2px),
         repeating-linear-gradient(90deg, transparent, transparent 1px, #333 1px, #333 2px);
     background-size: 2px 2px;
@@ -239,8 +239,9 @@ h1 {
 
 .timeline {
     position: relative;
-    padding-left: 40px;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+    padding-left: 40px; /* Space for the line and dots */
+    /* Remove shadow if it looks too heavy */
+    /* box-shadow: 5px 5px 0 rgba(0,0,0,0.3); */
     background: white;
     padding: 20px 20px 20px 40px;
     border: 3px solid #000;
@@ -249,7 +250,7 @@ h1 {
 
 .timeline-line {
     position: absolute;
-    left: 20px;
+    left: 20px; /* Center the line */
     top: 0;
     bottom: 0;
     width: 4px;
@@ -279,7 +280,7 @@ h1 {
 .day-header::before {
     content: '';
     position: absolute;
-    left: -33px;
+    left: -33px; /* Adjust to align with the line */
     top: 50%;
     transform: translateY(-50%);
     width: 16px;
@@ -295,7 +296,7 @@ h1 {
     background: #333;
 }
 
-/* ANIMACIÓN PANEL DESPLEGABLE */
+/* Collapsible day content animation */
 .day-content {
     max-height: 0;
     overflow: hidden;
@@ -313,17 +314,17 @@ h1 {
         transparent 2px
     );
     background-size: 4px 4px;
-    padding: 0 16px;
+    padding: 0 16px; /* Padding only when expanded */
 }
 
 .day-content.expanded {
-    max-height: 5000px !important;
+    max-height: 5000px !important; /* Large enough value */
     opacity: 1 !important;
     transform: translateY(0) !important;
-    padding: 16px !important;
+    padding: 16px !important; /* Add padding back when expanded */
 }
 
-/* ANIMACIÓN CHEVRON */
+/* Chevron animation */
 .chevron {
     display: inline-block;
     transition: transform 0.3s ease;
@@ -349,12 +350,22 @@ h1 {
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
 
+/* Ensure text inside track events is white */
 .breadcrumb-entry.track-event .breadcrumb-time,
 .breadcrumb-entry.track-event .breadcrumb-note,
-.breadcrumb-entry.track-event div,
-.breadcrumb-entry.track-event .activity-label {
+.breadcrumb-entry.track-event .optional-note, /* Specific for optional note */
+.breadcrumb-entry.track-event .activity-label,
+.breadcrumb-entry.track-event .breadcrumb-meta span, /* Target spans inside meta */
+.breadcrumb-entry.track-event div { /* General fallback, use sparingly */
     color: white !important;
 }
+/* Exception for the yellow optional note background */
+.breadcrumb-entry.track-event .optional-note {
+    background: #fffacd !important; /* Keep yellow background */
+    color: #000 !important; /* But make text black */
+    border-color: #cc9900 !important;
+}
+
 
 .breadcrumb-entry.spent-event {
     background: #d4edda;
@@ -374,6 +385,7 @@ h1 {
     margin-bottom: 8px;
 }
 
+/* Overwrite for track event time */
 .breadcrumb-entry.track-event .breadcrumb-time {
     color: white !important;
 }
@@ -382,14 +394,14 @@ h1 {
     font-size: 14px;
     line-height: 1.6;
     color: #000;
-    max-height: 4.8em; /* 3 líneas */
+    max-height: 4.8em; /* 3 lines approx */
     overflow: hidden;
     position: relative;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     transition: all 0.3s ease;
-    white-space: pre-wrap; /* Respetar saltos de línea */
+    white-space: pre-wrap; /* Respect line breaks */
 }
 
 .breadcrumb-note.expanded {
@@ -413,9 +425,13 @@ h1 {
 }
 
 .breadcrumb-meta {
-    font-size: 13px;
+    font-size: 12px; /* Smaller meta text */
     margin-bottom: 8px;
-    color: #666;
+    color: #666; /* Grey text */
+}
+/* Overwrite for track event meta */
+.breadcrumb-entry.track-event .breadcrumb-meta {
+     color: #ccc !important; /* Lighter grey for dark background */
 }
 
 .mini-map {
@@ -433,7 +449,7 @@ h1 {
     gap: 8px;
     margin-top: 12px;
     flex-wrap: wrap;
-    align-items: center; /* Alinear botones */
+    align-items: center; /* Vertically align items */
 }
 
 .preview-image-thumb {
@@ -466,10 +482,10 @@ h1 {
 .preview-button {
     padding: 4px 10px;
     font-size: 11px;
-    height: 60px; /* Alinear altura */
+    height: 60px; /* Match height of thumbnails */
 }
 
-/* ANIMACIÓN MODAL (pop-in suave) */
+/* Modal animation (smooth pop-in) */
 .preview-modal {
     display: none;
     position: fixed;
@@ -486,7 +502,7 @@ h1 {
 }
 
 .preview-modal.show {
-    display: flex !important;
+    display: flex !important; /* Use flex to center content */
     align-items: center;
     justify-content: center;
     opacity: 1 !important;
@@ -496,10 +512,11 @@ h1 {
     background: white;
     border: 3px solid #000;
     max-width: 90%;
-    width: 600px; /* Ancho fijo para modal */
-    max-height: 90vh;
+    width: 600px; /* Fixed width for larger screens */
+    max-height: 90vh; /* Limit height */
     overflow-y: auto;
     position: relative;
+    /* Pop-in animation */
     transform: scale(0.95) translateY(8px);
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
 }
@@ -512,19 +529,19 @@ h1 {
     width: 100%;
     height: 300px;
     border: 3px solid #000;
-    margin: 16px 0;
+    margin: 16px 0; /* Spacing */
 }
 
 .preview-images-full {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Más pequeño */
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Smaller grid items */
     gap: 12px;
-    margin: 16px 0;
+    margin: 16px 0; /* Spacing */
 }
 
 .preview-image-full {
     width: 100%;
-    height: 150px;
+    height: 150px; /* Adjust height */
     object-fit: cover;
     border: 2px solid #000;
     cursor: pointer;
@@ -572,7 +589,7 @@ h1 {
 }
 
 .footer {
-    position: fixed !important;
+    position: fixed !important; /* Keep it fixed */
     bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
@@ -584,7 +601,7 @@ h1 {
     justify-content: center;
     align-items: center;
     gap: 6px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 -3px 10px rgba(0,0,0,0.3); /* Shadow on top */
     z-index: 9999 !important;
     flex-wrap: nowrap;
 }
@@ -608,34 +625,34 @@ h1 {
         padding: 8px 8px;
         gap: 6px;
     }
-    
+
     .footer .mac-button {
         font-size: 9px;
         padding: 4px 6px;
         margin: 0;
-        flex: 1;
+        flex: 1; /* Allow buttons to take equal space */
         min-width: 0;
         white-space: nowrap;
     }
 
     .preview-content {
-        width: 90%; /* Ancho flexible en móvil */
+        width: 90%; /* More flexible width on mobile */
     }
 }
 
 .edit-mode {
-    background: #fff8dc;
+    background: #fff8dc; /* Consistent background for edit */
 }
 
 .delete-button {
     background: #ff6b6b;
     color: white;
-    border-color: #ff0000;
+    border-color: #ff0000; /* Use a red border */
 }
 
 .mood-selector {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, 1fr); /* 5 moods per row */
     gap: 6px;
     margin-bottom: 12px;
 }
@@ -658,7 +675,7 @@ h1 {
     background: #000;
     border-style: inset;
     transform: scale(0.95);
-    color: white;
+    color: white; /* Make emoji/label white */
 }
 
 .mood-label {
@@ -681,7 +698,7 @@ h1 {
 }
 
 .config-panel {
-    background: #ffffcc;
+    background: #ffffcc; /* Light yellow background */
     border: 3px solid #000;
     padding: 16px;
     margin-bottom: 12px;
@@ -702,8 +719,8 @@ h1 {
     font-family: 'Courier New', monospace;
 }
 
-.config-item input[type="text"]:first-child {
-    flex: 0 0 60px;
+.config-item input[type="text"]:first-child { /* Style for emoji input */
+    flex: 0 0 60px; /* Fixed width */
     text-align: center;
     font-size: 20px;
 }
@@ -711,7 +728,7 @@ h1 {
 .duration-selector,
 .activity-selector {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Responsive columns */
     gap: 8px;
     margin-bottom: 16px;
 }
@@ -747,7 +764,7 @@ h1 {
 }
 
 .recording {
-    background: #ffcccc !important;
+    background: #ffcccc !important; /* Red background when recording */
 }
 
 .spent-input {
@@ -762,7 +779,7 @@ h1 {
 }
 
 .spent-badge {
-    background: #4caf50;
+    background: #4caf50; /* Green badge */
     color: white;
     padding: 2px 8px;
     border-radius: 3px;
@@ -789,24 +806,27 @@ h1 {
     font-size: 14px;
 }
 
-.sync-status {
+/* Hide the sync status element */
+/* .sync-status { display: none; } */
+/* Alternative: Make it less prominent if needed later */
+ .sync-status {
     position: fixed;
-    top: 12px;
-    right: 12px;
-    background: #000;
-    color: #ff0000;
-    padding: 4px 8px;
-    border: 2px solid #ff0000;
+    top: 10px;
+    right: 10px;
     font-size: 10px;
-    font-weight: bold;
+    padding: 2px 5px;
+    background: rgba(0,0,0,0.7);
+    border-radius: 3px;
     z-index: 1000;
-}
+    display: none; /* Hide it completely as requested */
+ }
 
-/* WORK con caja visible */
+
+/* Activity label box */
 .activity-label {
     font-weight: bold !important;
     font-size: 18px !important;
-    margin-top: 30px !important;
+    margin-top: 30px !important; /* Space above */
     display: block !important;
     text-align: center !important;
     padding: 12px 20px !important;
@@ -818,7 +838,7 @@ h1 {
     color: #000 !important;
 }
 
-.breadcrumb-entry.track-event .activity-label {
+.breadcrumb-entry.track-event .activity-label { /* Style for dark background */
     background: rgba(255,255,255,0.25) !important;
     border-color: rgba(255,255,255,0.3) !important;
     box-shadow: 2px 2px 4px rgba(0,0,0,0.4) !important;
@@ -840,7 +860,7 @@ h1 {
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Smaller cards */
     gap: 16px;
     margin-top: 16px;
 }
@@ -853,25 +873,25 @@ h1 {
 }
 
 .stat-number {
-    font-size: 32px;
+    font-size: 28px; /* Slightly smaller number */
     font-weight: bold;
     color: #000;
     margin-bottom: 8px;
 }
 
 .stat-label {
-    font-size: 14px;
+    font-size: 12px; /* Smaller label */
     color: #666;
 }
 
-/* SUPER CRITICAL: Optional note amarillo visible */
+/* Optional note yellow box */
 .optional-note {
     font-size: 14px !important;
-    font-weight: bold !important;
-    color: #000 !important;
-    margin-top: 24px !important;
-    padding: 14px !important;
-    max-height: 4.8em; /* 3 líneas */
+    font-weight: normal !important; /* Not bold */
+    color: #333 !important; /* Darker text */
+    margin-top: 16px !important; /* Less space */
+    padding: 10px !important; /* Less padding */
+    max-height: 4.8em; /* 3 lines approx */
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -880,22 +900,19 @@ h1 {
     border: 2px solid #cc9900 !important;
     border-radius: 4px !important;
     line-height: 1.6 !important;
-    background: #fffacd !important;
-    /* display: block !important; */ /* Quitado para que funcione line-clamp */
-    white-space: pre-wrap; /* Respetar saltos de línea */
+    background: #fffacd !important; /* Light yellow */
+    white-space: pre-wrap; /* Respect line breaks */
 }
 
 .optional-note.expanded {
     max-height: none !important;
-    display: block;
+    display: block; /* Important for expansion */
     -webkit-line-clamp: unset;
     animation: slideDown 0.3s ease;
 }
-/* ARREGLO: Faltaba esta llave de cierre } */
-}
 
 .breadcrumb-entry.track-event .optional-note {
-    color: #000 !important;
+    color: #333 !important; /* Dark text even on dark background */
     border-color: #cc9900 !important;
     background: #fffacd !important;
 }
@@ -906,73 +923,46 @@ h1 {
         width: 50px !important;
         height: 50px !important;
     }
-    
+
     .header-image {
         max-height: 150px;
     }
-    
-    .preview-button {
-        height: 50px; /* Alinear en móvil */
+     .preview-button {
+        height: 50px; /* Match mobile thumbnail height */
     }
 }
 
-/* ANIMACIONES PARA TODOS LOS MODALES Y FORMULARIOS */
+/* Animations for all modals and forms */
 
-/* Stats panel */
-#stats-panel {
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    transform: translateY(-6px);
-    transition:
-        max-height 0.45s ease,
-        opacity 0.4s ease,
-        transform 0.4s ease;
+/* Stats modal */
+#stats-modal .preview-content {
+     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
+     transform: scale(0.95) translateY(8px);
+}
+#stats-modal.show .preview-content {
+     transform: scale(1) translateY(0);
 }
 
-#stats-panel:not(.hidden) {
-    max-height: 2000px;
-    opacity: 1;
-    transform: translateY(0);
+/* Settings modal */
+#settings-modal .preview-content {
+     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
+     transform: scale(0.95) translateY(8px);
+}
+#settings-modal.show .preview-content {
+     transform: scale(1) translateY(0);
 }
 
-/* Settings panel */
-#settings-panel {
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    transform: translateY(-6px);
-    transition:
-        max-height 0.45s ease,
-        opacity 0.4s ease,
-        transform 0.4s ease;
+/* Export modal */
+#export-modal .preview-content {
+     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
+     transform: scale(0.95) translateY(8px);
+}
+#export-modal.show .preview-content {
+     transform: scale(1) translateY(0);
 }
 
-#settings-panel:not(.hidden) {
-    max-height: 2000px;
-    opacity: 1;
-    transform: translateY(0);
-}
 
-/* Export panel */
-#export-panel {
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    transform: translateY(-6px);
-    transition:
-        max-height 0.45s ease,
-        opacity 0.4s ease,
-        transform 0.4s ease;
-}
-
-#export-panel:not(.hidden) {
-    max-height: 2000px;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* Formularios de creación (Crumb, Time, Track, Spent, Recap) */
+/* Creation forms (Crumb, Time, Track, Spent, Recap) slide down */
 #form-window,
 #timer-window,
 #track-window,
@@ -983,9 +973,9 @@ h1 {
     opacity: 0;
     transform: translateY(-6px);
     transition:
-        max-height 0.45s ease,
-        opacity 0.4s ease,
-        transform 0.4s ease;
+        max-height 0.45s ease-out, /* Smoother ease-out */
+        opacity 0.4s ease-out,
+        transform 0.4s ease-out;
 }
 
 #form-window:not(.hidden),
@@ -993,12 +983,12 @@ h1 {
 #track-window:not(.hidden),
 #spent-window:not(.hidden),
 #recap-form:not(.hidden) {
-    max-height: 3000px;
+    max-height: 4000px; /* Increased max-height */
     opacity: 1;
     transform: translateY(0);
 }
 
-/* Animación suave para botones del footer */
+/* Smooth animation for footer buttons */
 .footer .mac-button {
     transition: transform 0.15s ease, background 0.15s ease;
 }
@@ -1007,7 +997,7 @@ h1 {
     transform: scale(0.95);
 }
 
-/* Animación para mood selector */
+/* Animation for mood selector */
 .mood-option {
     transition: all 0.2s cubic-bezier(.18,.89,.32,1.28);
 }
@@ -1016,7 +1006,7 @@ h1 {
     transform: scale(0.9);
 }
 
-/* Animación para activity/duration selectors */
+/* Animation for activity/duration selectors */
 .duration-option,
 .activity-option {
     transition: all 0.2s cubic-bezier(.18,.89,.32,1.28);
@@ -1027,7 +1017,7 @@ h1 {
     transform: scale(0.95);
 }
 
-/* Animación para image preview */
+/* Animation for image preview */
 .preview-image-thumb,
 .preview-map-thumb {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -1044,7 +1034,7 @@ h1 {
     transform: scale(0.98);
 }
 
-/* Animación para edit button */
+/* Animation for edit button */
 .edit-button {
     transition: all 0.15s ease;
 }
@@ -1058,7 +1048,7 @@ h1 {
     transform: scale(0.95);
 }
 
-/* Animación para read more button */
+/* Animation for read more button */
 .read-more-btn {
     transition: all 0.2s ease;
     padding: 4px 8px;
@@ -1070,15 +1060,7 @@ h1 {
     transform: translateY(-1px);
 }
 
-.note-text {
-    transition: max-height 0.3s ease;
-    overflow: hidden;
-}
-
-.note-text.expanded {
-    animation: slideDown 0.3s ease;
-}
-
+/* Animation for note expansion */
 @keyframes slideDown {
     from {
         opacity: 0.5;
@@ -1092,11 +1074,11 @@ h1 {
 
 /* ===== RECAP STYLES ===== */
 
-.recap-entry {
+.recap-entry { /* Deprecated? Recap is now a block */
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3) !important;
 }
 
-/* Slider estilo Mac retro */
+/* Mac-style range slider */
 input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
@@ -1105,7 +1087,7 @@ input[type="range"] {
     border: 2px inset #999;
     background: #ddd;
     outline: none;
-    border-radius: 0;
+    border-radius: 0; /* Square */
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -1116,7 +1098,7 @@ input[type="range"]::-webkit-slider-thumb {
     background: #000;
     border: 3px outset #fff;
     cursor: pointer;
-    border-radius: 0;
+    border-radius: 0; /* Square */
 }
 
 input[type="range"]::-moz-range-thumb {
@@ -1125,7 +1107,7 @@ input[type="range"]::-moz-range-thumb {
     background: #000;
     border: 3px outset #fff;
     cursor: pointer;
-    border-radius: 0;
+    border-radius: 0; /* Square */
 }
 
 input[type="range"]:active::-webkit-slider-thumb {
@@ -1136,7 +1118,7 @@ input[type="range"]:active::-moz-range-thumb {
     border-style: inset;
 }
 
-/* BSO Results */
+/* BSO Search Results */
 .bso-result:hover {
     background: #f0f0f0 !important;
     box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
@@ -1146,18 +1128,18 @@ input[type="range"]:active::-moz-range-thumb {
     transform: scale(0.98);
 }
 
-/* Footer responsive con 5 botones */
+/* Responsive footer with 4 buttons */
 @media (max-width: 768px) {
     .footer {
         padding: 8px;
         gap: 8px;
         justify-content: center;
     }
-    
+
     .footer .mac-button {
         font-size: 10px;
         padding: 8px;
-        flex: 0 1 calc(33.33% - 6px);
+        flex: 1; /* Equal width */
         min-width: 0;
         white-space: nowrap;
     }
@@ -1174,11 +1156,11 @@ input[type="range"]:active::-moz-range-thumb {
 
 .fab-container {
     position: fixed;
-    bottom: 80px; /* ARREGLO: Bajado (estaba en 100px) */
+    bottom: 80px; /* Position above footer */
     right: 20px;
     z-index: 9998;
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column-reverse; /* Actions appear upwards */
     gap: 12px;
     align-items: flex-end;
 }
@@ -1195,7 +1177,7 @@ input[type="range"]:active::-moz-range-thumb {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Bounce effect */
     position: relative;
 }
 
@@ -1214,7 +1196,7 @@ input[type="range"]:active::-moz-range-thumb {
     color: white;
     font-size: 32px;
     font-weight: bold;
-    width: 64px;
+    width: 64px; /* Slightly larger */
     height: 64px;
 }
 
@@ -1228,7 +1210,6 @@ input[type="range"]:active::-moz-range-thumb {
     font-size: 20px;
 }
 
-/* fab-action-wrapper se usa para la animación */
 .fab-action-wrapper {
     display: flex;
     align-items: center;
@@ -1236,7 +1217,7 @@ input[type="range"]:active::-moz-range-thumb {
     opacity: 0;
     transform: scale(0) translateY(20px);
     pointer-events: none;
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Bounce effect */
 }
 
 .fab-action-wrapper.show {
@@ -1248,14 +1229,14 @@ input[type="range"]:active::-moz-range-thumb {
 @media (max-width: 768px) {
     .fab-container {
         right: 16px;
-        bottom: 70px; /* Un poco más bajo en móvil */
+        bottom: 70px; /* Adjust for mobile footer */
     }
-    
+
     .fab-main {
         width: 56px;
         height: 56px;
     }
-    
+
     .fab-action {
         width: 44px;
         height: 44px;
@@ -1271,18 +1252,18 @@ input[type="range"]:active::-moz-range-thumb {
 
 /* Recap Block Styles */
 .recap-block {
-    margin: 0;
+    margin: 0; /* Remove default margin */
     border-bottom: 3px solid #000;
 }
 
 .recap-header {
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); /* Gold gradient */
     color: #000;
     padding: 12px 16px;
     font-size: 15px;
     font-weight: bold;
     cursor: pointer;
-    border-top: none;
+    border-top: none; /* Remove top border */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1295,10 +1276,10 @@ input[type="range"]:active::-moz-range-thumb {
 }
 
 .recap-content {
-    background: #fffef0;
+    background: #fffef0; /* Very light yellow */
     padding: 16px;
     position: relative;
-    border-bottom: none;
+    border-bottom: none; /* Remove bottom border */
 }
 
 .recap-content.hidden {
