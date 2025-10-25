@@ -515,3 +515,4 @@ function deleteCurrentEntry() {
         editingEntryId = null;
     }
 }
+
