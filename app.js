@@ -36,7 +36,8 @@ let moods = [...defaultMoods];
 
 // --- Authentication Functions (Called from HTML) ---
 
-function signInWithGoogle() {
+// CAMBIO: Hacer la función global asignándola a window.
+window.signInWithGoogle = function() {
     // CAMBIO: Usar window.auth
     if (!window.auth) return;
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -50,7 +51,8 @@ function signInWithGoogle() {
         });
 }
 
-function signInWithEmail() {
+// CAMBIO: Hacer la función global asignándola a window.
+window.signInWithEmail = function() {
     // CAMBIO: Usar window.auth
     if (!window.auth) return;
     const email = prompt('Enter your email:');
@@ -79,7 +81,8 @@ function signInWithEmail() {
         });
 }
 
-function signOutUser() {
+// CAMBIO: Hacer la función global asignándola a window.
+window.signOutUser = function() {
     // CAMBIO: Usar window.auth
     if (!window.auth) return;
     if (confirm('Sign out?')) {
@@ -89,7 +92,8 @@ function signOutUser() {
     }
 }
 
-function continueOffline() {
+// CAMBIO: Hacer la función global asignándola a window.
+window.continueOffline = function() {
     isOfflineMode = true;
     currentUser = null; // Asegurarse de que no haya usuario
     showMainApp(); // Definida en ui-handlers.js
@@ -103,7 +107,7 @@ function continueOffline() {
 // --- App Core Functions ---
 
 // Refresh function
-function refreshApp() {
+window.refreshApp = function() { // Hacer global para que la UI la vea
     if (currentUser && !isOfflineMode) {
         loadDataFromFirebase();
         loadSettingsFromFirebase();
@@ -122,7 +126,8 @@ function loadSettings() {
         const savedTrackItems = localStorage.getItem('track-items');
         const savedMoods = localStorage.getItem('mood-config');
         
-        if (savedDurATIONS) timeDurations = JSON.parse(savedDurations);
+        // CAMBIO: Corregido el typo de savedDurATIONS
+        if (savedDurations) timeDurations = JSON.parse(savedDurations);
         if (savedActivities) timeActivities = JSON.parse(savedActivities);
         if (savedTrackItems) trackItems = JSON.parse(savedTrackItems);
         if (savedMoods) moods = JSON.parse(savedMoods);
@@ -264,7 +269,7 @@ async function loadSettingsFromFirebase() {
             // Actualizar UI con los settings cargados
             updateTimerOptions(); // Definida en ui-handlers.js
             updateTrackOptions(); // Definida en ui-handlers.js
-            renderMoodSelector(); // Definida en ui-handlers.js
+            renderMoodSelector(); // Definida en ui-renderer.js
         } else {
             // Si no hay settings en Firebase, cargar los locales (o default)
             loadSettings();
@@ -322,23 +327,8 @@ async function deleteEntryFromFirebase(entryId) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM fully loaded and parsed");
 
-    // --- Listeners para los botones de Auth ---
-    // Esto reemplaza los 'onclick' del HTML
-    const btnSignInGoogle = document.getElementById('btn-signin-google');
-    if (btnSignInGoogle) {
-        btnSignInGoogle.addEventListener('click', signInWithGoogle);
-    }
-
-    const btnSignInEmail = document.getElementById('btn-signin-email');
-    if (btnSignInEmail) {
-        btnSignInEmail.addEventListener('click', signInWithEmail);
-    }
-
-    const btnContinueOffline = document.getElementById('btn-continue-offline');
-    if (btnContinueOffline) {
-        btnContinueOffline.addEventListener('click', continueOffline);
-    }
-    // --- Fin de los listeners ---
+    // CAMBIO: Eliminados los addEventListener que fallaban
+    // (Usaremos los onclick="" del HTML, que ahora encontrarán las funciones en 'window')
     
     // Configurar el listener de autenticación de Firebase
     // CAMBIO: Usar window.auth
