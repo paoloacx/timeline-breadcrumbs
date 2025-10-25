@@ -1008,8 +1008,7 @@ window.deleteCurrentEntry = function() {
     else if (!document.getElementById('timer-window').classList.contains('hidden')) formIdToDelete = 'timer-window';
     else if (!document.getElementById('track-window').classList.contains('hidden')) formIdToDelete = 'track-window';
     else if (!document.getElementById('spent-window').classList.contains('hidden')) formIdToDelete = 'spent-window';
-    // (Añadir recap si tuviera botón delete)
-    // else if (!document.getElementById('recap-form').classList.contains('hidden')) formIdToDelete = 'recap-form';
+    else if (!document.getElementById('recap-form').classList.contains('hidden')) formIdToDelete = 'recap-form';
     
     if (confirm('Delete this entry?')) {
         window.entries = window.entries.filter(e => e.id !== editingEntryId);
@@ -1273,6 +1272,9 @@ function renderTimeline() {
 
     // Ordenar días de más reciente a más antiguo
     const sortedDayKeys = Object.keys(groupedByDay).sort((a, b) => b.localeCompare(a));
+    
+    // *** NUEVO CAMBIO: Obtener la clave del día de hoy ***
+    const todayKey = getDayKey(new Date().toISOString());
 
     const html = `
         <div class="timeline">
@@ -1285,9 +1287,9 @@ function renderTimeline() {
                 const recaps = dayEntries.filter(e => e.type === 'recap');
                 const regularEntries = dayEntries.filter(e => e.type !== 'recap');
                 
-                // Abrir el primer día por defecto
-                const isFirstDay = sortedDayKeys.indexOf(dayKey) === 0;
-                const expandedClass = isFirstDay ? 'expanded' : '';
+                // *** NUEVO CAMBIO: Solo expandir si es el día de hoy ***
+                const isToday = (dayKey === todayKey);
+                const expandedClass = isToday ? 'expanded' : '';
                 
                 return `
                     <div class="day-block">
@@ -1483,7 +1485,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.loadSettings === 'function') {
         window.loadSettings();
     } else {
-        console.error("Error: settings-manager.js no se ha cargado.");
+        // Esto es un error normal si settings-manager.js aún no está cargado,
+        // firebase-config.js llamará a loadSettingsFromFirebase() que también llama a loadSettings().
     }
     
     loadData(); // Carga datos locales
@@ -1537,9 +1540,11 @@ window.showRecapForm = function() {
     const slider = document.getElementById('recap-rating');
     const valueDisplay = document.getElementById('recap-rating-value');
     
-    slider.oninput = function() {
-        valueDisplay.textContent = this.value;
-    };
+    if (slider) {
+        slider.oninput = function() {
+            if (valueDisplay) valueDisplay.textContent = this.value;
+        };
+    }
     
     recapForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
