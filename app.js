@@ -74,7 +74,7 @@ function loadData() {
     if (saved) {
         entries = JSON.parse(saved);
     }
-    renderTimeline();
+    renderTimeline(entries); // MODIFICADO
 }
 
 // Save data to localStorage
@@ -534,7 +534,7 @@ function saveEntry() {
     }
 
     saveData();
-    renderTimeline();
+    renderTimeline(entries); // MODIFICADO
     toggleForm();
 }
 
@@ -554,6 +554,11 @@ function editEntry(id) {
     
     if (entry.isSpent) {
         editSpentEvent(entry);
+        return;
+    }
+
+    if (entry.type === 'recap') {
+        editRecapEvent(entry);
         return;
     }
 
@@ -613,14 +618,13 @@ function editTimeEvent(entry) {
     const minutes = String(date.getMinutes()).padStart(2, '0');
     document.getElementById('datetime-input-time').value = `${year}-${month}-${day}T${hours}:${minutes}`;
     
+    document.getElementById('time-optional-note').value = entry.optionalNote || '';
+
     document.querySelectorAll('.duration-option').forEach(el => {
         el.classList.remove('selected');
         const text = el.textContent.trim();
-        if ((selectedDuration === 15 && text.includes('15')) ||
-            (selectedDuration === 30 && text.includes('30')) ||
-            (selectedDuration === 60 && text.includes('1 hour')) ||
-            (selectedDuration === 120 && text.includes('2')) ||
-            (selectedDuration === 180 && text.includes('3'))) {
+        const duration = parseInt(el.dataset.duration);
+        if (duration === selectedDuration) {
             el.classList.add('selected');
         }
     });
@@ -648,12 +652,8 @@ function selectDuration(minutes) {
     const options = document.querySelectorAll('.duration-option');
     options.forEach(el => {
         el.classList.remove('selected');
-        const text = el.textContent.trim();
-        if ((minutes === 15 && text.includes('15')) ||
-            (minutes === 30 && text.includes('30')) ||
-            (minutes === 60 && text.includes('1 hour')) ||
-            (minutes === 120 && text.includes('2')) ||
-            (minutes === 180 && text.includes('3'))) {
+        const duration = parseInt(el.dataset.duration);
+        if (duration === minutes) {
             el.classList.add('selected');
         }
     });
@@ -723,7 +723,7 @@ function createTimeEvent() {
     }
     
     saveData();
-    renderTimeline();
+    renderTimeline(entries); // MODIFICADO
     
     alert(`✅ Time event ${editingEntryId ? 'updated' : 'created'}!`);
     toggleTimer();
@@ -838,7 +838,7 @@ function saveTrackEvent() {
     }
     
     saveData();
-    renderTimeline();
+    renderTimeline(entries); // MODIFICADO
     toggleTrack();
     
     document.getElementById('save-track-btn').textContent = 'Save Track';
@@ -916,7 +916,7 @@ function saveSpent() {
     }
     
     saveData();
-    renderTimeline();
+    renderTimeline(entries); // MODIFICADO
     toggleSpent();
     document.getElementById('delete-spent-btn').classList.add('hidden');
 }
@@ -933,13 +933,14 @@ function deleteCurrentEntry() {
         }
         
         saveData();
-        renderTimeline();
+        renderTimeline(entries); // MODIFICADO
         
         // Close all windows
         document.getElementById('form-window').classList.add('hidden');
         document.getElementById('timer-window').classList.add('hidden');
         document.getElementById('track-window').classList.add('hidden');
         document.getElementById('spent-window').classList.add('hidden');
+        document.getElementById('recap-form').classList.add('hidden');
         
         editingEntryId = null;
     }
@@ -1205,7 +1206,7 @@ function updateTimerOptions() {
     if (!container) return;
     
     container.innerHTML = timeDurations.map(duration => `
-        <div class="duration-option" onclick="selectDuration(${duration})">
+        <div class="duration-option" onclick="selectDuration(${duration})" data-duration="${duration}">
             ${duration < 60 ? duration + ' min' : (duration / 60) + ' hour' + (duration > 60 ? 's' : '')}
         </div>
     `).join('');
@@ -1224,234 +1225,6 @@ function updateTrackOptions() {
     renderTrackSelector();
 }
 
-// Timeline rendering
-function toggleReadMore(id) {
-    const noteEl = document.getElementById(`note-${id}`);
-    const btnEl = document.getElementById(`read-more-${id}`);
-    
-    if (noteEl.classList.contains('expanded')) {
-        noteEl.classList.remove('expanded');
-        btnEl.textContent = 'Read more';
-    } else {
-        noteEl.classList.add('expanded');
-        btnEl.textContent = 'Show less';
-    }
-}
-
-function formatDate(timestamp) {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('en', { 
-        weekday: 'long',
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric'
-    });
-}
-
-function formatTime(timestamp) {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-}
-
-function calculateEndTime(timestamp, durationMinutes) {
-    const date = new Date(timestamp);
-    date.setMinutes(date.getMinutes() + durationMinutes);
-    return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-}
-
-function getDayKey(timestamp) {
-    const date = new Date(timestamp);
-    return date.toISOString().split('T')[0];
-}
-
-function toggleDay(dayKey) {
-    const content = document.getElementById(`day-content-${dayKey}`);
-    const chevron = document.getElementById(`chevron-${dayKey}`);
-    
-    content.classList.toggle('expanded');
-    chevron.classList.toggle('expanded');
-}
-
-
-// Show image in modal
-function showImageInModal(entryId, imageIndex) {
-    const entry = entries.find(e => e.id == entryId);
-    if (!entry || !entry.images || !entry.images[imageIndex]) {
-        console.error('Image not found');
-        return;
-    }
-    
-    const modal = document.getElementById('preview-modal');
-    const body = document.getElementById('preview-body');
-    
-    body.innerHTML = `
-        <div style="text-align: center; padding: 20px;">
-            <img src="${entry.images[imageIndex]}" style="max-width: 100%; max-height: 80vh; border: 2px solid #000;">
-        </div>
-    `;
-    
-    modal.classList.add('show');
-}
-
-
-// Toggle note expansion
-function toggleNote(entryId) {
-    const noteDiv = document.getElementById('note-' + entryId);
-    const btn = event.target;
-    
-    if (noteDiv) {
-        if (noteDiv.classList.contains('expanded')) {
-            noteDiv.classList.remove('expanded');
-            btn.textContent = 'Read more';
-        } else {
-            noteDiv.classList.add('expanded');
-            btn.textContent = 'Read less';
-        }
-    }
-}
-
-function renderTimeline() {
-    const container = document.getElementById('timeline-container');
-    const emptyState = document.getElementById('empty-state');
-    const footer = document.getElementById('footer');
-
-    if (entries.length === 0) {
-        container.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        footer.style.display = 'none';
-        return;
-    }
-
-    emptyState.classList.add('hidden');
-    footer.style.display = 'flex';
-
-    const groupedByDay = {};
-    entries.forEach(entry => {
-        const dayKey = getDayKey(entry.timestamp);
-        if (!groupedByDay[dayKey]) {
-            groupedByDay[dayKey] = [];
-        }
-        groupedByDay[dayKey].push(entry);
-    });
-
-    const html = `
-        <div class="timeline">
-            <div class="timeline-line"></div>
-            ${Object.keys(groupedByDay).map(dayKey => {
-                const dayEntries = groupedByDay[dayKey];
-                const firstEntry = dayEntries[0];
-                
-                return `
-                    <div class="day-block">
-                        <div class="day-header" onclick="toggleDay('${dayKey}')">
-                            <span>${formatDate(firstEntry.timestamp)}</span>
-                            <span class="chevron" id="chevron-${dayKey}">▼</span>
-                        </div>
-                        <div class="day-content" id="day-content-${dayKey}">
-                            ${dayEntries.map(entry => {
-                                const heightStyle = entry.isTimedActivity && entry.duration ? `min-height: ${Math.min(150 + entry.duration * 0.5, 300)}px;` : '';
-                                const trackClass = entry.isQuickTrack ? 'track-event' : '';
-                                const spentClass = entry.isSpent ? 'spent-event' : '';
-                                
-                                return `
-                                <div class="breadcrumb-entry ${entry.isTimedActivity ? 'edit-mode' : ''} ${trackClass} ${spentClass}" style="${heightStyle}">
-                                    <button class="mac-button edit-button" onclick="editEntry(${entry.id})">✏️ Edit</button>
-                                    
-                                    ${entry.isTimedActivity ? 
-                                        `<div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div>
-                                        <div class="activity-label">${entry.activity}</div>
-                                        <div style="font-size: 13px; color: #666; margin-top: 8px;">Duration: ${entry.duration} minutes</div>
-                                        ${entry.optionalNote ? '<div class="optional-note">' + entry.optionalNote + '</div>' : ''}` :
-                                        `<div class="breadcrumb-time">
-                                            ${entry.isQuickTrack ?
-                                                `<span class="compact-time">⏰ ${formatTime(entry.timestamp)} ${entry.note}</span>` :
-                                                `⏰ ${formatTime(entry.timestamp)}`
-                                            }
-                                            ${entry.isSpent ? `<span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>` : ''}
-                                        </div>`
-                                    }
-                                    
-                                    ${entry.isTimedActivity ? '' : ''}
-                                    ${entry.isQuickTrack && entry.optionalNote ? '<div class="optional-note">' + entry.optionalNote + '</div>' : ''}
-                                    
-                                    ${!entry.isTimedActivity && !entry.isQuickTrack ? `
-                                        <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
-                                            ${entry.mood ? `<span class="mood-display">${entry.mood.emoji}</span>` : ''}
-                                            <div style="flex: 1;">
-                                                <div class="breadcrumb-note" id="note-${entry.id}">${entry.note}</div>
-                                                ${entry.note && entry.note.length > 200 ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
-                                            </div>
-                                        </div>
-                                    ` : ''}
-                                    
-                                    ${entry.weather || entry.location ? `
-                                        <div style="font-size: 12px; color: ${entry.isQuickTrack ? '#ccc' : '#666'}; margin-bottom: 8px;">
-                                            ${entry.weather ? `${entry.weather}` : ''}
-                                            ${entry.weather && entry.location && entry.location.length < 20 ? ` • 📍 ${entry.location}` : ''}
-                                            ${!entry.weather && entry.location ? `📍 ${entry.location}` : ''}
-                                        </div>
-                                    ` : ''}
-                                    
-                                    ${entry.audio ? `
-                                        <div style="margin-top: 12px; margin-bottom: 12px;">
-                                            <audio controls style="width: 100%; max-width: 300px;">
-                                                <source src="${entry.audio}" type="audio/webm">
-                                            </audio>
-                                        </div>
-                                    ` : ''}
-                                    
-                                    <div class="breadcrumb-preview">
-                                        ${entry.images && entry.images.length > 0 ? entry.images.map(img => `
-                                            <img src="${img}" class="preview-image-thumb" onclick="event.stopPropagation(); showImageInModal('${entry.id}', ${entry.images.indexOf(img)});">
-                                        `).join('') : ''}
-                                        ${entry.coords ? `<div class="preview-map-thumb" id="mini-map-${entry.id}"></div>` : ''}
-                                        ${(entry.images && entry.images.length > 0) || entry.coords || entry.audio ? `
-                                            <button class="mac-button preview-button" onclick="previewEntry(${entry.id})">🔍</button>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                            `}).join('')}
-                        </div>
-                    </div>
-                `;
-            }).join('')}
-        </div>
-    `;
-
-    container.innerHTML = html;
-    
-    entries.forEach(entry => {
-        if (entry.coords) {
-            setTimeout(() => {
-                const mapEl = document.getElementById(`mini-map-${entry.id}`);
-                if (mapEl && !mapEl.classList.contains('leaflet-container')) {
-                    try {
-                        const miniMap = L.map(`mini-map-${entry.id}`, {
-                            zoomControl: false,
-                            attributionControl: false,
-                            dragging: false,
-                            scrollWheelZoom: false,
-                            doubleClickZoom: false,
-                            boxZoom: false,
-                            keyboard: false
-                        }).setView([entry.coords.lat, entry.coords.lon], 13);
-                        
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            maxZoom: 19
-                        }).addTo(miniMap);
-                        
-                        L.marker([entry.coords.lat, entry.coords.lon]).addTo(miniMap);
-                        
-                        mapEl.style.cursor = 'pointer';
-                        mapEl.onclick = () => previewEntry(entry.id);
-                    } catch (e) {
-                        console.error('Error creating mini map:', e);
-                    }
-                }
-            }, 100);
-        }
-    });
-}
 
 // Export functions
 function exportCSV() {
@@ -1727,10 +1500,11 @@ function openStats() {
 
 function calculateStats() {
     const totalEntries = entries.length;
-    const breadcrumbs = entries.filter(e => !e.isTimedActivity && !e.isQuickTrack && !e.isSpent).length;
+    const breadcrumbs = entries.filter(e => !e.isTimedActivity && !e.isQuickTrack && !e.isSpent && e.type !== 'recap').length;
     const timeEvents = entries.filter(e => e.isTimedActivity).length;
     const trackEvents = entries.filter(e => e.isQuickTrack).length;
     const spentEvents = entries.filter(e => e.isSpent).length;
+    const recapEvents = entries.filter(e => e.type === 'recap').length;
     
     const totalSpent = entries
         .filter(e => e.isSpent)
@@ -1781,6 +1555,10 @@ function calculateStats() {
             <div class="stat-number">${spentEvents}</div>
             <div class="stat-label">💰 Expenses</div>
         </div>
+         <div class="stat-card">
+            <div class="stat-number">${recapEvents}</div>
+            <div class="stat-label">🌟 Recaps</div>
+        </div>
         <div class="stat-card">
             <div class="stat-number">€${totalSpent.toFixed(2)}</div>
             <div class="stat-label">Total Spent</div>
@@ -1812,3 +1590,274 @@ function closeStats(event) {
 // Initialize app
 loadData();
 loadSettings();
+updateTimerOptions();
+updateTrackOptions();
+
+// ===== RECAP FUNCTIONS =====
+
+function showRecapForm() {
+    // Ocultar otros formularios
+    document.getElementById('form-window').classList.add('hidden');
+    document.getElementById('timer-window').classList.add('hidden');
+    document.getElementById('track-window').classList.add('hidden');
+    document.getElementById('spent-window').classList.add('hidden');
+    
+    document.getElementById('recap-form').classList.remove('hidden');
+    
+    // Establecer fecha actual
+    setCurrentDateTime('datetime-input-recap');
+    
+    // Listener para el slider
+    const slider = document.getElementById('recap-rating');
+    const valueDisplay = document.getElementById('recap-rating-value');
+    
+    slider.oninput = function() {
+        valueDisplay.textContent = this.value;
+    };
+    
+    // Limpiar formulario
+    editingEntryId = null;
+    document.getElementById('recap-reflection').value = '';
+    document.getElementById('recap-rating').value = '5';
+    document.getElementById('recap-rating-value').textContent = '5';
+    document.getElementById('recap-highlight-1').value = '';
+    document.getElementById('recap-highlight-2').value = '';
+    document.getElementById('recap-highlight-3').value = '';
+    document.getElementById('recap-bso').value = '';
+    document.getElementById('recap-bso-results').innerHTML = '';
+    document.getElementById('recap-selected-track').value = '';
+}
+
+function closeRecapForm() {
+    document.getElementById('recap-form').classList.add('hidden');
+    // Limpiar formulario
+    editingEntryId = null;
+    document.getElementById('recap-reflection').value = '';
+    document.getElementById('recap-rating').value = '5';
+    document.getElementById('recap-rating-value').textContent = '5';
+    document.getElementById('recap-highlight-1').value = '';
+    document.getElementById('recap-highlight-2').value = '';
+    document.getElementById('recap-highlight-3').value = '';
+    document.getElementById('recap-bso').value = '';
+    document.getElementById('recap-bso-results').innerHTML = '';
+    document.getElementById('recap-selected-track').value = '';
+}
+
+async function buscarBSO() {
+    const query = document.getElementById('recap-bso').value.trim();
+    if (!query) {
+        alert('Please enter a song or artist name');
+        return;
+    }
+    
+    const resultsDiv = document.getElementById('recap-bso-results');
+    resultsDiv.innerHTML = '<div style="padding: 12px; text-align: center;">Searching...</div>';
+    
+    try {
+        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=5`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.results && data.results.length > 0) {
+            const html = data.results.map(track => `
+                <div class="bso-result" style="display: flex; align-items: center; gap: 12px; padding: 8px; border: 2px solid #999; margin-bottom: 8px; cursor: pointer; background: white;" onclick="selectTrack('${track.trackName.replace(/'/g, "\\'")}', '${track.artistName.replace(/'/g, "\\'")}', '${track.trackViewUrl}', '${track.artworkUrl100}')">
+                    <img src="${track.artworkUrl100}" style="width: 50px; height: 50px; border: 2px solid #000;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold; font-size: 13px;">${track.trackName}</div>
+                        <div style="font-size: 11px; color: #666;">${track.artistName}</div>
+                    </div>
+                    <div style="font-size: 18px;">▶️</div>
+                </div>
+            `).join('');
+            resultsDiv.innerHTML = html;
+        } else {
+            resultsDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #666;">No results found</div>';
+        }
+    } catch (error) {
+        console.error('Error searching BSO:', error);
+        resultsDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: red;">Error searching. Try again.</div>';
+    }
+}
+
+function selectTrack(trackName, artistName, url, artwork) {
+    const trackData = {
+        name: trackName,
+        artist: artistName,
+        url: url,
+        artwork: artwork
+    };
+    
+    document.getElementById('recap-selected-track').value = JSON.stringify(trackData);
+    document.getElementById('recap-bso-results').innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 3px solid #000; background: #f0f0f0;">
+            <img src="${artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
+            <div style="flex: 1;">
+                <div style="font-weight: bold;">${trackName}</div>
+                <div style="font-size: 12px; color: #666;">${artistName}</div>
+            </div>
+            <a href="${url}" target="_blank" style="text-decoration: none; font-size: 20px;">🔗</a>
+        </div>
+    `;
+}
+
+function editRecapEvent(entry) {
+    editingEntryId = entry.id;
+    
+    // Set datetime
+    const date = new Date(entry.timestamp);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    document.getElementById('datetime-input-recap').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    
+    document.getElementById('recap-reflection').value = entry.reflection || '';
+    document.getElementById('recap-rating').value = entry.rating || 5;
+    document.getElementById('recap-rating-value').textContent = entry.rating || 5;
+    
+    if (entry.highlights && entry.highlights.length > 0) {
+        document.getElementById('recap-highlight-1').value = entry.highlights[0] || '';
+        document.getElementById('recap-highlight-2').value = entry.highlights[1] || '';
+        document.getElementById('recap-highlight-3').value = entry.highlights[2] || '';
+    }
+    
+    if (entry.track) {
+        document.getElementById('recap-selected-track').value = JSON.stringify(entry.track);
+        document.getElementById('recap-bso-results').innerHTML = `
+            <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 3px solid #000; background: #f0f0f0;">
+                <img src="${entry.track.artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
+                <div style="flex: 1;">
+                    <div style="font-weight: bold;">${entry.track.name}</div>
+                    <div style="font-size: 12px; color: #666;">${entry.track.artist}</div>
+                </div>
+                <a href="${entry.track.url}" target="_blank" style="text-decoration: none; font-size: 20px;">🔗</a>
+            </div>
+        `;
+    }
+    
+    const recapForm = document.getElementById('recap-form');
+    recapForm.classList.remove('hidden');
+    recapForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function saveRecap() {
+    const reflection = document.getElementById('recap-reflection').value.trim();
+    const rating = document.getElementById('recap-rating').value;
+    const highlight1 = document.getElementById('recap-highlight-1').value.trim();
+    const highlight2 = document.getElementById('recap-highlight-2').value.trim();
+    const highlight3 = document.getElementById('recap-highlight-3').value.trim();
+    const selectedTrackJson = document.getElementById('recap-selected-track').value;
+    const timestamp = getTimestampFromInput('datetime-input-recap');
+    
+    if (!reflection && !highlight1 && !highlight2 && !highlight3) {
+        alert('Please add at least one reflection or highlight');
+        return;
+    }
+    
+    if (editingEntryId) {
+        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
+        if (entryIndex !== -1) {
+            entries[entryIndex] = {
+                ...entries[entryIndex],
+                timestamp: timestamp,
+                reflection: reflection,
+                rating: parseInt(rating),
+                highlights: [highlight1, highlight2, highlight3].filter(h => h),
+                track: selectedTrackJson ? JSON.parse(selectedTrackJson) : null
+            };
+        }
+        editingEntryId = null;
+        alert('🌟 Recap updated!');
+    } else {
+        const recap = {
+            id: Date.now(),
+            timestamp: timestamp,
+            type: 'recap',
+            reflection: reflection,
+            rating: parseInt(rating),
+            highlights: [highlight1, highlight2, highlight3].filter(h => h),
+            track: selectedTrackJson ? JSON.parse(selectedTrackJson) : null
+        };
+        
+        entries.unshift(recap);
+        alert('🌟 Recap saved!');
+    }
+    
+    saveData();
+    renderTimeline(entries); // MODIFICADO
+    closeRecapForm();
+}
+
+// ===== FAB MENU =====
+
+let fabMenuOpen = false;
+
+function toggleFabMenu() {
+    const fabActions = document.querySelectorAll('.fab-action-wrapper');
+    const fabIcon = document.getElementById('fab-icon');
+    
+    fabMenuOpen = !fabMenuOpen;
+    
+    if (fabMenuOpen) {
+        fabIcon.textContent = '×';
+        fabIcon.style.transform = 'rotate(45deg)';
+        
+        fabActions.forEach((wrapper, index) => {
+            setTimeout(() => {
+                wrapper.classList.remove('hidden');
+                setTimeout(() => wrapper.classList.add('show'), 10);
+            }, index * 50);
+        });
+    } else {
+        fabIcon.textContent = '+';
+        fabIcon.style.transform = 'rotate(0deg)';
+        
+        fabActions.forEach((wrapper, index) => {
+            setTimeout(() => {
+                wrapper.classList.remove('show');
+                setTimeout(() => wrapper.classList.add('hidden'), 300);
+            }, (fabActions.length - 1 - index) * 30);
+        });
+    }
+}
+
+// Cerrar FAB menu al hacer click en una acción
+function closeFabMenu() {
+    if (fabMenuOpen) {
+        toggleFabMenu();
+    }
+}
+
+// Modificar las funciones toggle para cerrar el menú
+// BUGFIX: He cambiado los IDs para que coincidan con el HTML
+const originalToggleCrumb = window.toggleForm;
+window.toggleForm = function() {
+    closeFabMenu();
+    if (originalToggleCrumb) originalToggleCrumb();
+};
+
+const originalToggleTime = window.toggleTimer;
+window.toggleTimer = function() {
+    closeFabMenu();
+    if (originalToggleTime) originalToggleTime();
+};
+
+const originalToggleTrack = window.toggleTrack;
+window.toggleTrack = function() {
+    closeFabMenu();
+    if (originalToggleTrack) originalToggleTrack();
+};
+
+const originalToggleSpent = window.toggleSpent;
+window.toggleSpent = function() {
+    closeFabMenu();
+    if (originalToggleSpent) originalToggleSpent();
+};
+
+// Agregar para Recap
+const originalShowRecapForm = window.showRecapForm;
+window.showRecapForm = function() {
+    closeFabMenu();
+    if (originalShowRecapForm) originalShowRecapForm();
+};
