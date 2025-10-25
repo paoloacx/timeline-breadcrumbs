@@ -2,7 +2,8 @@
 const WEATHER_API_KEY = '317f7bcb07cf05e2c6265176c502a4bb';
 
 // Global variables
-let entries = [];
+// CAMBIO: Definidas como 'window.' para ser accesibles por los módulos
+window.entries = [];
 let currentImages = [];
 let currentAudio = null;
 let currentCoords = null;
@@ -17,16 +18,15 @@ let audioChunks = [];
 
 // Refresh function
 function refreshApp() {
-    if (currentUser && !isOfflineMode) {
-        loadDataFromFirebase();
-        loadSettingsFromFirebase();
+    // Las funciones de FB (currentUser, isOfflineMode) están en firebase-config.js
+    if (window.currentUser && !window.isOfflineMode) {
+        window.loadDataFromFirebase();
+        window.loadSettingsFromFirebase();
         alert('✅ Synced!');
     } else {
         location.reload();
     }
 }
-
-
 
 // Settings
 // CAMBIO: Definidas como variables GLOBALES (window.)
@@ -47,7 +47,7 @@ window.defaultMoods = [
     { emoji: '😰', label: 'Anxious' },
     { emoji: '😴', label: 'Tired' }
 ];
-window.moods = [...defaultMoods];
+window.moods = [...window.defaultMoods];
 
 // CAMBIO: loadSettings() se movió a settings-manager.js
 // CAMBIO: saveSettingsToStorage() se movió a settings-manager.js
@@ -57,31 +57,36 @@ function loadData() {
     const saved = localStorage.getItem('timeline-entries');
     if (saved) {
         try {
-            entries = JSON.parse(saved);
+            // CAMBIO: Usar variable global
+            window.entries = JSON.parse(saved);
         } catch(e) {
             console.error("Error parsing entries from localStorage", e);
-            entries = [];
+            window.entries = [];
         }
     }
-    renderTimeline();
+    renderTimeline(); // Esta función sigue aquí por ahora
 }
 
 // Save data to localStorage
 function saveData() {
-    localStorage.setItem('timeline-entries', JSON.stringify(entries));
-    if (!isOfflineMode && currentUser) {
-        saveDataToFirebase();
+    // CAMBIO: Usar variable global
+    localStorage.setItem('timeline-entries', JSON.stringify(window.entries));
+    // Las variables (isOfflineMode, currentUser) y la función (saveDataToFirebase) están en firebase-config.js
+    if (!window.isOfflineMode && window.currentUser) {
+        window.saveDataToFirebase();
     }
 }
 
 
 // Sync/Refresh data
-function syncData() {
+// CAMBIO: Hacer global para que el botón la llame
+window.syncData = function() {
     location.reload();
 }
 
 // Toggle forms
-function toggleForm() {
+// CAMBIO: Hacer global para que el botón la llame
+window.toggleForm = function() {
     const form = document.getElementById('form-window');
     const timer = document.getElementById('timer-window');
     const track = document.getElementById('track-window');
@@ -95,13 +100,14 @@ function toggleForm() {
     form.classList.toggle('hidden');
     if (!form.classList.contains('hidden')) {
         clearForm();
-        renderMoodSelector();
+        window.renderMoodSelector(); // CAMBIO: Llamar a global
         setCurrentDateTime('datetime-input');
         form.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
 
-function toggleTimer() {
+// CAMBIO: Hacer global para que el botón la llame
+window.toggleTimer = function() {
     const timer = document.getElementById('timer-window');
     const form = document.getElementById('form-window');
     const track = document.getElementById('track-window');
@@ -120,7 +126,8 @@ function toggleTimer() {
     }
 }
 
-function toggleTrack() {
+// CAMBIO: Hacer global para que el botón la llame
+window.toggleTrack = function() {
     const track = document.getElementById('track-window');
     const form = document.getElementById('form-window');
     const timer = document.getElementById('timer-window');
@@ -133,7 +140,7 @@ function toggleTrack() {
 
     track.classList.toggle('hidden');
     if (!track.classList.contains('hidden')) {
-        renderTrackSelector();
+        window.renderTrackSelector(); // CAMBIO: Llamar a global
         setCurrentDateTime('datetime-input-track');
         selectedTrackItem = null;
         document.getElementById('save-track-btn').disabled = true;
@@ -143,7 +150,8 @@ function toggleTrack() {
     }
 }
 
-function toggleSpent() {
+// CAMBIO: Hacer global para que el botón la llame
+window.toggleSpent = function() {
     const spent = document.getElementById('spent-window');
     const form = document.getElementById('form-window');
     const timer = document.getElementById('timer-window');
@@ -208,13 +216,15 @@ function clearForm() {
     }
 }
 
-function cancelEdit() {
+// CAMBIO: Hacer global para que el botón la llame
+window.cancelEdit = function() {
     clearForm();
-    toggleForm();
+    window.toggleForm(); // CAMBIO: Llamar a global
 }
 
 // GPS functions
-function getGPS() {
+// CAMBIO: Hacer global para que el botón la llame
+window.getGPS = function() {
     const btn = document.getElementById('gps-btn');
     const locationInput = document.getElementById('location-input');
     btn.textContent = '⏳ Searching...';
@@ -235,8 +245,8 @@ function getGPS() {
             
             locationInput.placeholder = 'Getting location...';
             
-            showMiniMap(lat, lon, 'form-map');
-            getWeather(lat, lon);
+            showMiniMap(lat, lon, 'form-map'); // Sigue en app.js (es de render)
+            getWeather(lat, lon); // Sigue en app.js
             
             btn.textContent = '🌍 GPS OK';
             btn.disabled = false;
@@ -323,7 +333,8 @@ function showMiniMap(lat, lon, containerId) {
 }
 
 // Image handling
-function handleImages(event) {
+// CAMBIO: Hacer global para que el input la llame
+window.handleImages = function(event) {
     const files = Array.from(event.target.files);
     
     files.forEach(file => {
@@ -362,7 +373,8 @@ function handleImages(event) {
 }
 
 // Audio recording - iOS compatible
-async function startRecording() {
+// CAMBIO: Hacer global para que el botón la llame
+window.startRecording = async function() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
             audio: {
@@ -412,7 +424,8 @@ async function startRecording() {
     }
 }
 
-function stopRecording() {
+// CAMBIO: Hacer global para que el botón la llame
+window.stopRecording = function() {
     if (mediaRecorder && mediaRecorder.state !== 'inactive') {
         mediaRecorder.stop();
         document.getElementById('record-btn').disabled = false;
@@ -447,12 +460,14 @@ function renderAudioPreview() {
     }
 }
 
-function removeImage(index) {
+// CAMBIO: Hacer global para que el botón la llame
+window.removeImage = function(index) {
     currentImages.splice(index, 1);
     renderImagePreviews();
 }
 
-function removeAudio() {
+// CAMBIO: Hacer global para que el botón la llame
+window.removeAudio = function() {
     currentAudio = null;
     renderAudioPreview();
 }
@@ -469,7 +484,8 @@ window.renderMoodSelector = function() {
     `).join('');
 }
 
-function selectMood(index) {
+// CAMBIO: Hacer global para que el botón la llame
+window.selectMood = function(index) {
     selectedMood = index;
     window.renderMoodSelector();
 }
@@ -479,7 +495,8 @@ function selectMood(index) {
 // CAMBIO: saveMoodConfig() movido a settings-manager.js
 
 // Save/Edit entry functions
-function saveEntry() {
+// CAMBIO: Hacer global para que el botón la llame
+window.saveEntry = function() {
     const note = document.getElementById('note-input').value.trim();
     if (!note) {
         alert('Please write a note');
@@ -491,17 +508,17 @@ function saveEntry() {
     const timestamp = getTimestampFromInput('datetime-input');
 
     if (editingEntryId) {
-        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
+        const entryIndex = window.entries.findIndex(e => e.id === editingEntryId);
         if (entryIndex !== -1) {
-            entries[entryIndex] = {
-                ...entries[entryIndex], // Mantener tipo (isTimedActivity, etc)
+            window.entries[entryIndex] = {
+                ...window.entries[entryIndex], // Mantener tipo (isTimedActivity, etc)
                 timestamp: timestamp,
                 note: note,
                 location: document.getElementById('location-input').value,
                 weather: document.getElementById('weather-input').value,
                 images: [...currentImages],
                 audio: currentAudio,
-                coords: currentCoords ? { ...currentCoords } : entries[entryIndex].coords,
+                coords: currentCoords ? { ...currentCoords } : window.entries[entryIndex].coords,
                 mood: moodData,
                 // Asegurarse de que no se marquen como otros tipos
                 isTimedActivity: false,
@@ -522,16 +539,17 @@ function saveEntry() {
             coords: currentCoords ? { ...currentCoords } : null,
             mood: moodData
         };
-        entries.unshift(entry);
+        window.entries.unshift(entry);
     }
 
     saveData();
     renderTimeline();
-    toggleForm();
+    window.toggleForm(); // CAMBIO: Llamar a global
 }
 
-function editEntry(id) {
-    const entry = entries.find(e => e.id === id);
+// CAMBIO: Hacer global para que el botón la llame
+window.editEntry = function(id) {
+    const entry = window.entries.find(e => e.id === id);
     if (!entry) return;
 
     // Redirigir a funciones de edición específicas si es necesario
@@ -660,7 +678,8 @@ function editTimeEvent(entry) {
     timerWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function selectDuration(minutes) {
+// CAMBIO: Hacer global para que el botón la llame
+window.selectDuration = function(minutes) {
     selectedDuration = minutes;
     const options = document.querySelectorAll('.duration-option');
     options.forEach(el => {
@@ -674,7 +693,8 @@ function selectDuration(minutes) {
     checkTimerReady();
 }
 
-function selectActivity(activity) {
+// CAMBIO: Hacer global para que el botón la llame
+window.selectActivity = function(activity) {
     selectedActivity = activity;
     const options = document.querySelectorAll('#activity-selector .activity-option');
     options.forEach(el => {
@@ -697,17 +717,18 @@ function checkTimerReady() {
     }
 }
 
-function createTimeEvent() {
+// CAMBIO: Hacer global para que el botón la llame
+window.createTimeEvent = function() {
     if (!selectedDuration || !selectedActivity) return;
     
     const timestamp = getTimestampFromInput('datetime-input-time');
     const optionalNote = document.getElementById('time-optional-note').value.trim();
     
     if (editingEntryId) {
-        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
+        const entryIndex = window.entries.findIndex(e => e.id === editingEntryId);
         if (entryIndex !== -1) {
-            entries[entryIndex] = {
-                ...entries[entryIndex],
+            window.entries[entryIndex] = {
+                ...window.entries[entryIndex],
                 timestamp: timestamp,
                 note: `${selectedActivity} - ${selectedDuration} minutes`,
                 activity: selectedActivity,
@@ -739,14 +760,14 @@ function createTimeEvent() {
             optionalNote: optionalNote
         };
         
-        entries.unshift(entry);
+        window.entries.unshift(entry);
     }
     
     saveData();
     renderTimeline();
     
     alert(`✅ Time event ${editingEntryId ? 'updated' : 'created'}!`);
-    toggleTimer();
+    window.toggleTimer(); // CAMBIO: Llamar a global
     
     document.getElementById('create-time-btn').textContent = 'Create Event';
     document.getElementById('delete-time-btn').classList.add('hidden');
@@ -780,7 +801,8 @@ window.renderTrackSelector = function() {
     `).join('');
 }
 
-function selectTrackItem(item) {
+// CAMBIO: Hacer global para que el botón la llame
+window.selectTrackItem = function(item) {
     selectedTrackItem = item;
     document.querySelectorAll('#track-selector .activity-option').forEach(el => {
         el.classList.remove('selected');
@@ -834,17 +856,18 @@ function editTrackEvent(entry) {
     trackWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function saveTrackEvent() {
+// CAMBIO: Hacer global para que el botón la llame
+window.saveTrackEvent = function() {
     if (!selectedTrackItem) return;
     
     const timestamp = getTimestampFromInput('datetime-input-track');
     const optionalNote = document.getElementById('track-optional-note').value.trim();
     
     if (editingEntryId) {
-        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
+        const entryIndex = window.entries.findIndex(e => e.id === editingEntryId);
         if (entryIndex !== -1) {
-            entries[entryIndex] = {
-                ...entries[entryIndex],
+            window.entries[entryIndex] = {
+                ...window.entries[entryIndex],
                 timestamp: timestamp,
                 note: selectedTrackItem,
                 optionalNote: optionalNote,
@@ -873,13 +896,13 @@ function saveTrackEvent() {
             optionalNote: optionalNote
         };
         
-        entries.unshift(entry);
+        window.entries.unshift(entry);
         alert(`✅ Tracked: ${selectedTrackItem}`);
     }
     
     saveData();
     renderTimeline();
-    toggleTrack();
+    window.toggleTrack(); // CAMBIO: Llamar a global
     
     document.getElementById('save-track-btn').textContent = 'Save Track';
     document.getElementById('delete-track-btn').classList.add('hidden');
@@ -914,7 +937,8 @@ function editSpentEvent(entry) {
     spentWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function saveSpent() {
+// CAMBIO: Hacer global para que el botón la llame
+window.saveSpent = function() {
     const description = document.getElementById('spent-description').value.trim();
     const amount = parseFloat(document.getElementById('spent-amount').value);
 
@@ -931,10 +955,10 @@ function saveSpent() {
     const timestamp = getTimestampFromInput('datetime-input-spent');
 
     if (editingEntryId) {
-        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
+        const entryIndex = window.entries.findIndex(e => e.id === editingEntryId);
         if (entryIndex !== -1) {
-            entries[entryIndex] = {
-                ...entries[entryIndex],
+            window.entries[entryIndex] = {
+                ...window.entries[entryIndex],
                 timestamp: timestamp,
                 note: description,
                 spentAmount: amount,
@@ -963,18 +987,19 @@ function saveSpent() {
             isSpent: true
         };
         
-        entries.unshift(entry);
+        window.entries.unshift(entry);
         alert(`✅ Spent tracked: €${amount.toFixed(2)}`);
     }
     
     saveData();
     renderTimeline();
-    toggleSpent();
+    window.toggleSpent(); // CAMBIO: Llamar a global
     document.getElementById('delete-spent-btn').classList.add('hidden');
 }
 
 // Delete entry
-function deleteCurrentEntry() {
+// CAMBIO: Hacer global para que el botón la llame
+window.deleteCurrentEntry = function() {
     if (!editingEntryId) return;
     
     // Determinar de qué formulario se está eliminando
@@ -987,10 +1012,11 @@ function deleteCurrentEntry() {
     // else if (!document.getElementById('recap-form').classList.contains('hidden')) formIdToDelete = 'recap-form';
     
     if (confirm('Delete this entry?')) {
-        entries = entries.filter(e => e.id !== editingEntryId);
+        window.entries = window.entries.filter(e => e.id !== editingEntryId);
         
-        if (currentUser && !isOfflineMode) {
-            deleteEntryFromFirebase(editingEntryId); // Función de firebase-config.js
+        // Las variables (currentUser, isOfflineMode) y la función (deleteEntryFromFirebase) están en firebase-config.js
+        if (window.currentUser && !window.isOfflineMode) {
+            window.deleteEntryFromFirebase(editingEntryId); 
         }
         
         saveData();
@@ -1005,8 +1031,9 @@ function deleteCurrentEntry() {
     }
 }
 // Preview functions
-function previewEntry(id) {
-    const entry = entries.find(e => e.id === id);
+// CAMBIO: Hacer global para que el botón la llame
+window.previewEntry = function(id) {
+    const entry = window.entries.find(e => e.id === id);
     if (!entry) return;
 
     const modal = document.getElementById('preview-modal');
@@ -1112,8 +1139,9 @@ function previewEntry(id) {
     }
 }
 
-function closePreview(event) {
-    if (event && event.target.id !== 'preview-modal') return;
+// CAMBIO: Hacer global para que el botón la llame
+window.closePreview = function(event) {
+    if (event && (event.target.id !== 'preview-modal' && !event.target.closest('.mac-title-bar button'))) return;
     const modal = document.getElementById('preview-modal');
     modal.classList.remove('show');
     document.getElementById('preview-body').innerHTML = '';
@@ -1122,8 +1150,9 @@ function closePreview(event) {
 // CAMBIO: openSettings() movido a settings-manager.js
 
 // Show image preview
-function showImageInModal(entryId, imageIndex) {
-    const entry = entries.find(e => e.id == entryId);
+// CAMBIO: Hacer global para que el botón la llame
+window.showImageInModal = function(entryId, imageIndex) {
+    const entry = window.entries.find(e => e.id == entryId);
     if (!entry || !entry.images || !entry.images[imageIndex]) {
         console.error('Image not found:', entryId, imageIndex);
         return;
@@ -1157,7 +1186,8 @@ function showImageInModal(entryId, imageIndex) {
 // CAMBIO: updateTrackOptions() movido a settings-manager.js
 
 // Timeline rendering
-function toggleReadMore(id) {
+// CAMBIO: Hacer global para que el botón la llame
+window.toggleReadMore = function(id) {
     const noteEl = document.getElementById(`note-${id}`);
     const btnEl = document.getElementById(`read-more-${id}`);
     
@@ -1196,7 +1226,8 @@ function getDayKey(timestamp) {
     return date.toISOString().split('T')[0];
 }
 
-function toggleDay(dayKey) {
+// CAMBIO: Hacer global para que el botón la llame
+window.toggleDay = function(dayKey) {
     const content = document.getElementById(`day-content-${dayKey}`);
     const chevron = document.getElementById(`chevron-${dayKey}`);
     
@@ -1204,7 +1235,8 @@ function toggleDay(dayKey) {
     chevron.classList.toggle('expanded');
 }
 
-function toggleRecap(recapId) {
+// CAMBIO: Hacer global para que el botón la llame
+window.toggleRecap = function(recapId) {
     const content = document.getElementById(`recap-content-${recapId}`);
     const chevron = document.getElementById(`chevron-recap-${recapId}`);
     
@@ -1212,50 +1244,15 @@ function toggleRecap(recapId) {
     chevron.classList.toggle('expanded');
 }
 
-
-// Show image in modal
-function showImageInModal(entryId, imageIndex) {
-    const entry = entries.find(e => e.id == entryId);
-    if (!entry || !entry.images || !entry.images[imageIndex]) {
-        console.error('Image not found');
-        return;
-    }
-    
-    const modal = document.getElementById('preview-modal');
-    const body = document.getElementById('preview-body');
-    
-    body.innerHTML = `
-        <div style="text-align: center; padding: 20px;">
-            <img src="${entry.images[imageIndex]}" style="max-width: 100%; max-height: 80vh; border: 2px solid #000;">
-        </div>
-    `;
-    
-    modal.classList.add('show');
-}
-
-
-// Toggle note expansion
-function toggleNote(entryId) {
-    const noteDiv = document.getElementById('note-' + entryId);
-    const btn = event.target;
-    
-    if (noteDiv) {
-        if (noteDiv.classList.contains('expanded')) {
-            noteDiv.classList.remove('expanded');
-            btn.textContent = 'Read more';
-        } else {
-            noteDiv.classList.add('expanded');
-            btn.textContent = 'Read less';
-        }
-    }
-}
+// Toggle note expansion (ya está toggleReadMore, esta parece duplicada)
+// function toggleNote(entryId) { ... }
 
 function renderTimeline() {
     const container = document.getElementById('timeline-container');
     const emptyState = document.getElementById('empty-state');
     const footer = document.getElementById('footer');
 
-    if (entries.length === 0) {
+    if (window.entries.length === 0) {
         container.innerHTML = '';
         emptyState.classList.remove('hidden');
         footer.style.display = 'none';
@@ -1266,7 +1263,7 @@ function renderTimeline() {
     footer.style.display = 'flex';
 
     const groupedByDay = {};
-    entries.forEach(entry => {
+    window.entries.forEach(entry => {
         const dayKey = getDayKey(entry.timestamp);
         if (!groupedByDay[dayKey]) {
             groupedByDay[dayKey] = [];
@@ -1430,7 +1427,7 @@ function renderTimeline() {
     container.innerHTML = html;
     
     // Renderizar mini-mapas después de que el HTML esté en el DOM
-    entries.forEach(entry => {
+    window.entries.forEach(entry => {
         if (entry.coords) {
             setTimeout(() => {
                 const mapEl = document.getElementById(`mini-map-${entry.id}`);
@@ -1453,7 +1450,7 @@ function renderTimeline() {
                         L.marker([entry.coords.lat, entry.coords.lon]).addTo(miniMap);
                         
                         mapEl.style.cursor = 'pointer';
-                        mapEl.onclick = () => previewEntry(entry.id);
+                        mapEl.onclick = () => window.previewEntry(entry.id); // CAMBIO: Llamar a global
                     } catch (e) {
                         console.error('Error creating mini map:', e);
                         mapEl.innerHTML = "Map failed";
@@ -1464,407 +1461,21 @@ function renderTimeline() {
     });
 }
 
-// Export functions
-function exportCSV() {
-    openExportModal('csv');
-}
-
-function exportICS() {
-    openExportModal('ical');
-}
-
-function openExportModal(format) {
-    let modal = document.getElementById('export-modal');
-    if (!modal) {
-        createExportModal(); // Crear si no existe
-        modal = document.getElementById('export-modal');
-    }
-    
-    // Configurar el modal según el formato
-    document.getElementById('export-format-type').textContent = format === 'csv' ? 'CSV' : 'iCal';
-    document.getElementById('export-modal').classList.add('show');
-    
-    // Configurar opciones de iCal
-    const icalOptions = document.getElementById('ical-options');
-    if (format === 'ical') {
-        icalOptions.style.display = 'block';
-    } else {
-        icalOptions.style.display = 'none';
-    }
-}
-
-function createExportModal() {
-    const modalHTML = `
-        <div id="export-modal" class="preview-modal" onclick="closeExportModal(event)">
-            <div class="preview-content" onclick="event.stopPropagation()">
-                <div class="mac-title-bar">
-                    <span>📤 Export <span id="export-format-type">CSV</span></span>
-                    <button onclick="closeExportModal()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
-                </div>
-                <div class="mac-content">
-                    <h3 style="margin-bottom: 16px;">Select Export Range</h3>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label class="mac-label">
-                            <input type="radio" name="export-range" value="all" checked onchange="updateExportOptions()"> 
-                            Export All Entries
-                        </label>
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label class="mac-label">
-                            <input type="radio" name="export-range" value="month" onchange="updateExportOptions()"> 
-                            Export Specific Month
-                        </label>
-                        <div id="month-selector" style="margin-left: 20px; margin-top: 8px; display: none;">
-                            <input type="month" class="mac-input" id="export-month" style="max-width: 200px;">
-                        </div>
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label class="mac-label">
-                            <input type="radio" name="export-range" value="day" onchange="updateExportOptions()"> 
-                            Export Specific Day
-                        </label>
-                        <div id="day-selector" style="margin-left: 20px; margin-top: 8px; display: none;">
-                            <input type="date" class="mac-input" id="export-day" style="max-width: 200px;">
-                        </div>
-                    </div>
-                    
-                    <div id="ical-options" style="display: none;">
-                        <hr style="margin: 20px 0; border: 1px solid #ddd;">
-                        <h3 style="margin-bottom: 16px;">iCal Options</h3>
-                        <div style="margin-bottom: 20px;">
-                            <label class="mac-label">
-                                <input type="radio" name="ical-grouping" value="individual" checked> 
-                                Each event as separate calendar entry
-                            </label>
-                        </div>
-                        <div style="margin-bottom: 20px;">
-                            <label class="mac-label">
-                                <input type="radio" name="ical-grouping" value="daily"> 
-                                Group all events per day as one calendar entry
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <button class="mac-button mac-button-primary" onclick="performExport()" style="width: 100%; margin-top: 24px;">
-                        📥 Export
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
-    // Establecer fechas por defecto
-    const today = new Date();
-    const monthInput = document.getElementById('export-month');
-    const dayInput = document.getElementById('export-day');
-    
-    monthInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-    dayInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-}
-
-function updateExportOptions() {
-    const range = document.querySelector('input[name="export-range"]:checked').value;
-    
-    document.getElementById('month-selector').style.display = range === 'month' ? 'block' : 'none';
-    document.getElementById('day-selector').style.display = range === 'day' ? 'block' : 'none';
-}
-
-function closeExportModal(event) {
-    if (event && event.target.id !== 'export-modal') return;
-    const modal = document.getElementById('export-modal');
-    if (modal) {
-        modal.classList.remove('show');
-    }
-}
-
-function performExport() {
-    const format = document.getElementById('export-format-type').textContent.toLowerCase();
-    const range = document.querySelector('input[name="export-range"]:checked').value;
-    const icalGrouping = document.querySelector('input[name="ical-grouping"]:checked').value;
-    
-    // Filtrar entradas según el rango seleccionado
-    let filteredEntries = [...entries];
-    let filenameSuffix = 'all';
-    
-    if (range === 'month') {
-        const monthValue = document.getElementById('export-month').value;
-        const [year, month] = monthValue.split('-');
-        filteredEntries = entries.filter(e => {
-            const date = new Date(e.timestamp);
-            return date.getFullYear() === parseInt(year) && 
-                   date.getMonth() + 1 === parseInt(month);
-        });
-        filenameSuffix = `${year}-${month}`;
-    } else if (range === 'day') {
-        const dayValue = document.getElementById('export-day').value;
-        filteredEntries = entries.filter(e => {
-            const date = new Date(e.timestamp);
-            const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-            return dateStr === dayValue;
-        });
-        filenameSuffix = dayValue;
-    }
-    
-    if (filteredEntries.length === 0) {
-        alert('No entries found for the selected period.');
-        return;
-    }
-    
-    // Realizar la exportación
-    if (format === 'csv') {
-        exportCSVData(filteredEntries, filenameSuffix);
-    } else {
-        exportICSData(filteredEntries, filenameSuffix, icalGrouping);
-    }
-    
-    closeExportModal();
-}
-
-function exportCSVData(data, suffix) {
-    const headers = ['ID', 'Timestamp', 'Type', 'Note', 'Optional Note', 'Mood', 'Location', 'Weather', 'Activity', 'Duration (min)', 'Spent Amount', 'Images (count)', 'Audio (exists)', 'Coords (lat)', 'Coords (lon)', 'Recap Rating', 'Recap Highlights'];
-    const rows = data.map(e => {
-        let type = 'Crumb';
-        if (e.isTimedActivity) type = 'Time';
-        if (e.isQuickTrack) type = 'Track';
-        if (e.isSpent) type = 'Spent';
-        if (e.type === 'recap') type = 'Recap';
-        
-        return [
-            e.id,
-            e.timestamp,
-            type,
-            e.note || '',
-            e.optionalNote || '',
-            e.mood ? `${e.mood.emoji} ${e.mood.label}` : '',
-            e.location || '',
-            e.weather || '',
-            e.activity || '',
-            e.duration || '',
-            e.spentAmount || '',
-            e.images ? e.images.length : 0,
-            e.audio ? 'Yes' : 'No',
-            e.coords ? e.coords.lat : '',
-            e.coords ? e.coords.lon : '',
-            e.rating || '',
-            e.highlights ? e.highlights.join('; ') : ''
-        ];
-    });
-    
-    const csv = [headers, ...rows].map(row => 
-        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-    ).join('\n');
-    
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `breadcrumbs-${suffix}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-}
-
-function exportICSData(data, suffix, grouping) {
-    let icsEvents = '';
-    
-    if (grouping === 'daily') {
-        // Agrupar por día
-        const groupedByDay = {};
-        data.forEach(e => {
-            const date = new Date(e.timestamp);
-            const dayKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-            if (!groupedByDay[dayKey]) {
-                groupedByDay[dayKey] = [];
-            }
-            groupedByDay[dayKey].push(e);
-        });
-        
-        // Crear un evento por día
-        icsEvents = Object.keys(groupedByDay).map(dayKey => {
-            const dayEntries = groupedByDay[dayKey];
-            const firstEntry = dayEntries[0];
-            const date = new Date(firstEntry.timestamp);
-            const dateStr = date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-            
-            // Crear descripción con todos los eventos del día
-            const description = dayEntries.map(e => {
-                const time = new Date(e.timestamp).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-                let text = `${time}: ${e.note || e.activity || 'Event'}`;
-                if (e.duration) text += ` (${e.duration} min)`;
-                if (e.optionalNote) text += `\\n  - Note: ${e.optionalNote}`;
-                if (e.type === 'recap') text = `${time}: 🌟 DAY RECAP (Rating: ${e.rating}/10)`;
-                return text;
-            }).join('\\n\\n');
-            
-            return `BEGIN:VEVENT
-UID:${dayKey}@breadcrumbs
-DTSTAMP:${dateStr}
-DTSTART;VALUE=DATE:${dayKey.replace(/-/g, '')}
-SUMMARY:Breadcrumbs - ${dayEntries.length} events
-DESCRIPTION:${description.replace(/\n/g, '\\n')}
-END:VEVENT`;
-        }).join('\n');
-    } else {
-        // Evento individual por cada entrada
-        icsEvents = data.map(e => {
-            const date = new Date(e.timestamp);
-            const dateStr = date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-            
-            let endDate = new Date(date);
-            if (e.duration) {
-                endDate.setMinutes(endDate.getMinutes() + e.duration);
-            } else if (e.type === 'recap') {
-                 endDate.setMinutes(endDate.getMinutes() + 15); // 15 min para recap
-            } else {
-                endDate.setMinutes(endDate.getMinutes() + 30); // 30 min por defecto
-            }
-            const endDateStr = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-            
-            let summary = 'Breadcrumb';
-            if (e.isTimedActivity) summary = `⏱️ ${e.activity}`;
-            else if (e.isQuickTrack) summary = `📊 ${e.note}`;
-            else if (e.isSpent) summary = `💰 ${e.note} (€${e.spentAmount})`;
-            else if (e.type === 'recap') summary = `🌟 Day Recap (Rating: ${e.rating}/10)`;
-            else if (e.note) summary = `📝 ${e.note.substring(0, 50)}${e.note.length > 50 ? '...' : ''}`;
-            
-            let description = (e.note || '');
-            if (e.optionalNote) description += `\\n\\nOptional Note: ${e.optionalNote}`;
-            if (e.location) description += `\\n\\n📍 Location: ${e.location}`;
-            if (e.weather) description += `\\n☁️ Weather: ${e.weather}`;
-            if (e.type === 'recap') {
-                description = `Reflection: ${e.reflection || 'N/A'}\\nHighlights:\\n${(e.highlights || []).map(h => `- ${h}`).join('\\n')}`;
-            }
-
-            return `BEGIN:VEVENT
-UID:${e.id}@breadcrumbs
-DTSTAMP:${dateStr}
-DTSTART:${dateStr}
-DTEND:${endDateStr}
-SUMMARY:${summary.replace(/\n/g, ' ')}
-DESCRIPTION:${description.replace(/\n/g, '\\n')}
-LOCATION:${e.location || ''}
-END:VEVENT`;
-        }).join('\n');
-    }
-
-    const ics = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Breadcrumbs Timeline//ES
-CALSCALE:GREGORIAN
-METHOD:PUBLISH
-${icsEvents}
-END:VCALENDAR`;
-
-    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `breadcrumbs-${suffix}.ics`;
-    a.click();
-    URL.revokeObjectURL(url);
-}
+// CAMBIO: exportCSV() movido a data-tools.js
+// CAMBIO: exportICS() movido a data-tools.js
+// CAMBIO: openExportModal() movido a data-tools.js
+// CAMBIO: createExportModal() movido a data-tools.js
+// CAMBIO: updateExportOptions() movido a data-tools.js
+// CAMBIO: closeExportModal() movido a data-tools.js
+// CAMBIO: performExport() movido a data-tools.js
+// CAMBIO: exportCSVData() movido a data-tools.js
+// CAMBIO: exportICSData() movido a data-tools.js
 
 // Stats functions
-function openStats() {
-    calculateStats();
-    const modal = document.getElementById('stats-modal');
-    if (modal) {
-        modal.classList.add('show');
-    }
-}
+// CAMBIO: openStats() movido a data-tools.js
+// CAMBIO: calculateStats() movido a data-tools.js
+// CAMBIO: closeStats() movido a data-tools.js
 
-function calculateStats() {
-    const totalEntries = entries.length;
-    const breadcrumbs = entries.filter(e => !e.isTimedActivity && !e.isQuickTrack && !e.isSpent && e.type !== 'recap').length;
-    const timeEvents = entries.filter(e => e.isTimedActivity).length;
-    const trackEvents = entries.filter(e => e.isQuickTrack).length;
-    const spentEvents = entries.filter(e => e.isSpent).length;
-    const recapEvents = entries.filter(e => e.type === 'recap').length;
-    
-    const totalSpent = entries
-        .filter(e => e.isSpent)
-        .reduce((sum, e) => sum + (e.spentAmount || 0), 0);
-    
-    const totalMinutes = entries
-        .filter(e => e.isTimedActivity)
-        .reduce((sum, e) => sum + (e.duration || 0), 0);
-    
-    const totalHours = (totalMinutes / 60).toFixed(1);
-    
-    // Actividades más frecuentes
-    const activityCount = {};
-    entries.filter(e => e.isTimedActivity).forEach(e => {
-        activityCount[e.activity] = (activityCount[e.activity] || 0) + 1;
-    });
-    const topActivity = Object.keys(activityCount).length > 0 
-        ? Object.keys(activityCount).reduce((a, b) => activityCount[a] > activityCount[b] ? a : b)
-        : 'None';
-    
-    // Tracks más frecuentes
-    const trackCount = {};
-    entries.filter(e => e.isQuickTrack).forEach(e => {
-        trackCount[e.note] = (trackCount[e.note] || 0) + 1;
-    });
-    const topTrack = Object.keys(trackCount).length > 0
-        ? Object.keys(trackCount).reduce((a, b) => trackCount[a] > trackCount[b] ? a : b)
-        : 'None';
-    
-    const statsHTML = `
-        <div class="stat-card">
-            <div class="stat-number">${totalEntries}</div>
-            <div class="stat-label">Total Entries</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">${breadcrumbs}</div>
-            <div class="stat-label">📝 Breadcrumbs</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">${timeEvents}</div>
-            <div class="stat-label">⏱️ Time Events</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">${trackEvents}</div>
-            <div class="stat-label">📊 Tracked Items</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">${spentEvents}</div>
-            <div class="stat-label">💰 Expenses</div>
-        </div>
-         <div class="stat-card">
-            <div class="stat-number">${recapEvents}</div>
-            <div class="stat-label">🌟 Recaps</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">€${totalSpent.toFixed(2)}</div>
-            <div class="stat-label">Total Spent</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">${totalHours}h</div>
-            <div class="stat-label">Hours Tracked</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number" style="font-size: 18px;">${topActivity}</div>
-            <div class="stat-label">Top Activity</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number" style="font-size: 16px;">${topTrack}</div>
-            <div class="stat-label">Most Tracked</div>
-        </div>
-    `;
-    
-    document.getElementById('stats-content').innerHTML = statsHTML;
-}
-
-function closeStats(event) {
-    if (event && event.target.id !== 'stats-modal') return;
-    const modal = document.getElementById('stats-modal');
-    if (modal) {
-        modal.classList.remove('show');
-    }
-}
 // Initialize app
 // Cargar datos y settings al inicio
 document.addEventListener('DOMContentLoaded', () => {
@@ -1895,7 +1506,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== RECAP FUNCTIONS =====
 
-function showRecapForm() {
+// CAMBIO: Hacer global para que el botón la llame
+window.showRecapForm = function() {
     // Ocultar otros formularios
     document.getElementById('form-window').classList.add('hidden');
     document.getElementById('timer-window').classList.add('hidden');
@@ -1932,12 +1544,14 @@ function showRecapForm() {
     recapForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function closeRecapForm() {
+// CAMBIO: Hacer global para que el botón la llame
+window.closeRecapForm = function() {
     document.getElementById('recap-form').classList.add('hidden');
     editingEntryId = null; // Asegurarse de limpiar el ID de edición
 }
 
-async function buscarBSO() {
+// CAMBIO: Hacer global para que el botón la llame
+window.buscarBSO = async function() {
     const query = document.getElementById('recap-bso').value.trim();
     if (!query) {
         alert('Please enter a song or artist name');
@@ -1978,7 +1592,8 @@ async function buscarBSO() {
     }
 }
 
-function selectTrack(trackName, artistName, url, artwork) {
+// CAMBIO: Hacer global para que el botón la llame
+window.selectTrack = function(trackName, artistName, url, artwork) {
     const trackData = {
         name: trackName,
         artist: artistName,
@@ -2035,13 +1650,14 @@ function editRecapEvent(entry) {
     
     if (entry.track) {
         // Mostrar la pista seleccionada
-        selectTrack(entry.track.name, entry.track.artist, entry.track.url, entry.track.artwork);
+        window.selectTrack(entry.track.name, entry.track.artist, entry.track.url, entry.track.artwork); // CAMBIO: Llamar a global
     }
     
     recapForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function saveRecap() {
+// CAMBIO: Hacer global para que el botón la llame
+window.saveRecap = function() {
     const reflection = document.getElementById('recap-reflection').value.trim();
     const rating = document.getElementById('recap-rating').value;
     const highlight1 = document.getElementById('recap-highlight-1').value.trim();
@@ -2072,27 +1688,28 @@ function saveRecap() {
     };
 
     if (editingEntryId) {
-        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
+        const entryIndex = window.entries.findIndex(e => e.id === editingEntryId);
         if (entryIndex !== -1) {
-            entries[entryIndex] = recapEntry;
+            window.entries[entryIndex] = recapEntry;
         }
         editingEntryId = null;
         alert('🌟 Recap updated!');
     } else {
-        entries.unshift(recapEntry);
+        window.entries.unshift(recapEntry);
         alert('🌟 Recap saved!');
     }
     
     saveData();
     renderTimeline();
-    closeRecapForm();
+    window.closeRecapForm(); // CAMBIO: Llamar a global
 }
 
 // ===== FAB MENU =====
 
 let fabMenuOpen = false;
 
-function toggleFabMenu() {
+// CAMBIO: Hacer global para que el botón la llame
+window.toggleFabMenu = function() {
     const fabActions = document.querySelectorAll('.fab-action-wrapper');
     const fabIcon = document.getElementById('fab-icon');
     
@@ -2124,11 +1741,31 @@ function toggleFabMenu() {
 // Cerrar FAB menu al hacer click en una acción
 function closeFabMenu() {
     if (fabMenuOpen) {
-        toggleFabMenu();
+        window.toggleFabMenu(); // CAMBIO: Llamar a global
     }
 }
 
-// Modificar las funciones toggle para cerrar el menú
-// (Las funciones toggleForm, etc. ya están definidas arriba)
-// (Los onclick en el HTML ya llaman a closeFabMenu())
+// Envolver los toggles para que cierren el menú
+// Los onclick en index.html ahora llaman a estas funciones
+// CAMBIO: Hacer globales
+window.toggleCrumb = function() {
+    closeFabMenu();
+    window.toggleForm();
+}
+window.toggleTime = function() {
+    closeFabMenu();
+    window.toggleTimer();
+}
+window.toggleTrack = function() {
+    closeFabMenu();
+    window.toggleTrack();
+}
+window.toggleSpent = function() {
+    closeFabMenu();
+    window.toggleSpent();
+}
+window.showRecapFormWithFab = function() { // Renombrada para evitar colisión
+    closeFabMenu();
+    window.showRecapForm();
+}
 
