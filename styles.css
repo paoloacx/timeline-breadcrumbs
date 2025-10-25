@@ -807,17 +807,7 @@ h1 {
 }
 
 /* Hide the sync status element */
-/* .sync-status { display: none; } */
-/* Alternative: Make it less prominent if needed later */
  .sync-status {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    font-size: 10px;
-    padding: 2px 5px;
-    background: rgba(0,0,0,0.7);
-    border-radius: 3px;
-    z-index: 1000;
     display: none; /* Hide it completely as requested */
  }
 
