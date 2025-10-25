@@ -26,56 +26,42 @@ function refreshApp() {
     }
 }
 
+
+
 // Settings
-let timeDurations = [15, 30, 60, 120, 180];
-let timeActivities = ['Reading', 'Sports', 'Work', 'Cleaning', 'Errands'];
-let trackItems = {
+// CAMBIO: Definidas como variables GLOBALES (window.)
+// para que settings-manager.js pueda acceder a ellas.
+window.timeDurations = [15, 30, 60, 120, 180];
+window.timeActivities = ['Reading', 'Sports', 'Work', 'Cleaning', 'Errands'];
+window.trackItems = {
     meals: ['🍳 Breakfast', '🥗 Lunch', '🍽️ Dinner', '☕ Snack'],
     tasks: ['💊 Medicine', '💧 Water', '🚶 Walk', '📞 Call']
 };
 
 // Default moods
-const defaultMoods = [
+// CAMBIO: Definidas como variables GLOBALES (window.)
+window.defaultMoods = [
     { emoji: '😊', label: 'Happy' },
     { emoji: '😢', label: 'Sad' },
     { emoji: '😡', label: 'Angry' },
     { emoji: '😰', label: 'Anxious' },
     { emoji: '😴', label: 'Tired' }
 ];
+window.moods = [...defaultMoods];
 
-let moods = [...defaultMoods];
-
-// Load settings from localStorage
-function loadSettings() {
-    const savedDurations = localStorage.getItem('time-durations');
-    const savedActivities = localStorage.getItem('time-activities');
-    const savedTrackItems = localStorage.getItem('track-items');
-    const savedMoods = localStorage.getItem('mood-config');
-    
-    if (savedDurations) timeDurations = JSON.parse(savedDurations);
-    if (savedActivities) timeActivities = JSON.parse(savedActivities);
-    if (savedTrackItems) trackItems = JSON.parse(savedTrackItems);
-    if (savedMoods) moods = JSON.parse(savedMoods);
-
-    // Actualizar UI al cargar
-    updateTimerOptions();
-    updateTrackOptions();
-    renderMoodSelector();
-}
-
-// Save settings to localStorage
-function saveSettingsToStorage() {
-    localStorage.setItem('time-durations', JSON.stringify(timeDurations));
-    localStorage.setItem('time-activities', JSON.stringify(timeActivities));
-    localStorage.setItem('track-items', JSON.stringify(trackItems));
-    localStorage.setItem('mood-config', JSON.stringify(moods));
-}
+// CAMBIO: loadSettings() se movió a settings-manager.js
+// CAMBIO: saveSettingsToStorage() se movió a settings-manager.js
 
 // Load data from localStorage
 function loadData() {
     const saved = localStorage.getItem('timeline-entries');
     if (saved) {
-        entries = JSON.parse(saved);
+        try {
+            entries = JSON.parse(saved);
+        } catch(e) {
+            console.error("Error parsing entries from localStorage", e);
+            entries = [];
+        }
     }
     renderTimeline();
 }
@@ -91,9 +77,7 @@ function saveData() {
 
 // Sync/Refresh data
 function syncData() {
-    // Esta función es llamada por firebase-config.js, 
-    // pero la lógica de sync/refresh está en refreshApp()
-    refreshApp();
+    location.reload();
 }
 
 // Toggle forms
@@ -107,6 +91,7 @@ function toggleForm() {
     track.classList.add('hidden');
     spent.classList.add('hidden');
     recap.classList.add('hidden');
+    
     form.classList.toggle('hidden');
     if (!form.classList.contains('hidden')) {
         clearForm();
@@ -126,6 +111,7 @@ function toggleTimer() {
     track.classList.add('hidden');
     spent.classList.add('hidden');
     recap.classList.add('hidden');
+
     timer.classList.toggle('hidden');
     if (!timer.classList.contains('hidden')) {
         resetTimerSelections();
@@ -144,6 +130,7 @@ function toggleTrack() {
     timer.classList.add('hidden');
     spent.classList.add('hidden');
     recap.classList.add('hidden');
+
     track.classList.toggle('hidden');
     if (!track.classList.contains('hidden')) {
         renderTrackSelector();
@@ -166,6 +153,7 @@ function toggleSpent() {
     timer.classList.add('hidden');
     track.classList.add('hidden');
     recap.classList.add('hidden');
+
     spent.classList.toggle('hidden');
     if (!spent.classList.contains('hidden')) {
         document.getElementById('spent-description').value = '';
@@ -178,6 +166,8 @@ function toggleSpent() {
 
 // Set current date/time in input
 function setCurrentDateTime(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return; // Guard clause
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -186,7 +176,7 @@ function setCurrentDateTime(inputId) {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     
     const dateTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
-    document.getElementById(inputId).value = dateTimeString;
+    input.value = dateTimeString;
 }
 
 // Get timestamp from datetime input
@@ -291,7 +281,7 @@ async function getWeather(lat, lon) {
     } catch (error) {
         console.error('Error getting weather:', error);
         weatherInput.value = '';
-        locationInput.value = '';
+        locationInput.value = ''; // Limpiar si falla
     }
 }
 
@@ -313,18 +303,23 @@ function showMiniMap(lat, lon, containerId) {
     mapContainer.innerHTML = '';
     mapContainer.style.display = 'block';
 
-    const map = L.map(containerId).setView([lat, lon], 13);
+    try {
+        const map = L.map(containerId).setView([lat, lon], 13);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap',
-        maxZoom: 19
-    }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19
+        }).addTo(map);
 
-    L.marker([lat, lon]).addTo(map);
+        L.marker([lat, lon]).addTo(map);
 
-    setTimeout(() => {
-        map.invalidateSize();
-    }, 100);
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+    } catch(e) {
+        console.error("Error initializing Leaflet map:", e);
+        mapContainer.innerHTML = "Map failed to load. Are you online?";
+    }
 }
 
 // Image handling
@@ -430,7 +425,7 @@ function renderImagePreviews() {
     const container = document.getElementById('image-previews');
     container.innerHTML = currentImages.map((img, idx) => `
         <div class="image-preview">
-            <img src="${img}" alt="">
+            <img src="${img}" alt="Preview image ${idx+1}">
             <div class="image-remove" onclick="removeImage(${idx})">✕</div>
         </div>
     `).join('');
@@ -442,7 +437,7 @@ function renderAudioPreview() {
         container.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
                 <audio controls style="flex: 1;">
-                    <source src="${currentAudio}" type="audio/webm">
+                    <source src="${currentAudio}">
                 </audio>
                 <button class="mac-button" onclick="removeAudio()" style="padding: 4px 8px;">✕</button>
             </div>
@@ -462,10 +457,11 @@ function removeAudio() {
     renderAudioPreview();
 }
 // Mood functions
-function renderMoodSelector() {
+// CAMBIO: Hacer global para que settings-manager.js la llame
+window.renderMoodSelector = function() {
     const container = document.getElementById('mood-selector');
-    if (!container) return;
-    container.innerHTML = moods.map((mood, index) => `
+    // CAMBIO: Usar variable global window.moods
+    container.innerHTML = window.moods.map((mood, index) => `
         <div class="mood-option ${selectedMood === index ? 'selected' : ''}" onclick="selectMood(${index})">
             ${mood.emoji}
             <span class="mood-label">${mood.label}</span>
@@ -475,42 +471,12 @@ function renderMoodSelector() {
 
 function selectMood(index) {
     selectedMood = index;
-    renderMoodSelector();
+    window.renderMoodSelector();
 }
 
-function toggleMoodConfig() {
-    const panel = document.getElementById('mood-config');
-    panel.classList.toggle('hidden');
-    if (!panel.classList.contains('hidden')) {
-        renderMoodConfig();
-    }
-}
-
-function renderMoodConfig() {
-    const container = document.getElementById('mood-config-list');
-    container.innerHTML = moods.map((mood, index) => `
-        <div class="config-item">
-            <input type="text" value="${mood.emoji}" id="mood-emoji-${index}" maxlength="2">
-            <input type="text" value="${mood.label}" id="mood-label-${index}" placeholder="Label">
-        </div>
-    `).join('');
-}
-
-function saveMoodConfig() {
-    moods = moods.map((mood, index) => ({
-        emoji: document.getElementById(`mood-emoji-${index}`).value || mood.emoji,
-        label: document.getElementById(`mood-label-${index}`).value || mood.label
-    }));
-    
-    saveSettingsToStorage();
-    if (currentUser && !isOfflineMode) {
-        saveSettingsToFirebase();
-    }
-    
-    renderMoodSelector();
-    toggleMoodConfig();
-    alert('✅ Configuration saved');
-}
+// CAMBIO: toggleMoodConfig() movido a settings-manager.js
+// CAMBIO: renderMoodConfig() movido a settings-manager.js
+// CAMBIO: saveMoodConfig() movido a settings-manager.js
 
 // Save/Edit entry functions
 function saveEntry() {
@@ -520,14 +486,15 @@ function saveEntry() {
         return;
     }
 
-    const moodData = selectedMood !== null ? moods[selectedMood] : null;
+    // CAMBIO: Usar variable global window.moods
+    const moodData = selectedMood !== null ? window.moods[selectedMood] : null;
     const timestamp = getTimestampFromInput('datetime-input');
 
     if (editingEntryId) {
         const entryIndex = entries.findIndex(e => e.id === editingEntryId);
         if (entryIndex !== -1) {
             entries[entryIndex] = {
-                ...entries[entryIndex],
+                ...entries[entryIndex], // Mantener tipo (isTimedActivity, etc)
                 timestamp: timestamp,
                 note: note,
                 location: document.getElementById('location-input').value,
@@ -536,11 +503,11 @@ function saveEntry() {
                 audio: currentAudio,
                 coords: currentCoords ? { ...currentCoords } : entries[entryIndex].coords,
                 mood: moodData,
-                // Asegurarse de no sobreescribir flags
-                isTimedActivity: entries[entryIndex].isTimedActivity,
-                isQuickTrack: entries[entryIndex].isQuickTrack,
-                isSpent: entries[entryIndex].isSpent,
-                type: entries[entryIndex].type
+                // Asegurarse de que no se marquen como otros tipos
+                isTimedActivity: false,
+                isQuickTrack: false,
+                isSpent: false,
+                type: null
             };
         }
     } else {
@@ -553,8 +520,7 @@ function saveEntry() {
             images: [...currentImages],
             audio: currentAudio,
             coords: currentCoords ? { ...currentCoords } : null,
-            mood: moodData,
-            type: 'crumb' // Añadir tipo
+            mood: moodData
         };
         entries.unshift(entry);
     }
@@ -568,12 +534,7 @@ function editEntry(id) {
     const entry = entries.find(e => e.id === id);
     if (!entry) return;
 
-    // ARREGLO: Añadir comprobación para 'recap'
-    if (entry.type === 'recap') {
-        editRecapEvent(entry);
-        return;
-    }
-
+    // Redirigir a funciones de edición específicas si es necesario
     if (entry.isTimedActivity) {
         editTimeEvent(entry);
         return;
@@ -589,7 +550,12 @@ function editEntry(id) {
         return;
     }
 
-    // Es un 'crumb' normal
+    if (entry.type === 'recap') {
+        editRecapEvent(entry);
+        return;
+    }
+
+    // Es un "Crumb" normal
     editingEntryId = id;
     document.getElementById('note-input').value = entry.note;
     document.getElementById('location-input').value = entry.location || '';
@@ -608,7 +574,8 @@ function editEntry(id) {
     document.getElementById('datetime-input').value = `${year}-${month}-${day}T${hours}:${minutes}`;
 
     if (entry.mood) {
-        const moodIndex = moods.findIndex(m => m.emoji === entry.mood.emoji && m.label === entry.mood.label);
+        // CAMBIO: Usar variable global window.moods
+        const moodIndex = window.moods.findIndex(m => m.emoji === entry.mood.emoji && m.label === entry.mood.label);
         selectedMood = moodIndex !== -1 ? moodIndex : null;
     } else {
         selectedMood = null;
@@ -616,7 +583,7 @@ function editEntry(id) {
 
     renderImagePreviews();
     renderAudioPreview();
-    renderMoodSelector();
+    window.renderMoodSelector(); // Usar la global
 
     if (entry.coords) {
         showMiniMap(entry.coords.lat, entry.coords.lon, 'form-map');
@@ -625,12 +592,13 @@ function editEntry(id) {
     document.getElementById('delete-btn').classList.remove('hidden');
     document.getElementById('save-btn').textContent = '💾 Update';
     
-    // Ocultar otros formularios y mostrar el de crumb
+    // Ocultar otros formularios y mostrar el correcto
+    const formWindow = document.getElementById('form-window');
     document.getElementById('timer-window').classList.add('hidden');
     document.getElementById('track-window').classList.add('hidden');
     document.getElementById('spent-window').classList.add('hidden');
     document.getElementById('recap-form').classList.add('hidden');
-    const formWindow = document.getElementById('form-window');
+    
     formWindow.classList.remove('hidden');
     formWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -653,10 +621,15 @@ function editTimeEvent(entry) {
     
     document.getElementById('time-optional-note').value = entry.optionalNote || '';
     
-    // Seleccionar opciones
-    updateTimerOptions(); // Asegura que los botones existan
+    // CAMBIO: Asegurarse de que las opciones estén renderizadas
+    // La función updateTimerOptions() está en settings-manager.js
+    if (typeof window.updateTimerOptions === 'function') {
+        window.updateTimerOptions();
+    }
+    
     document.querySelectorAll('.duration-option').forEach(el => {
         el.classList.remove('selected');
+        // Usar data-duration para una comparación más fiable
         if (parseInt(el.dataset.duration) === selectedDuration) {
             el.classList.add('selected');
         }
@@ -664,6 +637,7 @@ function editTimeEvent(entry) {
     
     document.querySelectorAll('#activity-selector .activity-option').forEach(el => {
         el.classList.remove('selected');
+        // Usar data-activity para una comparación más fiable
         if (el.dataset.activity === selectedActivity) {
             el.classList.add('selected');
         }
@@ -671,16 +645,17 @@ function editTimeEvent(entry) {
     
     checkTimerReady();
     
-    // Ocultar otros formularios y mostrar el de timer
-    document.getElementById('form-window').classList.add('hidden');
-    document.getElementById('track-window').classList.add('hidden');
-    document.getElementById('spent-window').classList.add('hidden');
-    document.getElementById('recap-form').classList.add('hidden');
     const timerWindow = document.getElementById('timer-window');
     const createBtn = document.getElementById('create-time-btn');
     createBtn.textContent = '💾 Update Event';
     document.getElementById('delete-time-btn').classList.remove('hidden');
     
+    // Ocultar otros formularios y mostrar el correcto
+    document.getElementById('form-window').classList.add('hidden');
+    document.getElementById('track-window').classList.add('hidden');
+    document.getElementById('spent-window').classList.add('hidden');
+    document.getElementById('recap-form').classList.add('hidden');
+
     timerWindow.classList.remove('hidden');
     timerWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -690,6 +665,7 @@ function selectDuration(minutes) {
     const options = document.querySelectorAll('.duration-option');
     options.forEach(el => {
         el.classList.remove('selected');
+        // Usar data-duration
         if (parseInt(el.dataset.duration) === minutes) {
             el.classList.add('selected');
         }
@@ -703,6 +679,7 @@ function selectActivity(activity) {
     const options = document.querySelectorAll('#activity-selector .activity-option');
     options.forEach(el => {
         el.classList.remove('selected');
+        // Usar data-activity
         if (el.dataset.activity === activity) {
             el.classList.add('selected');
         }
@@ -736,20 +713,30 @@ function createTimeEvent() {
                 activity: selectedActivity,
                 duration: selectedDuration,
                 optionalNote: optionalNote,
-                isTimedActivity: true, // Asegurar flag
-                type: 'time' // Añadir tipo
+                isTimedActivity: true, // Asegurar
+                // Limpiar otros tipos
+                isQuickTrack: false,
+                isSpent: false,
+                type: null,
+                mood: null
             };
         }
+        editingEntryId = null;
     } else {
         const entry = {
             id: Date.now(),
             timestamp: timestamp,
             note: `${selectedActivity} - ${selectedDuration} minutes`,
+            location: '',
+            weather: '',
+            images: [],
+            audio: null,
+            coords: null,
+            mood: null,
             activity: selectedActivity,
             duration: selectedDuration,
             isTimedActivity: true,
-            optionalNote: optionalNote,
-            type: 'time' // Añadir tipo
+            optionalNote: optionalNote
         };
         
         entries.unshift(entry);
@@ -761,7 +748,6 @@ function createTimeEvent() {
     alert(`✅ Time event ${editingEntryId ? 'updated' : 'created'}!`);
     toggleTimer();
     
-    editingEntryId = null; // Limpiar
     document.getElementById('create-time-btn').textContent = 'Create Event';
     document.getElementById('delete-time-btn').classList.add('hidden');
     document.getElementById('time-optional-note').value = '';
@@ -780,13 +766,15 @@ function resetTimerSelections() {
 }
 
 // Track Event functions
-function renderTrackSelector() {
+// CAMBIO: Hacer global para que settings-manager.js la llame
+window.renderTrackSelector = function() {
     const container = document.getElementById('track-selector');
-    if (!container) return;
-    const allItems = [...trackItems.meals, ...trackItems.tasks];
+    if (!container) return; // Guard clause
+    // CAMBIO: Usar variable global window.trackItems
+    const allItems = [...window.trackItems.meals, ...window.trackItems.tasks];
     
     container.innerHTML = allItems.map((item, index) => `
-        <div class="activity-option" data-item="${item}" onclick="selectTrackItem('${item}')">
+        <div class="activity-option" data-item="${item.replace(/'/g, "\\'")}" onclick="selectTrackItem('${item.replace(/'/g, "\\'")}')">
             ${item}
         </div>
     `).join('');
@@ -796,6 +784,7 @@ function selectTrackItem(item) {
     selectedTrackItem = item;
     document.querySelectorAll('#track-selector .activity-option').forEach(el => {
         el.classList.remove('selected');
+        // Usar data-item
         if (el.dataset.item === item) {
             el.classList.add('selected');
         }
@@ -818,7 +807,11 @@ function editTrackEvent(entry) {
     
     document.getElementById('track-optional-note').value = entry.optionalNote || '';
     
-    renderTrackSelector();
+    // CAMBIO: Asegurarse de que las opciones estén renderizadas
+    // La función updateTrackOptions() está en settings-manager.js
+    if (typeof window.updateTrackOptions === 'function') {
+        window.updateTrackOptions();
+    }
     
     document.querySelectorAll('#track-selector .activity-option').forEach(el => {
         if (el.dataset.item === selectedTrackItem) {
@@ -830,12 +823,13 @@ function editTrackEvent(entry) {
     document.getElementById('save-track-btn').textContent = '💾 Update Track';
     document.getElementById('delete-track-btn').classList.remove('hidden');
     
-    // Ocultar otros formularios y mostrar el de track
+    // Ocultar otros formularios y mostrar el correcto
+    const trackWindow = document.getElementById('track-window');
     document.getElementById('form-window').classList.add('hidden');
     document.getElementById('timer-window').classList.add('hidden');
     document.getElementById('spent-window').classList.add('hidden');
     document.getElementById('recap-form').classList.add('hidden');
-    const trackWindow = document.getElementById('track-window');
+
     trackWindow.classList.remove('hidden');
     trackWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -854,19 +848,29 @@ function saveTrackEvent() {
                 timestamp: timestamp,
                 note: selectedTrackItem,
                 optionalNote: optionalNote,
-                isQuickTrack: true, // Asegurar flag
-                type: 'track' // Añadir tipo
+                isQuickTrack: true, // Asegurar
+                // Limpiar otros tipos
+                isTimedActivity: false,
+                isSpent: false,
+                type: null,
+                mood: null
             };
         }
+        editingEntryId = null;
         alert(`✅ Track updated: ${selectedTrackItem}`);
     } else {
         const entry = {
             id: Date.now(),
             timestamp: timestamp,
             note: selectedTrackItem,
+            location: '',
+            weather: '',
+            images: [],
+            audio: null,
+            coords: null,
+            mood: null,
             isQuickTrack: true,
-            optionalNote: optionalNote,
-            type: 'track' // Añadir tipo
+            optionalNote: optionalNote
         };
         
         entries.unshift(entry);
@@ -877,7 +881,6 @@ function saveTrackEvent() {
     renderTimeline();
     toggleTrack();
     
-    editingEntryId = null; // Limpiar
     document.getElementById('save-track-btn').textContent = 'Save Track';
     document.getElementById('delete-track-btn').classList.add('hidden');
 }
@@ -900,12 +903,13 @@ function editSpentEvent(entry) {
     
     document.getElementById('delete-spent-btn').classList.remove('hidden');
     
-    // Ocultar otros formularios y mostrar el de spent
+    // Ocultar otros formularios y mostrar el correcto
+    const spentWindow = document.getElementById('spent-window');
     document.getElementById('form-window').classList.add('hidden');
     document.getElementById('timer-window').classList.add('hidden');
     document.getElementById('track-window').classList.add('hidden');
     document.getElementById('recap-form').classList.add('hidden');
-    const spentWindow = document.getElementById('spent-window');
+
     spentWindow.classList.remove('hidden');
     spentWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -919,7 +923,7 @@ function saveSpent() {
         return;
     }
 
-    if (isNaN(amount) || amount <= 0) {
+    if (!amount || amount <= 0 || isNaN(amount)) {
         alert('Please enter a valid amount');
         return;
     }
@@ -934,19 +938,29 @@ function saveSpent() {
                 timestamp: timestamp,
                 note: description,
                 spentAmount: amount,
-                isSpent: true, // Asegurar flag
-                type: 'spent' // Añadir tipo
+                isSpent: true, // Asegurar
+                // Limpiar otros tipos
+                isTimedActivity: false,
+                isQuickTrack: false,
+                type: null,
+                mood: null
             };
         }
+        editingEntryId = null;
         alert(`✅ Spent updated: €${amount.toFixed(2)}`);
     } else {
         const entry = {
             id: Date.now(),
             timestamp: timestamp,
             note: description,
+            location: '',
+            weather: '',
+            images: [],
+            audio: null,
+            coords: null,
+            mood: null,
             spentAmount: amount,
-            isSpent: true,
-            type: 'spent' // Añadir tipo
+            isSpent: true
         };
         
         entries.unshift(entry);
@@ -956,8 +970,6 @@ function saveSpent() {
     saveData();
     renderTimeline();
     toggleSpent();
-    
-    editingEntryId = null; // Limpiar
     document.getElementById('delete-spent-btn').classList.add('hidden');
 }
 
@@ -965,23 +977,29 @@ function saveSpent() {
 function deleteCurrentEntry() {
     if (!editingEntryId) return;
     
+    // Determinar de qué formulario se está eliminando
+    let formIdToDelete = null;
+    if (!document.getElementById('form-window').classList.contains('hidden')) formIdToDelete = 'form-window';
+    else if (!document.getElementById('timer-window').classList.contains('hidden')) formIdToDelete = 'timer-window';
+    else if (!document.getElementById('track-window').classList.contains('hidden')) formIdToDelete = 'track-window';
+    else if (!document.getElementById('spent-window').classList.contains('hidden')) formIdToDelete = 'spent-window';
+    // (Añadir recap si tuviera botón delete)
+    // else if (!document.getElementById('recap-form').classList.contains('hidden')) formIdToDelete = 'recap-form';
+    
     if (confirm('Delete this entry?')) {
-        
-        if (currentUser && !isOfflineMode) {
-            deleteEntryFromFirebase(editingEntryId);
-        }
-
         entries = entries.filter(e => e.id !== editingEntryId);
         
-        saveData(); // Guardar después de eliminar de Firebase
+        if (currentUser && !isOfflineMode) {
+            deleteEntryFromFirebase(editingEntryId); // Función de firebase-config.js
+        }
+        
+        saveData();
         renderTimeline();
         
-        // Close all windows
-        document.getElementById('form-window').classList.add('hidden');
-        document.getElementById('timer-window').classList.add('hidden');
-        document.getElementById('track-window').classList.add('hidden');
-        document.getElementById('spent-window').classList.add('hidden');
-        document.getElementById('recap-form').classList.add('hidden');
+        // Cerrar el formulario activo
+        if (formIdToDelete) {
+            document.getElementById(formIdToDelete).classList.add('hidden');
+        }
         
         editingEntryId = null;
     }
@@ -1007,7 +1025,7 @@ function previewEntry(id) {
         
         <div style="margin-bottom: 16px;">
             <strong>Note:</strong>
-            <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${entry.note}</div>
+            <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${entry.note || ''}</div>
         </div>
         
         ${entry.location ? `
@@ -1033,7 +1051,7 @@ function previewEntry(id) {
             <div style="margin-bottom: 16px;">
                 <strong>Audio:</strong>
                 <audio controls style="width: 100%; margin-top: 8px;">
-                    <source src="${entry.audio}" type="audio/webm">
+                    <source src="${entry.audio}">
                 </audio>
             </div>
         ` : ''}
@@ -1042,8 +1060,8 @@ function previewEntry(id) {
             <div style="margin-bottom: 16px;">
                 <strong>Images:</strong>
                 <div class="preview-images-full">
-                    ${entry.images.map(img => `
-                        <img src="${img}" class="preview-image-full" onclick="event.stopPropagation(); showImageInModal('${entry.id}', ${entry.images.indexOf(img)});">
+                    ${entry.images.map((img, idx) => `
+                        <img src="${img}" class="preview-image-full" onclick="event.stopPropagation(); showImageInModal('${entry.id}', ${idx});">
                     `).join('')}
                 </div>
             </div>
@@ -1052,19 +1070,14 @@ function previewEntry(id) {
         ${entry.isTimedActivity ? `
             <div style="margin-bottom: 16px;">
                 <strong>Activity:</strong> ${entry.activity} (${entry.duration} minutes)
+                ${entry.optionalNote ? `<div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap; font-style: italic;">${entry.optionalNote}</div>` : ''}
             </div>
-            ${entry.optionalNote ? `
-                <div style="margin-bottom: 16px;">
-                    <strong>Optional Note:</strong>
-                    <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${entry.optionalNote}</div>
-                </div>
-            ` : ''}
         ` : ''}
-
+        
         ${entry.isQuickTrack && entry.optionalNote ? `
             <div style="margin-bottom: 16px;">
                 <strong>Optional Note:</strong>
-                <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${entry.optionalNote}</div>
+                <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap; font-style: italic;">${entry.optionalNote}</div>
             </div>
         ` : ''}
         
@@ -1081,32 +1094,32 @@ function previewEntry(id) {
     if (entry.coords) {
         setTimeout(() => {
             const mapContainer = document.getElementById('preview-map-modal');
-            if (mapContainer && !mapContainer.classList.contains('leaflet-container')) {
-                const map = L.map('preview-map-modal').setView([entry.coords.lat, entry.coords.lon], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
-                L.marker([entry.coords.lat, entry.coords.lon]).addTo(map);
-                
-                setTimeout(() => map.invalidateSize(), 100);
+            if (mapContainer) {
+                try {
+                    const map = L.map('preview-map-modal').setView([entry.coords.lat, entry.coords.lon], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap'
+                    }).addTo(map);
+                    L.marker([entry.coords.lat, entry.coords.lon]).addTo(map);
+                    
+                    setTimeout(() => map.invalidateSize(), 100);
+                } catch(e) {
+                    console.error("Error initializing preview map:", e);
+                    mapContainer.innerHTML = "Map failed to load.";
+                }
             }
         }, 100);
     }
 }
 
 function closePreview(event) {
-    if (event && event.target.id !== 'preview-modal' && !event.target.classList.contains('preview-modal')) return;
+    if (event && event.target.id !== 'preview-modal') return;
     const modal = document.getElementById('preview-modal');
     modal.classList.remove('show');
     document.getElementById('preview-body').innerHTML = '';
 }
 
-// Settings functions
-function openSettings() {
-    const modal = document.getElementById('settings-modal');
-    modal.classList.add('show');
-    renderSettingsConfig();
-}
+// CAMBIO: openSettings() movido a settings-manager.js
 
 // Show image preview
 function showImageInModal(entryId, imageIndex) {
@@ -1129,155 +1142,19 @@ function showImageInModal(entryId, imageIndex) {
 }
 
 
-function closeSettings(event) {
-    if (event && event.target.id !== 'settings-modal' && !event.target.classList.contains('settings-modal')) return;
-    const modal = document.getElementById('settings-modal');
-    modal.classList.remove('show');
-}
-
-function renderSettingsConfig() {
-    const durationsContainer = document.getElementById('time-durations-config');
-    durationsContainer.innerHTML = timeDurations.map((duration, index) => `
-        <div class="config-item">
-            <input type="number" value="${duration}" id="duration-${index}" style="flex: 0 0 100px;">
-            <span>minutes</span>
-            <button class="mac-button" onclick="removeDuration(${index})" style="padding: 4px 8px; margin-left: auto;">✕</button>
-        </div>
-    `).join('') + `
-        <button class="mac-button" onclick="addDuration()" style="margin-top: 8px;">➕ Add Duration</button>
-    `;
-
-    const activitiesContainer = document.getElementById('time-activities-config');
-    activitiesContainer.innerHTML = timeActivities.map((activity, index) => `
-        <div class="config-item">
-            <input type="text" value="${activity}" id="activity-${index}">
-            <button class="mac-button" onclick="removeActivity(${index})" style="padding: 4px 8px;">✕</button>
-        </div>
-    `).join('') + `
-        <button class="mac-button" onclick="addActivity()" style="margin-top: 8px;">➕ Add Activity</button>
-    `;
-
-    const trackContainer = document.getElementById('track-items-config');
-    trackContainer.innerHTML = `
-        <div style="margin-bottom: 16px;">
-            <strong>Meals:</strong>
-            ${trackItems.meals.map((item, index) => `
-                <div class="config-item">
-                    <input type="text" value="${item}" id="meal-${index}">
-                    <button class="mac-button" onclick="removeMeal(${index})" style="padding: 4px 8px;">✕</button>
-                </div>
-            `).join('')}
-            <button class="mac-button" onclick="addMeal()" style="margin-top: 8px;">➕ Add Meal</button>
-        </div>
-        <div>
-            <strong>Tasks:</strong>
-            ${trackItems.tasks.map((item, index) => `
-                <div class="config-item">
-                    <input type="text" value="${item}" id="task-${index}">
-                    <button class="mac-button" onclick="removeTask(${index})" style="padding: 4px 8px;">✕</button>
-                </div>
-            `).join('')}
-            <button class="mac-button" onclick="addTask()" style="margin-top: 8px;">➕ Add Task</button>
-        </div>
-    `;
-}
-
-function addDuration() {
-    timeDurations.push(60);
-    renderSettingsConfig();
-}
-
-function removeDuration(index) {
-    timeDurations.splice(index, 1);
-    renderSettingsConfig();
-}
-
-function addActivity() {
-    timeActivities.push('New Activity');
-    renderSettingsConfig();
-}
-
-function removeActivity(index) {
-    timeActivities.splice(index, 1);
-    renderSettingsConfig();
-}
-
-function addMeal() {
-    trackItems.meals.push('🍴 New Meal');
-    renderSettingsConfig();
-}
-
-function removeMeal(index) {
-    trackItems.meals.splice(index, 1);
-    renderSettingsConfig();
-}
-
-function addTask() {
-    trackItems.tasks.push('✓ New Task');
-    renderSettingsConfig();
-}
-
-function removeTask(index) {
-    trackItems.tasks.splice(index, 1);
-    renderSettingsConfig();
-}
-
-function saveSettings() {
-    timeDurations = timeDurations.map((_, index) => {
-        const val = document.getElementById(`duration-${index}`);
-        return val ? parseInt(val.value) || 60 : 60;
-    }).filter(d => d > 0); // Filtrar valores no válidos
-
-    timeActivities = timeActivities.map((_, index) => {
-        const val = document.getElementById(`activity-${index}`);
-        return val ? val.value : 'Activity';
-    }).filter(a => a.trim() !== ''); // Filtrar vacíos
-
-    trackItems.meals = trackItems.meals.map((_, index) => {
-        const val = document.getElementById(`meal-${index}`);
-        return val ? val.value : 'Meal';
-    }).filter(m => m.trim() !== ''); // Filtrar vacíos
-
-    trackItems.tasks = trackItems.tasks.map((_, index) => {
-        const val = document.getElementById(`task-${index}`);
-        return val ? val.value : 'Task';
-    }).filter(t => t.trim() !== ''); // Filtrar vacíos
-
-    saveSettingsToStorage();
-    
-    if (currentUser && !isOfflineMode) {
-        saveSettingsToFirebase();
-    }
-    
-    updateTimerOptions();
-    updateTrackOptions();
-    closeSettings();
-    alert('✅ Settings saved!');
-}
-
-function updateTimerOptions() {
-    const container = document.getElementById('duration-selector');
-    if (!container) return;
-    
-    container.innerHTML = timeDurations.map(duration => `
-        <div class="duration-option" data-duration="${duration}" onclick="selectDuration(${duration})">
-            ${duration < 60 ? duration + ' min' : (duration / 60) + ' hour' + (duration > 60 ? 's' : '')}
-        </div>
-    `).join('');
-
-    const actContainer = document.getElementById('activity-selector');
-    if (!actContainer) return;
-    
-    actContainer.innerHTML = timeActivities.map(activity => `
-        <div class="activity-option" data-activity="${activity}" onclick="selectActivity('${activity}')">
-            ${activity}
-        </div>
-    `).join('');
-}
-
-function updateTrackOptions() {
-    renderTrackSelector();
-}
+// CAMBIO: closeSettings() movido a settings-manager.js
+// CAMBIO: renderSettingsConfig() movido a settings-manager.js
+// CAMBIO: addDuration() movido a settings-manager.js
+// CAMBIO: removeDuration() movido a settings-manager.js
+// CAMBIO: addActivity() movido a settings-manager.js
+// CAMBIO: removeActivity() movido a settings-manager.js
+// CAMBIO: addMeal() movido a settings-manager.js
+// CAMBIO: removeMeal() movido a settings-manager.js
+// CAMBIO: addTask() movido a settings-manager.js
+// CAMBIO: removeTask() movido a settings-manager.js
+// CAMBIO: saveSettings() movido a settings-manager.js
+// CAMBIO: updateTimerOptions() movido a settings-manager.js
+// CAMBIO: updateTrackOptions() movido a settings-manager.js
 
 // Timeline rendering
 function toggleReadMore(id) {
@@ -1295,7 +1172,7 @@ function toggleReadMore(id) {
 
 function formatDate(timestamp) {
     const date = new Date(timestamp);
-    return date.toLocaleDateString('en-US', { // 'en-US' es más compatible
+    return date.toLocaleDateString('en', { // 'en' para formato consistente
         weekday: 'long',
         day: 'numeric', 
         month: 'long', 
@@ -1336,7 +1213,28 @@ function toggleRecap(recapId) {
 }
 
 
-// Toggle note expansion (unificada)
+// Show image in modal
+function showImageInModal(entryId, imageIndex) {
+    const entry = entries.find(e => e.id == entryId);
+    if (!entry || !entry.images || !entry.images[imageIndex]) {
+        console.error('Image not found');
+        return;
+    }
+    
+    const modal = document.getElementById('preview-modal');
+    const body = document.getElementById('preview-body');
+    
+    body.innerHTML = `
+        <div style="text-align: center; padding: 20px;">
+            <img src="${entry.images[imageIndex]}" style="max-width: 100%; max-height: 80vh; border: 2px solid #000;">
+        </div>
+    `;
+    
+    modal.classList.add('show');
+}
+
+
+// Toggle note expansion
 function toggleNote(entryId) {
     const noteDiv = document.getElementById('note-' + entryId);
     const btn = event.target;
@@ -1376,10 +1274,13 @@ function renderTimeline() {
         groupedByDay[dayKey].push(entry);
     });
 
+    // Ordenar días de más reciente a más antiguo
+    const sortedDayKeys = Object.keys(groupedByDay).sort((a, b) => b.localeCompare(a));
+
     const html = `
         <div class="timeline">
             <div class="timeline-line"></div>
-            ${Object.keys(groupedByDay).sort().reverse().map(dayKey => { // Asegurar orden
+            ${sortedDayKeys.map(dayKey => {
                 const dayEntries = groupedByDay[dayKey];
                 const firstEntry = dayEntries[0];
                 
@@ -1387,11 +1288,15 @@ function renderTimeline() {
                 const recaps = dayEntries.filter(e => e.type === 'recap');
                 const regularEntries = dayEntries.filter(e => e.type !== 'recap');
                 
+                // Abrir el primer día por defecto
+                const isFirstDay = sortedDayKeys.indexOf(dayKey) === 0;
+                const expandedClass = isFirstDay ? 'expanded' : '';
+                
                 return `
                     <div class="day-block">
                         <div class="day-header" onclick="toggleDay('${dayKey}')">
                             <span>${formatDate(firstEntry.timestamp)}</span>
-                            <span class="chevron expanded" id="chevron-${dayKey}">▼</span>
+                            <span class="chevron ${expandedClass}" id="chevron-${dayKey}">▼</span>
                         </div>
                         
                         ${recaps.map(recap => `
@@ -1426,7 +1331,7 @@ function renderTimeline() {
                                     ${recap.track ? `
                                         <div style="margin-bottom: 16px;">
                                             <strong>Day's Soundtrack:</strong>
-                                            <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 12px; border: 2px solid #000; background: #f9f9f9;">
+                                            <div class="bso-result" style="display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 12px; border: 2px solid #000; background: #f9f9f9;">
                                                 <img src="${recap.track.artwork}" style="width: 50px; height: 50px; border: 2px solid #000;">
                                                 <div style="flex: 1;">
                                                     <div style="font-weight: bold; font-size: 13px;">${recap.track.name}</div>
@@ -1440,24 +1345,31 @@ function renderTimeline() {
                             </div>
                         `).join('')}
                         
-                        <div class="day-content expanded" id="day-content-${dayKey}">
+                        <div class="day-content ${expandedClass}" id="day-content-${dayKey}">
                             ${regularEntries.map(entry => {
-                                const heightStyle = entry.isTimedActivity && entry.duration ? `min-height: ${Math.min(150 + entry.duration * 0.5, 300)}px;` : '';
+                                const heightStyle = entry.isTimedActivity && entry.duration ? `min-height: ${Math.max(120, Math.min(150 + entry.duration * 0.5, 300))}px;` : '';
                                 const trackClass = entry.isQuickTrack ? 'track-event' : '';
                                 const spentClass = entry.isSpent ? 'spent-event' : '';
-                                const timeClass = entry.isTimedActivity ? 'time-event' : '';
+                                const crumbClass = (!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap') ? 'crumb-event' : ''; // Clase para crumbs
                                 
+                                const noteContent = entry.note || '';
+                                const optionalNoteContent = entry.optionalNote || '';
+                                const needsReadMore = noteContent.length > 200 || noteContent.split('\n').length > 4;
+                                const needsReadMoreOptional = optionalNoteContent.length > 200 || optionalNoteContent.split('\n').length > 4;
+
                                 return `
-                                <div class="breadcrumb-entry ${timeClass} ${trackClass} ${spentClass}" style="${heightStyle}">
+                                <div class="breadcrumb-entry ${entry.isTimedActivity ? 'time-event' : ''} ${trackClass} ${spentClass} ${crumbClass}" style="${heightStyle}">
                                     <button class="mac-button edit-button" onclick="editEntry(${entry.id})">✏️ Edit</button>
                                     
                                     ${entry.isTimedActivity ? 
-                                        `<div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div>
-                                        <div class="activity-label">${entry.activity}</div>
-                                        <div style="font-size: 13px; color: #666; margin-top: 8px;">Duration: ${entry.duration} minutes</div>
+                                        `<div>
+                                            <div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div>
+                                            <div class="activity-label">${entry.activity}</div>
+                                            <div style="font-size: 13px; color: #666; margin-top: 8px;">Duration: ${entry.duration} minutes</div>
+                                        </div>
                                         ${entry.optionalNote ? `
                                             <div class="optional-note" id="note-${entry.id}">${entry.optionalNote}</div>
-                                            ${entry.optionalNote.length > 200 ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleNote(${entry.id})">Read more</button>` : ''}
+                                            ${needsReadMoreOptional ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
                                         ` : ''}` :
                                         `<div class="breadcrumb-time">
                                             ${entry.isQuickTrack ?
@@ -1470,38 +1382,38 @@ function renderTimeline() {
                                     
                                     ${entry.isQuickTrack && entry.optionalNote ? `
                                         <div class="optional-note" id="note-${entry.id}">${entry.optionalNote}</div>
-                                        ${entry.optionalNote.length > 200 ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleNote(${entry.id})">Read more</button>` : ''}
+                                        ${needsReadMoreOptional ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
                                     ` : ''}
                                     
-                                    ${!entry.isTimedActivity && !entry.isQuickTrack ? `
+                                    ${!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap' ? `
                                         <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
                                             ${entry.mood ? `<span class="mood-display">${entry.mood.emoji}</span>` : ''}
                                             <div style="flex: 1;">
                                                 <div class="breadcrumb-note" id="note-${entry.id}">${entry.note}</div>
-                                                ${entry.note && entry.note.length > 200 ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleNote(${entry.id})">Read more</button>` : ''}
+                                                ${needsReadMore ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
                                             </div>
                                         </div>
                                     ` : ''}
                                     
-                                    ${entry.weather || entry.location ? `
+                                    ${(entry.weather || entry.location) ? `
                                         <div class="breadcrumb-meta">
-                                            ${entry.weather ? `${entry.weather}` : ''}
-                                            ${entry.weather && entry.location ? ` • 📍 ${entry.location}` : ''}
-                                            ${!entry.weather && entry.location ? `📍 ${entry.location}` : ''}
+                                            ${entry.weather ? `<span>${entry.weather}</span>` : ''}
+                                            ${entry.weather && entry.location ? ` • ` : ''}
+                                            ${entry.location ? `<span>📍 ${entry.location}</span>` : ''}
                                         </div>
                                     ` : ''}
                                     
                                     ${entry.audio ? `
                                         <div style="margin-top: 12px; margin-bottom: 12px;">
                                             <audio controls style="width: 100%; max-width: 300px;">
-                                                <source src="${entry.audio}" type="audio/webm">
+                                                <source src="${entry.audio}">
                                             </audio>
                                         </div>
                                     ` : ''}
                                     
                                     <div class="breadcrumb-preview">
-                                        ${entry.images && entry.images.length > 0 ? entry.images.map(img => `
-                                            <img src="${img}" class="preview-image-thumb" onclick="event.stopPropagation(); showImageInModal('${entry.id}', ${entry.images.indexOf(img)});">
+                                        ${entry.images && entry.images.length > 0 ? entry.images.map((img, idx) => `
+                                            <img src="${img}" class="preview-image-thumb" alt="Thumbnail ${idx+1}" onclick="event.stopPropagation(); showImageInModal('${entry.id}', ${idx});">
                                         `).join('') : ''}
                                         ${entry.coords ? `<div class="preview-map-thumb" id="mini-map-${entry.id}"></div>` : ''}
                                         <button class="mac-button preview-button" onclick="previewEntry(${entry.id})">🔍 Preview</button>
@@ -1517,6 +1429,7 @@ function renderTimeline() {
 
     container.innerHTML = html;
     
+    // Renderizar mini-mapas después de que el HTML esté en el DOM
     entries.forEach(entry => {
         if (entry.coords) {
             setTimeout(() => {
@@ -1543,6 +1456,7 @@ function renderTimeline() {
                         mapEl.onclick = () => previewEntry(entry.id);
                     } catch (e) {
                         console.error('Error creating mini map:', e);
+                        mapEl.innerHTML = "Map failed";
                     }
                 }
             }, 100);
@@ -1552,20 +1466,193 @@ function renderTimeline() {
 
 // Export functions
 function exportCSV() {
-    const headers = ['Date and Time', 'Type', 'Note', 'Activity', 'Duration (min)', 'Location', 'Weather', 'Mood', 'Spent', 'Optional Note', 'Images'];
-    const rows = entries.map(e => [
-        new Date(e.timestamp).toLocaleString(),
-        e.type || (e.isTimedActivity ? 'time' : (e.isQuickTrack ? 'track' : (e.isSpent ? 'spent' : 'crumb'))),
-        e.note || '',
-        e.activity || '',
-        e.duration || '',
-        e.location || '',
-        e.weather || '',
-        e.mood ? `${e.mood.emoji} ${e.mood.label}` : '',
-        e.spentAmount ? `€${e.spentAmount.toFixed(2)}` : '',
-        e.optionalNote || '',
-        e.images ? e.images.length : 0
-    ]);
+    openExportModal('csv');
+}
+
+function exportICS() {
+    openExportModal('ical');
+}
+
+function openExportModal(format) {
+    let modal = document.getElementById('export-modal');
+    if (!modal) {
+        createExportModal(); // Crear si no existe
+        modal = document.getElementById('export-modal');
+    }
+    
+    // Configurar el modal según el formato
+    document.getElementById('export-format-type').textContent = format === 'csv' ? 'CSV' : 'iCal';
+    document.getElementById('export-modal').classList.add('show');
+    
+    // Configurar opciones de iCal
+    const icalOptions = document.getElementById('ical-options');
+    if (format === 'ical') {
+        icalOptions.style.display = 'block';
+    } else {
+        icalOptions.style.display = 'none';
+    }
+}
+
+function createExportModal() {
+    const modalHTML = `
+        <div id="export-modal" class="preview-modal" onclick="closeExportModal(event)">
+            <div class="preview-content" onclick="event.stopPropagation()">
+                <div class="mac-title-bar">
+                    <span>📤 Export <span id="export-format-type">CSV</span></span>
+                    <button onclick="closeExportModal()" style="background: #fff; border: 2px solid #000; padding: 2px 8px; cursor: pointer;">✕</button>
+                </div>
+                <div class="mac-content">
+                    <h3 style="margin-bottom: 16px;">Select Export Range</h3>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label class="mac-label">
+                            <input type="radio" name="export-range" value="all" checked onchange="updateExportOptions()"> 
+                            Export All Entries
+                        </label>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label class="mac-label">
+                            <input type="radio" name="export-range" value="month" onchange="updateExportOptions()"> 
+                            Export Specific Month
+                        </label>
+                        <div id="month-selector" style="margin-left: 20px; margin-top: 8px; display: none;">
+                            <input type="month" class="mac-input" id="export-month" style="max-width: 200px;">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label class="mac-label">
+                            <input type="radio" name="export-range" value="day" onchange="updateExportOptions()"> 
+                            Export Specific Day
+                        </label>
+                        <div id="day-selector" style="margin-left: 20px; margin-top: 8px; display: none;">
+                            <input type="date" class="mac-input" id="export-day" style="max-width: 200px;">
+                        </div>
+                    </div>
+                    
+                    <div id="ical-options" style="display: none;">
+                        <hr style="margin: 20px 0; border: 1px solid #ddd;">
+                        <h3 style="margin-bottom: 16px;">iCal Options</h3>
+                        <div style="margin-bottom: 20px;">
+                            <label class="mac-label">
+                                <input type="radio" name="ical-grouping" value="individual" checked> 
+                                Each event as separate calendar entry
+                            </label>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label class="mac-label">
+                                <input type="radio" name="ical-grouping" value="daily"> 
+                                Group all events per day as one calendar entry
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button class="mac-button mac-button-primary" onclick="performExport()" style="width: 100%; margin-top: 24px;">
+                        📥 Export
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Establecer fechas por defecto
+    const today = new Date();
+    const monthInput = document.getElementById('export-month');
+    const dayInput = document.getElementById('export-day');
+    
+    monthInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    dayInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+}
+
+function updateExportOptions() {
+    const range = document.querySelector('input[name="export-range"]:checked').value;
+    
+    document.getElementById('month-selector').style.display = range === 'month' ? 'block' : 'none';
+    document.getElementById('day-selector').style.display = range === 'day' ? 'block' : 'none';
+}
+
+function closeExportModal(event) {
+    if (event && event.target.id !== 'export-modal') return;
+    const modal = document.getElementById('export-modal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+function performExport() {
+    const format = document.getElementById('export-format-type').textContent.toLowerCase();
+    const range = document.querySelector('input[name="export-range"]:checked').value;
+    const icalGrouping = document.querySelector('input[name="ical-grouping"]:checked').value;
+    
+    // Filtrar entradas según el rango seleccionado
+    let filteredEntries = [...entries];
+    let filenameSuffix = 'all';
+    
+    if (range === 'month') {
+        const monthValue = document.getElementById('export-month').value;
+        const [year, month] = monthValue.split('-');
+        filteredEntries = entries.filter(e => {
+            const date = new Date(e.timestamp);
+            return date.getFullYear() === parseInt(year) && 
+                   date.getMonth() + 1 === parseInt(month);
+        });
+        filenameSuffix = `${year}-${month}`;
+    } else if (range === 'day') {
+        const dayValue = document.getElementById('export-day').value;
+        filteredEntries = entries.filter(e => {
+            const date = new Date(e.timestamp);
+            const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            return dateStr === dayValue;
+        });
+        filenameSuffix = dayValue;
+    }
+    
+    if (filteredEntries.length === 0) {
+        alert('No entries found for the selected period.');
+        return;
+    }
+    
+    // Realizar la exportación
+    if (format === 'csv') {
+        exportCSVData(filteredEntries, filenameSuffix);
+    } else {
+        exportICSData(filteredEntries, filenameSuffix, icalGrouping);
+    }
+    
+    closeExportModal();
+}
+
+function exportCSVData(data, suffix) {
+    const headers = ['ID', 'Timestamp', 'Type', 'Note', 'Optional Note', 'Mood', 'Location', 'Weather', 'Activity', 'Duration (min)', 'Spent Amount', 'Images (count)', 'Audio (exists)', 'Coords (lat)', 'Coords (lon)', 'Recap Rating', 'Recap Highlights'];
+    const rows = data.map(e => {
+        let type = 'Crumb';
+        if (e.isTimedActivity) type = 'Time';
+        if (e.isQuickTrack) type = 'Track';
+        if (e.isSpent) type = 'Spent';
+        if (e.type === 'recap') type = 'Recap';
+        
+        return [
+            e.id,
+            e.timestamp,
+            type,
+            e.note || '',
+            e.optionalNote || '',
+            e.mood ? `${e.mood.emoji} ${e.mood.label}` : '',
+            e.location || '',
+            e.weather || '',
+            e.activity || '',
+            e.duration || '',
+            e.spentAmount || '',
+            e.images ? e.images.length : 0,
+            e.audio ? 'Yes' : 'No',
+            e.coords ? e.coords.lat : '',
+            e.coords ? e.coords.lon : '',
+            e.rating || '',
+            e.highlights ? e.highlights.join('; ') : ''
+        ];
+    });
     
     const csv = [headers, ...rows].map(row => 
         row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
@@ -1575,32 +1662,83 @@ function exportCSV() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `breadcrumbs-export.csv`;
+    a.download = `breadcrumbs-${suffix}.csv`;
     a.click();
     URL.revokeObjectURL(url);
 }
 
-function exportICS() {
-    const icsEvents = entries.map(e => {
-        const date = new Date(e.timestamp);
-        const dateStr = date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+function exportICSData(data, suffix, grouping) {
+    let icsEvents = '';
+    
+    if (grouping === 'daily') {
+        // Agrupar por día
+        const groupedByDay = {};
+        data.forEach(e => {
+            const date = new Date(e.timestamp);
+            const dayKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            if (!groupedByDay[dayKey]) {
+                groupedByDay[dayKey] = [];
+            }
+            groupedByDay[dayKey].push(e);
+        });
         
-        let endDate = new Date(date);
-        if (e.duration) {
-            endDate.setMinutes(endDate.getMinutes() + e.duration);
-        } else {
-            endDate.setMinutes(endDate.getMinutes() + 15); // 15 min por defecto
-        }
-        const endDateStr = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-        
-        const summary = e.activity || e.note?.substring(0, 50) || 'Breadcrumb Event';
-        let description = (e.note || '');
-        if (e.optionalNote) description += `\\nNote: ${e.optionalNote}`;
-        if (e.location) description += `\\nLocation: ${e.location}`;
-        if (e.weather) description += `\\nWeather: ${e.weather}`;
-        if (e.spentAmount) description += `\\nSpent: €${e.spentAmount.toFixed(2)}`;
-        
-        return `BEGIN:VEVENT
+        // Crear un evento por día
+        icsEvents = Object.keys(groupedByDay).map(dayKey => {
+            const dayEntries = groupedByDay[dayKey];
+            const firstEntry = dayEntries[0];
+            const date = new Date(firstEntry.timestamp);
+            const dateStr = date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            
+            // Crear descripción con todos los eventos del día
+            const description = dayEntries.map(e => {
+                const time = new Date(e.timestamp).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                let text = `${time}: ${e.note || e.activity || 'Event'}`;
+                if (e.duration) text += ` (${e.duration} min)`;
+                if (e.optionalNote) text += `\\n  - Note: ${e.optionalNote}`;
+                if (e.type === 'recap') text = `${time}: 🌟 DAY RECAP (Rating: ${e.rating}/10)`;
+                return text;
+            }).join('\\n\\n');
+            
+            return `BEGIN:VEVENT
+UID:${dayKey}@breadcrumbs
+DTSTAMP:${dateStr}
+DTSTART;VALUE=DATE:${dayKey.replace(/-/g, '')}
+SUMMARY:Breadcrumbs - ${dayEntries.length} events
+DESCRIPTION:${description.replace(/\n/g, '\\n')}
+END:VEVENT`;
+        }).join('\n');
+    } else {
+        // Evento individual por cada entrada
+        icsEvents = data.map(e => {
+            const date = new Date(e.timestamp);
+            const dateStr = date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            
+            let endDate = new Date(date);
+            if (e.duration) {
+                endDate.setMinutes(endDate.getMinutes() + e.duration);
+            } else if (e.type === 'recap') {
+                 endDate.setMinutes(endDate.getMinutes() + 15); // 15 min para recap
+            } else {
+                endDate.setMinutes(endDate.getMinutes() + 30); // 30 min por defecto
+            }
+            const endDateStr = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            
+            let summary = 'Breadcrumb';
+            if (e.isTimedActivity) summary = `⏱️ ${e.activity}`;
+            else if (e.isQuickTrack) summary = `📊 ${e.note}`;
+            else if (e.isSpent) summary = `💰 ${e.note} (€${e.spentAmount})`;
+            else if (e.type === 'recap') summary = `🌟 Day Recap (Rating: ${e.rating}/10)`;
+            else if (e.note) summary = `📝 ${e.note.substring(0, 50)}${e.note.length > 50 ? '...' : ''}`;
+            
+            let description = (e.note || '');
+            if (e.optionalNote) description += `\\n\\nOptional Note: ${e.optionalNote}`;
+            if (e.location) description += `\\n\\n📍 Location: ${e.location}`;
+            if (e.weather) description += `\\n☁️ Weather: ${e.weather}`;
+            if (e.type === 'recap') {
+                description = `Reflection: ${e.reflection || 'N/A'}\\nHighlights:\\n${(e.highlights || []).map(h => `- ${h}`).join('\\n')}`;
+            }
+
+            return `BEGIN:VEVENT
 UID:${e.id}@breadcrumbs
 DTSTAMP:${dateStr}
 DTSTART:${dateStr}
@@ -1609,7 +1747,8 @@ SUMMARY:${summary.replace(/\n/g, ' ')}
 DESCRIPTION:${description.replace(/\n/g, '\\n')}
 LOCATION:${e.location || ''}
 END:VEVENT`;
-    }).join('\n');
+        }).join('\n');
+    }
 
     const ics = `BEGIN:VCALENDAR
 VERSION:2.0
@@ -1623,11 +1762,10 @@ END:VCALENDAR`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `breadcrumbs-export.ics`;
+    a.download = `breadcrumbs-${suffix}.ics`;
     a.click();
     URL.revokeObjectURL(url);
 }
-
 
 // Stats functions
 function openStats() {
@@ -1640,10 +1778,11 @@ function openStats() {
 
 function calculateStats() {
     const totalEntries = entries.length;
-    const breadcrumbs = entries.filter(e => e.type === 'crumb' || (!e.type && !e.isTimedActivity && !e.isQuickTrack && !e.isSpent)).length;
+    const breadcrumbs = entries.filter(e => !e.isTimedActivity && !e.isQuickTrack && !e.isSpent && e.type !== 'recap').length;
     const timeEvents = entries.filter(e => e.isTimedActivity).length;
     const trackEvents = entries.filter(e => e.isQuickTrack).length;
     const spentEvents = entries.filter(e => e.isSpent).length;
+    const recapEvents = entries.filter(e => e.type === 'recap').length;
     
     const totalSpent = entries
         .filter(e => e.isSpent)
@@ -1694,6 +1833,10 @@ function calculateStats() {
             <div class="stat-number">${spentEvents}</div>
             <div class="stat-label">💰 Expenses</div>
         </div>
+         <div class="stat-card">
+            <div class="stat-number">${recapEvents}</div>
+            <div class="stat-label">🌟 Recaps</div>
+        </div>
         <div class="stat-card">
             <div class="stat-number">€${totalSpent.toFixed(2)}</div>
             <div class="stat-label">Total Spent</div>
@@ -1716,15 +1859,39 @@ function calculateStats() {
 }
 
 function closeStats(event) {
-    if (event && event.target.id !== 'stats-modal' && !event.target.classList.contains('stats-modal')) return;
+    if (event && event.target.id !== 'stats-modal') return;
     const modal = document.getElementById('stats-modal');
     if (modal) {
         modal.classList.remove('show');
     }
 }
-// Initialize app (en firebase-config.js)
-// loadData();
-// loadSettings();
+// Initialize app
+// Cargar datos y settings al inicio
+document.addEventListener('DOMContentLoaded', () => {
+    // CAMBIO: Llamar a la función global de settings-manager.js
+    if (typeof window.loadSettings === 'function') {
+        window.loadSettings();
+    } else {
+        console.error("Error: settings-manager.js no se ha cargado.");
+    }
+    
+    loadData(); // Carga datos locales
+    
+    // CAMBIO: Llamar a las funciones globales de settings-manager.js
+    // para poblar los selectores de los formularios (que están ocultos)
+    if (typeof window.updateTimerOptions === 'function') {
+        window.updateTimerOptions();
+    }
+    if (typeof window.updateTrackOptions === 'function') {
+        window.updateTrackOptions();
+    }
+    
+    // Las funciones de login (signInWithGoogle, etc.) están en firebase-config.js
+    // y se llaman directamente desde el HTML.
+    
+    // El listener onAuthStateChanged en firebase-config.js
+    // se encargará de llamar a loadDataFromFirebase y loadSettingsFromFirebase
+});
 
 // ===== RECAP FUNCTIONS =====
 
@@ -1735,13 +1902,14 @@ function showRecapForm() {
     document.getElementById('track-window').classList.add('hidden');
     document.getElementById('spent-window').classList.add('hidden');
     
-    document.getElementById('recap-form').classList.remove('hidden');
+    const recapForm = document.getElementById('recap-form');
+    recapForm.classList.remove('hidden');
     
     // Establecer fecha actual
     setCurrentDateTime('datetime-input-recap');
     
-    // Limpiar formulario (excepto si se está editando)
-    if (!editingEntryId) {
+    // Limpiar formulario (excepto si estamos editando, lo cual se maneja en editRecapEvent)
+    if (!editingEntryId) { // Solo limpiar si no estamos editando
         document.getElementById('recap-reflection').value = '';
         document.getElementById('recap-rating').value = '5';
         document.getElementById('recap-rating-value').textContent = '5';
@@ -1752,7 +1920,7 @@ function showRecapForm() {
         document.getElementById('recap-bso-results').innerHTML = '';
         document.getElementById('recap-selected-track').value = '';
     }
-    
+
     // Listener para el slider
     const slider = document.getElementById('recap-rating');
     const valueDisplay = document.getElementById('recap-rating-value');
@@ -1760,23 +1928,13 @@ function showRecapForm() {
     slider.oninput = function() {
         valueDisplay.textContent = this.value;
     };
-
-    document.getElementById('recap-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    recapForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function closeRecapForm() {
     document.getElementById('recap-form').classList.add('hidden');
-    // Limpiar formulario
-    document.getElementById('recap-reflection').value = '';
-    document.getElementById('recap-rating').value = '5';
-    document.getElementById('recap-rating-value').textContent = '5';
-    document.getElementById('recap-highlight-1').value = '';
-    document.getElementById('recap-highlight-2').value = '';
-    document.getElementById('recap-highlight-3').value = '';
-    document.getElementById('recap-bso').value = '';
-    document.getElementById('recap-bso-results').innerHTML = '';
-    document.getElementById('recap-selected-track').value = '';
-    editingEntryId = null; // Asegurar que se limpia
+    editingEntryId = null; // Asegurarse de limpiar el ID de edición
 }
 
 async function buscarBSO() {
@@ -1790,9 +1948,13 @@ async function buscarBSO() {
     resultsDiv.innerHTML = '<div style="padding: 12px; text-align: center;">Searching...</div>';
     
     try {
-        // Usar un proxy simple si es necesario para CORS, pero iTunes suele ser abierto
         const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=5`;
         const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`iTunes API error: ${response.status}`);
+        }
+        
         const data = await response.json();
         
         if (data.results && data.results.length > 0) {
@@ -1826,7 +1988,7 @@ function selectTrack(trackName, artistName, url, artwork) {
     
     document.getElementById('recap-selected-track').value = JSON.stringify(trackData);
     document.getElementById('recap-bso-results').innerHTML = `
-        <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 3px solid #000; background: #f0f0f0;">
+        <div class="bso-result" style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 3px solid #000; background: #f0f0f0;">
             <img src="${artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
             <div style="flex: 1;">
                 <div style="font-weight: bold;">${trackName}</div>
@@ -1840,12 +2002,15 @@ function selectTrack(trackName, artistName, url, artwork) {
 function editRecapEvent(entry) {
     editingEntryId = entry.id;
     
-    // Ocultar otros formularios
+    // Ocultar otros formularios y mostrar el de Recap
     document.getElementById('form-window').classList.add('hidden');
     document.getElementById('timer-window').classList.add('hidden');
     document.getElementById('track-window').classList.add('hidden');
     document.getElementById('spent-window').classList.add('hidden');
     
+    const recapForm = document.getElementById('recap-form');
+    recapForm.classList.remove('hidden');
+
     // Set datetime
     const date = new Date(entry.timestamp);
     const year = date.getFullYear();
@@ -1863,27 +2028,16 @@ function editRecapEvent(entry) {
     document.getElementById('recap-highlight-2').value = (entry.highlights && entry.highlights[1]) || '';
     document.getElementById('recap-highlight-3').value = (entry.highlights && entry.highlights[2]) || '';
     
+    // Limpiar búsqueda anterior
     document.getElementById('recap-bso').value = '';
     document.getElementById('recap-bso-results').innerHTML = '';
+    document.getElementById('recap-selected-track').value = '';
     
     if (entry.track) {
-        document.getElementById('recap-selected-track').value = JSON.stringify(entry.track);
-        document.getElementById('recap-bso-results').innerHTML = `
-            <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 3px solid #000; background: #f0f0f0;">
-                <img src="${entry.track.artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
-                <div style="flex: 1;">
-                    <div style="font-weight: bold;">${entry.track.name}</div>
-                    <div style="font-size: 12px; color: #666;">${entry.track.artist}</div>
-                </div>
-                <a href="${entry.track.url}" target="_blank" style="text-decoration: none; font-size: 20px;">🔗</a>
-            </div>
-        `;
-    } else {
-        document.getElementById('recap-selected-track').value = '';
+        // Mostrar la pista seleccionada
+        selectTrack(entry.track.name, entry.track.artist, entry.track.url, entry.track.artwork);
     }
     
-    const recapForm = document.getElementById('recap-form');
-    recapForm.classList.remove('hidden');
     recapForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -1896,50 +2050,42 @@ function saveRecap() {
     const selectedTrackJson = document.getElementById('recap-selected-track').value;
     const timestamp = getTimestampFromInput('datetime-input-recap');
     
-    const highlights = [highlight1, highlight2, highlight3].filter(h => h); // Filtrar vacíos
-    
-    if (!reflection && highlights.length === 0) {
+    if (!reflection && !highlight1 && !highlight2 && !highlight3) {
         alert('Please add at least one reflection or highlight');
         return;
     }
     
+    const recapEntry = {
+        id: editingEntryId || Date.now(),
+        timestamp: timestamp,
+        type: 'recap',
+        reflection: reflection,
+        rating: parseInt(rating),
+        highlights: [highlight1, highlight2, highlight3].filter(h => h), // Solo guardar highlights no vacíos
+        track: selectedTrackJson ? JSON.parse(selectedTrackJson) : null,
+        // Asegurar que otros campos estén limpios
+        note: `Day Recap (Rating: ${rating}/10)`,
+        isTimedActivity: false,
+        isQuickTrack: false,
+        isSpent: false,
+        mood: null
+    };
+
     if (editingEntryId) {
         const entryIndex = entries.findIndex(e => e.id === editingEntryId);
         if (entryIndex !== -1) {
-            entries[entryIndex] = {
-                ...entries[entryIndex], // Conservar datos antiguos
-                timestamp: timestamp,
-                type: 'recap',
-                reflection: reflection,
-                rating: parseInt(rating),
-                highlights: highlights,
-                track: selectedTrackJson ? JSON.parse(selectedTrackJson) : null,
-                // Limpiar flags de otros tipos
-                isTimedActivity: false,
-                isQuickTrack: false,
-                isSpent: false
-            };
+            entries[entryIndex] = recapEntry;
         }
+        editingEntryId = null;
         alert('🌟 Recap updated!');
     } else {
-        const recap = {
-            id: Date.now(),
-            timestamp: timestamp,
-            type: 'recap',
-            reflection: reflection,
-            rating: parseInt(rating),
-            highlights: highlights,
-            track: selectedTrackJson ? JSON.parse(selectedTrackJson) : null
-        };
-        
-        entries.unshift(recap);
+        entries.unshift(recapEntry);
         alert('🌟 Recap saved!');
     }
     
     saveData();
     renderTimeline();
     closeRecapForm();
-    editingEntryId = null; // Limpiar
 }
 
 // ===== FAB MENU =====
@@ -1947,8 +2093,7 @@ function saveRecap() {
 let fabMenuOpen = false;
 
 function toggleFabMenu() {
-    // ARREGLO: Selector corregido a .fab-action
-    const fabActions = document.querySelectorAll('.fab-action');
+    const fabActions = document.querySelectorAll('.fab-action-wrapper');
     const fabIcon = document.getElementById('fab-icon');
     
     fabMenuOpen = !fabMenuOpen;
@@ -1958,18 +2103,20 @@ function toggleFabMenu() {
         fabIcon.style.transform = 'rotate(45deg)';
         
         fabActions.forEach((wrapper, index) => {
-            wrapper.closest('.fab-action-wrapper').classList.remove('hidden');
-            setTimeout(() => wrapper.closest('.fab-action-wrapper').classList.add('show'), 10 + (index * 40));
+            setTimeout(() => {
+                wrapper.classList.remove('hidden');
+                setTimeout(() => wrapper.classList.add('show'), 10);
+            }, index * 50);
         });
     } else {
         fabIcon.textContent = '+';
         fabIcon.style.transform = 'rotate(0deg)';
         
-        // Invertir el orden para cerrar
-        const reversedActions = Array.from(fabActions).reverse();
-        reversedActions.forEach((wrapper, index) => {
-            wrapper.closest('.fab-action-wrapper').classList.remove('show');
-            setTimeout(() => wrapper.closest('.fab-action-wrapper').classList.add('hidden'), 300); // Dar tiempo a la anim
+        fabActions.forEach((wrapper, index) => {
+            setTimeout(() => {
+                wrapper.classList.remove('show');
+                setTimeout(() => wrapper.classList.add('hidden'), 300);
+            }, (fabActions.length - index - 1) * 30); // Invertir orden al cerrar
         });
     }
 }
@@ -1981,14 +2128,7 @@ function closeFabMenu() {
     }
 }
 
-// Las funciones de toggle (toggleForm, toggleTimer, etc.) 
-// y showRecapForm() son llamadas directamente desde el HTML,
-// y ahora incluyen closeFabMenu() en el onclick.
-
-// Cargar datos y settings al inicio (si no estamos esperando a Firebase)
-// Esto se maneja ahora desde firebase-config.js y el DOMContentLoaded
-document.addEventListener('DOMContentLoaded', () => {
-    loadSettings();
-    loadData();
-});
+// Modificar las funciones toggle para cerrar el menú
+// (Las funciones toggleForm, etc. ya están definidas arriba)
+// (Los onclick en el HTML ya llaman a closeFabMenu())
 
