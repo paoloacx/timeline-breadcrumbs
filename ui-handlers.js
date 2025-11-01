@@ -14,7 +14,7 @@ window.toggleForm = function() {
     
     form.classList.toggle('hidden');
     if (!form.classList.contains('hidden')) {
-        clearForm(); // global function in app.js
+        window.clearForm(); // global function in app.js
         window.renderMoodSelector(); // global function in ui-renderer.js
         window.setCurrentDateTime('datetime-input'); // global function in utils.js
         form.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -34,7 +34,7 @@ window.toggleTimer = function() {
 
     timer.classList.toggle('hidden');
     if (!timer.classList.contains('hidden')) {
-        resetTimerSelections(); // global function in app.js
+        window.resetTimerSelections(); // global function in app.js
         window.setCurrentDateTime('datetime-input-time'); // global function in utils.js
         timer.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -55,7 +55,7 @@ window.toggleTrack = function() {
     if (!track.classList.contains('hidden')) {
         window.renderTrackSelector(); // global function in ui-renderer.js
         window.setCurrentDateTime('datetime-input-track'); // global function in utils.js
-        selectedTrackItem = null; // global variable from app.js
+        window.selectedTrackItem = null; // global variable from app.js
         document.getElementById('save-track-btn').disabled = true;
         document.getElementById('delete-track-btn').classList.add('hidden');
         document.getElementById('track-optional-note').value = '';
@@ -85,19 +85,19 @@ window.toggleSpent = function() {
 }
 
 window.cancelEdit = function() {
-    clearForm(); // global function in app.js
+    window.clearForm(); // global function in app.js
     window.toggleForm();
 }
 
 // Mood selection
 window.selectMood = function(index) {
-    selectedMood = index; // global variable from app.js
+    window.selectedMood = index; // global variable from app.js
     window.renderMoodSelector(); // global function in ui-renderer.js
 }
 
 // Time event selections
 window.selectDuration = function(minutes) {
-    selectedDuration = minutes; // global variable from app.js
+    window.selectedDuration = minutes; // global variable from app.js
     const options = document.querySelectorAll('.duration-option');
     options.forEach(el => {
         el.classList.remove('selected');
@@ -105,11 +105,11 @@ window.selectDuration = function(minutes) {
             el.classList.add('selected');
         }
     });
-    checkTimerReady(); // global function in app.js
+    window.checkTimerReady(); // global function in app.js
 }
 
 window.selectActivity = function(activity) {
-    selectedActivity = activity; // global variable from app.js
+    window.selectedActivity = activity; // global variable from app.js
     const options = document.querySelectorAll('#activity-selector .activity-option');
     options.forEach(el => {
         el.classList.remove('selected');
@@ -117,12 +117,12 @@ window.selectActivity = function(activity) {
             el.classList.add('selected');
         }
     });
-    checkTimerReady(); // global function in app.js
+    window.checkTimerReady(); // global function in app.js
 }
 
 // Track event selection
 window.selectTrackItem = function(item) {
-    selectedTrackItem = item; // global variable from app.js
+    window.selectedTrackItem = item; // global variable from app.js
     document.querySelectorAll('#track-selector .activity-option').forEach(el => {
         el.classList.remove('selected');
         if (el.dataset.item === item) {
@@ -312,7 +312,7 @@ window.showRecapForm = function() {
     window.setCurrentDateTime('datetime-input-recap'); // global util
     
     // Clear form only if not editing
-    if (!editingEntryId) { // global var from app.js
+    if (!window.editingEntryId) { // global var from app.js
         document.getElementById('recap-reflection').value = '';
         document.getElementById('recap-rating').value = '5';
         document.getElementById('recap-rating-value').textContent = '5';
@@ -339,7 +339,7 @@ window.showRecapForm = function() {
 
 window.closeRecapForm = function() {
     document.getElementById('recap-form').classList.add('hidden');
-    editingEntryId = null; // global var from app.js
+    window.editingEntryId = null; // global var from app.js
 }
 
 window.selectTrack = function(trackName, artistName, url, artwork) {
@@ -403,24 +403,24 @@ function closeFabMenu() {
     }
 }
 
-// Wrappers for FAB actions
-window.toggleCrumb = function() {
+// CAMBIO: Wrappers for FAB actions renombrados para no ser recursivos
+window.handleFabCrumb = function() {
     closeFabMenu();
-    window.toggleForm();
+    window.toggleForm(); // Llama a la función real
 }
-window.toggleTime = function() {
+window.handleFabTime = function() {
     closeFabMenu();
-    window.toggleTimer();
+    window.toggleTimer(); // Llama a la función real
 }
-window.toggleTrack = function() {
+window.handleFabTrack = function() {
     closeFabMenu();
-    window.toggleTrack();
+    window.toggleTrack(); // Llama a la función real
 }
-window.toggleSpent = function() {
+window.handleFabSpent = function() {
     closeFabMenu();
-    window.toggleSpent();
+    window.toggleSpent(); // Llama a la función real
 }
-window.showRecapFormWithFab = function() { // Renamed
+window.handleFabRecap = function() {
     closeFabMenu();
-    window.showRecapForm();
+    window.showRecapForm(); // Llama a la función real
 }
