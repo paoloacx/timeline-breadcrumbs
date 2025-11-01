@@ -56,6 +56,10 @@ window.toggleTrack = function() {
         window.renderTrackSelector(); // global function in ui-renderer.js
         window.setCurrentDateTime('datetime-input-track'); // global function in utils.js
         window.selectedTrackItem = null; // global variable from app.js
+        
+        // CAMBIO: Arregla el bug del "Cancel"
+        window.editingEntryId = null; 
+
         document.getElementById('save-track-btn').disabled = true;
         document.getElementById('delete-track-btn').classList.add('hidden');
         document.getElementById('track-optional-note').value = '';
@@ -79,6 +83,10 @@ window.toggleSpent = function() {
         document.getElementById('spent-description').value = '';
         document.getElementById('spent-amount').value = '';
         window.setCurrentDateTime('datetime-input-spent'); // global function in utils.js
+        
+        // CAMBIO: Arregla el bug del "Cancel"
+        window.editingEntryId = null; 
+
         document.getElementById('delete-spent-btn').classList.add('hidden');
         spent.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -403,7 +411,7 @@ function closeFabMenu() {
     }
 }
 
-// CAMBIO: Wrappers for FAB actions renombrados para no ser recursivos
+// Wrappers for FAB actions
 window.handleFabCrumb = function() {
     closeFabMenu();
     window.toggleForm(); // Llama a la función real
