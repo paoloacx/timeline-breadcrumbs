@@ -1,11 +1,112 @@
-// --- Funciones de Renderizado del Timeline ---
+// ===== UI RENDERING FUNCTIONS =====
 
-function renderTimeline() {
+/**
+ * Renders the image previews in the form.
+ */
+window.renderImagePreviews = function() {
+    const container = document.getElementById('image-previews');
+    // 'currentImages' is a global variable from app.js
+    container.innerHTML = currentImages.map((img, idx) => `
+        <div class="image-preview">
+            <img src="${img}" alt="Preview image ${idx+1}">
+            <div class="image-remove" onclick="removeImage(${idx})">✕</div>
+        </div>
+    `).join('');
+}
+
+/**
+ * Renders the audio preview player in the form.
+ */
+window.renderAudioPreview = function() {
+    const container = document.getElementById('audio-preview');
+    // 'currentAudio' is a global variable from app.js
+    if (currentAudio) {
+        container.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                <audio controls style="flex: 1;">
+                    <source src="${currentAudio}">
+                </audio>
+                <button class="mac-button" onclick="removeAudio()" style="padding: 4px 8px;">✕</button>
+            </div>
+        `;
+    } else {
+        container.innerHTML = '';
+    }
+}
+
+/**
+ * Renders the mood selection buttons in the form.
+ */
+window.renderMoodSelector = function() {
+    const container = document.getElementById('mood-selector');
+    // 'window.moods' and 'selectedMood' are globals from app.js
+    container.innerHTML = window.moods.map((mood, index) => `
+        <div class="mood-option ${selectedMood === index ? 'selected' : ''}" onclick="selectMood(${index})">
+            ${mood.emoji}
+            <span class="mood-label">${mood.label}</span>
+        </div>
+    `).join('');
+}
+
+/**
+ * Renders the track selector buttons for the "Track" form.
+ */
+window.renderTrackSelector = function() {
+    const container = document.getElementById('track-selector');
+    if (!container) return; // Guard clause
+    // 'window.trackItems' is a global from app.js
+    const allItems = [...window.trackItems.meals, ...window.trackItems.tasks];
+    
+    container.innerHTML = allItems.map((item, index) => `
+        <div class="activity-option" data-item="${item.replace(/'/g, "\\'")}" onclick="selectTrackItem('${item.replace(/'/g, "\\'")}')">
+            ${item}
+        </div>
+    `).join('');
+}
+
+/**
+ * Displays a mini-map in the specified container.
+ * @param {number} lat - Latitude.
+ * @param {number} lon - Longitude.
+ * @param {string} containerId - The ID of the map container element.
+ */
+window.showMiniMap = function(lat, lon, containerId) {
+    const mapContainer = document.getElementById(containerId);
+    if (!mapContainer) return;
+
+    mapContainer.innerHTML = '';
+    mapContainer.style.display = 'block';
+
+    try {
+        const map = L.map(containerId).setView([lat, lon], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19
+        }).addTo(map);
+
+        L.marker([lat, lon]).addTo(map);
+
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+    } catch(e) {
+        console.error("Error initializing Leaflet map:", e);
+        mapContainer.innerHTML = "Map failed to load. Are you online?";
+    }
+}
+
+
+/**
+ * Renders the entire timeline based on the global 'window.entries' array.
+ */
+window.renderTimeline = function() {
     const container = document.getElementById('timeline-container');
     const emptyState = document.getElementById('empty-state');
     const footer = document.getElementById('footer');
 
-    if (entries.length === 0) {
+    // 'window.entries' is a global from app.js
+    if (window.entries.length === 0) {
         container.innerHTML = '';
         emptyState.classList.remove('hidden');
         footer.style.display = 'none';
@@ -16,16 +117,19 @@ function renderTimeline() {
     footer.style.display = 'flex';
 
     const groupedByDay = {};
-    entries.forEach(entry => {
-        const dayKey = getDayKey(entry.timestamp);
+    window.entries.forEach(entry => {
+        const dayKey = window.getDayKey(entry.timestamp); // Uses util function
         if (!groupedByDay[dayKey]) {
             groupedByDay[dayKey] = [];
         }
         groupedByDay[dayKey].push(entry);
     });
 
-    // Ordenar los días por fecha (más reciente primero)
-    const sortedDayKeys = Object.keys(groupedByDay).sort((a, b) => new Date(b) - new Date(a));
+    // Sort days from newest to oldest
+    const sortedDayKeys = Object.keys(groupedByDay).sort((a, b) => b.localeCompare(a));
+    
+    // Get today's key to expand it by default
+    const todayKey = window.getDayKey(new Date().toISOString());
 
     const html = `
         <div class="timeline">
@@ -34,18 +138,19 @@ function renderTimeline() {
                 const dayEntries = groupedByDay[dayKey];
                 const firstEntry = dayEntries[0];
                 
-                // Separar recaps de otros eventos
+                // Separate recaps from other events
                 const recaps = dayEntries.filter(e => e.type === 'recap');
-                // Ordenar entradas regulares por hora (más reciente primero)
-                const regularEntries = dayEntries
-                    .filter(e => e.type !== 'recap')
-                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                const regularEntries = dayEntries.filter(e => e.type !== 'recap');
+                
+                // Expand if it's today
+                const isToday = (dayKey === todayKey);
+                const expandedClass = isToday ? 'expanded' : '';
                 
                 return `
                     <div class="day-block">
                         <div class="day-header" onclick="toggleDay('${dayKey}')">
-                            <span>${formatDate(firstEntry.timestamp)}</span>
-                            <span class="chevron expanded" id="chevron-${dayKey}">▼</span>
+                            <span>${window.formatDate(firstEntry.timestamp)}</span>
+                            <span class="chevron ${expandedClass}" id="chevron-${dayKey}">▼</span>
                         </div>
                         
                         ${recaps.map(recap => `
@@ -64,7 +169,7 @@ function renderTimeline() {
                                     ${recap.reflection ? `
                                         <div style="margin-bottom: 16px;">
                                             <strong>Reflection:</strong>
-                                            <div style="margin-top: 8px; line-height: 1.6;">${recap.reflection.replace(/\n/g, '<br>')}</div>
+                                            <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${recap.reflection}</div>
                                         </div>
                                     ` : ''}
                                     
@@ -80,7 +185,7 @@ function renderTimeline() {
                                     ${recap.track ? `
                                         <div style="margin-bottom: 16px;">
                                             <strong>Day's Soundtrack:</strong>
-                                            <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 12px; border: 2px solid #000; background: #f9f9f9;">
+                                            <div class="bso-result" style="display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 12px; border: 2px solid #000; background: #f9f9f9;">
                                                 <img src="${recap.track.artwork}" style="width: 50px; height: 50px; border: 2px solid #000;">
                                                 <div style="flex: 1;">
                                                     <div style="font-weight: bold; font-size: 13px;">${recap.track.name}</div>
@@ -94,66 +199,62 @@ function renderTimeline() {
                             </div>
                         `).join('')}
                         
-                        <div class="day-content expanded" id="day-content-${dayKey}">
+                        <div class="day-content ${expandedClass}" id="day-content-${dayKey}">
                             ${regularEntries.map(entry => {
-                                const heightStyle = entry.isTimedActivity && entry.duration ? `min-height: ${Math.min(150 + entry.duration * 0.5, 300)}px;` : '';
+                                const heightStyle = entry.isTimedActivity && entry.duration ? `min-height: ${Math.max(120, Math.min(150 + entry.duration * 0.5, 300))}px;` : '';
                                 const trackClass = entry.isQuickTrack ? 'track-event' : '';
                                 const spentClass = entry.isSpent ? 'spent-event' : '';
-                                const noteHtml = (entry.note || '').replace(/\n/g, '<br>');
-                                const optionalNoteHtml = (entry.optionalNote || '').replace(/\n/g, '<br>');
+                                const crumbClass = (!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap') ? 'crumb-event' : '';
                                 
+                                const noteContent = entry.note || '';
+                                const optionalNoteContent = entry.optionalNote || '';
+                                const needsReadMore = noteContent.length > 200 || noteContent.split('\n').length > 4;
+                                const needsReadMoreOptional = optionalNoteContent.length > 200 || optionalNoteContent.split('\n').length > 4;
+
                                 return `
-                                <div class="breadcrumb-entry ${entry.isTimedActivity ? 'time-event' : ''} ${trackClass} ${spentClass}" style="${heightStyle}">
+                                <div class="breadcrumb-entry ${entry.isTimedActivity ? 'time-event' : ''} ${trackClass} ${spentClass} ${crumbClass}" style="${heightStyle}">
                                     <button class="mac-button edit-button" onclick="editEntry(${entry.id})">✏️ Edit</button>
                                     
                                     ${entry.isTimedActivity ? 
-                                        `<!-- Time Event -->
-                                        <div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div>
-                                        <div class="activity-label">${entry.activity}</div>
-                                        <div style="font-size: 13px; color: #666; margin-top: 8px;">Duration: ${entry.duration} minutes</div>
-                                        ${entry.optionalNote ? `
-                                            <div class="optional-note" id="note-${entry.id}">${optionalNoteHtml}</div>
-                                            ${entry.optionalNote.length > 200 ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
-                                        ` : ''}` 
-                                    : 
-                                        entry.isQuickTrack ?
-                                        `<!-- Quick Track -->
-                                        <div class="breadcrumb-time">
-                                            <span class="compact-time">⏰ ${formatTime(entry.timestamp)} ${entry.note}</span>
+                                        `<div>
+                                            <div class="breadcrumb-time">⏰ ${window.formatTime(entry.timestamp)} - ${window.calculateEndTime(entry.timestamp, entry.duration)}</div>
+                                            <div class="activity-label">${entry.activity}</div>
+                                            <div style="font-size: 13px; color: #666; margin-top: 8px;">Duration: ${entry.duration} minutes</div>
                                         </div>
                                         ${entry.optionalNote ? `
-                                            <div class="optional-note" id="note-${entry.id}">${optionalNoteHtml}</div>
-                                            ${entry.optionalNote.length > 200 ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
-                                        ` : ''}`
-                                    :
-                                        entry.isSpent ?
-                                        `<!-- Spent Event -->
-                                        <div class="breadcrumb-time">
-                                            ⏰ ${formatTime(entry.timestamp)}
-                                            <span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>
-                                        </div>
-                                        <div class="breadcrumb-note" id="note-${entry.id}">${noteHtml}</div>
-                                        ${entry.note && entry.note.length > 200 ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}`
-                                    :
-                                        `<!-- Crumb Event -->
-                                        <div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)}</div>
-                                        <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
-                                            ${entry.mood ? `<span class="mood-display">${entry.mood.emoji}</span>` : ''}
-                                            <div style="flex: 1;">
-                                                <div class="breadcrumb-note" id="note-${entry.id}">${noteHtml}</div>
-                                                ${entry.note && entry.note.length > 200 ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
-                                            </div>
+                                            <div class="optional-note" id="note-${entry.id}">${entry.optionalNote}</div>
+                                            ${needsReadMoreOptional ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
+                                        ` : ''}` :
+                                        `<div class="breadcrumb-time">
+                                            ${entry.isQuickTrack ?
+                                                `<span class="compact-time">⏰ ${window.formatTime(entry.timestamp)} ${entry.note}</span>` :
+                                                `⏰ ${window.formatTime(entry.timestamp)}`
+                                            }
+                                            ${entry.isSpent ? `<span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>` : ''}
                                         </div>`
                                     }
                                     
-                                    ${!entry.isTimedActivity && !entry.isQuickTrack ? `
-                                        ${entry.weather || entry.location ? `
-                                            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">
-                                                ${entry.weather ? `${entry.weather}` : ''}
-                                                ${entry.weather && entry.location ? ` • 📍 ${entry.location}` : ''}
-                                                ${!entry.weather && entry.location ? `📍 ${entry.location}` : ''}
+                                    ${entry.isQuickTrack && entry.optionalNote ? `
+                                        <div class="optional-note" id="note-${entry.id}">${entry.optionalNote}</div>
+                                        ${needsReadMoreOptional ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
+                                    ` : ''}
+                                    
+                                    ${!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap' ? `
+                                        <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
+                                            ${entry.mood ? `<span class="mood-display">${entry.mood.emoji}</span>` : ''}
+                                            <div style="flex: 1;">
+                                                <div class="breadcrumb-note" id="note-${entry.id}">${entry.note}</div>
+                                                ${needsReadMore ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
                                             </div>
-                                        ` : ''}
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${(entry.weather || entry.location) ? `
+                                        <div class="breadcrumb-meta">
+                                            ${entry.weather ? `<span>${entry.weather}</span>` : ''}
+                                            ${entry.weather && entry.location ? ` • ` : ''}
+                                            ${entry.location ? `<span>📍 ${entry.location}</span>` : ''}
+                                        </div>
                                     ` : ''}
                                     
                                     ${entry.audio ? `
@@ -165,18 +266,14 @@ function renderTimeline() {
                                     ` : ''}
                                     
                                     <div class="breadcrumb-preview">
-                                        ${entry.images && entry.images.length > 0 ? entry.images.map((img, index) => `
-                                            <img src="${img}" class="preview-image-thumb" onclick="event.stopPropagation(); showImageInModal('${entry.id}', ${index});">
+                                        ${entry.images && entry.images.length > 0 ? entry.images.map((img, idx) => `
+                                            <img src="${img}" class="preview-image-thumb" alt="Thumbnail ${idx+1}" onclick="event.stopPropagation(); showImageInModal('${entry.id}', ${idx});">
                                         `).join('') : ''}
                                         ${entry.coords ? `<div class="preview-map-thumb" id="mini-map-${entry.id}"></div>` : ''}
-                                        
-                                        <!-- Botón de preview solo si hay algo que previsualizar (mapa, audio, o imágenes) -->
-                                        ${(entry.images && entry.images.length > 0) || entry.coords || entry.audio ? `
-                                            <button class="mac-button preview-button" onclick="previewEntry(${entry.id})">🔍</button>
-                                        ` : ''}
+                                        <button class="mac-button preview-button" onclick="previewEntry(${entry.id})">🔍 Preview</button>
                                     </div>
                                 </div>
-                            `}).join('')}
+                                `}).join('')}
                         </div>
                     </div>
                 `;
@@ -186,8 +283,8 @@ function renderTimeline() {
 
     container.innerHTML = html;
     
-    // Inicializar mini-mapas después de renderizar el HTML
-    entries.forEach(entry => {
+    // Render mini-maps after HTML is in the DOM
+    window.entries.forEach(entry => {
         if (entry.coords) {
             setTimeout(() => {
                 const mapEl = document.getElementById(`mini-map-${entry.id}`);
@@ -210,84 +307,13 @@ function renderTimeline() {
                         L.marker([entry.coords.lat, entry.coords.lon]).addTo(miniMap);
                         
                         mapEl.style.cursor = 'pointer';
-                        mapEl.onclick = () => previewEntry(entry.id);
+                        mapEl.onclick = () => window.previewEntry(entry.id); // Call global
                     } catch (e) {
                         console.error('Error creating mini map:', e);
+                        mapEl.innerHTML = "Map failed";
                     }
                 }
             }, 100);
         }
     });
-}
-
-// --- Funciones Ayudantes de Renderizado ---
-
-// Alternar "Leer más"
-function toggleReadMore(id) {
-    const noteEl = document.getElementById(`note-${id}`);
-    const btnEl = document.getElementById(`read-more-${id}`);
-    
-    if (noteEl.classList.contains('expanded')) {
-        noteEl.classList.remove('expanded');
-        btnEl.textContent = 'Read more';
-    } else {
-        noteEl.classList.add('expanded');
-        btnEl.textContent = 'Show less';
-    }
-}
-
-// Formatear Fecha
-function formatDate(timestamp) {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString(undefined, { // Usar locale del navegador
-        weekday: 'long',
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric'
-    });
-}
-
-// Formatear Hora
-function formatTime(timestamp) {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString(undefined, { // Usar locale del navegador
-        hour: '2-digit', 
-        minute: '2-digit', 
-        hour12: false 
-    });
-}
-
-// Calcular Hora de Fin
-function calculateEndTime(timestamp, durationMinutes) {
-    const date = new Date(timestamp);
-    date.setMinutes(date.getMinutes() + durationMinutes);
-    return date.toLocaleTimeString(undefined, { // Usar locale del navegador
-        hour: '2-digit', 
-        minute: '2-digit', 
-        hour12: false 
-    });
-}
-
-// Obtener Clave del Día (YYYY-MM-DD)
-function getDayKey(timestamp) {
-    const date = new Date(timestamp);
-    return date.toISOString().split('T')[0];
-}
-
-// Alternar visibilidad del día
-function toggleDay(dayKey) {
-    const content = document.getElementById(`day-content-${dayKey}`);
-    const chevron = document.getElementById(`chevron-${dayKey}`);
-    
-    content.classList.toggle('expanded');
-    chevron.classList.toggle('expanded');
-}
-
-// Alternar visibilidad del recap
-function toggleRecap(recapId) {
-    const content = document.getElementById(`recap-content-${recapId}`);
-    const chevron = document.getElementById(`chevron-recap-${recapId}`);
-    
-    content.classList.toggle('hidden');
-    chevron.classList.toggle('expanded');
 }
