@@ -77,9 +77,19 @@ export function openCrumbForm(entry = null) {
         document.getElementById('weather-input').value = '';
         document.getElementById('image-previews').innerHTML = '';
         document.getElementById('audio-preview').innerHTML = '';
-        document.getElementById('delete-btn-crumb').classList.add('hidden');
-        document.getElementById('save-btn-crumb').textContent = '💾 Save';
-        document.getElementById('mood-config').classList.add('hidden');
+        
+        // --- CAMBIO: Inicio del Arreglo (Bug 1) ---
+        // Añadidas comprobaciones para evitar el error 'Cannot read properties of null'
+        const deleteBtn = document.getElementById('btn-delete-crumb');
+        if (deleteBtn) deleteBtn.classList.add('hidden');
+        
+        const saveBtn = document.getElementById('btn-save-crumb');
+        if (saveBtn) saveBtn.textContent = '💾 Save';
+        
+        const moodConfig = document.getElementById('mood-config');
+        if (moodConfig) moodConfig.classList.add('hidden');
+        // --- CAMBIO: Fin del Arreglo (Bug 1) ---
+
         const mapContainer = document.getElementById('form-map');
         if (mapContainer) {
             mapContainer.style.display = 'none';
@@ -346,14 +356,49 @@ export function initUI(onOfflineCallback) {
     document.getElementById('recap-bso-results').addEventListener('click', (e) => {
         const target = e.target.closest('.bso-result');
         if (target) {
+            // Llama a la función de UI-Renderer
             selectTrackUI(target.dataset);
         }
     });
     
     // --- TIMELINE EVENT DELEGATION ---
     document.getElementById('timeline-container').addEventListener('click', (e) => {
-        const entryEl = e.target.closest('.breadcrumb-entry, .recap-block');
-        if (!entryEl) return; // Clicked on empty space
+        
+        // --- CAMBIO: Inicio del Arreglo (Bug 2) ---
+        // Esta lógica DEBE ir antes que la comprobación de 'entryEl'
+        
+        // Handle Toggle Day
+        const dayHeader = e.target.closest('.day-header');
+        if (dayHeader) {
+            const dayBlock = dayHeader.closest('.day-block');
+            if (dayBlock) {
+                const dayKey = dayBlock.dataset.day;
+                const content = document.getElementById(`day-content-${dayKey}`);
+                const chevron = document.getElementById(`chevron-${dayKey}`);
+                if (content) content.classList.toggle('expanded');
+                if (chevron) chevron.classList.toggle('expanded');
+            }
+            return; // Acción completada
+        }
+
+        // Handle Toggle Recap
+        const recapHeader = e.target.closest('.recap-header');
+        if (recapHeader) {
+            const recapBlock = recapHeader.closest('.recap-block');
+            if (recapBlock) {
+                const content = recapBlock.querySelector('.recap-content');
+                const chevron = recapBlock.querySelector('.chevron-recap');
+                if (content) content.classList.toggle('hidden');
+                if (chevron) chevron.classList.toggle('expanded');
+            }
+            return; // Acción completada
+        }
+        // --- CAMBIO: Fin del Arreglo (Bug 2) ---
+
+
+        // Ahora, comprueba si el clic fue en un crumb
+        const entryEl = e.target.closest('.breadcrumb-entry'); // NOTA: Quitado .recap-block
+        if (!entryEl) return; // Si no fue en un crumb, no hacer nada más
 
         const id = entryEl.dataset.id;
         
@@ -394,25 +439,6 @@ export function initUI(onOfflineCallback) {
                 noteEl.classList.toggle('expanded');
                 e.target.textContent = noteEl.classList.contains('expanded') ? 'Show less' : 'Read more';
             }
-            return;
-        }
-
-        // Handle Toggle Day
-        if (e.target.closest('.day-header')) {
-            const dayKey = e.target.closest('.day-block').dataset.day;
-            const content = document.getElementById(`day-content-${dayKey}`);
-            const chevron = document.getElementById(`chevron-${dayKey}`);
-            if (content) content.classList.toggle('expanded');
-            if (chevron) chevron.classList.toggle('expanded');
-            return;
-        }
-
-        // Handle Toggle Recap
-        if (e.target.closest('.recap-header')) {
-            const content = entryEl.querySelector('.recap-content');
-            const chevron = entryEl.querySelector('.chevron-recap');
-            if (content) content.classList.toggle('hidden');
-            if (chevron) chevron.classList.toggle('expanded');
             return;
         }
     });
