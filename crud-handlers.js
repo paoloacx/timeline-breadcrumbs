@@ -11,11 +11,11 @@ window.saveEntry = function() {
     }
 
     // global vars from app.js
-    const moodData = selectedMood !== null ? window.moods[selectedMood] : null;
+    const moodData = window.selectedMood !== null ? window.moods[window.selectedMood] : null;
     const timestamp = window.getTimestampFromInput('datetime-input'); // global util
 
-    if (editingEntryId) { // global var from app.js
-        const entryIndex = window.entries.findIndex(e => e.id === editingEntryId);
+    if (window.editingEntryId) { // global var from app.js
+        const entryIndex = window.entries.findIndex(e => e.id === window.editingEntryId);
         if (entryIndex !== -1) {
             window.entries[entryIndex] = {
                 ...window.entries[entryIndex], // Keep original ID and type
@@ -23,9 +23,9 @@ window.saveEntry = function() {
                 note: note,
                 location: document.getElementById('location-input').value,
                 weather: document.getElementById('weather-input').value,
-                images: [...currentImages],
-                audio: currentAudio,
-                coords: currentCoords ? { ...currentCoords } : window.entries[entryIndex].coords,
+                images: [...window.currentImages],
+                audio: window.currentAudio,
+                coords: window.currentCoords ? { ...window.currentCoords } : window.entries[entryIndex].coords,
                 mood: moodData,
                 // Ensure other types are false
                 isTimedActivity: false,
@@ -41,15 +41,15 @@ window.saveEntry = function() {
             note: note,
             location: document.getElementById('location-input').value,
             weather: document.getElementById('weather-input').value,
-            images: [...currentImages],
-            audio: currentAudio,
-            coords: currentCoords ? { ...currentCoords } : null,
+            images: [...window.currentImages],
+            audio: window.currentAudio,
+            coords: window.currentCoords ? { ...window.currentCoords } : null,
             mood: moodData
         };
         window.entries.unshift(entry); // global var from app.js
     }
 
-    saveData(); // global function in app.js
+    window.saveData(); // global function in app.js
     window.renderTimeline(); // global function in ui-renderer.js
     window.toggleForm(); // global function in ui-handlers.js
 }
@@ -84,13 +84,13 @@ window.editEntry = function(id) {
     }
 
     // --- Is a standard "Crumb" entry ---
-    editingEntryId = id; // global var from app.js
+    window.editingEntryId = id; // global var from app.js
     document.getElementById('note-input').value = entry.note;
     document.getElementById('location-input').value = entry.location || '';
     document.getElementById('weather-input').value = entry.weather || '';
-    currentImages = [...(entry.images || [])]; // global var
-    currentAudio = entry.audio || null; // global var
-    currentCoords = entry.coords ? { ...entry.coords } : null; // global var
+    window.currentImages = [...(entry.images || [])]; // global var
+    window.currentAudio = entry.audio || null; // global var
+    window.currentCoords = entry.coords ? { ...entry.coords } : null; // global var
 
     // Set datetime
     const date = new Date(entry.timestamp);
@@ -103,9 +103,9 @@ window.editEntry = function(id) {
 
     if (entry.mood) {
         const moodIndex = window.moods.findIndex(m => m.emoji === entry.mood.emoji && m.label === entry.mood.label);
-        selectedMood = moodIndex !== -1 ? moodIndex : null; // global var
+        window.selectedMood = moodIndex !== -1 ? moodIndex : null; // global var
     } else {
-        selectedMood = null; // global var
+        window.selectedMood = null; // global var
     }
 
     window.renderImagePreviews(); // global function in ui-renderer.js
@@ -135,10 +135,10 @@ window.editEntry = function(id) {
  * @param {object} entry - The time event entry object.
  */
 window.editTimeEvent = function(entry) {
-    editingEntryId = entry.id; // global var
+    window.editingEntryId = entry.id; // global var
     
-    selectedDuration = entry.duration; // global var
-    selectedActivity = entry.activity; // global var
+    window.selectedDuration = entry.duration; // global var
+    window.selectedActivity = entry.activity; // global var
     
     // Set datetime
     const date = new Date(entry.timestamp);
@@ -159,19 +159,19 @@ window.editTimeEvent = function(entry) {
     // Select correct options
     document.querySelectorAll('.duration-option').forEach(el => {
         el.classList.remove('selected');
-        if (parseInt(el.dataset.duration) === selectedDuration) {
+        if (parseInt(el.dataset.duration) === window.selectedDuration) {
             el.classList.add('selected');
         }
     });
     
     document.querySelectorAll('#activity-selector .activity-option').forEach(el => {
         el.classList.remove('selected');
-        if (el.dataset.activity === selectedActivity) {
+        if (el.dataset.activity === window.selectedActivity) {
             el.classList.add('selected');
         }
     });
     
-    checkTimerReady(); // global function in app.js
+    window.checkTimerReady(); // global function in app.js
     
     const timerWindow = document.getElementById('timer-window');
     document.getElementById('create-time-btn').textContent = '💾 Update Event';
@@ -192,20 +192,20 @@ window.editTimeEvent = function(entry) {
  */
 window.createTimeEvent = function() {
     // global vars from app.js
-    if (!selectedDuration || !selectedActivity) return;
+    if (!window.selectedDuration || !window.selectedActivity) return;
     
     const timestamp = window.getTimestampFromInput('datetime-input-time'); // global util
     const optionalNote = document.getElementById('time-optional-note').value.trim();
     
-    if (editingEntryId) { // global var
-        const entryIndex = window.entries.findIndex(e => e.id === editingEntryId);
+    if (window.editingEntryId) { // global var
+        const entryIndex = window.entries.findIndex(e => e.id === window.editingEntryId);
         if (entryIndex !== -1) {
             window.entries[entryIndex] = {
                 ...window.entries[entryIndex],
                 timestamp: timestamp,
-                note: `${selectedActivity} - ${selectedDuration} minutes`,
-                activity: selectedActivity,
-                duration: selectedDuration,
+                note: `${window.selectedActivity} - ${window.selectedDuration} minutes`,
+                activity: window.selectedActivity,
+                duration: window.selectedDuration,
                 optionalNote: optionalNote,
                 isTimedActivity: true,
                 // Clear other types
@@ -220,15 +220,15 @@ window.createTimeEvent = function() {
         const entry = {
             id: Date.now(),
             timestamp: timestamp,
-            note: `${selectedActivity} - ${selectedDuration} minutes`,
+            note: `${window.selectedActivity} - ${window.selectedDuration} minutes`,
             location: '',
             weather: '',
             images: [],
             audio: null,
             coords: null,
             mood: null,
-            activity: selectedActivity,
-            duration: selectedDuration,
+            activity: window.selectedActivity,
+            duration: window.selectedDuration,
             isTimedActivity: true,
             optionalNote: optionalNote
         };
@@ -237,13 +237,13 @@ window.createTimeEvent = function() {
         alert(`✅ Time event created!`);
     }
     
-    saveData(); // global function in app.js
+    window.saveData(); // global function in app.js
     window.renderTimeline(); // global function in ui-renderer.js
     
     window.toggleTimer(); // global function in ui-handlers.js
     
     // Reset form state
-    editingEntryId = null; // global var
+    window.editingEntryId = null; // global var
     document.getElementById('create-time-btn').textContent = 'Create Event';
     document.getElementById('delete-time-btn').classList.add('hidden');
     document.getElementById('time-optional-note').value = '';
@@ -254,8 +254,8 @@ window.createTimeEvent = function() {
  * @param {object} entry - The track event entry object.
  */
 window.editTrackEvent = function(entry) {
-    editingEntryId = entry.id; // global var
-    selectedTrackItem = entry.note; // global var
+    window.editingEntryId = entry.id; // global var
+    window.selectedTrackItem = entry.note; // global var
     
     // Set datetime
     const date = new Date(entry.timestamp);
@@ -275,7 +275,7 @@ window.editTrackEvent = function(entry) {
     
     // Select correct option
     document.querySelectorAll('#track-selector .activity-option').forEach(el => {
-        if (el.dataset.item === selectedTrackItem) {
+        if (el.dataset.item === window.selectedTrackItem) {
             el.classList.add('selected');
         }
     });
@@ -299,18 +299,18 @@ window.editTrackEvent = function(entry) {
  * Saves or updates a "Track" event.
  */
 window.saveTrackEvent = function() {
-    if (!selectedTrackItem) return; // global var
+    if (!window.selectedTrackItem) return; // global var
     
     const timestamp = window.getTimestampFromInput('datetime-input-track'); // global util
     const optionalNote = document.getElementById('track-optional-note').value.trim();
     
-    if (editingEntryId) { // global var
-        const entryIndex = window.entries.findIndex(e => e.id === editingEntryId);
+    if (window.editingEntryId) { // global var
+        const entryIndex = window.entries.findIndex(e => e.id === window.editingEntryId);
         if (entryIndex !== -1) {
             window.entries[entryIndex] = {
                 ...window.entries[entryIndex],
                 timestamp: timestamp,
-                note: selectedTrackItem,
+                note: window.selectedTrackItem,
                 optionalNote: optionalNote,
                 isQuickTrack: true,
                 // Clear other types
@@ -320,12 +320,12 @@ window.saveTrackEvent = function() {
                 mood: null
             };
         }
-        alert(`✅ Track updated: ${selectedTrackItem}`);
+        alert(`✅ Track updated: ${window.selectedTrackItem}`);
     } else {
         const entry = {
             id: Date.now(),
             timestamp: timestamp,
-            note: selectedTrackItem,
+            note: window.selectedTrackItem,
             location: '',
             weather: '',
             images: [],
@@ -337,15 +337,15 @@ window.saveTrackEvent = function() {
         };
         
         window.entries.unshift(entry); // global var
-        alert(`✅ Tracked: ${selectedTrackItem}`);
+        alert(`✅ Tracked: ${window.selectedTrackItem}`);
     }
     
-    saveData(); // global function in app.js
+    window.saveData(); // global function in app.js
     window.renderTimeline(); // global function in ui-renderer.js
     window.toggleTrack(); // global function in ui-handlers.js
     
     // Reset form state
-    editingEntryId = null; // global var
+    window.editingEntryId = null; // global var
     document.getElementById('save-track-btn').textContent = 'Save Track';
     document.getElementById('delete-track-btn').classList.add('hidden');
 }
@@ -355,7 +355,7 @@ window.saveTrackEvent = function() {
  * @param {object} entry - The spent event entry object.
  */
 window.editSpentEvent = function(entry) {
-    editingEntryId = entry.id; // global var
+    window.editingEntryId = entry.id; // global var
     
     document.getElementById('spent-description').value = entry.note;
     document.getElementById('spent-amount').value = entry.spentAmount;
@@ -401,8 +401,8 @@ window.saveSpent = function() {
 
     const timestamp = window.getTimestampFromInput('datetime-input-spent'); // global util
 
-    if (editingEntryId) { // global var
-        const entryIndex = window.entries.findIndex(e => e.id === editingEntryId);
+    if (window.editingEntryId) { // global var
+        const entryIndex = window.entries.findIndex(e => e.id === window.editingEntryId);
         if (entryIndex !== -1) {
             window.entries[entryIndex] = {
                 ...window.entries[entryIndex],
@@ -437,12 +437,12 @@ window.saveSpent = function() {
         alert(`✅ Spent tracked: €${amount.toFixed(2)}`);
     }
     
-    saveData(); // global function in app.js
+    window.saveData(); // global function in app.js
     window.renderTimeline(); // global function in ui-renderer.js
     window.toggleSpent(); // global function in ui-handlers.js
 
     // Reset form state
-    editingEntryId = null; // global var
+    window.editingEntryId = null; // global var
     document.getElementById('delete-spent-btn').classList.add('hidden');
 }
 
@@ -451,7 +451,7 @@ window.saveSpent = function() {
  * @param {object} entry - The recap event entry object.
  */
 window.editRecapEvent = function(entry) {
-    editingEntryId = entry.id; // global var
+    window.editingEntryId = entry.id; // global var
     
     // Show the correct form
     document.getElementById('form-window').classList.add('hidden');
@@ -510,7 +510,7 @@ window.saveRecap = function() {
     }
     
     const recapEntry = {
-        id: editingEntryId || Date.now(), // global var
+        id: window.editingEntryId || Date.now(), // global var
         timestamp: timestamp,
         type: 'recap',
         reflection: reflection,
@@ -525,8 +525,8 @@ window.saveRecap = function() {
         mood: null
     };
 
-    if (editingEntryId) { // global var
-        const entryIndex = window.entries.findIndex(e => e.id === editingEntryId);
+    if (window.editingEntryId) { // global var
+        const entryIndex = window.entries.findIndex(e => e.id === window.editingEntryId);
         if (entryIndex !== -1) {
             window.entries[entryIndex] = recapEntry;
         }
@@ -536,9 +536,9 @@ window.saveRecap = function() {
         alert('🌟 Recap saved!');
     }
     
-    editingEntryId = null; // global var
+    window.editingEntryId = null; // global var
     
-    saveData(); // global function in app.js
+    window.saveData(); // global function in app.js
     window.renderTimeline(); // global function in ui-renderer.js
     window.closeRecapForm(); // global function in ui-handlers.js
 }
@@ -547,7 +547,7 @@ window.saveRecap = function() {
  * Deletes the entry currently being edited (from any form).
  */
 window.deleteCurrentEntry = function() {
-    if (!editingEntryId) return; // global var
+    if (!window.editingEntryId) return; // global var
     
     // Determine which form is active to close it
     let formIdToDelete = null;
@@ -558,14 +558,14 @@ window.deleteCurrentEntry = function() {
     else if (!document.getElementById('recap-form').classList.contains('hidden')) formIdToDelete = 'recap-form';
     
     if (confirm('Delete this entry?')) {
-        window.entries = window.entries.filter(e => e.id !== editingEntryId); // global var
+        window.entries = window.entries.filter(e => e.id !== window.editingEntryId); // global var
         
         // Firebase deletion (from firebase-config.js)
         if (window.currentUser && !window.isOfflineMode) {
-            window.deleteEntryFromFirebase(editingEntryId); 
+            window.deleteEntryFromFirebase(window.editingEntryId); 
         }
         
-        saveData(); // global function in app.js
+        window.saveData(); // global function in app.js
         window.renderTimeline(); // global function in ui-renderer.js
         
         // Close the active form
@@ -573,6 +573,6 @@ window.deleteCurrentEntry = function() {
             document.getElementById(formIdToDelete).classList.add('hidden');
         }
         
-        editingEntryId = null; // global var
+        window.editingEntryId = null; // global var
     }
 }
