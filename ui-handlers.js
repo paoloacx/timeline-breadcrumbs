@@ -1,14 +1,15 @@
 // ===== ui-handlers.js (Event Listeners & UI Logic) =====
 
 // Imports
-import { getState, setEditingId, setSelectedMood, setSelectedDuration, setSelectedActivity, setSelectedTrackItem, clearFormState, clearTimerState, clearTrackState, clearSpentState, clearRecapState, setOfflineMode } from './state.js';
-import { handleSaveCrumb, handleSaveTime, handleSaveTrack, handleSaveSpent, handleSaveRecap, handleDeleteEntry } from './crud-handlers.js';
+import { getState, setEditingId, setSelectedMood, setSelectedDuration, setSelectedActivity, setSelectedTrackItem, clearFormState, clearTimerState, clearTrackState, clearSpentState, clearRecapState } from './state.js';
+import { handleSaveCrumb, handleSaveTime, handleSaveTrack, handleSaveSpent, handleSaveRecap, handleDeleteEntry, handleEditEntry, handlePreviewEntry } from './crud-handlers.js';
 import { handleGps, handleSearchBSO } from './api-services.js';
-import { handleImageInput, startRecording, stopRecording } from './media-handlers.js';
-import { openStats, exportCSV, exportICS } from './data-tools.js';
-import { openSettings, toggleMoodConfig, saveSettings } from './settings-manager.js';
-import { renderMoodSelector, renderImagePreviews, renderAudioPreview, removeImagePreview, removeAudioPreview } from './ui-renderer.js';
+import { handleImageInput, startRecording, stopRecording, removeImage, removeAudio } from './media-handlers.js';
+import { openStats, exportCSV, exportICS, openExportModal, performExport } from './data-tools.js';
+import { openSettings, toggleMoodConfig, saveSettings, updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from './settings-manager.js';
+import { renderMoodSelector, renderImagePreviews, renderAudioPreview, selectTrackUI } from './ui-renderer.js';
 import { setCurrentDateTime } from './utils.js';
+import { signInWithGoogle, signInWithEmail, signOutUser } from './firebase-config.js';
 
 // --- Modal Management ---
 
@@ -34,51 +35,122 @@ export function closeModal(modalId) {
     }
 }
 
+// --- Auth/Main App UI ---
+
+/**
+ * Shows the main app UI and hides the auth panel.
+ * @param {object|null} user - The Firebase user object, or null for offline.
+ */
+export function showMainApp(user) {
+    document.getElementById('auth-container').style.display = 'none';
+    document.getElementById('main-app').style.display = 'block';
+    
+    if (user) {
+        const email = user.email;
+        document.getElementById('user-icon').textContent = '👤';
+        document.getElementById('user-email-full').textContent = email;
+        document.getElementById('btn-user-avatar').style.display = 'block';
+    } else {
+        document.getElementById('btn-user-avatar').style.display = 'none';
+    }
+}
+
+/**
+ * Toggles the visibility of the user logout menu.
+ * @param {Event} e - The click event.
+ */
+export function toggleUserMenu(e) {
+    e.stopPropagation();
+    const menu = document.getElementById('logout-menu');
+    menu.classList.toggle('show');
+}
+
 // --- Form Toggle Functions (now open modals) ---
 
-function openCrumbForm(entry = null) {
+export function openCrumbForm(entry = null) {
     if (entry) {
-        setEditingId(entry.id);
-        // (La lógica de rellenar el formulario se moverá a crud-handlers.js 'handleEditEntry')
+        handleEditEntry(entry); // Rellena el formulario
     } else {
         clearFormState();
-        // (La lógica de limpiar el formulario se moverá a crud-handlers.js 'handleNewEntry')
+        document.getElementById('note-input').value = '';
+        document.getElementById('location-input').value = '';
+        document.getElementById('weather-input').value = '';
+        document.getElementById('image-previews').innerHTML = '';
+        document.getElementById('audio-preview').innerHTML = '';
+        document.getElementById('delete-btn-crumb').classList.add('hidden');
+        document.getElementById('save-btn-crumb').textContent = '💾 Save';
+        document.getElementById('mood-config').classList.add('hidden');
+        const mapContainer = document.getElementById('form-map');
+        if (mapContainer) {
+            mapContainer.style.display = 'none';
+            mapContainer.innerHTML = '';
+        }
+        renderMoodSelector();
+        setCurrentDateTime('datetime-input');
     }
-    // (temporalmente, la lógica de limpiar/rellenar sigue en crud-handlers)
-    setCurrentDateTime('datetime-input');
-    renderMoodSelector();
     openModal('crumb-modal');
 }
 
-function openTimerForm(entry = null) {
-    if (!entry) {
+export function openTimerForm(entry = null) {
+    if (entry) {
+        handleEditEntry(entry); // Rellena el formulario
+    } else {
         clearTimerState();
+        document.getElementById('time-optional-note').value = '';
+        document.getElementById('btn-save-time').textContent = 'Create Event';
+        document.getElementById('btn-delete-time').classList.add('hidden');
+        updateTimerOptions(); // Re-renderiza para limpiar selección
+        checkTimerReady();
+        setCurrentDateTime('datetime-input-time');
     }
-    setCurrentDateTime('datetime-input-time');
     openModal('timer-modal');
 }
 
-function openTrackForm(entry = null) {
-    if (!entry) {
+export function openTrackForm(entry = null) {
+    if (entry) {
+        handleEditEntry(entry); // Rellena el formulario
+    } else {
         clearTrackState();
+        document.getElementById('track-optional-note').value = '';
+        document.getElementById('btn-save-track').textContent = 'Save Track';
+        document.getElementById('btn-delete-track').classList.add('hidden');
+        updateTrackOptions(); // Re-renderiza para limpiar selección
+        checkTrackReady();
+        setCurrentDateTime('datetime-input-track');
     }
-    setCurrentDateTime('datetime-input-track');
     openModal('track-modal');
 }
 
-function openSpentForm(entry = null) {
-    if (!entry) {
+export function openSpentForm(entry = null) {
+    if (entry) {
+        handleEditEntry(entry); // Rellena el formulario
+    } else {
         clearSpentState();
+        document.getElementById('spent-description').value = '';
+        document.getElementById('spent-amount').value = '';
+        document.getElementById('btn-delete-spent').classList.add('hidden');
+        setCurrentDateTime('datetime-input-spent');
     }
-    setCurrentDateTime('datetime-input-spent');
     openModal('spent-modal');
 }
 
-function openRecapForm(entry = null) {
-    if (!entry) {
+export function openRecapForm(entry = null) {
+    if (entry) {
+        handleEditEntry(entry); // Rellena el formulario
+    } else {
         clearRecapState();
+        document.getElementById('recap-reflection').value = '';
+        document.getElementById('recap-rating').value = '5';
+        document.getElementById('recap-rating-value').textContent = '5';
+        document.getElementById('recap-highlight-1').value = '';
+        document.getElementById('recap-highlight-2').value = '';
+        document.getElementById('recap-highlight-3').value = '';
+        document.getElementById('recap-bso').value = '';
+        document.getElementById('recap-bso-results').innerHTML = '';
+        document.getElementById('recap-selected-track').value = '';
+        document.getElementById('btn-delete-recap').classList.add('hidden');
+        setCurrentDateTime('datetime-input-recap');
     }
-    setCurrentDateTime('datetime-input-recap');
     openModal('recap-modal');
 }
 
@@ -121,20 +193,24 @@ function closeFabMenu() {
 /**
  * Attaches all persistent event listeners to the DOM.
  */
-export function initUI() {
+export function initUI(onOfflineCallback) {
     
     // --- Auth Buttons ---
-    document.getElementById('btn-signin-google').addEventListener('click', window.signInWithGoogle); // Still global for now
-    document.getElementById('btn-signin-email').addEventListener('click', window.signInWithEmail); // Still global for now
-    document.getElementById('btn-continue-offline').addEventListener('click', () => {
-        setOfflineMode(true);
-        window.continueOffline(); // Still global for now
-    });
+    document.getElementById('btn-signin-google').addEventListener('click', signInWithGoogle);
+    document.getElementById('btn-signin-email').addEventListener('click', signInWithEmail);
+    document.getElementById('btn-continue-offline').addEventListener('click', onOfflineCallback);
 
     // --- Header / User Menu ---
-    document.getElementById('btn-sync').addEventListener('click', () => location.reload()); // Simple reload
-    document.getElementById('btn-user-avatar').addEventListener('click', (e) => window.toggleUserMenu(e)); // Still global
-    document.getElementById('btn-signout').addEventListener('click', () => window.signOutUser()); // Still global
+    document.getElementById('btn-sync').addEventListener('click', () => location.reload());
+    document.getElementById('btn-user-avatar').addEventListener('click', (e) => toggleUserMenu(e));
+    document.getElementById('btn-signout').addEventListener('click', signOutUser);
+    // Close user menu on outside click
+    document.addEventListener('click', (e) => {
+        const menu = document.getElementById('logout-menu');
+        if (menu && !e.target.closest('#btn-user-avatar')) {
+            menu.classList.remove('show');
+        }
+    });
 
     // --- Top Action Buttons ---
     document.getElementById('btn-toggle-crumb').addEventListener('click', () => openCrumbForm());
@@ -144,8 +220,8 @@ export function initUI() {
 
     // --- Footer Buttons ---
     document.getElementById('btn-open-stats').addEventListener('click', openStats);
-    document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
-    document.getElementById('btn-export-ics').addEventListener('click', exportICS);
+    document.getElementById('btn-export-csv').addEventListener('click', () => openExportModal('csv'));
+    document.getElementById('btn-export-ics').addEventListener('click', () => openExportModal('ics'));
     document.getElementById('btn-open-settings').addEventListener('click', openSettings);
 
     // --- FAB Menu ---
@@ -168,7 +244,7 @@ export function initUI() {
     // Backdrop click to close
     document.querySelectorAll('.preview-modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
-            if (e.target.id === modal.id) {
+            if (e.target.classList.contains('preview-modal')) {
                 closeModal(modal.id);
             }
         });
@@ -206,6 +282,9 @@ export function initUI() {
     // --- Settings Modal ---
     document.getElementById('btn-save-settings').addEventListener('click', saveSettings);
     
+    // --- Export Modal ---
+    document.getElementById('btn-perform-export').addEventListener('click', performExport);
+
     // --- EVENT DELEGATION for dynamic content ---
     
     // Mood Selector
@@ -222,7 +301,8 @@ export function initUI() {
         const target = e.target.closest('.duration-option');
         if (target && target.dataset.duration) {
             setSelectedDuration(parseInt(target.dataset.duration, 10));
-            // (La lógica de re-renderizar está en settings-manager)
+            updateTimerOptions(); // Re-render
+            checkTimerReady();
         }
     });
 
@@ -231,7 +311,8 @@ export function initUI() {
         const target = e.target.closest('.activity-option');
         if (target && target.dataset.activity) {
             setSelectedActivity(target.dataset.activity);
-            // (La lógica de re-renderizar está en settings-manager)
+            updateTimerOptions(); // Re-render
+            checkTimerReady();
         }
     });
     
@@ -240,7 +321,8 @@ export function initUI() {
         const target = e.target.closest('.activity-option');
         if (target && target.dataset.item) {
             setSelectedTrackItem(target.dataset.item);
-            // (La lógica de re-renderizar está en settings-manager)
+            updateTrackOptions(); // Re-render
+            checkTrackReady();
         }
     });
 
@@ -248,7 +330,7 @@ export function initUI() {
     document.getElementById('image-previews').addEventListener('click', (e) => {
         const target = e.target.closest('.image-remove');
         if (target && target.dataset.index) {
-            removeImagePreview(parseInt(target.dataset.index, 10));
+            removeImage(parseInt(target.dataset.index, 10));
         }
     });
 
@@ -256,7 +338,7 @@ export function initUI() {
     document.getElementById('audio-preview').addEventListener('click', (e) => {
         const target = e.target.closest('.audio-remove');
         if (target) {
-            removeAudioPreview();
+            removeAudio();
         }
     });
 
@@ -264,20 +346,74 @@ export function initUI() {
     document.getElementById('recap-bso-results').addEventListener('click', (e) => {
         const target = e.target.closest('.bso-result');
         if (target) {
-            // (La lógica de seleccionar la pista se moverá a api-services)
-            window.selectTrack(target.dataset.name, target.dataset.artist, target.dataset.url, target.dataset.artwork);
+            selectTrackUI(target.dataset);
         }
     });
     
-    // Timeline Container (Edit, Preview, Toggle Read More, etc.)
+    // --- TIMELINE EVENT DELEGATION ---
     document.getElementById('timeline-container').addEventListener('click', (e) => {
-        const target = e.target;
+        const entryEl = e.target.closest('.breadcrumb-entry, .recap-block');
+        if (!entryEl) return; // Clicked on empty space
+
+        const id = entryEl.dataset.id;
         
-        // (Toda la lógica de edit/preview/etc se moverá aquí)
+        // Handle Edit
+        if (e.target.closest('.btn-edit')) {
+            e.stopPropagation();
+            handleEditEntry(id);
+            return;
+        }
         
-        // if (target.closest('.btn-edit')) { ... }
-        // if (target.closest('.btn-preview')) { ... }
-        // if (target.closest('.read-more-btn')) { ... }
-        // if (target.closest('.day-header')) { ... }
+        // Handle Preview
+        if (e.target.closest('.btn-preview')) {
+            e.stopPropagation();
+            handlePreviewEntry(id);
+            return;
+        }
+
+        // Handle Image Click
+        if (e.target.closest('.preview-image-thumb')) {
+            e.stopPropagation();
+            const imageIndex = e.target.dataset.index;
+            handlePreviewEntry(id, imageIndex); // Preview specific image
+            return;
+        }
+
+        // Handle Map Click
+        if (e.target.closest('.preview-map-thumb')) {
+            e.stopPropagation();
+            handlePreviewEntry(id);
+            return;
+        }
+        
+        // Handle Read More
+        if (e.target.closest('.read-more-btn')) {
+            e.stopPropagation();
+            const noteEl = entryEl.querySelector('.breadcrumb-note, .optional-note');
+            if (noteEl) {
+                noteEl.classList.toggle('expanded');
+                e.target.textContent = noteEl.classList.contains('expanded') ? 'Show less' : 'Read more';
+            }
+            return;
+        }
+
+        // Handle Toggle Day
+        if (e.target.closest('.day-header')) {
+            const dayKey = e.target.closest('.day-block').dataset.day;
+            const content = document.getElementById(`day-content-${dayKey}`);
+            const chevron = document.getElementById(`chevron-${dayKey}`);
+            if (content) content.classList.toggle('expanded');
+            if (chevron) chevron.classList.toggle('expanded');
+            return;
+        }
+
+        // Handle Toggle Recap
+        if (e.target.closest('.recap-header')) {
+            const content = entryEl.querySelector('.recap-content');
+            const chevron = entryEl.querySelector('.chevron-recap');
+            if (content) content.classList.toggle('hidden');
+            if (chevron) chevron.classList.toggle('expanded');
+            return;
+        }
     });
 }
