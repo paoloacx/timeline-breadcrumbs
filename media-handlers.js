@@ -1,8 +1,10 @@
-// Este archivo maneja la lógica para capturar,
-// procesar y previsualizar imágenes y audio.
+// ===== MEDIA HANDLING FUNCTIONS =====
 
-// Image handling
-function handleImages(event) {
+/**
+ * Handles image file input, resizes images, and adds to 'currentImages'.
+ * @param {Event} event - The file input change event.
+ */
+window.handleImages = function(event) {
     const files = Array.from(event.target.files);
     
     files.forEach(file => {
@@ -31,8 +33,8 @@ function handleImages(event) {
                 
                 const resizedImage = canvas.toDataURL('image/jpeg', 0.8);
                 
-                currentImages.push(resizedImage);
-                renderImagePreviews();
+                currentImages.push(resizedImage); // global var from app.js
+                window.renderImagePreviews(); // global function in ui-renderer.js
             };
             img.src = e.target.result;
         };
@@ -40,8 +42,10 @@ function handleImages(event) {
     });
 }
 
-// Audio recording - iOS compatible
-async function startRecording() {
+/**
+ * Starts audio recording.
+ */
+window.startRecording = async function() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
             audio: {
@@ -51,7 +55,7 @@ async function startRecording() {
             } 
         });
         
-        // Detectar formato compatible con iOS
+        // Detect compatible format (for iOS)
         let options = {};
         if (MediaRecorder.isTypeSupported('audio/mp4')) {
             options = { mimeType: 'audio/mp4' };
@@ -61,8 +65,8 @@ async function startRecording() {
             options = { mimeType: 'audio/ogg' };
         }
         
-        mediaRecorder = new MediaRecorder(stream, options);
-        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream, options); // global var from app.js
+        audioChunks = []; // global var from app.js
 
         mediaRecorder.ondataavailable = (event) => {
             audioChunks.push(event.data);
@@ -73,8 +77,8 @@ async function startRecording() {
             const audioBlob = new Blob(audioChunks, { type: mimeType });
             const reader = new FileReader();
             reader.onloadend = () => {
-                currentAudio = reader.result;
-                renderAudioPreview();
+                currentAudio = reader.result; // global var from app.js
+                window.renderAudioPreview(); // global function in ui-renderer.js
             };
             reader.readAsDataURL(audioBlob);
             
@@ -91,8 +95,11 @@ async function startRecording() {
     }
 }
 
-function stopRecording() {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+/**
+ * Stops audio recording.
+ */
+window.stopRecording = function() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') { // global var from app.js
         mediaRecorder.stop();
         document.getElementById('record-btn').disabled = false;
         document.getElementById('stop-record-btn').disabled = true;
@@ -100,38 +107,19 @@ function stopRecording() {
     }
 }
 
-function renderImagePreviews() {
-    const container = document.getElementById('image-previews');
-    container.innerHTML = currentImages.map((img, idx) => `
-        <div class="image-preview">
-            <img src="${img}" alt="">
-            <div class="image-remove" onclick="removeImage(${idx})">✕</div>
-        </div>
-    `).join('');
+/**
+ * Removes an image from the 'currentImages' array.
+ * @param {number} index - The index of the image to remove.
+ */
+window.removeImage = function(index) {
+    currentImages.splice(index, 1); // global var from app.js
+    window.renderImagePreviews(); // global function in ui-renderer.js
 }
 
-function renderAudioPreview() {
-    const container = document.getElementById('audio-preview');
-    if (currentAudio) {
-        container.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
-                <audio controls style="flex: 1;">
-                    <source src="${currentAudio}" type="audio/webm">
-                </audio>
-                <button class="mac-button" onclick="removeAudio()" style="padding: 4px 8px;">✕</button>
-            </div>
-        `;
-    } else {
-        container.innerHTML = '';
-    }
-}
-
-function removeImage(index) {
-    currentImages.splice(index, 1);
-    renderImagePreviews();
-}
-
-function removeAudio() {
-    currentAudio = null;
-    renderAudioPreview();
+/**
+ * Removes the current audio recording.
+ */
+window.removeAudio = function() {
+    currentAudio = null; // global var from app.js
+    window.renderAudioPreview(); // global function in ui-renderer.js
 }
