@@ -118,7 +118,7 @@
     
     <div id="recap-modal" class="preview-modal form-modal">
         <div class="preview-content" onclick="event.stopPropagation()">
-            <div id="recap-form" class="mac-window">
+            <div class="mac-window" style="border: none; box-shadow: none; margin: 0;">
                 <div class="mac-title-bar">
                     <span>🌟 Day Recap</span>
                     <button id="btn-close-recap" class="btn-modal-close">✕</button>
@@ -156,7 +156,7 @@
 
     <div id="crumb-modal" class="preview-modal form-modal">
         <div class="preview-content" onclick="event.stopPropagation()">
-            <div id="form-window" class="mac-window">
+            <div class="mac-window" style="border: none; box-shadow: none; margin: 0;">
                 <div class="mac-title-bar">
                     <span>New Entry</span>
                     <button id="btn-close-crumb" class="btn-modal-close">✕</button>
@@ -197,7 +197,7 @@
 
     <div id="timer-modal" class="preview-modal form-modal">
         <div class="preview-content" onclick="event.stopPropagation()">
-            <div id="timer-window" class="mac-window">
+            <div class="mac-window" style="border: none; box-shadow: none; margin: 0;">
                 <div class="mac-title-bar">
                     <span>Time Event</span>
                     <button id="btn-close-timer" class="btn-modal-close">✕</button>
@@ -221,7 +221,7 @@
 
     <div id="track-modal" class="preview-modal form-modal">
         <div class="preview-content" onclick="event.stopPropagation()">
-            <div id="track-window" class="mac-window">
+            <div class="mac-window" style="border: none; box-shadow: none; margin: 0;">
                 <div class="mac-title-bar">
                     <span>Quick Track</span>
                     <button id="btn-close-track" class="btn-modal-close">✕</button>
@@ -243,7 +243,7 @@
 
     <div id="spent-modal" class="preview-modal form-modal">
         <div class="preview-content" onclick="event.stopPropagation()">
-            <div id="spent-window" class="mac-window">
+            <div class="mac-window" style="border: none; box-shadow: none; margin: 0;">
                 <div class="mac-title-bar">
                     <span>Spent</span>
                     <button id="btn-close-spent" class="btn-modal-close">✕</button>
@@ -308,6 +308,45 @@
         </div>
     </div>
     
+    <div id="export-modal" class="preview-modal">
+        <div class="preview-content" onclick="event.stopPropagation()">
+            <div class="mac-title-bar">
+                <span>Export Data</span>
+                <button id="btn-close-export" class="btn-modal-close">✕</button>
+            </div>
+            <div class="mac-content">
+                <h3 id="export-title" style="margin-bottom: 16px;">Export as CSV</h3>
+                
+                <label class="mac-label">Date Range:</label>
+                <select id="export-range" class="mac-input" style="margin-bottom: 16px;">
+                    <option value="all">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="7days">Last 7 Days</option>
+                    <option value="30days">Last 30 Days</option>
+                    <option value="current_month">This Month</option>
+                </select>
+
+                <label class="mac-label">Entry Types:</label>
+                <div id="export-types" class="export-types-grid">
+                    </div>
+
+                <div id="ics-options" class="hidden" style="margin-top: 16px;">
+                    <label class="mac-label">iCal Format:</label>
+                    <div class="mac-radio-wrapper">
+                        <input type="radio" id="ics-separate" name="ics-format" value="separate" checked>
+                        <label for="ics-separate">Separate events (default)</label>
+                    </div>
+                    <div class="mac-radio-wrapper">
+                        <input type="radio" id="ics-single" name="ics-format" value="single">
+                        <label for="ics-single">Single all-day event (per day)</label>
+                    </div>
+                </div>
+
+                <button class="mac-button mac-button-primary" id="btn-perform-export" style="width: 100%; margin-top: 24px;">💾 Export</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="app.js"></script>
 
 </body>
