@@ -23,9 +23,6 @@
         <img class="header-image" src="./header.png" alt="Breadcrumbs Timeline Header">
     </div>
     
-    <!-- CAMBIO: Div sync-status eliminado -->
-    <!-- <div class="sync-status" id="sync-status">● Offline</div> -->
-
     <div id="auth-container" class="auth-panel">
         <div style="text-align: center; margin-bottom: 20px;">
             <h2 style="font-size: 20px;">Breadcrumbs Timeline</h2>
@@ -51,7 +48,6 @@
 
     <div class="container" id="main-app" style="display: none;">
         
-    <!-- Recap Form -->
     <div id="recap-form" class="mac-window hidden">
         <div class="mac-title-bar">
             <span>🌟 Day Recap</span>
@@ -67,7 +63,7 @@
             <label class="mac-label">Valoración del día (1-10)</label>
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
                 <input type="range" id="recap-rating" min="1" max="10" value="5" 
-                    style="flex: 1; height: 8px; border: 2px inset #999; background: #ddd;">
+                       style="flex: 1; height: 8px; border: 2px inset #999; background: #ddd;">
                 <span id="recap-rating-value" style="font-size: 24px; font-weight: bold; min-width: 40px;">5</span>
             </div>
             
@@ -87,9 +83,7 @@
             <div style="margin-top: 16px;">
                 <button class="mac-button mac-button-primary" onclick="window.saveRecap()">💾 Save Recap</button>
                 <button class="mac-button" onclick="window.closeRecapForm()">Cancel</button>
-                <!-- Botón Delete para Recap (opcional, necesita window.deleteCurrentEntry en app.js) -->
-                <!-- <button class="mac-button delete-button hidden" onclick="window.deleteCurrentEntry()" id="delete-recap-btn">🗑️ Delete</button> -->
-            </div>
+                </div>
         </div>
     </div>
 
@@ -127,12 +121,10 @@
                 </label>
                 
                 <div id="mood-config" class="config-panel hidden">
-                    <!-- Contenido renderizado por settings-manager.js -->
-                </div>
+                    </div>
 
                 <div class="mood-selector" id="mood-selector">
-                    <!-- Contenido renderizado por app.js -->
-                </div>
+                    </div>
 
                 <label class="mac-label">Note:</label>
                 <textarea class="mac-textarea" id="note-input" placeholder="What's happening?"></textarea>
@@ -170,13 +162,11 @@
 
                 <label class="mac-label">Duration:</label>
                 <div class="duration-selector" id="duration-selector">
-                    <!-- Contenido renderizado por settings-manager.js -->
-                </div>
+                    </div>
 
                 <label class="mac-label">Activity:</label>
                 <div class="activity-selector" id="activity-selector">
-                     <!-- Contenido renderizado por settings-manager.js -->
-                </div>
+                         </div>
 
                 <label class="mac-label">Optional Note:</label>
                 <input type="text" class="mac-input" id="time-optional-note" placeholder="Add a short note (optional)">
@@ -195,8 +185,7 @@
 
                 <label class="mac-label">Select Track Type:</label>
                 <div class="activity-selector" id="track-selector">
-                     <!-- Contenido renderizado por settings-manager.js -->
-                </div>
+                         </div>
 
                 <label class="mac-label">Optional Note:</label>
                 <input type="text" class="mac-input" id="track-optional-note" placeholder="Add a short note (optional)">
@@ -229,8 +218,7 @@
         </div>
 
         <div id="timeline-container">
-             <!-- Contenido renderizado por app.js (renderTimeline) -->
-        </div>
+             </div>
 
         <div class="mac-window hidden" id="empty-state">
             <div class="mac-content empty-state">
@@ -268,9 +256,7 @@
                 <div id="track-items-config"></div>
 
                 <h3 style="margin-top: 24px; margin-bottom: 16px;">Moods</h3>
-                <div id="mood-config-list"></div> <!-- Moved from form-window -->
-
-                <button class="mac-button mac-button-primary" onclick="window.saveSettings()" style="width: 100%; margin-top: 24px;">💾 Save Settings</button>
+                <div id="mood-config-list"></div> <button class="mac-button mac-button-primary" onclick="window.saveSettings()" style="width: 100%; margin-top: 24px;">💾 Save Settings</button>
             </div>
         </div>
     </div>
@@ -287,9 +273,6 @@
         </div>
     </div>
     
-    <!-- El modal de exportación se crea dinámicamente en data-tools.js -->
-    <!-- <div id="export-modal" ... ></div> -->
-
     <div class="fab-container">
         <button class="fab fab-main" onclick="window.toggleFabMenu()" id="fab-main">
             <span id="fab-icon">+</span>
@@ -323,20 +306,19 @@
         <button class="mac-button" onclick="window.openSettings()">⚙️ Settings</button>
     </div>
 
-    <!-- Orden de scripts FINAL -->
-    <!-- Configuración Firebase -->
     <script src="./firebase-config.js"></script>
-    <!-- Cerebro y variables globales -->
-    <script src="./app.js"></script>
-    <!-- Módulos / Handlers -->
+    
     <script src="./settings-manager.js"></script>
     <script src="./data-tools.js"></script> 
-    <!-- <script src="./api-services.js"></script> --> <!-- Próximo paso -->
-    <!-- <script src="./media-handlers.js"></script> --> <!-- Próximo paso -->
-    <!-- <script src="./crud-handlers.js"></script> --> <!-- Próximo paso -->
-    <!-- <script src="./ui-renderer.js"></script> --> <!-- Próximo paso -->
-    <!-- <script src="./ui-handlers.js"></script> --> <!-- Próximo paso -->
+    
+    <script src="./utils.js"></script>
+    <script src="./ui-renderer.js"></script>
+    <script src="./ui-handlers.js"></script>
+    <script src="./api-services.js"></script>
+    <script src="./media-handlers.js"></script>
+    <script src="./crud-handlers.js"></script>
+    
+    <script src="./app.js"></script>
 
 </body>
 </html>
-
