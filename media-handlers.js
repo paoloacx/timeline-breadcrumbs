@@ -1,15 +1,70 @@
-// Este archivo maneja la lógica para capturar,
-// procesar y previsualizar imágenes y audio.
+// /media-handlers.js
+// Handles hardware interactions: GPS, camera, and microphone.
 
-// Image handling
-function handleImages(event) {
+import { setState, getState } from './state-manager.js';
+import { getWeather } from './api-services.js';
+import { showMiniMap, renderImagePreviews, renderAudioPreview } from './ui-renderer.js';
+
+/**
+ * Initiates GPS lookup.
+ */
+export function getGPS() {
+    const btn = document.getElementById('gps-btn');
+    const locationInput = document.getElementById('location-input');
+    btn.textContent = '⏳ Searching...';
+    btn.disabled = true;
+
+    if (!navigator.geolocation) {
+        alert('Geolocation not available');
+        btn.textContent = '🌍 Use GPS';
+        btn.disabled = false;
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            setState({ currentCoords: { lat, lon } });
+            
+            locationInput.placeholder = 'Getting location...';
+            
+            // Show map
+            showMiniMap(lat, lon, 'form-map');
+            
+            // Fetch weather
+            const weatherInput = document.getElementById('weather-input');
+            weatherInput.value = '⏳ Getting weather...';
+            const { weatherString, city } = await getWeather(lat, lon);
+            weatherInput.value = weatherString;
+            locationInput.value = city;
+            
+            btn.textContent = '🌍 GPS OK';
+            btn.disabled = false;
+        },
+        (error) => {
+            console.error('GPS Error:', error);
+            alert('Could not get GPS location.');
+            btn.textContent = '🌍 Use GPS';
+            btn.disabled = false;
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+}
+
+/**
+ * Handles image file selection, resizing, and adding to state.
+ * @param {Event} event - The file input change event.
+ */
+export function handleImages(event) {
     const files = Array.from(event.target.files);
+    let { currentImages } = getState();
     
     files.forEach(file => {
         const reader = new FileReader();
         reader.onload = (e) => {
             const img = new Image();
-            img.onload = function() {
+            img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
@@ -32,6 +87,7 @@ function handleImages(event) {
                 const resizedImage = canvas.toDataURL('image/jpeg', 0.8);
                 
                 currentImages.push(resizedImage);
+                setState({ currentImages: [...currentImages] });
                 renderImagePreviews();
             };
             img.src = e.target.result;
@@ -40,29 +96,28 @@ function handleImages(event) {
     });
 }
 
-// Audio recording - iOS compatible
-async function startRecording() {
+/**
+ * Starts audio recording.
+ */
+export async function startRecording() {
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
+        const stream = await navigator.mediaDevices.getUserMedia({
             audio: {
                 echoCancellation: true,
                 noiseSuppression: true,
                 sampleRate: 44100
-            } 
+            }
         });
         
-        // Detectar formato compatible con iOS
         let options = {};
         if (MediaRecorder.isTypeSupported('audio/mp4')) {
             options = { mimeType: 'audio/mp4' };
         } else if (MediaRecorder.isTypeSupported('audio/webm')) {
             options = { mimeType: 'audio/webm' };
-        } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
-            options = { mimeType: 'audio/ogg' };
         }
         
-        mediaRecorder = new MediaRecorder(stream, options);
-        audioChunks = [];
+        const mediaRecorder = new MediaRecorder(stream, options);
+        let audioChunks = [];
 
         mediaRecorder.ondataavailable = (event) => {
             audioChunks.push(event.data);
@@ -73,7 +128,7 @@ async function startRecording() {
             const audioBlob = new Blob(audioChunks, { type: mimeType });
             const reader = new FileReader();
             reader.onloadend = () => {
-                currentAudio = reader.result;
+                setState({ currentAudio: reader.result });
                 renderAudioPreview();
             };
             reader.readAsDataURL(audioBlob);
@@ -82,16 +137,23 @@ async function startRecording() {
         };
 
         mediaRecorder.start();
+        setState({ mediaRecorder, audioChunks });
+
         document.getElementById('record-btn').disabled = true;
         document.getElementById('stop-record-btn').disabled = false;
         document.querySelector('.audio-recorder').classList.add('recording');
+
     } catch (error) {
         console.error('Error accessing microphone:', error);
         alert('Could not access microphone.');
     }
 }
 
-function stopRecording() {
+/**
+ * Stops the audio recording.
+ */
+export function stopRecording() {
+    const { mediaRecorder } = getState();
     if (mediaRecorder && mediaRecorder.state !== 'inactive') {
         mediaRecorder.stop();
         document.getElementById('record-btn').disabled = false;
@@ -100,38 +162,21 @@ function stopRecording() {
     }
 }
 
-function renderImagePreviews() {
-    const container = document.getElementById('image-previews');
-    container.innerHTML = currentImages.map((img, idx) => `
-        <div class="image-preview">
-            <img src="${img}" alt="">
-            <div class="image-remove" onclick="removeImage(${idx})">✕</div>
-        </div>
-    `).join('');
-}
-
-function renderAudioPreview() {
-    const container = document.getElementById('audio-preview');
-    if (currentAudio) {
-        container.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
-                <audio controls style="flex: 1;">
-                    <source src="${currentAudio}" type="audio/webm">
-                </audio>
-                <button class="mac-button" onclick="removeAudio()" style="padding: 4px 8px;">✕</button>
-            </div>
-        `;
-    } else {
-        container.innerHTML = '';
-    }
-}
-
-function removeImage(index) {
+/**
+ * Removes an image from the current state.
+ * @param {number} index - The index of the image to remove.
+ */
+export function removeImage(index) {
+    let { currentImages } = getState();
     currentImages.splice(index, 1);
+    setState({ currentImages: [...currentImages] });
     renderImagePreviews();
 }
 
-function removeAudio() {
-    currentAudio = null;
+/**
+ * Removes the current audio from the state.
+ */
+export function removeAudio() {
+    setState({ currentAudio: null });
     renderAudioPreview();
 }
