@@ -1,22 +1,135 @@
-// Weather API Key
+// /api-services.js
+// Handles all external API communications (Firebase, Weather, iTunes).
+
+import { db, auth } from './firebase-config.js';
+import { doc, getDoc, setDoc, writeBatch, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getState, setState } from './state-manager.js';
+
+// --- External API Keys ---
 const WEATHER_API_KEY = '317f7bcb07cf05e2c6265176c502a4bb';
 
-// Esta función ahora vive aquí
-async function getWeather(lat, lon) {
-    const weatherInput = document.getElementById('weather-input');
-    const locationInput = document.getElementById('location-input');
+// --- Firestore Database Services ---
+
+/**
+ * Loads all timeline entries from Firebase for the current user.
+ */
+export async function loadDataFromFirebase() {
+    const { currentUser } = getState();
+    if (!currentUser) return;
+
+    try {
+        const docRef = doc(db, "users", currentUser.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const remoteData = docSnap.data().entries || [];
+            setState({ entries: remoteData });
+            console.log("Data loaded from Firebase.");
+            // Save to local storage as well for backup
+            localStorage.setItem('timeline-entries', JSON.stringify(remoteData));
+        } else {
+            console.log("No remote data found. Using local.");
+            // No remote data, so we'll just use what's in local state
+            // and save it to cloud on next update.
+        }
+    } catch (e) {
+        console.error("Error loading data from Firebase:", e);
+    }
+}
+
+/**
+ * Saves the entire 'entries' array to Firebase.
+ */
+export async function saveDataToFirebase() {
+    const { currentUser, entries, isOfflineMode } = getState();
+    if (!currentUser || isOfflineMode) return;
+
+    try {
+        const docRef = doc(db, "users", currentUser.uid);
+        await setDoc(docRef, { entries: entries }, { merge: true });
+        console.log("Data saved to Firebase.");
+    } catch (e) {
+        console.error("Error saving data to Firebase:", e);
+    }
+}
+
+/**
+ * Deletes a single entry from Firebase.
+ * @param {string} entryId - The ID of the entry to delete.
+ */
+export async function deleteEntryFromFirebase(entryId) {
+    const { currentUser, entries, isOfflineMode } = getState();
+    if (!currentUser || isOfflineMode) return;
+
+    // This is a "best-effort" delete. We've already deleted it from local state.
+    // We just need to sync this deletion to Firebase.
+    // We re-save the entire (now smaller) entries array.
     
-    weatherInput.value = '⏳ Getting weather...';
+    // Note: A more scalable way is to use a batch write or cloud function,
+    // but for this app's data structure, resaving the array is the
+    // simplest way to ensure sync.
+    await saveDataToFirebase();
+    console.log(`Entry ${entryId} deletion synced to Firebase.`);
+}
+
+/**
+ * Loads user settings from Firebase.
+ */
+export async function loadSettingsFromFirebase() {
+    const { currentUser } = getState();
+    if (!currentUser) return;
+
+    try {
+        const settingsRef = doc(db, "settings", currentUser.uid);
+        const docSnap = await getDoc(settingsRef);
+
+        if (docSnap.exists()) {
+            const settings = docSnap.data();
+            // Update local state and local storage
+            // This function is defined in settings-manager.js
+            window.saveSettingsToStorage(settings);
+            console.log("Settings loaded from Firebase.");
+        } else {
+            console.log("No remote settings found.");
+        }
+    } catch (e) {
+        console.error("Error loading settings from Firebase:", e);
+    }
+}
+
+/**
+ * Saves user settings to Firebase.
+ */
+export async function saveSettingsToFirebase(settings) {
+    const { currentUser, isOfflineMode } = getState();
+    if (!currentUser || isOfflineMode) return;
+
+    try {
+        const settingsRef = doc(db, "settings", currentUser.uid);
+        await setDoc(settingsRef, settings, { merge: true });
+        console.log("Settings saved to Firebase.");
+    } catch (e) {
+        console.error("Error saving settings to Firebase:", e);
+    }
+}
+
+
+// --- OpenWeatherMap API Service ---
+
+/**
+ * Fetches weather data from OpenWeatherMap.
+ * @param {number} lat - Latitude.
+ * @param {number} lon - Longitude.
+ * @returns {object} - { weatherString: string, city: string }
+ */
+export async function getWeather(lat, lon) {
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric&lang=en`;
     
     try {
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric&lang=en`;
-        
         const response = await fetch(url);
-        
         if (!response.ok) {
             throw new Error('Weather API returned ' + response.status);
         }
-        
         const data = await response.json();
         
         const temp = Math.round(data.main.temp);
@@ -24,16 +137,21 @@ async function getWeather(lat, lon) {
         const emoji = getWeatherEmoji(data.weather[0].id);
         const city = data.name || 'Unknown';
         
-        weatherInput.value = `${emoji} ${description}, ${temp}°C in ${city}`;
-        locationInput.value = city;
+        return {
+            weatherString: `${emoji} ${description}, ${temp}°C in ${city}`,
+            city: city
+        };
     } catch (error) {
         console.error('Error getting weather:', error);
-        weatherInput.value = '';
-        locationInput.value = '';
+        return { weatherString: '', city: '' };
     }
 }
 
-// Esta función ayudante ahora vive aquí
+/**
+ * Helper to get an emoji for a weather code.
+ * @param {number} code - OpenWeatherMap weather ID.
+ * @returns {string} Emoji.
+ */
 function getWeatherEmoji(code) {
     if (code >= 200 && code < 300) return '⛈️';
     if (code >= 300 && code < 400) return '🌦️';
@@ -45,40 +163,26 @@ function getWeatherEmoji(code) {
     return '🌤️';
 }
 
-// Esta función ahora vive aquí
-async function buscarBSO() {
-    const query = document.getElementById('recap-bso').value.trim();
-    if (!query) {
-        alert('Please enter a song or artist name');
-        return;
-    }
-    
-    const resultsDiv = document.getElementById('recap-bso-results');
-    resultsDiv.innerHTML = '<div style="padding: 12px; text-align: center;">Searching...</div>';
+
+// --- iTunes API Service ---
+
+/**
+ * Searches the iTunes API for tracks.
+ * @param {string} query - The search term.
+ * @returns {Array} - A list of track results.
+ */
+export async function searchiTunesTracks(query) {
+    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=5`;
     
     try {
-        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=5`;
         const response = await fetch(url);
-        const data = await response.json();
-        
-        if (data.results && data.results.length > 0) {
-            const html = data.results.map(track => `
-                <div class="bso-result" style="display: flex; align-items: center; gap: 12px; padding: 8px; border: 2px solid #999; margin-bottom: 8px; cursor: pointer; background: white;" onclick="selectTrack('${track.trackName.replace(/'/g, "\'")}', '${track.artistName.replace(/'/g, "\'")}', '${track.trackViewUrl}', '${track.artworkUrl100}')">
-                    <img src="${track.artworkUrl100}" style="width: 50px; height: 50px; border: 2px solid #000;">
-                    <div style="flex: 1;">
-                        <div style="font-weight: bold; font-size: 13px;">${track.trackName}</div>
-                        <div style="font-size: 11px; color: #666;">${track.artistName}</div>
-                    </div>
-                    <div style="font-size: 18px;">▶️</div>
-                </div>
-            `).join('');
-            resultsDiv.innerHTML = html;
-        } else {
-            resultsDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #666;">No results found</div>';
+        if (!response.ok) {
+            throw new Error(`iTunes API error: ${response.status}`);
         }
+        const data = await response.json();
+        return data.results || [];
     } catch (error) {
-        console.error('Error searching BSO:', error);
-        resultsDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: red;">Error searching. Try again.</div>';
+        console.error('Error searching iTunes:', error);
+        return [];
     }
 }
-
