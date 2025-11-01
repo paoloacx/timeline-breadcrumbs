@@ -1,155 +1,140 @@
-// --- Manejadores de Interfaz de Usuario (UI) ---
+// ===== UI HANDLER FUNCTIONS =====
 
-// --- Funciones Principales de Navegación (Formularios) ---
-
-/**
- * Muestra una ventana/formulario principal y oculta los demás.
- * @param {string} windowId - El ID del elemento de la ventana a mostrar (ej. 'form-window').
- */
-function showMainWindow(windowId) {
-    // Lista de todos los IDs de formularios principales
-    const allWindows = [
-        'form-window', 
-        'timer-window', 
-        'track-window', 
-        'spent-window', 
-        'recap-form'
-    ];
+// Toggle forms
+window.toggleForm = function() {
+    const form = document.getElementById('form-window');
+    const timer = document.getElementById('timer-window');
+    const track = document.getElementById('track-window');
+    const spent = document.getElementById('spent-window');
+    const recap = document.getElementById('recap-form');
+    timer.classList.add('hidden');
+    track.classList.add('hidden');
+    spent.classList.add('hidden');
+    recap.classList.add('hidden');
     
-    // Ocultar todas las ventanas
-    allWindows.forEach(id => {
-        const win = document.getElementById(id);
-        if (win) {
-            win.classList.add('hidden');
+    form.classList.toggle('hidden');
+    if (!form.classList.contains('hidden')) {
+        clearForm(); // global function in app.js
+        window.renderMoodSelector(); // global function in ui-renderer.js
+        window.setCurrentDateTime('datetime-input'); // global function in utils.js
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+window.toggleTimer = function() {
+    const timer = document.getElementById('timer-window');
+    const form = document.getElementById('form-window');
+    const track = document.getElementById('track-window');
+    const spent = document.getElementById('spent-window');
+    const recap = document.getElementById('recap-form');
+    form.classList.add('hidden');
+    track.classList.add('hidden');
+    spent.classList.add('hidden');
+    recap.classList.add('hidden');
+
+    timer.classList.toggle('hidden');
+    if (!timer.classList.contains('hidden')) {
+        resetTimerSelections(); // global function in app.js
+        window.setCurrentDateTime('datetime-input-time'); // global function in utils.js
+        timer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+window.toggleTrack = function() {
+    const track = document.getElementById('track-window');
+    const form = document.getElementById('form-window');
+    const timer = document.getElementById('timer-window');
+    const spent = document.getElementById('spent-window');
+    const recap = document.getElementById('recap-form');
+    form.classList.add('hidden');
+    timer.classList.add('hidden');
+    spent.classList.add('hidden');
+    recap.classList.add('hidden');
+
+    track.classList.toggle('hidden');
+    if (!track.classList.contains('hidden')) {
+        window.renderTrackSelector(); // global function in ui-renderer.js
+        window.setCurrentDateTime('datetime-input-track'); // global function in utils.js
+        selectedTrackItem = null; // global variable from app.js
+        document.getElementById('save-track-btn').disabled = true;
+        document.getElementById('delete-track-btn').classList.add('hidden');
+        document.getElementById('track-optional-note').value = '';
+        track.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+window.toggleSpent = function() {
+    const spent = document.getElementById('spent-window');
+    const form = document.getElementById('form-window');
+    const timer = document.getElementById('timer-window');
+    const track = document.getElementById('track-window');
+    const recap = document.getElementById('recap-form');
+    form.classList.add('hidden');
+    timer.classList.add('hidden');
+    track.classList.add('hidden');
+    recap.classList.add('hidden');
+
+    spent.classList.toggle('hidden');
+    if (!spent.classList.contains('hidden')) {
+        document.getElementById('spent-description').value = '';
+        document.getElementById('spent-amount').value = '';
+        window.setCurrentDateTime('datetime-input-spent'); // global function in utils.js
+        document.getElementById('delete-spent-btn').classList.add('hidden');
+        spent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+window.cancelEdit = function() {
+    clearForm(); // global function in app.js
+    window.toggleForm();
+}
+
+// Mood selection
+window.selectMood = function(index) {
+    selectedMood = index; // global variable from app.js
+    window.renderMoodSelector(); // global function in ui-renderer.js
+}
+
+// Time event selections
+window.selectDuration = function(minutes) {
+    selectedDuration = minutes; // global variable from app.js
+    const options = document.querySelectorAll('.duration-option');
+    options.forEach(el => {
+        el.classList.remove('selected');
+        if (parseInt(el.dataset.duration) === minutes) {
+            el.classList.add('selected');
         }
     });
-    
-    // Mostrar la ventana solicitada
-    const windowToShow = document.getElementById(windowId);
-    if (windowToShow) {
-        windowToShow.classList.remove('hidden');
-        // Hacer scroll para que el formulario sea visible
-        windowToShow.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    checkTimerReady(); // global function in app.js
 }
 
-// Funciones "toggle" que llaman al manejador principal
-function toggleForm() {
-    showMainWindow('form-window');
-    clearForm();
-    renderMoodSelector();
-    setCurrentDateTime('datetime-input');
+window.selectActivity = function(activity) {
+    selectedActivity = activity; // global variable from app.js
+    const options = document.querySelectorAll('#activity-selector .activity-option');
+    options.forEach(el => {
+        el.classList.remove('selected');
+        if (el.dataset.activity === activity) {
+            el.classList.add('selected');
+        }
+    });
+    checkTimerReady(); // global function in app.js
 }
 
-function toggleTimer() {
-    showMainWindow('timer-window');
-    resetTimerSelections();
-    setCurrentDateTime('datetime-input-time');
+// Track event selection
+window.selectTrackItem = function(item) {
+    selectedTrackItem = item; // global variable from app.js
+    document.querySelectorAll('#track-selector .activity-option').forEach(el => {
+        el.classList.remove('selected');
+        if (el.dataset.item === item) {
+            el.classList.add('selected');
+        }
+    });
+    document.getElementById('save-track-btn').disabled = false;
 }
 
-function toggleTrack() {
-    showMainWindow('track-window');
-    renderTrackSelector();
-    setCurrentDateTime('datetime-input-track');
-    selectedTrackItem = null;
-    document.getElementById('save-track-btn').disabled = true;
-    document.getElementById('delete-track-btn').classList.add('hidden');
-    document.getElementById('track-optional-note').value = '';
-}
-
-function toggleSpent() {
-    showMainWindow('spent-window');
-    document.getElementById('spent-description').value = '';
-    document.getElementById('spent-amount').value = '';
-    setCurrentDateTime('datetime-input-spent');
-    document.getElementById('delete-spent-btn').classList.add('hidden');
-}
-
-function showRecapForm() {
-    showMainWindow('recap-form');
-    // Establecer fecha actual
-    setCurrentDateTime('datetime-input-recap');
-    
-    // Resetear formulario (excepto el BSO)
-    document.getElementById('recap-reflection').value = '';
-    document.getElementById('recap-rating').value = '5';
-    document.getElementById('recap-rating-value').textContent = '5';
-    document.getElementById('recap-highlight-1').value = '';
-    document.getElementById('recap-highlight-2').value = '';
-    document.getElementById('recap-highlight-3').value = '';
-    document.getElementById('generate-highlights-btn').disabled = false;
-    document.getElementById('generate-highlights-btn').textContent = '✨ Generar';
-}
-
-function closeRecapForm() {
-    const recapForm = document.getElementById('recap-form');
-    if (recapForm) {
-        recapForm.classList.add('hidden');
-    }
-    // Limpiar formulario al cerrar
-    document.getElementById('recap-bso').value = '';
-    document.getElementById('recap-bso-results').innerHTML = '';
-    document.getElementById('recap-selected-track').value = '';
-}
-
-
-// --- Ayudantes de Formularios ---
-
-// Limpia el formulario principal de "Crumb"
-function clearForm() {
-    document.getElementById('note-input').value = '';
-    document.getElementById('location-input').value = '';
-    document.getElementById('weather-input').value = '';
-    currentImages = [];
-    currentAudio = null;
-    currentCoords = null;
-    editingEntryId = null;
-    selectedMood = null;
-    document.getElementById('image-previews').innerHTML = '';
-    document.getElementById('audio-preview').innerHTML = '';
-    document.getElementById('delete-btn').classList.add('hidden');
-    document.getElementById('save-btn').textContent = '💾 Save';
-    document.getElementById('mood-config').classList.add('hidden');
-    const mapContainer = document.getElementById('form-map');
-    if (mapContainer) {
-        mapContainer.style.display = 'none';
-        mapContainer.innerHTML = '';
-    }
-}
-
-// Cancela la edición de un "Crumb"
-function cancelEdit() {
-    clearForm();
-    toggleForm();
-}
-
-// Establece la fecha y hora actual en un input datetime-local
-function setCurrentDateTime(inputId) {
-    const now = new Date();
-    // Ajustar a la zona horaria local
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    const isoString = now.toISOString();
-    
-    // Formato YYYY-MM-DDTHH:mm
-    const dateTimeString = isoString.substring(0, 16);
-    const inputEl = document.getElementById(inputId);
-    if (inputEl) {
-        inputEl.value = dateTimeString;
-    }
-}
-
-// Obtiene el timestamp (ISO string) desde un input datetime-local
-function getTimestampFromInput(inputId) {
-    const value = document.getElementById(inputId).value;
-    if (!value) return new Date().toISOString();
-    // Convertir la fecha local del input a un objeto Date y luego a ISO string
-    return new Date(value).toISOString();
-}
-
-// --- Manejadores de Modales (Preview, Stats, Settings) ---
-
-function previewEntry(id) {
-    const entry = entries.find(e => e.id === id);
+// Preview modal functions
+window.previewEntry = function(id) {
+    const entry = window.entries.find(e => e.id === id); // global variable from app.js
     if (!entry) return;
 
     const modal = document.getElementById('preview-modal');
@@ -157,7 +142,7 @@ function previewEntry(id) {
     
     let html = `
         <div style="margin-bottom: 16px;">
-            <strong>Time:</strong> ${formatDate(entry.timestamp)} at ${formatTime(entry.timestamp)}
+            <strong>Time:</strong> ${window.formatDate(entry.timestamp)} at ${window.formatTime(entry.timestamp)}
         </div>
         
         ${entry.mood ? `
@@ -168,7 +153,7 @@ function previewEntry(id) {
         
         <div style="margin-bottom: 16px;">
             <strong>Note:</strong>
-            <div style="margin-top: 8px; line-height: 1.6;">${(entry.note || '').replace(/\n/g, '<br>')}</div>
+            <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${entry.note || ''}</div>
         </div>
         
         ${entry.location ? `
@@ -203,8 +188,8 @@ function previewEntry(id) {
             <div style="margin-bottom: 16px;">
                 <strong>Images:</strong>
                 <div class="preview-images-full">
-                    ${entry.images.map((img, index) => `
-                        <img src="${img}" class="preview-image-full" onclick="event.stopPropagation(); showImageInModal('${entry.id}', ${index});">
+                    ${entry.images.map((img, idx) => `
+                        <img src="${img}" class="preview-image-full" onclick="event.stopPropagation(); showImageInModal('${entry.id}', ${idx});">
                     `).join('')}
                 </div>
             </div>
@@ -213,13 +198,14 @@ function previewEntry(id) {
         ${entry.isTimedActivity ? `
             <div style="margin-bottom: 16px;">
                 <strong>Activity:</strong> ${entry.activity} (${entry.duration} minutes)
-                ${entry.optionalNote ? `<br><strong>Note:</strong> ${(entry.optionalNote || '').replace(/\n/g, '<br>')}` : ''}
+                ${entry.optionalNote ? `<div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap; font-style: italic;">${entry.optionalNote}</div>` : ''}
             </div>
         ` : ''}
-
-        ${entry.isQuickTrack ? `
+        
+        ${entry.isQuickTrack && entry.optionalNote ? `
             <div style="margin-bottom: 16px;">
-                ${entry.optionalNote ? `<strong>Note:</strong> ${(entry.optionalNote || '').replace(/\n/g, '<br>')}` : ''}
+                <strong>Optional Note:</strong>
+                <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap; font-style: italic;">${entry.optionalNote}</div>
             </div>
         ` : ''}
         
@@ -233,41 +219,38 @@ function previewEntry(id) {
     body.innerHTML = html;
     modal.classList.add('show');
     
-    // Renderizar mapa en el modal
     if (entry.coords) {
         setTimeout(() => {
             const mapContainer = document.getElementById('preview-map-modal');
-            if (mapContainer && !mapContainer._leaflet_id) { // Evitar reinicialización
-                const map = L.map('preview-map-modal').setView([entry.coords.lat, entry.coords.lon], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
-                L.marker([entry.coords.lat, entry.coords.lon]).addTo(map);
-                
-                setTimeout(() => map.invalidateSize(), 100);
+            if (mapContainer) {
+                try {
+                    const map = L.map('preview-map-modal').setView([entry.coords.lat, entry.coords.lon], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap'
+                    }).addTo(map);
+                    L.marker([entry.coords.lat, entry.coords.lon]).addTo(map);
+                    
+                    setTimeout(() => map.invalidateSize(), 100);
+                } catch(e) {
+                    console.error("Error initializing preview map:", e);
+                    mapContainer.innerHTML = "Map failed to load.";
+                }
             }
         }, 100);
     }
 }
 
-function closePreview(event) {
-    // Cierra si se hace clic fuera del contenido (en el fondo oscuro)
-    if (event && event.target.id !== 'preview-modal') return;
-    forceClosePreview();
-}
-
-function forceClosePreview() {
+window.closePreview = function(event) {
+    if (event && (event.target.id !== 'preview-modal' && !event.target.closest('.mac-title-bar button'))) return;
     const modal = document.getElementById('preview-modal');
     modal.classList.remove('show');
-    // Limpiar contenido para liberar memoria (especialmente el mapa)
     document.getElementById('preview-body').innerHTML = '';
 }
 
-// Muestra una imagen específica en el modal de preview
-function showImageInModal(entryId, imageIndex) {
-    const entry = entries.find(e => e.id == entryId);
+window.showImageInModal = function(entryId, imageIndex) {
+    const entry = window.entries.find(e => e.id == entryId); // global variable from app.js
     if (!entry || !entry.images || !entry.images[imageIndex]) {
-        console.error('Image not found');
+        console.error('Image not found:', entryId, imageIndex);
         return;
     }
     
@@ -283,52 +266,109 @@ function showImageInModal(entryId, imageIndex) {
     modal.classList.add('show');
 }
 
-function openStats() {
-    calculateStats();
-    const modal = document.getElementById('stats-modal');
-    if (modal) {
-        modal.classList.add('show');
+// Timeline interactions
+window.toggleReadMore = function(id) {
+    const noteEl = document.getElementById(`note-${id}`);
+    const btnEl = document.getElementById(`read-more-${id}`);
+    
+    if (noteEl.classList.contains('expanded')) {
+        noteEl.classList.remove('expanded');
+        btnEl.textContent = 'Read more';
+    } else {
+        noteEl.classList.add('expanded');
+        btnEl.textContent = 'Show less';
     }
 }
 
-function closeStats(event) {
-    if (event && event.target.id !== 'stats-modal') return;
-    forceCloseStats();
+window.toggleDay = function(dayKey) {
+    const content = document.getElementById(`day-content-${dayKey}`);
+    const chevron = document.getElementById(`chevron-${dayKey}`);
+    
+    content.classList.toggle('expanded');
+    chevron.classList.toggle('expanded');
 }
 
-function forceCloseStats() {
-    const modal = document.getElementById('stats-modal');
-    if (modal) {
-        modal.classList.remove('show');
+window.toggleRecap = function(recapId) {
+    const content = document.getElementById(`recap-content-${recapId}`);
+    const chevron = document.getElementById(`chevron-recap-${recapId}`);
+    
+    content.classList.toggle('hidden');
+    chevron.classList.toggle('expanded');
+}
+
+// ===== RECAP FUNCTIONS (UI) =====
+
+window.showRecapForm = function() {
+    // Hide other forms
+    document.getElementById('form-window').classList.add('hidden');
+    document.getElementById('timer-window').classList.add('hidden');
+    document.getElementById('track-window').classList.add('hidden');
+    document.getElementById('spent-window').classList.add('hidden');
+    
+    const recapForm = document.getElementById('recap-form');
+    recapForm.classList.remove('hidden');
+    
+    // Set current date
+    window.setCurrentDateTime('datetime-input-recap'); // global util
+    
+    // Clear form only if not editing
+    if (!editingEntryId) { // global var from app.js
+        document.getElementById('recap-reflection').value = '';
+        document.getElementById('recap-rating').value = '5';
+        document.getElementById('recap-rating-value').textContent = '5';
+        document.getElementById('recap-highlight-1').value = '';
+        document.getElementById('recap-highlight-2').value = '';
+        document.getElementById('recap-highlight-3').value = '';
+        document.getElementById('recap-bso').value = '';
+        document.getElementById('recap-bso-results').innerHTML = '';
+        document.getElementById('recap-selected-track').value = '';
     }
-}
 
-function openSettings() {
-    renderSettingsConfig(); // Renderiza el contenido de los settings
-    const modal = document.getElementById('settings-modal');
-    if (modal) {
-        modal.classList.add('show');
+    // Slider listener
+    const slider = document.getElementById('recap-rating');
+    const valueDisplay = document.getElementById('recap-rating-value');
+    
+    if (slider) {
+        slider.oninput = function() {
+            if (valueDisplay) valueDisplay.textContent = this.value;
+        };
     }
+    
+    recapForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function closeSettings(event) {
-    if (event && event.target.id !== 'settings-modal') return;
-    forceCloseSettings();
+window.closeRecapForm = function() {
+    document.getElementById('recap-form').classList.add('hidden');
+    editingEntryId = null; // global var from app.js
 }
 
-function forceCloseSettings() {
-    const modal = document.getElementById('settings-modal');
-    if (modal) {
-        modal.classList.remove('show');
-    }
+window.selectTrack = function(trackName, artistName, url, artwork) {
+    const trackData = {
+        name: trackName,
+        artist: artistName,
+        url: url,
+        artwork: artwork
+    };
+    
+    document.getElementById('recap-selected-track').value = JSON.stringify(trackData);
+    document.getElementById('recap-bso-results').innerHTML = `
+        <div class="bso-result" style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 3px solid #000; background: #f0f0f0;">
+            <img src="${artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
+            <div style="flex: 1;">
+                <div style="font-weight: bold;">${trackName}</div>
+                <div style="font-size: 12px; color: #666;">${artistName}</div>
+            </div>
+            <a href="${url}" target="_blank" style="text-decoration: none; font-size: 20px;">🔗</a>
+        </div>
+    `;
 }
 
-// --- Manejadores del Menú Flotante (FAB) ---
+// ===== FAB MENU =====
 
 let fabMenuOpen = false;
 
-function toggleFabMenu() {
-    const fabActions = document.querySelectorAll('.fab-action');
+window.toggleFabMenu = function() {
+    const fabActions = document.querySelectorAll('.fab-action-wrapper');
     const fabIcon = document.getElementById('fab-icon');
     
     fabMenuOpen = !fabMenuOpen;
@@ -351,58 +391,36 @@ function toggleFabMenu() {
             setTimeout(() => {
                 wrapper.classList.remove('show');
                 setTimeout(() => wrapper.classList.add('hidden'), 300);
-            }, (fabActions.length - index - 1) * 30); // Cierra en orden inverso
+            }, (fabActions.length - index - 1) * 30); // Reverse order on close
         });
     }
 }
 
-// Cierra el menú FAB si está abierto
+// Close FAB menu when clicking an action
 function closeFabMenu() {
     if (fabMenuOpen) {
-        toggleFabMenu();
+        window.toggleFabMenu();
     }
 }
 
-// Asignaciones globales para los `onclick` del index.html (legado)
-// Estos actúan como "enlaces" que también cierran el menú.
+// Wrappers for FAB actions
 window.toggleCrumb = function() {
     closeFabMenu();
-    toggleForm(); // Llama a la función real
-};
-
+    window.toggleForm();
+}
 window.toggleTime = function() {
     closeFabMenu();
-    toggleTimer(); // Llama a la función real
-};
-
+    window.toggleTimer();
+}
 window.toggleTrack = function() {
     closeFabMenu();
-    toggleTrack(); // Llama a la función real
-};
-
+    window.toggleTrack();
+}
 window.toggleSpent = function() {
     closeFabMenu();
-    toggleSpent(); // Llama a la función real
-};
-
-window.handleShowRecapForm = function() {
+    window.toggleSpent();
+}
+window.showRecapFormWithFab = function() { // Renamed
     closeFabMenu();
-    showRecapForm(); // Llama a la función real
-};
-
-// Asignar los listeners del FAB en cuanto cargue el DOM
-document.addEventListener('DOMContentLoaded', () => {
-    const fabMain = document.getElementById('fab-main');
-    if (fabMain) {
-        fabMain.onclick = toggleFabMenu;
-    }
-    
-    const fabActions = document.querySelectorAll('.fab-action');
-    if (fabActions.length === 5) {
-        fabActions[0].onclick = window.toggleCrumb;
-        fabActions[1].onclick = window.toggleTime;
-        fabActions[2].onclick = window.toggleTrack;
-        fabActions[3].onclick = window.toggleSpent;
-        fabActions[4].onclick = window.handleShowRecapForm;
-    }
-});
+    window.showRecapForm();
+}
