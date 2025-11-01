@@ -4,7 +4,7 @@
  * Sets the current date and time in a datetime-local input field.
  * @param {string} inputId - The ID of the input element.
  */
-window.setCurrentDateTime = function(inputId) {
+export function setCurrentDateTime(inputId) {
     const input = document.getElementById(inputId);
     if (!input) return; // Guard clause
     const now = new Date();
@@ -23,7 +23,7 @@ window.setCurrentDateTime = function(inputId) {
  * @param {string} inputId - The ID of the input element.
  * @returns {string} ISO date string.
  */
-window.getTimestampFromInput = function(inputId) {
+export function getTimestampFromInput(inputId) {
     const value = document.getElementById(inputId).value;
     if (!value) return new Date().toISOString();
     return new Date(value).toISOString();
@@ -34,7 +34,7 @@ window.getTimestampFromInput = function(inputId) {
  * @param {string} timestamp - ISO date string.
  * @returns {string} Formatted date.
  */
-window.formatDate = function(timestamp) {
+export function formatDate(timestamp) {
     const date = new Date(timestamp);
     return date.toLocaleDateString('en', { // 'en' para formato consistente
         weekday: 'long',
@@ -49,7 +49,7 @@ window.formatDate = function(timestamp) {
  * @param {string} timestamp - ISO date string.
  * @returns {string} Formatted time.
  */
-window.formatTime = function(timestamp) {
+export function formatTime(timestamp) {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
 }
@@ -60,7 +60,7 @@ window.formatTime = function(timestamp) {
  * @param {number} durationMinutes - Duration in minutes.
  * @returns {string} Formatted end time.
  */
-window.calculateEndTime = function(timestamp, durationMinutes) {
+export function calculateEndTime(timestamp, durationMinutes) {
     const date = new Date(timestamp);
     date.setMinutes(date.getMinutes() + durationMinutes);
     return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -71,7 +71,7 @@ window.calculateEndTime = function(timestamp, durationMinutes) {
  * @param {string} timestamp - ISO date string.
  * @returns {string} Date key.
  */
-window.getDayKey = function(timestamp) {
+export function getDayKey(timestamp) {
     const date = new Date(timestamp);
     return date.toISOString().split('T')[0];
 }
@@ -81,7 +81,7 @@ window.getDayKey = function(timestamp) {
  * @param {number} code - Weather condition code.
  * @returns {string} Emoji.
  */
-window.getWeatherEmoji = function(code) {
+export function getWeatherEmoji(code) {
     if (code >= 200 && code < 300) return '⛈️';
     if (code >= 300 && code < 400) return '🌦️';
     if (code >= 500 && code < 600) return '🌧️';
