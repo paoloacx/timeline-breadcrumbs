@@ -1,3 +1,12 @@
+// ===== firebase-config.js (Firebase Logic) =====
+
+// Imports
+import { getState, setCurrentUser, setEntries, setSettings } from './state.js';
+import { renderTimeline } from './ui-renderer.js';
+import { updateTimerOptions, updateTrackOptions, loadSettings } as settingsManager from './settings-manager.js';
+import { loadData as loadLocalData } from './data-storage.js';
+import { renderMoodSelector } from './ui-renderer.js';
+
 // Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAb-MLu8atl5hruOPLDhgftjkjc_1M2038", // (Tu clave)
@@ -13,62 +22,44 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-const storage = firebase.storage();
+// const storage = firebase.storage(); // (No se usa aún)
 
-// CAMBIO: Hecho global para que otros archivos puedan verlo
-window.currentUser = null;
-window.isOfflineMode = false;
-
-// Auth state observer
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        window.currentUser = user;
-        console.log('Usuario autenticado:', user.email, 'UID:', user.uid);
-        
-        // CAMBIO: No necesitamos comprobar si la función existe
-        // si app.js ya está cargado (lo cual está).
-        window.showMainApp(); // (Función local de este archivo)
-        // updateSyncStatus('online'); // (La función no existe, la comento)
-        window.loadDataFromFirebase(); // (Función local de este archivo)
-        window.loadSettingsFromFirebase(); // (Función local de este archivo)
-        
-    }
-});
-
-// Sign in with Google
-// CAMBIO: Hecho global
-window.signInWithGoogle = function() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    
-    auth.signInWithPopup(provider)
-        .then((result) => {
-            console.log('Signed in with Google:', result.user.email);
-        })
-        .catch((error) => {
-            console.error('Google sign-in error:', error);
-            alert('Sign in error: ' + error.message);
-        });
+/**
+ * Initializes the Firebase auth listener.
+ * @param {function} onLoginCallback - Function to call when user logs in.
+ * @param {function} onLogoutCallback - Function to call when user logs out.
+ */
+export function initAuth(onLoginCallback, onLogoutCallback) {
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            setCurrentUser(user);
+            onLoginCallback(user);
+        } else {
+            setCurrentUser(null);
+            onLogoutCallback();
+        }
+    });
 }
 
-// Sign in with Email/Password
-// CAMBIO: Hecho global
-window.signInWithEmail = function() {
+// --- Auth Functions ---
+
+export function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch((error) => {
+        console.error('Google sign-in error:', error);
+        alert('Sign in error: ' + error.message);
+    });
+}
+
+export function signInWithEmail() {
     const email = prompt('Enter your email:');
     const password = prompt('Enter your password:');
-    
     if (!email || !password) return;
-    
+
     auth.signInWithEmailAndPassword(email, password)
-        .then((result) => {
-            console.log('Signed in with email:', result.user.email);
-        })
         .catch((error) => {
-            // Si el usuario no existe, intentar crearlo
             if (error.code === 'auth/user-not-found') {
                 auth.createUserWithEmailAndPassword(email, password)
-                    .then((result) => {
-                        console.log('New user created:', result.user.email);
-                    })
                     .catch((createError) => {
                         console.error('Error creating user:', createError);
                         alert('Error: ' + createError.message);
@@ -80,249 +71,141 @@ window.signInWithEmail = function() {
         });
 }
 
-// Sign out
-// CAMBIO: Hecho global
-window.signOutUser = function() {
+export function signOutUser() {
     if (confirm('Sign out?')) {
-        auth.signOut().then(() => {
-            location.reload();
-        });
+        auth.signOut(); // onAuthStateChanged se encargará del resto
     }
 }
 
-// Continue offline
-// CAMBIO: Hecho global
-window.continueOffline = function() {
-    window.isOfflineMode = true;
-    showMainApp(); // (Función local)
-    // updateSyncStatus('offline'); // (La función no existe)
-    
-    // Asegurarse que app.js esté cargado
-    if (typeof window.loadData === 'function') {
-        window.loadData();
-    }
-    if (typeof window.loadSettings === 'function') {
-        window.loadSettings();
-    }
-}
+// --- Data Functions ---
 
-// Show main app
-// CAMBIO: Hecho global
-window.showMainApp = function() {
-    document.getElementById('auth-container').style.display = 'none';
-    document.getElementById('main-app').style.display = 'block';
-    
-    if (window.currentUser) {
-        const email = window.currentUser.email;
-        // Mostrar solo icono en el avatar
-        document.getElementById('user-icon').textContent = '👤';
-        // Guardar el email completo en el dropdown
-        document.getElementById('user-email-full').textContent = email;
-        document.getElementById('user-avatar').style.display = 'block';
-    } else {
-        document.getElementById('user-avatar').style.display = 'none';
-    }
-}
-
-// Toggle user menu
-// CAMBIO: Hecho global
-window.toggleUserMenu = function(e) {
-    e.stopPropagation();
-    const menu = document.getElementById('logout-menu');
-    menu.classList.toggle('show');
-}
-
-// Close user menu on outside click
-document.addEventListener('click', (e) => {
-    const menu = document.getElementById('logout-menu');
-    if (menu && !e.target.closest('.user-avatar')) {
-        menu.classList.remove('show');
-    }
-});
-
-// Update sync status (Función no encontrada, la comento)
-// function updateSyncStatus(status) { ... }
-
-// Load data from Firebase
-// CAMBIO: Hecho global
-window.loadDataFromFirebase = async function() {
-    if (!window.currentUser) return;
-    
-    // updateSyncStatus('syncing');
+export async function loadFirebaseData() {
+    const { currentUser } = getState();
+    if (!currentUser) return;
     
     try {
+        // 1. Load Entries
         const snapshot = await db.collection('users')
-            .doc(window.currentUser.uid)
+            .doc(currentUser.uid)
             .collection('entries')
             .orderBy('timestamp', 'desc')
             .get();
         
-        // *** CAMBIO CRÍTICO ***
-        // Usar 'window.entries' (global) en lugar de 'entries' (local)
-        if (typeof window.entries !== 'undefined') {
-            window.entries = []; // Limpiar el array global
-            snapshot.forEach((doc) => {
-                window.entries.push({ id: doc.id, ...doc.data() }); // Llenar el array global
-            });
-            
-            console.log(`Cargadas ${window.entries.length} entradas del usuario ${window.currentUser.email}`);
-            
-            // *** CAMBIO CRÍTICO ***
-            // Renderizar el timeline DESPUÉS de cargar los datos
-            if (typeof window.renderTimeline === 'function') {
-                window.renderTimeline();
-            }
-        }
+        const newEntries = [];
+        snapshot.forEach((doc) => {
+            newEntries.push({ id: doc.id, ...doc.data() });
+        });
         
-        // updateSyncStatus('online');
+        setEntries(newEntries);
+        console.log(`Cargadas ${newEntries.length} entradas del usuario ${currentUser.email}`);
+        
+        // 2. Load Settings
+        await loadSettingsFromFirebase();
+
+        // 3. Render Timeline (después de cargar todo)
+        renderTimeline();
+
     } catch (error) {
         console.error('Error loading from Firebase:', error);
-        // updateSyncStatus('offline');
-        if (typeof window.loadData === 'function') {
-            window.loadData();
-        }
+        // Fallback to local data if cloud fails
+        loadLocalData();
     }
 }
 
-// Save data to Firebase
-// CAMBIO: Hecho global
-window.saveDataToFirebase = async function() {
-    if (!window.currentUser || window.isOfflineMode) {
-        // if (typeof window.saveData === 'function') {
-        //     window.saveData(); // No llamar a saveData() aquí, crearía un bucle
-        // }
-        return;
-    }
-    
-    // updateSyncStatus('syncing');
+export async function saveDataToFirebase() {
+    const { currentUser, isOfflineMode, entries } = getState();
+    if (!currentUser || isOfflineMode) return;
     
     try {
         const batch = db.batch();
         
-        // *** CAMBIO CRÍTICO ***
-        // Usar 'window.entries' (global) en lugar de 'entries' (local)
-        if (typeof window.entries !== 'undefined') {
-            window.entries.forEach((entry) => {
-                const docRef = db.collection('users')
-                    .doc(window.currentUser.uid)
-                    .collection('entries')
-                    .doc(String(entry.id));
-                
-                // *** CAMBIO CRÍTICO ***
-                // Limpiar el objeto antes de enviarlo a Firebase
-                // Esto arregla el guardado de Day Recaps (objetos anidados)
-                const cleanEntry = JSON.parse(JSON.stringify(entry));
-                
-                batch.set(docRef, cleanEntry);
-            });
+        entries.forEach((entry) => {
+            const docRef = db.collection('users')
+                .doc(currentUser.uid)
+                .collection('entries')
+                .doc(String(entry.id));
             
-            await batch.commit();
-            console.log(`Guardadas ${window.entries.length} entradas para ${window.currentUser.email}`);
-        }
+            // Clean object for Firebase (handles nested objects like 'track')
+            const cleanEntry = JSON.parse(JSON.stringify(entry));
+            batch.set(docRef, cleanEntry);
+        });
         
-        // updateSyncStatus('online');
+        await batch.commit();
+        console.log(`Guardadas ${entries.length} entradas para ${currentUser.email}`);
+        
     } catch (error) {
         console.error('Error saving to Firebase:', error);
-        // updateSyncStatus('offline');
-        // if (typeof window.saveData === 'function') {
-        //     window.saveData(); // No llamar a saveData() aquí
-        // }
     }
 }
 
-// Load settings from Firebase
-// CAMBIO: Hecho global
-window.loadSettingsFromFirebase = async function() {
-    if (!window.currentUser) return;
+export async function loadSettingsFromFirebase() {
+    const { currentUser } = getState();
+    if (!currentUser) return;
     
     try {
         const doc = await db.collection('users')
-            .doc(window.currentUser.uid)
+            .doc(currentUser.uid)
             .collection('settings')
             .doc('app-settings')
             .get();
         
-        // *** CAMBIO CRÍTICO ***
-        // Usar 'window.timeDurations', etc. (globales)
-        if (doc.exists && typeof window.timeDurations !== 'undefined') {
+        if (doc.exists) {
             const data = doc.data();
-            if (data.timeDurations) window.timeDurations = data.timeDurations;
-            if (data.timeActivities) window.timeActivities = data.timeActivities;
-            if (data.trackItems) window.trackItems = data.trackItems;
-            if (data.moods) window.moods = data.moods;
-            
-            console.log('Configuración cargada para', window.currentUser.email);
-            
-            if (typeof window.updateTimerOptions === 'function') {
-                window.updateTimerOptions();
-            }
-            if (typeof window.updateTrackOptions === 'function') {
-                window.updateTrackOptions();
-            }
-            if (typeof window.renderMoodSelector === 'function') {
-                window.renderMoodSelector();
-            }
+            // Carga las settings en el state
+            setSettings({
+                timeDurations: data.timeDurations || undefined,
+                timeActivities: data.timeActivities || undefined,
+                trackItems: data.trackItems || undefined,
+                moods: data.moods || undefined
+            });
+            console.log('Configuración de Firebase cargada');
         } else {
-             if (typeof window.loadSettings === 'function') {
-                window.loadSettings(); // Cargar local si no existe en FB
-            }
+            // Si no hay settings en la nube, carga las locales
+            settingsManager.loadSettings();
         }
+        
+        // Actualiza la UI con las settings cargadas
+        settingsManager.updateTimerOptions();
+        settingsManager.updateTrackOptions();
+        renderMoodSelector();
+
     } catch (error) {
         console.error('Error loading settings from Firebase:', error);
-        if (typeof window.loadSettings === 'function') {
-            window.loadSettings();
-        }
+        settingsManager.loadSettings(); // Fallback a locales
     }
 }
 
-// Save settings to Firebase
-// CAMBIO: Hecho global
-window.saveSettingsToFirebase = async function() {
-    if (!window.currentUser || window.isOfflineMode) {
-        if (typeof window.saveSettingsToStorage === 'function') {
-            window.saveSettingsToStorage();
-        }
-        return;
-    }
-    
-    try {
-        // *** CAMBIO CRÍTICO ***
-        // Usar 'window.timeDurations', etc. (globales)
-        if (typeof window.timeDurations !== 'undefined') {
-            await db.collection('users')
-                .doc(window.currentUser.uid)
-                .collection('settings')
-                .doc('app-settings')
-                .set({
-                    timeDurations: window.timeDurations,
-                    timeActivities: window.timeActivities,
-                    trackItems: window.trackItems,
-                    moods: window.moods,
-                    updatedAt: new Date().toISOString()
-                });
-            
-            console.log('Settings saved to Firebase for', window.currentUser.email);
-        }
-    } catch (error) {
-        console.error('Error saving settings to Firebase:', error);
-        if (typeof window.saveSettingsToStorage === 'function') {
-            window.saveSettingsToStorage();
-        }
-    }
-}
-
-// Delete entry from Firebase
-// CAMBIO: Hecho global
-window.deleteEntryFromFirebase = async function(entryId) {
-    if (!window.currentUser || window.isOfflineMode) return;
+export async function saveSettingsToFirebase() {
+    const { currentUser, isOfflineMode, settings } = getState();
+    if (!currentUser || isOfflineMode) return;
     
     try {
         await db.collection('users')
-            .doc(window.currentUser.uid)
+            .doc(currentUser.uid)
+            .collection('settings')
+            .doc('app-settings')
+            .set({
+                ...settings,
+                updatedAt: new Date().toISOString()
+            });
+        
+        console.log('Settings saved to Firebase for', currentUser.email);
+    } catch (error) {
+        console.error('Error saving settings to Firebase:', error);
+    }
+}
+
+export async function deleteEntryFromFirebase(entryId) {
+    const { currentUser, isOfflineMode } = getState();
+    if (!currentUser || isOfflineMode) return;
+    
+    try {
+        await db.collection('users')
+            .doc(currentUser.uid)
             .collection('entries')
             .doc(String(entryId))
             .delete();
-        console.log('Entry deleted from Firebase for', window.currentUser.email);
+        console.log('Entry deleted from Firebase');
     } catch (error) {
         console.error('Error deleting from Firebase:', error);
     }
