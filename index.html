@@ -10,7 +10,7 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
 
-    <link rel="stylesheet" href="styles.css?v=1.1">
+    <link rel="stylesheet" href="styles.css?v=1.2">
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -29,8 +29,6 @@
         </div>
         <div class="header-right">
             <button id="sync-btn" class="mac-button" title="Sync/Refresh">🔄</button>
-            <button id="stats-btn" class="mac-button" title="Stats">📊</button>
-            <button id="settings-btn" class="mac-button" title="Settings">⚙️</button>
             
             <button id="login-btn" class="mac-button mac-button-primary hidden" style="margin-left: 10px;">Sign In</button>
             <div id="auth-container" class="hidden" style="margin-left: 10px; display: flex; align-items: center; gap: 8px;">
@@ -253,14 +251,14 @@
 
     <footer id="footer" class="mac-footer">
         <div class="footer-item">
+            <span class="footer-label">Admin:</span>
+            <button id="stats-btn" class="mac-button" title="Stats">📊</button>
+            <button id="settings-btn" class="mac-button" title="Settings">⚙️</button>
+        </div>
+        <div class="footer-item">
             <span class="footer-label">Export:</span>
             <button id="export-csv-btn">CSV</button>
             <button id="export-ics-btn">iCal</button>
-        </div>
-        <div class="footer-item">
-            <span class="footer-label">Ver:</span>
-            <button>All</button>
-            <button>Today</button>
         </div>
         <div class="footer-item">
             <span class="footer-label">Total:</span>
@@ -379,6 +377,6 @@
     </div>
 
 
-    <script type="module" src="app.js?v=1.1"></script>
+    <script type="module" src="app.js?v=1.2"></script>
 </body>
 </html>
