@@ -12,6 +12,7 @@ window.openStats = function() {
     // 'window.entries' is a global from app.js
     const stats = window.calculateStats(window.entries);
     
+    // CAMBIO: Se ha devuelto el estilo .stat-item a todos los elementos
     let html = `
         <div class="stat-item">
             <div class="stat-value">${stats.totalEntries}</div>
@@ -53,7 +54,8 @@ window.openStats = function() {
 
     // Activity Stats
      if (stats.activityCounts.length > 0) {
-        html += `<div class="stat-item stat-header">Top Activities</div>`;
+        // CAMBIO: Añadido un .stat-item como cabecera para mantener el grid
+        html += `<div class="stat-item stat-header"><div class="stat-label">Top Activities</div></div>`;
         stats.activityCounts.slice(0, 5).forEach(activity => { // Show top 5
             html += `
                 <div class="stat-item">
@@ -167,6 +169,7 @@ window.openExportModal = function(format) {
 }
 
 window.createExportModal = function() {
+    // CAMBIO: Re-añadido el HTML original con labels y opciones de iCal
     const modalHTML = `
         <div id="export-modal" class="preview-modal" onclick="closeExportModal(event)">
             <div class="preview-content" onclick="event.stopPropagation()">
@@ -178,7 +181,7 @@ window.createExportModal = function() {
                     <h3 id="export-title" style="margin-bottom: 16px;">Export as CSV</h3>
                     
                     <label class="mac-label">Date Range:</label>
-                    <select id="export-range" class="mac-input">
+                    <select id="export-range" class="mac-input" style="margin-bottom: 16px;">
                         <option value="all">All Time</option>
                         <option value="today">Today</option>
                         <option value="7days">Last 7 Days</option>
@@ -186,9 +189,21 @@ window.createExportModal = function() {
                         <option value="current_month">This Month</option>
                     </select>
 
-                    <label class="mac-label" style="margin-top: 16px;">Entry Types:</label>
+                    <label class="mac-label">Entry Types:</label>
                     <div id="export-types" class="export-types-grid">
                         </div>
+
+                    <div id="ics-options" class="hidden" style="margin-top: 16px;">
+                        <label class="mac-label">iCal Format:</label>
+                        <div class="mac-radio-wrapper">
+                            <input type="radio" id="ics-separate" name="ics-format" value="separate" checked>
+                            <label for="ics-separate">Separate events (default)</label>
+                        </div>
+                        <div class="mac-radio-wrapper">
+                            <input type="radio" id="ics-single" name="ics-format" value="single">
+                            <label for="ics-single">Single all-day event (per day)</label>
+                        </div>
+                    </div>
 
                     <button class="mac-button mac-button-primary" onclick="performExport()" style="width: 100%; margin-top: 24px;">💾 Export</button>
                 </div>
@@ -201,6 +216,14 @@ window.createExportModal = function() {
 window.updateExportOptions = function(format) {
     document.getElementById('export-title').textContent = `Export as ${format.toUpperCase()}`;
     document.getElementById('export-modal').dataset.format = format;
+
+    // Mostrar/ocultar opciones de iCal
+    const icsOptions = document.getElementById('ics-options');
+    if (format === 'ics') {
+        icsOptions.classList.remove('hidden');
+    } else {
+        icsOptions.classList.add('hidden');
+    }
 
     // 'window.entries' is a global from app.js
     const entryTypes = new Set(window.entries.map(e => {
@@ -236,6 +259,9 @@ window.performExport = function() {
     const format = document.getElementById('export-modal').dataset.format;
     const range = document.getElementById('export-range').value;
     const selectedTypes = Array.from(document.querySelectorAll('.export-type-check:checked')).map(cb => cb.value);
+    
+    // Leer la opción de iCal
+    const icsFormat = document.querySelector('input[name="ics-format"]:checked').value;
 
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -272,21 +298,22 @@ window.performExport = function() {
     if (format === 'csv') {
         window.exportCSVData(filteredEntries);
     } else if (format === 'ics') {
-        window.exportICSData(filteredEntries);
+        // Pasar la opción de formato
+        window.exportICSData(filteredEntries, icsFormat);
     }
 
     window.closeExportModal();
 }
 
 window.exportCSVData = function(entries) {
-    let csvContent = "data:text/csv;charset=utf-sh,-8,";
+    let csvContent = "data:text/csv;charset=utf-8,";
     // Define headers
     const headers = [
         "id", "timestamp", "type", "note", "mood_emoji", "mood_label", 
         "location", "weather", "coords_lat", "coords_lon", 
         "activity", "duration", "optional_note", 
         "spent_amount", 
-        "recap_reflection", "recap_rating", "recap_highlights"
+        "recap_reflection", "recap_rating", "recap_highlights", "recap_bso_track", "recap_bso_artist"
     ];
     csvContent += headers.join(",") + "\r\n";
 
@@ -315,7 +342,9 @@ window.exportCSVData = function(entries) {
             entry.spentAmount || "",
             `"${(entry.reflection || "").replace(/"/g, '""')}"`,
             entry.rating || "",
-            `"${(entry.highlights || []).join(', ').replace(/"/g, '""')}"`
+            `"${(entry.highlights || []).join('; ').replace(/"/g, '""')}"`, // Usar ; como separador
+            entry.track ? `"${entry.track.name.replace(/"/g, '""')}"` : "",
+            entry.track ? `"${entry.track.artist.replace(/"/g, '""')}"` : ""
         ];
         csvContent += row.join(",") + "\r\n";
     });
@@ -329,7 +358,7 @@ window.exportCSVData = function(entries) {
     document.body.removeChild(link);
 }
 
-window.exportICSData = function(entries) {
+window.exportICSData = function(entries, icsFormat) {
     let icsContent = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
@@ -339,35 +368,80 @@ window.exportICSData = function(entries) {
     const toICSDate = (date) => {
         return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     };
+    
+    const toICSDateOnly = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}${m}${d}`;
+    };
 
-    entries.forEach(entry => {
-        const startDate = new Date(entry.timestamp);
-        let endDate = new Date(startDate.getTime() + 15 * 60 * 1000); // Default 15 min
-        let summary = entry.note;
+    if (icsFormat === 'single') {
+        // Agrupar por día
+        const groupedByDay = {};
+        entries.forEach(entry => {
+            const dayKey = window.getDayKey(entry.timestamp); // Asume que getDayKey existe en utils.js
+            if (!groupedByDay[dayKey]) {
+                groupedByDay[dayKey] = [];
+            }
+            groupedByDay[dayKey].push(entry);
+        });
 
-        if (entry.isTimedActivity && entry.duration) {
-            endDate = new Date(startDate.getTime() + entry.duration * 60 * 1000);
-            summary = `${entry.activity}: ${entry.note}`;
-        } else if (entry.isQuickTrack) {
-            summary = `Track: ${entry.note}`;
-        } else if (entry.isSpent) {
-            summary = `Spent: ${entry.note} (€${entry.spentAmount})`;
-        } else if (entry.type === 'recap') {
-            summary = `Day Recap: Rating ${entry.rating}/10`;
+        for (const dayKey in groupedByDay) {
+            const dayEntries = groupedByDay[dayKey];
+            const firstEntryDate = new Date(dayEntries[0].timestamp);
+            let summary = `Breadcrumbs Recap (${dayEntries.length} entries)`;
+            let description = dayEntries.map(entry => {
+                let desc = `${window.formatTime(entry.timestamp)}: `; // Asume formatTime existe en utils.js
+                if (entry.isTimedActivity) desc += `(Time) ${entry.activity} - ${entry.duration}min`;
+                else if (entry.isQuickTrack) desc += `(Track) ${entry.note}`;
+                else if (entry.isSpent) desc += `(Spent) ${entry.note} - €${entry.spentAmount}`;
+                else if (entry.type === 'recap') desc += `(Recap) Rating: ${entry.rating}/10`;
+                else desc += entry.note;
+                return desc.replace(/\n/g, ' '); // Quitar saltos de línea para el ICS
+            }).join('\\n'); // Añadir saltos de línea de ICS
+
+            icsContent.push(
+                "BEGIN:VEVENT",
+                `UID:${dayKey}@paoloacx.github.io`,
+                `DTSTAMP:${toICSDate(new Date())}`,
+                `DTSTART;VALUE=DATE:${toICSDateOnly(firstEntryDate)}`,
+                `SUMMARY:${summary}`,
+                `DESCRIPTION:${description}`,
+                "END:VEVENT"
+            );
         }
+    } else {
+        // Formato de eventos separados (el original)
+        entries.forEach(entry => {
+            const startDate = new Date(entry.timestamp);
+            let endDate = new Date(startDate.getTime() + 15 * 60 * 1000); // Default 15 min
+            let summary = entry.note;
 
-        icsContent.push(
-            "BEGIN:VEVENT",
-            `UID:${entry.id}@paoloacx.github.io`,
-            `DTSTAMP:${toICSDate(new Date())}`,
-            `DTSTART:${toICSDate(startDate)}`,
-            `DTEND:${toICSDate(endDate)}`,
-            `SUMMARY:${summary}`,
-            `DESCRIPTION:${(entry.note || entry.reflection || '').replace(/\n/g, '\\n')}`,
-            `LOCATION:${entry.location || ""}`,
-            "END:VEVENT"
-        );
-    });
+            if (entry.isTimedActivity && entry.duration) {
+                endDate = new Date(startDate.getTime() + entry.duration * 60 * 1000);
+                summary = `${entry.activity}: ${entry.note}`;
+            } else if (entry.isQuickTrack) {
+                summary = `Track: ${entry.note}`;
+            } else if (entry.isSpent) {
+                summary = `Spent: ${entry.note} (€${entry.spentAmount})`;
+            } else if (entry.type === 'recap') {
+                summary = `Day Recap: Rating ${entry.rating}/10`;
+            }
+
+            icsContent.push(
+                "BEGIN:VEVENT",
+                `UID:${entry.id}@paoloacx.github.io`,
+                `DTSTAMP:${toICSDate(new Date())}`,
+                `DTSTART:${toICSDate(startDate)}`,
+                `DTEND:${toICSDate(endDate)}`,
+                `SUMMARY:${summary.replace(/\n/g, ' ')}`,
+                `DESCRIPTION:${(entry.note || entry.reflection || '').replace(/\n/g, '\\n')}`,
+                `LOCATION:${(entry.location || "").replace(/\n/g, ' ')}`,
+                "END:VEVENT"
+            );
+        });
+    }
 
     icsContent.push("END:VCALENDAR");
 
