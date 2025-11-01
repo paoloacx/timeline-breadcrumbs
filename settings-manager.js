@@ -3,7 +3,8 @@
 // Imports
 import { getState, setSettings } from './state.js';
 import { saveSettingsToFirebase } from './firebase-config.js';
-import { closeModal } from './ui-handlers.js';
+// CAMBIO: Importar las funciones de modal que faltaban
+import { openModal, closeModal } from './ui-handlers.js';
 import { renderMoodSelector } from './ui-renderer.js';
 
 // --- Local Storage ---
@@ -42,7 +43,7 @@ function saveSettingsToStorage() {
  */
 export function openSettings() {
     renderSettingsConfig();
-    openModal('settings-modal');
+    openModal('settings-modal'); // Ahora 'openModal' está definida
 }
 
 /**
@@ -99,7 +100,7 @@ export function saveSettings() {
     updateTrackOptions();
     renderMoodSelector(); // Actualiza el selector del formulario de crumb
     
-    closeModal('settings-modal');
+    closeModal('settings-modal'); // Ahora 'closeModal' está definida
     alert('Settings Saved!');
 }
 
@@ -114,19 +115,20 @@ function renderSettingsConfig() {
     // Render Time Durations
     const durationsContainer = document.getElementById('time-durations-config');
     durationsContainer.innerHTML = settings.timeDurations.map((duration, index) => `
-        <div classclass="config-item">
+        <div class="config-item">
             <input type="number" class="mac-input" value="${duration}" min="1">
             <button class="mac-button delete-button" onclick="this.closest('.config-item').remove()">✕</button>
         </div>
     `).join('') + `<button class="mac-button" id="btn-add-duration">➕ Add Duration</button>`;
     
     // (El listener para 'btn-add-duration' se añade dinámicamente)
+    // Usamos 'data-action' para un listener delegado más limpio en el futuro, pero onclick funciona por ahora.
     durationsContainer.querySelector('#btn-add-duration').addEventListener('click', () => {
         const newItem = `<div class="config-item">
             <input type="number" class="mac-input" value="15" min="1">
-            <button classclass="mac-button delete-button" onclick="this.closest('.config-item').remove()">✕</button>
+            <button class="mac-button delete-button" onclick="this.closest('.config-item').remove()">✕</button>
         </div>`;
-        durationsContainer.insertAdjacentHTML('beforeend', newItem);
+        durationsContainer.querySelector('#btn-add-duration').insertAdjacentHTML('beforebegin', newItem);
     });
 
     // Render Time Activities
@@ -143,7 +145,7 @@ function renderSettingsConfig() {
             <input type="text" class="mac-input" value="">
             <button class="mac-button delete-button" onclick="this.closest('.config-item').remove()">✕</button>
         </div>`;
-        activitiesContainer.insertAdjacentHTML('beforeend', newItem);
+        activitiesContainer.querySelector('#btn-add-activity').insertAdjacentHTML('beforebegin', newItem);
     });
 
     // Render Track Items
@@ -167,13 +169,19 @@ function renderSettingsConfig() {
     trackHTML += `<button class="mac-button" id="btn-add-task">➕ Add Task</button>`;
     trackContainer.innerHTML = trackHTML;
 
-    trackContainer.querySelector('#btn-add-meal').addEventListener('click', () => {
-        const newItem = `<div class="config-item meal">...</div>`; // (Similar a los otros)
-        trackContainer.querySelector('#btn-add-meal').insertAdjacentHTML('beforebegin', newItem);
+    trackContainer.querySelector('#btn-add-meal').addEventListener('click', (e) => {
+        const newItem = `<div class="config-item meal">
+            <input type="text" class="mac-input" value="">
+            <button class="mac-button delete-button" onclick="this.closest('.config-item').remove()">✕</button>
+        </div>`;
+        e.target.insertAdjacentHTML('beforebegin', newItem);
     });
-    trackContainer.querySelector('#btn-add-task').addEventListener('click', () => {
-        const newItem = `<div class="config-item task">...</div>`; // (Similar a los otros)
-        trackContainer.querySelector('#btn-add-task').insertAdjacentHTML('beforebegin', newItem);
+    trackContainer.querySelector('#btn-add-task').addEventListener('click', (e) => {
+        const newItem = `<div class="config-item task">
+            <input type="text" class="mac-input" value="">
+            <button class="mac-button delete-button" onclick="this.closest('.config-item').remove()">✕</button>
+        </div>`;
+        e.target.insertAdjacentHTML('beforebegin', newItem);
     });
 
     // Render Mood Config
@@ -227,6 +235,7 @@ export function updateTimerOptions() {
     const { settings, selectedDuration, selectedActivity } = getState();
     
     const durationContainer = document.getElementById('duration-selector');
+    if (!durationContainer) return; // Guard clause
     durationContainer.innerHTML = settings.timeDurations.map(minutes => `
         <div class="duration-option ${selectedDuration === minutes ? 'selected' : ''}" data-duration="${minutes}">
             ${minutes} min
@@ -234,6 +243,7 @@ export function updateTimerOptions() {
     `).join('');
     
     const activityContainer = document.getElementById('activity-selector');
+    if (!activityContainer) return; // Guard clause
     activityContainer.innerHTML = settings.timeActivities.map(activity => `
         <div class="activity-option ${selectedActivity === activity ? 'selected' : ''}" data-activity="${activity}">
             ${activity}
@@ -247,6 +257,7 @@ export function updateTimerOptions() {
 export function updateTrackOptions() {
     const { settings, selectedTrackItem } = getState();
     const container = document.getElementById('track-selector');
+    if (!container) return; // Guard clause
     
     let html = '';
     if (settings.trackItems.meals.length > 0) {
