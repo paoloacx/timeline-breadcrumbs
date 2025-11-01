@@ -57,7 +57,8 @@ window.toggleTrack = function() {
         window.setCurrentDateTime('datetime-input-track'); // global function in utils.js
         window.selectedTrackItem = null; // global variable from app.js
         
-        // CAMBIO: Arregla el bug del "Cancel"
+        // *** CAMBIO CRÍTICO ***
+        // Arregla el bug del "Cancel" al editar
         window.editingEntryId = null; 
 
         document.getElementById('save-track-btn').disabled = true;
@@ -84,7 +85,8 @@ window.toggleSpent = function() {
         document.getElementById('spent-amount').value = '';
         window.setCurrentDateTime('datetime-input-spent'); // global function in utils.js
         
-        // CAMBIO: Arregla el bug del "Cancel"
+        // *** CAMBIO CRÍTICO ***
+        // Arregla el bug del "Cancel" al editar
         window.editingEntryId = null; 
 
         document.getElementById('delete-spent-btn').classList.add('hidden');
@@ -92,9 +94,10 @@ window.toggleSpent = function() {
     }
 }
 
+// ESTA FUNCIÓN ES PARA EL FORMULARIO PRINCIPAL
 window.cancelEdit = function() {
-    window.clearForm(); // global function in app.js
-    window.toggleForm();
+    window.clearForm(); // global function in app.js (ya resetea editingEntryId)
+    window.toggleForm(); // Cierra el formulario
 }
 
 // Mood selection
