@@ -12,7 +12,8 @@ window.openStats = function() {
     // 'window.entries' is a global from app.js
     const stats = window.calculateStats(window.entries);
     
-    // CAMBIO: Se ha devuelto el estilo .stat-item a todos los elementos
+    // *** CAMBIO CRÍTICO ***
+    // Re-aplicado el estilo .stat-item a todos los elementos para mantener el grid
     let html = `
         <div class="stat-item">
             <div class="stat-value">${stats.totalEntries}</div>
@@ -54,7 +55,7 @@ window.openStats = function() {
 
     // Activity Stats
      if (stats.activityCounts.length > 0) {
-        // CAMBIO: Añadido un .stat-item como cabecera para mantener el grid
+        // Añadido un .stat-item como cabecera para mantener el grid
         html += `<div class="stat-item stat-header"><div class="stat-label">Top Activities</div></div>`;
         stats.activityCounts.slice(0, 5).forEach(activity => { // Show top 5
             html += `
@@ -73,7 +74,7 @@ window.openStats = function() {
 /**
  * Calculates various statistics from the entries.
  * @param {Array} entries - The global entries array.
- * @returns {object} An object containing calculated stats.
+ *@returns {object} An object containing calculated stats.
  */
 window.calculateStats = function(entries) {
     const stats = {
@@ -169,7 +170,8 @@ window.openExportModal = function(format) {
 }
 
 window.createExportModal = function() {
-    // CAMBIO: Re-añadido el HTML original con labels y opciones de iCal
+    // *** CAMBIO CRÍTICO ***
+    // Re-añadido el HTML original con labels y opciones de iCal
     const modalHTML = `
         <div id="export-modal" class="preview-modal" onclick="closeExportModal(event)">
             <div class="preview-content" onclick="event.stopPropagation()">
@@ -343,8 +345,8 @@ window.exportCSVData = function(entries) {
             `"${(entry.reflection || "").replace(/"/g, '""')}"`,
             entry.rating || "",
             `"${(entry.highlights || []).join('; ').replace(/"/g, '""')}"`, // Usar ; como separador
-            entry.track ? `"${entry.track.name.replace(/"/g, '""')}"` : "",
-            entry.track ? `"${entry.track.artist.replace(/"/g, '""')}"` : ""
+            entry.track ? `"${(entry.track.name || "").replace(/"/g, '""')}"` : "",
+            entry.track ? `"${(entry.track.artist || "").replace(/"/g, '""')}"` : ""
         ];
         csvContent += row.join(",") + "\r\n";
     });
@@ -417,16 +419,23 @@ window.exportICSData = function(entries, icsFormat) {
             const startDate = new Date(entry.timestamp);
             let endDate = new Date(startDate.getTime() + 15 * 60 * 1000); // Default 15 min
             let summary = entry.note;
+            let description = (entry.note || entry.reflection || '').replace(/\n/g, '\\n');
 
             if (entry.isTimedActivity && entry.duration) {
                 endDate = new Date(startDate.getTime() + entry.duration * 60 * 1000);
-                summary = `${entry.activity}: ${entry.note}`;
+                summary = `${entry.activity}`;
+                description = entry.optionalNote ? entry.optionalNote.replace(/\n/g, '\\n') : '';
             } else if (entry.isQuickTrack) {
                 summary = `Track: ${entry.note}`;
+                description = entry.optionalNote ? entry.optionalNote.replace(/\n/g, '\\n') : '';
             } else if (entry.isSpent) {
                 summary = `Spent: ${entry.note} (€${entry.spentAmount})`;
             } else if (entry.type === 'recap') {
                 summary = `Day Recap: Rating ${entry.rating}/10`;
+                description = (entry.reflection || '').replace(/\n/g, '\\n');
+                if (entry.highlights) {
+                    description += `\\n\\nHighlights:\\n- ${entry.highlights.join('\\n- ')}`;
+                }
             }
 
             icsContent.push(
@@ -436,7 +445,7 @@ window.exportICSData = function(entries, icsFormat) {
                 `DTSTART:${toICSDate(startDate)}`,
                 `DTEND:${toICSDate(endDate)}`,
                 `SUMMARY:${summary.replace(/\n/g, ' ')}`,
-                `DESCRIPTION:${(entry.note || entry.reflection || '').replace(/\n/g, '\\n')}`,
+                `DESCRIPTION:${description}`,
                 `LOCATION:${(entry.location || "").replace(/\n/g, ' ')}`,
                 "END:VEVENT"
             );
