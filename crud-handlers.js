@@ -1,34 +1,40 @@
-// --- Funciones de Guardado/Edición de Entradas ---
+// ===== CRUD FUNCTIONS (Create, Read, Update, Delete) =====
 
-// Guardar/Actualizar un "Crumb" (entrada normal)
-function saveEntry() {
+/**
+ * Saves or updates a standard "Crumb" entry.
+ */
+window.saveEntry = function() {
     const note = document.getElementById('note-input').value.trim();
     if (!note) {
         alert('Please write a note');
         return;
     }
 
-    const moodData = selectedMood !== null ? moods[selectedMood] : null;
-    const timestamp = getTimestampFromInput('datetime-input');
+    // global vars from app.js
+    const moodData = selectedMood !== null ? window.moods[selectedMood] : null;
+    const timestamp = window.getTimestampFromInput('datetime-input'); // global util
 
-    if (editingEntryId) {
-        // Actualizar entrada existente
-        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
+    if (editingEntryId) { // global var from app.js
+        const entryIndex = window.entries.findIndex(e => e.id === editingEntryId);
         if (entryIndex !== -1) {
-            entries[entryIndex] = {
-                ...entries[entryIndex],
+            window.entries[entryIndex] = {
+                ...window.entries[entryIndex], // Keep original ID and type
                 timestamp: timestamp,
                 note: note,
                 location: document.getElementById('location-input').value,
                 weather: document.getElementById('weather-input').value,
                 images: [...currentImages],
                 audio: currentAudio,
-                coords: currentCoords ? { ...currentCoords } : entries[entryIndex].coords,
-                mood: moodData
+                coords: currentCoords ? { ...currentCoords } : window.entries[entryIndex].coords,
+                mood: moodData,
+                // Ensure other types are false
+                isTimedActivity: false,
+                isQuickTrack: false,
+                isSpent: false,
+                type: null
             };
         }
     } else {
-        // Crear entrada nueva
         const entry = {
             id: Date.now(),
             timestamp: timestamp,
@@ -40,48 +46,51 @@ function saveEntry() {
             coords: currentCoords ? { ...currentCoords } : null,
             mood: moodData
         };
-        entries.unshift(entry);
+        window.entries.unshift(entry); // global var from app.js
     }
 
-    saveData();
-    renderTimeline();
-    toggleForm();
+    saveData(); // global function in app.js
+    window.renderTimeline(); // global function in ui-renderer.js
+    window.toggleForm(); // global function in ui-handlers.js
 }
 
-// "Enrutador" principal para editar cualquier tipo de entrada
-function editEntry(id) {
-    const entry = entries.find(e => e.id === id);
+/**
+ * Main entry point for editing an entry. Delegates to specific edit functions.
+ * @param {number} id - The ID of the entry to edit.
+ */
+window.editEntry = function(id) {
+    const entry = window.entries.find(e => e.id === id); // global var from app.js
     if (!entry) return;
 
-    // Diferenciar el tipo de entrada para llamar a la función de edición correcta
+    // Delegate to specific handlers
     if (entry.isTimedActivity) {
-        editTimeEvent(entry);
+        window.editTimeEvent(entry);
         return;
     }
     
     if (entry.isQuickTrack) {
-        editTrackEvent(entry);
+        window.editTrackEvent(entry);
         return;
     }
     
     if (entry.isSpent) {
-        editSpentEvent(entry);
+        window.editSpentEvent(entry);
         return;
     }
 
     if (entry.type === 'recap') {
-        editRecapEvent(entry);
+        window.editRecapEvent(entry);
         return;
     }
 
-    // Si no es ninguno de los anteriores, es un "Crumb" normal
-    editingEntryId = id;
+    // --- Is a standard "Crumb" entry ---
+    editingEntryId = id; // global var from app.js
     document.getElementById('note-input').value = entry.note;
     document.getElementById('location-input').value = entry.location || '';
     document.getElementById('weather-input').value = entry.weather || '';
-    currentImages = [...(entry.images || [])];
-    currentAudio = entry.audio || null;
-    currentCoords = entry.coords ? { ...entry.coords } : null;
+    currentImages = [...(entry.images || [])]; // global var
+    currentAudio = entry.audio || null; // global var
+    currentCoords = entry.coords ? { ...entry.coords } : null; // global var
 
     // Set datetime
     const date = new Date(entry.timestamp);
@@ -93,35 +102,43 @@ function editEntry(id) {
     document.getElementById('datetime-input').value = `${year}-${month}-${day}T${hours}:${minutes}`;
 
     if (entry.mood) {
-        const moodIndex = moods.findIndex(m => m.emoji === entry.mood.emoji && m.label === entry.mood.label);
-        selectedMood = moodIndex !== -1 ? moodIndex : null;
+        const moodIndex = window.moods.findIndex(m => m.emoji === entry.mood.emoji && m.label === entry.mood.label);
+        selectedMood = moodIndex !== -1 ? moodIndex : null; // global var
     } else {
-        selectedMood = null;
+        selectedMood = null; // global var
     }
 
-    renderImagePreviews();
-    renderAudioPreview();
-    renderMoodSelector();
+    window.renderImagePreviews(); // global function in ui-renderer.js
+    window.renderAudioPreview(); // global function in ui-renderer.js
+    window.renderMoodSelector(); // global function in ui-renderer.js
 
     if (entry.coords) {
-        showMiniMap(entry.coords.lat, entry.coords.lon, 'form-map');
+        window.showMiniMap(entry.coords.lat, entry.coords.lon, 'form-map'); // global util
     }
 
     document.getElementById('delete-btn').classList.remove('hidden');
     document.getElementById('save-btn').textContent = '💾 Update';
     
+    // Show the correct form
     const formWindow = document.getElementById('form-window');
+    document.getElementById('timer-window').classList.add('hidden');
+    document.getElementById('track-window').classList.add('hidden');
+    document.getElementById('spent-window').classList.add('hidden');
+    document.getElementById('recap-form').classList.add('hidden');
+    
     formWindow.classList.remove('hidden');
     formWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// --- Funciones Específicas de "Time Event" ---
-
-function editTimeEvent(entry) {
-    editingEntryId = entry.id;
+/**
+ * Populates the "Time" form to edit an existing time event.
+ * @param {object} entry - The time event entry object.
+ */
+window.editTimeEvent = function(entry) {
+    editingEntryId = entry.id; // global var
     
-    selectedDuration = entry.duration;
-    selectedActivity = entry.activity;
+    selectedDuration = entry.duration; // global var
+    selectedActivity = entry.activity; // global var
     
     // Set datetime
     const date = new Date(entry.timestamp);
@@ -132,58 +149,74 @@ function editTimeEvent(entry) {
     const minutes = String(date.getMinutes()).padStart(2, '0');
     document.getElementById('datetime-input-time').value = `${year}-${month}-${day}T${hours}:${minutes}`;
     
-    // Settear nota opcional
     document.getElementById('time-optional-note').value = entry.optionalNote || '';
-
+    
+    // Ensure options are rendered (from settings-manager.js)
+    if (typeof window.updateTimerOptions === 'function') {
+        window.updateTimerOptions();
+    }
+    
+    // Select correct options
     document.querySelectorAll('.duration-option').forEach(el => {
         el.classList.remove('selected');
-        // Usar data-minutes para una comparación numérica fiable
-        const durationMinutes = parseInt(el.dataset.minutes || 0, 10);
-        if (durationMinutes === selectedDuration) {
+        if (parseInt(el.dataset.duration) === selectedDuration) {
             el.classList.add('selected');
         }
     });
     
     document.querySelectorAll('#activity-selector .activity-option').forEach(el => {
         el.classList.remove('selected');
-        if (el.textContent.trim() === selectedActivity) {
+        if (el.dataset.activity === selectedActivity) {
             el.classList.add('selected');
         }
     });
     
-    checkTimerReady();
+    checkTimerReady(); // global function in app.js
     
     const timerWindow = document.getElementById('timer-window');
-    const createBtn = document.getElementById('create-time-btn');
-    createBtn.textContent = '💾 Update Event';
+    document.getElementById('create-time-btn').textContent = '💾 Update Event';
     document.getElementById('delete-time-btn').classList.remove('hidden');
     
+    // Show the correct form
+    document.getElementById('form-window').classList.add('hidden');
+    document.getElementById('track-window').classList.add('hidden');
+    document.getElementById('spent-window').classList.add('hidden');
+    document.getElementById('recap-form').classList.add('hidden');
+
     timerWindow.classList.remove('hidden');
     timerWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function createTimeEvent() {
+/**
+ * Saves or updates a "Time" event.
+ */
+window.createTimeEvent = function() {
+    // global vars from app.js
     if (!selectedDuration || !selectedActivity) return;
     
-    const timestamp = getTimestampFromInput('datetime-input-time');
+    const timestamp = window.getTimestampFromInput('datetime-input-time'); // global util
     const optionalNote = document.getElementById('time-optional-note').value.trim();
     
-    if (editingEntryId) {
-        // Actualizar
-        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
+    if (editingEntryId) { // global var
+        const entryIndex = window.entries.findIndex(e => e.id === editingEntryId);
         if (entryIndex !== -1) {
-            entries[entryIndex] = {
-                ...entries[entryIndex],
+            window.entries[entryIndex] = {
+                ...window.entries[entryIndex],
                 timestamp: timestamp,
                 note: `${selectedActivity} - ${selectedDuration} minutes`,
                 activity: selectedActivity,
                 duration: selectedDuration,
-                optionalNote: optionalNote
+                optionalNote: optionalNote,
+                isTimedActivity: true,
+                // Clear other types
+                isQuickTrack: false,
+                isSpent: false,
+                type: null,
+                mood: null
             };
         }
         alert(`✅ Time event updated!`);
     } else {
-        // Crear nuevo
         const entry = {
             id: Date.now(),
             timestamp: timestamp,
@@ -200,26 +233,29 @@ function createTimeEvent() {
             optionalNote: optionalNote
         };
         
-        entries.unshift(entry);
+        window.entries.unshift(entry); // global var
         alert(`✅ Time event created!`);
     }
     
-    saveData();
-    renderTimeline();
-    toggleTimer();
+    saveData(); // global function in app.js
+    window.renderTimeline(); // global function in ui-renderer.js
     
-    // Resetear formulario de tiempo
+    window.toggleTimer(); // global function in ui-handlers.js
+    
+    // Reset form state
+    editingEntryId = null; // global var
     document.getElementById('create-time-btn').textContent = 'Create Event';
     document.getElementById('delete-time-btn').classList.add('hidden');
     document.getElementById('time-optional-note').value = '';
-    editingEntryId = null; // Asegurarse de limpiar el ID de edición
 }
 
-// --- Funciones Específicas de "Track Event" ---
-
-function editTrackEvent(entry) {
-    editingEntryId = entry.id;
-    selectedTrackItem = entry.note;
+/**
+ * Populates the "Track" form to edit an existing track event.
+ * @param {object} entry - The track event entry object.
+ */
+window.editTrackEvent = function(entry) {
+    editingEntryId = entry.id; // global var
+    selectedTrackItem = entry.note; // global var
     
     // Set datetime
     const date = new Date(entry.timestamp);
@@ -232,11 +268,14 @@ function editTrackEvent(entry) {
     
     document.getElementById('track-optional-note').value = entry.optionalNote || '';
     
-    renderTrackSelector(); // Renderiza las opciones
+    // Ensure options are rendered (from settings-manager.js)
+    if (typeof window.updateTrackOptions === 'function') {
+        window.updateTrackOptions();
+    }
     
-    // Selecciona la opción correcta
+    // Select correct option
     document.querySelectorAll('#track-selector .activity-option').forEach(el => {
-        if (el.textContent.trim() === selectedTrackItem) {
+        if (el.dataset.item === selectedTrackItem) {
             el.classList.add('selected');
         }
     });
@@ -245,31 +284,44 @@ function editTrackEvent(entry) {
     document.getElementById('save-track-btn').textContent = '💾 Update Track';
     document.getElementById('delete-track-btn').classList.remove('hidden');
     
+    // Show the correct form
     const trackWindow = document.getElementById('track-window');
+    document.getElementById('form-window').classList.add('hidden');
+    document.getElementById('timer-window').classList.add('hidden');
+    document.getElementById('spent-window').classList.add('hidden');
+    document.getElementById('recap-form').classList.add('hidden');
+
     trackWindow.classList.remove('hidden');
     trackWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function saveTrackEvent() {
-    if (!selectedTrackItem) return;
+/**
+ * Saves or updates a "Track" event.
+ */
+window.saveTrackEvent = function() {
+    if (!selectedTrackItem) return; // global var
     
-    const timestamp = getTimestampFromInput('datetime-input-track');
+    const timestamp = window.getTimestampFromInput('datetime-input-track'); // global util
     const optionalNote = document.getElementById('track-optional-note').value.trim();
     
-    if (editingEntryId) {
-        // Actualizar
-        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
+    if (editingEntryId) { // global var
+        const entryIndex = window.entries.findIndex(e => e.id === editingEntryId);
         if (entryIndex !== -1) {
-            entries[entryIndex] = {
-                ...entries[entryIndex],
+            window.entries[entryIndex] = {
+                ...window.entries[entryIndex],
                 timestamp: timestamp,
                 note: selectedTrackItem,
-                optionalNote: optionalNote
+                optionalNote: optionalNote,
+                isQuickTrack: true,
+                // Clear other types
+                isTimedActivity: false,
+                isSpent: false,
+                type: null,
+                mood: null
             };
         }
         alert(`✅ Track updated: ${selectedTrackItem}`);
     } else {
-        // Crear nuevo
         const entry = {
             id: Date.now(),
             timestamp: timestamp,
@@ -284,24 +336,26 @@ function saveTrackEvent() {
             optionalNote: optionalNote
         };
         
-        entries.unshift(entry);
+        window.entries.unshift(entry); // global var
         alert(`✅ Tracked: ${selectedTrackItem}`);
     }
     
-    saveData();
-    renderTimeline();
-    toggleTrack();
+    saveData(); // global function in app.js
+    window.renderTimeline(); // global function in ui-renderer.js
+    window.toggleTrack(); // global function in ui-handlers.js
     
-    // Resetear formulario de track
+    // Reset form state
+    editingEntryId = null; // global var
     document.getElementById('save-track-btn').textContent = 'Save Track';
     document.getElementById('delete-track-btn').classList.add('hidden');
-    editingEntryId = null; // Asegurarse de limpiar el ID de edición
 }
 
-// --- Funciones Específicas de "Spent Event" ---
-
-function editSpentEvent(entry) {
-    editingEntryId = entry.id;
+/**
+ * Populates the "Spent" form to edit an existing spent event.
+ * @param {object} entry - The spent event entry object.
+ */
+window.editSpentEvent = function(entry) {
+    editingEntryId = entry.id; // global var
     
     document.getElementById('spent-description').value = entry.note;
     document.getElementById('spent-amount').value = entry.spentAmount;
@@ -317,12 +371,21 @@ function editSpentEvent(entry) {
     
     document.getElementById('delete-spent-btn').classList.remove('hidden');
     
+    // Show the correct form
     const spentWindow = document.getElementById('spent-window');
+    document.getElementById('form-window').classList.add('hidden');
+    document.getElementById('timer-window').classList.add('hidden');
+    document.getElementById('track-window').classList.add('hidden');
+    document.getElementById('recap-form').classList.add('hidden');
+
     spentWindow.classList.remove('hidden');
     spentWindow.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function saveSpent() {
+/**
+ * Saves or updates a "Spent" event.
+ */
+window.saveSpent = function() {
     const description = document.getElementById('spent-description').value.trim();
     const amount = parseFloat(document.getElementById('spent-amount').value);
 
@@ -331,27 +394,31 @@ function saveSpent() {
         return;
     }
 
-    if (!amount || amount <= 0) {
+    if (!amount || amount <= 0 || isNaN(amount)) {
         alert('Please enter a valid amount');
         return;
     }
 
-    const timestamp = getTimestampFromInput('datetime-input-spent');
+    const timestamp = window.getTimestampFromInput('datetime-input-spent'); // global util
 
-    if (editingEntryId) {
-        // Actualizar
-        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
+    if (editingEntryId) { // global var
+        const entryIndex = window.entries.findIndex(e => e.id === editingEntryId);
         if (entryIndex !== -1) {
-            entries[entryIndex] = {
-                ...entries[entryIndex],
+            window.entries[entryIndex] = {
+                ...window.entries[entryIndex],
                 timestamp: timestamp,
                 note: description,
-                spentAmount: amount
+                spentAmount: amount,
+                isSpent: true,
+                // Clear other types
+                isTimedActivity: false,
+                isQuickTrack: false,
+                type: null,
+                mood: null
             };
         }
         alert(`✅ Spent updated: €${amount.toFixed(2)}`);
     } else {
-        // Crear nuevo
         const entry = {
             id: Date.now(),
             timestamp: timestamp,
@@ -366,25 +433,35 @@ function saveSpent() {
             isSpent: true
         };
         
-        entries.unshift(entry);
+        window.entries.unshift(entry); // global var
         alert(`✅ Spent tracked: €${amount.toFixed(2)}`);
     }
     
-    saveData();
-    renderTimeline();
-    toggleSpent();
+    saveData(); // global function in app.js
+    window.renderTimeline(); // global function in ui-renderer.js
+    window.toggleSpent(); // global function in ui-handlers.js
 
-    // Resetear formulario de spent
+    // Reset form state
+    editingEntryId = null; // global var
     document.getElementById('delete-spent-btn').classList.add('hidden');
-    editingEntryId = null; // Asegurarse de limpiar el ID de edición
 }
 
-
-// --- Funciones Específicas de "Recap Event" ---
-
-function editRecapEvent(entry) {
-    editingEntryId = entry.id;
+/**
+ * Populates the "Recap" form to edit an existing recap event.
+ * @param {object} entry - The recap event entry object.
+ */
+window.editRecapEvent = function(entry) {
+    editingEntryId = entry.id; // global var
     
+    // Show the correct form
+    document.getElementById('form-window').classList.add('hidden');
+    document.getElementById('timer-window').classList.add('hidden');
+    document.getElementById('track-window').classList.add('hidden');
+    document.getElementById('spent-window').classList.add('hidden');
+    
+    const recapForm = document.getElementById('recap-form');
+    recapForm.classList.remove('hidden');
+
     // Set datetime
     const date = new Date(entry.timestamp);
     const year = date.getFullYear();
@@ -398,121 +475,104 @@ function editRecapEvent(entry) {
     document.getElementById('recap-rating').value = entry.rating || 5;
     document.getElementById('recap-rating-value').textContent = entry.rating || 5;
     
-    if (entry.highlights && entry.highlights.length > 0) {
-        document.getElementById('recap-highlight-1').value = entry.highlights[0] || '';
-        document.getElementById('recap-highlight-2').value = entry.highlights[1] || '';
-        document.getElementById('recap-highlight-3').value = entry.highlights[2] || '';
-    }
+    document.getElementById('recap-highlight-1').value = (entry.highlights && entry.highlights[0]) || '';
+    document.getElementById('recap-highlight-2').value = (entry.highlights && entry.highlights[1]) || '';
+    document.getElementById('recap-highlight-3').value = (entry.highlights && entry.highlights[2]) || '';
+    
+    // Clear old search
+    document.getElementById('recap-bso').value = '';
+    document.getElementById('recap-bso-results').innerHTML = '';
+    document.getElementById('recap-selected-track').value = '';
     
     if (entry.track) {
-        // Llama a selectTrack para poblar la UI
-        selectTrack(entry.track.name, entry.track.artist, entry.track.url, entry.track.artwork);
+        // Display the selected track
+        window.selectTrack(entry.track.name, entry.track.artist, entry.track.url, entry.track.artwork); // global util
     }
     
-    const recapForm = document.getElementById('recap-form');
-    recapForm.classList.remove('hidden');
     recapForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function saveRecap() {
+/**
+ * Saves or updates a "Recap" event.
+ */
+window.saveRecap = function() {
     const reflection = document.getElementById('recap-reflection').value.trim();
     const rating = document.getElementById('recap-rating').value;
     const highlight1 = document.getElementById('recap-highlight-1').value.trim();
     const highlight2 = document.getElementById('recap-highlight-2').value.trim();
     const highlight3 = document.getElementById('recap-highlight-3').value.trim();
     const selectedTrackJson = document.getElementById('recap-selected-track').value;
-    const timestamp = getTimestampFromInput('datetime-input-recap');
+    const timestamp = window.getTimestampFromInput('datetime-input-recap'); // global util
     
     if (!reflection && !highlight1 && !highlight2 && !highlight3) {
         alert('Please add at least one reflection or highlight');
         return;
     }
     
-    if (editingEntryId) {
-        // Actualizar
-        const entryIndex = entries.findIndex(e => e.id === editingEntryId);
+    const recapEntry = {
+        id: editingEntryId || Date.now(), // global var
+        timestamp: timestamp,
+        type: 'recap',
+        reflection: reflection,
+        rating: parseInt(rating),
+        highlights: [highlight1, highlight2, highlight3].filter(h => h), // Only save non-empty highlights
+        track: selectedTrackJson ? JSON.parse(selectedTrackJson) : null,
+        // Ensure other fields are clean
+        note: `Day Recap (Rating: ${rating}/10)`,
+        isTimedActivity: false,
+        isQuickTrack: false,
+        isSpent: false,
+        mood: null
+    };
+
+    if (editingEntryId) { // global var
+        const entryIndex = window.entries.findIndex(e => e.id === editingEntryId);
         if (entryIndex !== -1) {
-            entries[entryIndex] = {
-                ...entries[entryIndex],
-                timestamp: timestamp,
-                reflection: reflection,
-                rating: parseInt(rating),
-                highlights: [highlight1, highlight2, highlight3].filter(h => h),
-                track: selectedTrackJson ? JSON.parse(selectedTrackJson) : null,
-                type: 'recap' // Asegurarse de que el tipo se mantenga
-            };
+            window.entries[entryIndex] = recapEntry;
         }
         alert('🌟 Recap updated!');
     } else {
-        // Crear nuevo
-        const recap = {
-            id: Date.now(),
-            timestamp: timestamp,
-            type: 'recap',
-            reflection: reflection,
-            rating: parseInt(rating),
-            highlights: [highlight1, highlight2, highlight3].filter(h => h),
-            track: selectedTrackJson ? JSON.parse(selectedTrackJson) : null
-        };
-        
-        entries.unshift(recap);
+        window.entries.unshift(recapEntry); // global var
         alert('🌟 Recap saved!');
     }
     
-    saveData();
-    renderTimeline();
-    closeRecapForm();
-    editingEntryId = null; // Limpiar ID de edición
+    editingEntryId = null; // global var
+    
+    saveData(); // global function in app.js
+    window.renderTimeline(); // global function in ui-renderer.js
+    window.closeRecapForm(); // global function in ui-handlers.js
 }
 
-// Función ayudante para seleccionar BSO en Recap
-function selectTrack(trackName, artistName, url, artwork) {
-    const trackData = {
-        name: trackName,
-        artist: artistName,
-        url: url,
-        artwork: artwork
-    };
+/**
+ * Deletes the entry currently being edited (from any form).
+ */
+window.deleteCurrentEntry = function() {
+    if (!editingEntryId) return; // global var
     
-    // Almacena el JSON en el input hidden
-    document.getElementById('recap-selected-track').value = JSON.stringify(trackData);
-    
-    // Muestra la selección en la UI
-    document.getElementById('recap-bso-results').innerHTML = `
-        <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 3px solid #000; background: #f0f0f0;">
-            <img src="${artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
-            <div style="flex: 1;">
-                <div style="font-weight: bold;">${trackName}</div>
-                <div style="font-size: 12px; color: #666;">${artistName}</div>
-            </div>
-            <a href="${url}" target="_blank" style="text-decoration: none; font-size: 20px;">🔗</a>
-        </div>
-    `;
-}
-
-// --- Función de Borrado ---
-
-function deleteCurrentEntry() {
-    if (!editingEntryId) return;
+    // Determine which form is active to close it
+    let formIdToDelete = null;
+    if (!document.getElementById('form-window').classList.contains('hidden')) formIdToDelete = 'form-window';
+    else if (!document.getElementById('timer-window').classList.contains('hidden')) formIdToDelete = 'timer-window';
+    else if (!document.getElementById('track-window').classList.contains('hidden')) formIdToDelete = 'track-window';
+    else if (!document.getElementById('spent-window').classList.contains('hidden')) formIdToDelete = 'spent-window';
+    else if (!document.getElementById('recap-form').classList.contains('hidden')) formIdToDelete = 'recap-form';
     
     if (confirm('Delete this entry?')) {
-        entries = entries.filter(e => e.id !== editingEntryId);
+        window.entries = window.entries.filter(e => e.id !== editingEntryId); // global var
         
-        if (currentUser && !isOfflineMode) {
-            deleteEntryFromFirebase(editingEntryId);
+        // Firebase deletion (from firebase-config.js)
+        if (window.currentUser && !window.isOfflineMode) {
+            window.deleteEntryFromFirebase(editingEntryId); 
         }
         
-        saveData();
-        renderTimeline();
+        saveData(); // global function in app.js
+        window.renderTimeline(); // global function in ui-renderer.js
         
-        // Cerrar todas las ventanas de formulario
-        document.getElementById('form-window').classList.add('hidden');
-        document.getElementById('timer-window').classList.add('hidden');
-        document.getElementById('track-window').classList.add('hidden');
-        document.getElementById('spent-window').classList.add('hidden');
-        document.getElementById('recap-form').classList.add('hidden');
+        // Close the active form
+        if (formIdToDelete) {
+            document.getElementById(formIdToDelete).classList.add('hidden');
+        }
         
-        editingEntryId = null;
+        editingEntryId = null; // global var
     }
 }
-
