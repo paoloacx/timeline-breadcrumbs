@@ -7,9 +7,12 @@ import {
     renderMoodSelector, renderTrackSelector, renderTimerOptions, 
     populateCrumbForm, populateTimerForm, populateTrackForm, 
     populateSpentForm, populateRecapForm, clearForm, 
-    renderBsoResults, renderSelectedBsoTrack, renderMoodConfig 
+    renderBsoResults, renderSelectedBsoTrack 
+    // CAMBIO: Se ha eliminado 'renderMoodConfig' de esta línea
 } from './ui-renderer.js';
 import { searchiTunesTracks } from './api-services.js';
+// CAMBIO: Se ha añadido la importación correcta desde 'settings-manager.js'
+import { renderMoodConfig } from './settings-manager.js';
 
 let fabMenuOpen = false;
 const allForms = ['form-window', 'timer-window', 'track-window', 'spent-window', 'recap-form'];
@@ -104,8 +107,8 @@ export function closeRecapForm() {
  */
 export function cancelEdit() {
     resetCrumbFormState();
-    toggleForm(); // Will re-open a clean form
-    // A bit clunky, let's just close it.
+    // toggleForm(); // Will re-open a clean form
+    // Let's just close it.
     hideAllForms();
 }
 
@@ -228,7 +231,8 @@ export function previewEntry(id, imageIndex = null) {
         return;
     }
 
-    // Standard full preview
+    // Standard full preview (Move full HTML from app.js here)
+    // NOTE: This is the full HTML from your original app.js, now living here.
     let html = `
         <div style="margin-bottom: 16px;">
             <strong>Time:</strong> ${new Date(entry.timestamp).toLocaleString('en-GB')}
@@ -242,11 +246,20 @@ export function previewEntry(id, imageIndex = null) {
         
         <div style="margin-bottom: 16px;">
             <strong>Note:</strong>
-            <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap; max-height: 200px; overflow-y: auto;">${entry.note || ''}</div>
+            <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap; max-height: 200px; overflow-y: auto; background: #fff; padding: 5px; border: 1px solid #999;">${entry.note || ''}</div>
         </div>
         
-        ${entry.location ? `...` : ''} 
-        ${entry.weather ? `...` : ''}
+        ${entry.location ? `
+            <div style="margin-bottom: 16px;">
+                <strong>Location:</strong> ${entry.location}
+            </div>
+        ` : ''}
+        
+        ${entry.weather ? `
+            <div style="margin-bottom: 16px;">
+                <strong>Weather:</strong> ${entry.weather}
+            </div>
+        ` : ''}
         
         ${entry.coords ? `
             <div style="margin-bottom: 16px;">
@@ -255,29 +268,82 @@ export function previewEntry(id, imageIndex = null) {
             </div>
         ` : ''}
         
-        ${entry.audio ? `...` : ''}
-        ${entry.images && entry.images.length > 0 ? `...` : ''}
-        ${entry.isTimedActivity ? `...` : ''}
-        ${entry.isQuickTrack && entry.optionalNote ? `...` : ''}
-        ${entry.isSpent ? `...` : ''}
+        ${entry.audio ? `
+            <div style="margin-bottom: 16px;">
+                <strong>Audio:</strong>
+                <audio controls style="width: 100%; margin-top: 8px;">
+                    <source src="${entry.audio}">
+                </audio>
+            </div>
+        ` : ''}
+        
+        ${entry.images && entry.images.length > 0 ? `
+            <div style="margin-bottom: 16px;">
+                <strong>Images:</strong>
+                <div class="preview-images-full">
+                    ${entry.images.map((img, idx) => `
+                        <img src="${img}" class="preview-image-full" data-entry-id="${entry.id}" data-image-index="${idx}">
+                    `).join('')}
+                </div>
+            </div>
+        ` : ''}
+        
+        ${entry.isTimedActivity ? `
+            <div style="margin-bottom: 16px;">
+                <strong>Activity:</strong> ${entry.activity} (${entry.duration} minutes)
+                ${entry.optionalNote ? `<div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap; font-style: italic; background: #fff; padding: 5px; border: 1px solid #999;">${entry.optionalNote}</div>` : ''}
+            </div>
+        ` : ''}
+        
+        ${entry.isQuickTrack && entry.optionalNote ? `
+            <div style="margin-bottom: 16px;">
+                <strong>Optional Note:</strong>
+                <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap; font-style: italic; background: #fff; padding: 5px; border: 1px solid #999;">${entry.optionalNote}</div>
+            </div>
+        ` : ''}
+        
+        ${entry.isSpent ? `
+            <div style="margin-bottom: 16px;">
+                <strong>Amount Spent:</strong> €${entry.spentAmount.toFixed(2)}
+            </div>
+        ` : ''}
     `;
-    // (Keeping the HTML brief as it's in the original file, just to show the function lives here)
-    // The full HTML from app.js would be moved here.
-    body.innerHTML = `Full preview for entry ${entry.id}... (Full HTML logic moved here)`;
     
+    body.innerHTML = html;
     modal.classList.add('show');
     
+    // Render Leaflet map if coords exist
     if (entry.coords) {
-        // Logic to render Leaflet map in modal
+        setTimeout(() => {
+            const mapContainer = document.getElementById('preview-map-modal');
+            if (mapContainer) {
+                try {
+                    const map = L.map('preview-map-modal').setView([entry.coords.lat, entry.coords.lon], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap'
+                    }).addTo(map);
+                    L.marker([entry.coords.lat, entry.coords.lon]).addTo(map);
+                    
+                    setTimeout(() => map.invalidateSize(), 100);
+                } catch(e) {
+                    console.error("Error initializing preview map:", e);
+                    mapContainer.innerHTML = "Map failed to load.";
+                }
+            }
+        }, 100);
     }
 }
+
 
 /**
  * Closes the preview modal.
  * @param {Event} [event] - Optional click event (for background click).
  */
 export function closePreview(event) {
-    if (event && event.target.id !== 'preview-modal') return; // Clicked inside content
+    // Check for background click (id === 'preview-modal')
+    // or close button (closest('.mac-title-bar button'))
+    if (event && !event.target.id === 'preview-modal' && !event.target.closest('#preview-close-btn')) return;
+
     const modal = document.getElementById('preview-modal');
     modal.classList.remove('show');
     document.getElementById('preview-body').innerHTML = ''; // Clear content
@@ -328,15 +394,15 @@ export function toggleTime() {
     closeFabMenu();
     toggleTimer();
 }
-export function toggleTrackFab() {
+export function toggleTrackFab() { // Renamed to avoid conflict
     closeFabMenu();
     toggleTrack();
 }
-export function toggleSpentFab() {
+export function toggleSpentFab() { // Renamed to avoid conflict
     closeFabMenu();
     toggleSpent();
 }
-export function showRecapFormWithFab() {
+export function showRecapFormWithFab() { // Renamed to avoid conflict
     closeFabMenu();
     showRecapForm();
 }
