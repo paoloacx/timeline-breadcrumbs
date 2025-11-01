@@ -2,10 +2,11 @@
 
 // Imports
 import { getState, setCurrentUser, setEntries, setSettings } from './state.js';
-import { renderTimeline } from './ui-renderer.js';
-import { updateTimerOptions, updateTrackOptions, loadSettings } as settingsManager from './settings-manager.js';
+import { renderTimeline, renderMoodSelector } from './ui-renderer.js';
+// CAMBIO: Esta línea tenía el error de sintaxis
+import * as settingsManager from './settings-manager.js';
 import { loadData as loadLocalData } from './data-storage.js';
-import { renderMoodSelector } from './ui-renderer.js';
+
 
 // Firebase Configuration
 const firebaseConfig = {
