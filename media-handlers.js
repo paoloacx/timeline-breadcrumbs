@@ -1,10 +1,14 @@
-// ===== MEDIA HANDLING FUNCTIONS =====
+// ===== media-handlers.js (Image & Audio Logic) =====
+
+// Imports
+import { setMediaRecorder, getMediaRecorder, setAudioChunks, getAudioChunks, addImage, removeImage as removeImageFromState, setAudio } from './state.js';
+import { renderImagePreviews, renderAudioPreview } from './ui-renderer.js';
 
 /**
- * Handles image file input, resizes images, and adds to 'currentImages'.
+ * Handles image file input, resizes images, and adds to state.
  * @param {Event} event - The file input change event.
  */
-window.handleImages = function(event) {
+export function handleImageInput(event) {
     const files = Array.from(event.target.files);
     
     files.forEach(file => {
@@ -33,8 +37,8 @@ window.handleImages = function(event) {
                 
                 const resizedImage = canvas.toDataURL('image/jpeg', 0.8);
                 
-                currentImages.push(resizedImage); // global var from app.js
-                window.renderImagePreviews(); // global function in ui-renderer.js
+                addImage(resizedImage); // Add to state
+                renderImagePreviews(); // Re-render previews
             };
             img.src = e.target.result;
         };
@@ -45,40 +49,31 @@ window.handleImages = function(event) {
 /**
  * Starts audio recording.
  */
-window.startRecording = async function() {
+export async function startRecording() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
-            audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                sampleRate: 44100
-            } 
+            audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 } 
         });
         
-        // Detect compatible format (for iOS)
         let options = {};
-        if (MediaRecorder.isTypeSupported('audio/mp4')) {
-            options = { mimeType: 'audio/mp4' };
-        } else if (MediaRecorder.isTypeSupported('audio/webm')) {
-            options = { mimeType: 'audio/webm' };
-        } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
-            options = { mimeType: 'audio/ogg' };
-        }
+        if (MediaRecorder.isTypeSupported('audio/mp4')) options = { mimeType: 'audio/mp4' };
+        else if (MediaRecorder.isTypeSupported('audio/webm')) options = { mimeType: 'audio/webm' };
         
-        mediaRecorder = new MediaRecorder(stream, options); // global var from app.js
-        audioChunks = []; // global var from app.js
+        const mediaRecorder = new MediaRecorder(stream, options);
+        setMediaRecorder(mediaRecorder);
+        setAudioChunks([]); // Clear old chunks
 
         mediaRecorder.ondataavailable = (event) => {
-            audioChunks.push(event.data);
+            getAudioChunks().push(event.data);
         };
 
         mediaRecorder.onstop = () => {
-            const mimeType = mediaRecorder.mimeType || 'audio/webm';
-            const audioBlob = new Blob(audioChunks, { type: mimeType });
+            const mimeType = getMediaRecorder().mimeType || 'audio/webm';
+            const audioBlob = new Blob(getAudioChunks(), { type: mimeType });
             const reader = new FileReader();
             reader.onloadend = () => {
-                currentAudio = reader.result; // global var from app.js
-                window.renderAudioPreview(); // global function in ui-renderer.js
+                setAudio(reader.result); // Save audio data to state
+                renderAudioPreview(); // Re-render preview
             };
             reader.readAsDataURL(audioBlob);
             
@@ -86,9 +81,10 @@ window.startRecording = async function() {
         };
 
         mediaRecorder.start();
-        document.getElementById('record-btn').disabled = true;
-        document.getElementById('stop-record-btn').disabled = false;
+        document.getElementById('btn-record-start').disabled = true;
+        document.getElementById('btn-record-stop').disabled = false;
         document.querySelector('.audio-recorder').classList.add('recording');
+
     } catch (error) {
         console.error('Error accessing microphone:', error);
         alert('Could not access microphone.');
@@ -98,28 +94,29 @@ window.startRecording = async function() {
 /**
  * Stops audio recording.
  */
-window.stopRecording = function() {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') { // global var from app.js
+export function stopRecording() {
+    const mediaRecorder = getMediaRecorder();
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
         mediaRecorder.stop();
-        document.getElementById('record-btn').disabled = false;
-        document.getElementById('stop-record-btn').disabled = true;
+        document.getElementById('btn-record-start').disabled = false;
+        document.getElementById('btn-record-stop').disabled = true;
         document.querySelector('.audio-recorder').classList.remove('recording');
     }
 }
 
 /**
- * Removes an image from the 'currentImages' array.
+ * Removes an image from the state and re-renders previews.
  * @param {number} index - The index of the image to remove.
  */
-window.removeImage = function(index) {
-    currentImages.splice(index, 1); // global var from app.js
-    window.renderImagePreviews(); // global function in ui-renderer.js
+export function removeImage(index) {
+    removeImageFromState(index);
+    renderImagePreviews();
 }
 
 /**
- * Removes the current audio recording.
+ * Removes the current audio from the state and re-renders preview.
  */
-window.removeAudio = function() {
-    currentAudio = null; // global var from app.js
-    window.renderAudioPreview(); // global function in ui-renderer.js
+export function removeAudio() {
+    setAudio(null);
+    renderAudioPreview();
 }
