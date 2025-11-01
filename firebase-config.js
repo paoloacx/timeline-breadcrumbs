@@ -9,12 +9,13 @@ import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY", // IMPORTANT: Add your actual API key
-    authDomain: "timeline-breadcrumbs.firebaseapp.com",
-    projectId: "timeline-breadcrumbs",
-    storageBucket: "timeline-breadcrumbs.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID", // IMPORTANT: Add your actual Sender ID
-    appId: "YOUR_APP_ID" // IMPORTANT: Add your actual App ID
+    apiKey: "AIzaSyAb-MLu8atl5hruOPLDhgftjkjc_1M2038", // IMPORTANT: Add your actual API key
+    authDomain: "breadcrumbs-8b59e.firebaseapp.com",
+    projectId: "breadcrumbs-8b59e",
+    storageBucket: "breadcrumbs-8b59e.firebasestorage.app",
+    messagingSenderId: "912286191427", // IMPORTANT: Add your actual Sender ID
+    appId: "1:912286191427:web:e78b665df6a6ff6d8529f6" // IMPORTANT: Add your actual App ID
+    measurementId: "G-GZYTDYNSRB"
 };
 
 // Initialize Firebase
