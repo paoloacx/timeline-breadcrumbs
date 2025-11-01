@@ -97,7 +97,7 @@ window.buscarBSO = async function() {
     
     try {
         // Using a proxy for CORS might be needed in production if iTunes API blocks
-        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=10`;
+        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=5`;
         const response = await fetch(url);
         
         if (!response.ok) {
