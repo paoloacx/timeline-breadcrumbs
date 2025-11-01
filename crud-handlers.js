@@ -50,7 +50,7 @@ window.saveEntry = function() {
         window.entries.unshift(entry);
     }
 
-    saveData(); // De app.js
+    saveData(); // De data-manager.js
     renderTimeline(); // De ui-renderer.js
     window.toggleForm(); // De ui-handlers.js
 }
@@ -218,7 +218,7 @@ window.createTimeEvent = function() {
         window.entries.unshift(entry);
     }
     
-    saveData(); // De app.js
+    saveData(); // De data-manager.js
     renderTimeline(); // De ui-renderer.js
     
     alert(`✅ Time event ${editingEntryId ? 'updated' : 'created'}!`);
@@ -311,9 +311,9 @@ window.saveTrackEvent = function() {
         alert(`✅ Tracked: ${selectedTrackItem}`);
     }
     
-    saveData(); // De app.js
+    saveData(); // De data-manager.js
     renderTimeline(); // De ui-renderer.js
-  T window.toggleTrack(); // De ui-handlers.js
+    window.toggleTrack(); // De ui-handlers.js
     
     document.getElementById('save-track-btn').textContent = 'Save Track';
     document.getElementById('delete-track-btn').classList.add('hidden');
@@ -397,7 +397,7 @@ window.saveSpent = function() {
         alert(`✅ Spent tracked: €${amount.toFixed(2)}`);
     }
     
-    saveData(); // De app.js
+    saveData(); // De data-manager.js
     renderTimeline(); // De ui-renderer.js
     window.toggleSpent(); // De ui-handlers.js
     document.getElementById('delete-spent-btn').classList.add('hidden');
@@ -484,7 +484,7 @@ window.saveRecap = function() {
         alert('🌟 Recap saved!');
     }
     
-    saveData(); // De app.js
+    saveData(); // De data-manager.js
     renderTimeline(); // De ui-renderer.js
     window.closeRecapForm(); // De ui-handlers.js
 }
@@ -508,7 +508,7 @@ window.deleteCurrentEntry = function() {
             window.deleteEntryFromFirebase(editingEntryId); // De firebase-config.js
         }
         
-        saveData(); // De app.js
+        saveData(); // De data-manager.js
         renderTimeline(); // De ui-renderer.js
         
         if (formIdToDelete) {
