@@ -1,9 +1,9 @@
 // ===== modules/data/data-tools.js (Stats & Export Logic) =====
 
 // Imports
-// CAMBIO: Las rutas ahora suben dos niveles (../../)
+// CAMBIO: Las rutas ahora suben dos niveles (../../) y apuntan a 'core/'
 import { getState } from '../../core/state.js';
-import { openModal, closeModal } from '../ui/modal-manager.js';
+import { openModal, closeModal } from '../ui/modal-manager.js'; // Sube uno y entra a 'ui'
 import { getDayKey, formatTime } from '../../utils.js';
 
 // --- Stats Functions ---
