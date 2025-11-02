@@ -1,7 +1,7 @@
 // ===== modules/settings/settings-manager.js (Settings Logic) =====
 
 // Imports
-// CAMBIO: Las rutas ahora suben dos niveles (../../)
+// CAMBIO: Las rutas ahora suben dos niveles (../../) y apuntan a 'core/'
 import { getState, setSettings } from '../../core/state.js';
 import { saveSettingsToFirebase } from '../../firebase-config.js';
 import { openModal, closeModal } from '../ui/modal-manager.js';
