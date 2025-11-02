@@ -45,15 +45,13 @@ const state = {
 
 /**
  * Returns a read-only copy of the current state.
- * (Read-only to prevent accidental mutation)
  */
 export function getState() {
-    // Return a structured copy to prevent direct mutation of the state object
     return {
         currentUser: state.currentUser,
         isOfflineMode: state.isOfflineMode,
-        entries: [...state.entries], // Return copy of entries array
-        settings: JSON.parse(JSON.stringify(state.settings)), // Return deep copy of settings
+        entries: [...state.entries],
+        settings: JSON.parse(JSON.stringify(state.settings)),
         editingEntryId: state.editingEntryId,
         selectedMood: state.selectedMood,
         selectedDuration: state.selectedDuration,
@@ -81,13 +79,15 @@ export function addEntry(entry) {
     state.entries.unshift(entry);
 }
 export function updateEntry(updatedEntry) {
-    const index = state.entries.findIndex(e => e.id === updatedEntry.id);
+    const index = state.entries.findIndex(e => e.id == updatedEntry.id); // Usar ==
     if (index !== -1) {
         state.entries[index] = updatedEntry;
     }
 }
 export function removeEntry(entryId) {
-    state.entries = state.entries.filter(e => e.id !== entryId);
+    // *** CAMBIO CRÍTICO: Usar != en lugar de !== ***
+    // Esto compara el valor (ej: 123) sin importar si es Número o String.
+    state.entries = state.entries.filter(e => e.id != entryId);
 }
 
 // --- Settings State ---
