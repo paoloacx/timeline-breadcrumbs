@@ -31,28 +31,45 @@ function getWeekNumber(d) {
  * @param {HTMLElement} headerEl - El elemento de cabecera que se ha clickeado.
  */
 function toggleGroup(headerEl) {
-    // Busca el *siguiente* elemento hermano que sea un .content
-    let content = headerEl.nextElementSibling;
-    while(content && !content.classList.contains('content-wrapper')) {
-        content = content.nextElementSibling;
-    }
+    const groupSelector = headerEl.dataset.group; // ej: 'data-year-id'
+    const groupID = headerEl.dataset.id;
+    const chevron = headerEl.querySelector('.chevron');
+    const isExpanding = !chevron.classList.contains('expanded');
+
+    chevron.classList.toggle('expanded');
     
-    if (content) {
-        const chevron = headerEl.querySelector('.chevron');
-        const isExpanding = !content.classList.contains('expanded');
-        
-        // Colapsa/expande este nivel
-        content.classList.toggle('expanded');
-        if (chevron) chevron.classList.toggle('expanded');
-        
-        // Si estamos colapsando, colapsamos todos los hijos también
-        if (!isExpanding) {
-            const childrenContent = content.querySelectorAll('.content-wrapper');
-            const childrenChevrons = content.querySelectorAll('.chevron');
-            childrenContent.forEach(c => c.classList.remove('expanded'));
-            childrenChevrons.forEach(c => c.classList.remove('expanded'));
+    const timelineContainer = headerEl.closest('.timeline');
+    if (!timelineContainer) return;
+
+    // Encuentra todos los elementos hijos que pertenecen a este grupo
+    const childrenToToggle = timelineContainer.querySelectorAll(`[${groupSelector}="${groupID}"]`);
+    
+    childrenToToggle.forEach(child => {
+        if (isExpanding) {
+            child.classList.remove('collapsed');
+            
+            // NO expandir los sub-niveles, excepto si es una semana (que expande días)
+            if (groupSelector !== 'data-week-id') {
+                const childChevron = child.querySelector('.chevron');
+                // Asegurarse de que el chevron hijo esté colapsado
+                if (childChevron) childChevron.classList.remove('expanded');
+            } else {
+                // Si es una semana, SÍ expandir el primer día (si es hoy)
+                const todayKey = getDayKey(new Date().toISOString());
+                if (child.dataset.day === todayKey) {
+                     child.querySelector('.day-content').classList.add('expanded');
+                     child.querySelector('.chevron').classList.add('expanded');
+                }
+            }
+        } else {
+            // Si estamos colapsando, colapsar todos los hijos recursivamente
+            child.classList.add('collapsed');
+            const childChevrons = child.querySelectorAll('.chevron');
+            childChevrons.forEach(c => c.classList.remove('expanded'));
+            const dayContents = child.querySelectorAll('.day-content');
+            dayContents.forEach(dc => dc.classList.remove('expanded'));
         }
-    }
+    });
 }
 
 /**
@@ -62,34 +79,21 @@ export function initTimeline() {
     document.getElementById('timeline-container').addEventListener('click', (e) => {
         
         // --- Lógica para colapsar/expandir ---
-        
-        const yearHeader = e.target.closest('.year-header');
-        if (yearHeader) {
-            toggleGroup(yearHeader);
-            return;
-        }
-        
-        const monthHeader = e.target.closest('.month-header');
-        if (monthHeader) {
-            toggleGroup(monthHeader);
-            return;
-        }
-
-        const weekHeader = e.target.closest('.week-header');
-        if (weekHeader) {
-            toggleGroup(weekHeader);
-            return;
-        }
-
-        const dayHeader = e.target.closest('.day-header');
-        if (dayHeader) {
-            const dayBlock = dayHeader.closest('.day-block');
-            if (dayBlock) {
-                const dayKey = dayBlock.dataset.day;
-                const content = document.getElementById(`day-content-${dayKey}`);
-                const chevron = document.getElementById(`chevron-${dayKey}`);
-                if (content) content.classList.toggle('expanded');
-                if (chevron) chevron.classList.toggle('expanded');
+        const header = e.target.closest('.year-header, .month-header, .week-header, .day-header');
+        if (header) {
+            // El .day-header tiene una lógica de toggle diferente (solo su .day-content)
+            if (header.classList.contains('day-header')) {
+                const dayBlock = header.closest('.day-block');
+                if (dayBlock) {
+                    const dayKey = dayBlock.dataset.day;
+                    const content = document.getElementById(`day-content-${dayKey}`);
+                    const chevron = document.getElementById(`chevron-${dayKey}`);
+                    if (content) content.classList.toggle('expanded');
+                    if (chevron) chevron.classList.toggle('expanded');
+                }
+            } else {
+                // Year, Month, Week usan la lógica de grupo
+                toggleGroup(header);
             }
             return;
         }
@@ -196,7 +200,7 @@ export function renderTimeline() {
     let lastWeek = null;
     let lastDay = null;
 
-    // 3. Loop sobre las entradas (ordenadas de más nuevas a más viejas)
+    // 3. Loop sobre las entradas (ya están ordenadas de más nuevas a más viejas)
     for (const entry of entries) {
         const date = new Date(entry.timestamp);
         
@@ -226,7 +230,7 @@ export function renderTimeline() {
             
             html += `
                 <div class="year-block" data-year="${entryYear}">
-                    <div class="year-header" data-id="${yearID}">
+                    <div class="year-header" data-id="${yearID}" data-group="data-year-id">
                         <span>${entryYear}</span>
                         <span class="chevron chevron-year ${expandedClass}">▲</span>
                     </div>
@@ -244,7 +248,7 @@ export function renderTimeline() {
 
             html += `
                 <div class="month-block content-wrapper ${collapsedClass}" data-year-id="${yearID}">
-                    <div class="month-header" data-id="${monthID}">
+                    <div class="month-header" data-id="${monthID}" data-group="data-month-id">
                         <span>${entryMonth}</span>
                         <span class="chevron chevron-month ${expandedClass}">▲</span>
                     </div>
@@ -261,7 +265,7 @@ export function renderTimeline() {
 
             html += `
                 <div class="week-block content-wrapper ${collapsedClass}" data-year-id="${yearID}" data-month-id="${monthID}">
-                    <div class="week-header" data-id="${weekID}">
+                    <div class="week-header" data-id="${weekID}" data-group="data-week-id">
                         <span>${entryWeek}</span>
                         <span class="chevron chevron-week ${expandedClass}">▲</span>
                     </div>
@@ -274,10 +278,9 @@ export function renderTimeline() {
             lastDay = entryDayKey;
             
             const isToday = entryDayKey === todayKey;
-            const dayExpanded = isToday ? 'expanded' : ''; // Excepción: hoy expandido
-            
-            // Colapsado si NO es la semana actual
-            const dayCollapsed = !isCurrentWeek ? 'collapsed' : ''; 
+            // Excepción: el día de hoy o la semana actual se expande
+            const dayExpanded = isCurrentWeek ? 'expanded' : '';
+            const dayCollapsed = !isCurrentWeek ? 'collapsed' : '';
 
             const dayEntries = entries.filter(e => getDayKey(e.timestamp) === entryDayKey);
             const recaps = dayEntries.filter(e => e.type === 'recap');
@@ -295,7 +298,7 @@ export function renderTimeline() {
                  data-month-id="${monthID}" 
                  data-week-id="${weekID}">
                 
-                <div class="day-header" data-id="${dayID}">
+                <div class="day-header" data-id="${dayID}" data-group="data-day-id">
                     <span>${formatDate(entry.timestamp)}</span>
                     <span class="chevron ${dayExpanded}" id="chevron-${dayID}">▼</span>
                 </div>
