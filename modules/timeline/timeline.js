@@ -24,74 +24,95 @@ function getWeekNumber(d) {
     return `Semana ${weekNo}`;
 }
 
-// --- Lógica de Interactividad ---
+/**
+ * Agrupa la lista plana de entradas en un objeto anidado por Año, Mes, Semana y Día.
+ * @param {Array} entries - La lista plana de entradas.
+ * @returns {object} - Un objeto anidado.
+ */
+function groupEntriesByTime(entries) {
+    const grouped = {};
+
+    entries.forEach(entry => {
+        const date = new Date(entry.timestamp);
+        const year = date.getFullYear().toString();
+        const month = getMonthName(date.getMonth());
+        const week = getWeekNumber(date);
+        const dayKey = getDayKey(entry.timestamp); // YYYY-MM-DD
+        
+        if (!grouped[year]) grouped[year] = {};
+        if (!grouped[year][month]) grouped[year][month] = {};
+        if (!grouped[year][month][week]) grouped[year][month][week] = {};
+        if (!grouped[year][month][week][dayKey]) grouped[year][month][week][dayKey] = [];
+        
+        grouped[year][month][week][dayKey].push(entry);
+    });
+    
+    return grouped;
+}
+// --- FIN DE NUEVAS FUNCIONES ---
+
 
 /**
  * Colapsa/expande un grupo (año, mes, semana)
  * @param {HTMLElement} headerEl - El elemento de cabecera que se ha clickeado.
- * @param {string} groupSelector - El selector de data-attribute (ej. 'data-year-id')
  */
-function toggleGroup(headerEl, groupSelector) {
-    const groupID = headerEl.dataset.id;
-    const chevron = headerEl.querySelector('.chevron');
-    const isExpanding = !chevron.classList.contains('expanded'); // La acción que VAMOS a hacer
-
-    chevron.classList.toggle('expanded');
+function toggleGroup(headerEl) {
+    // Busca el *siguiente* elemento hermano que sea un .content
+    let content = headerEl.nextElementSibling;
+    while(content && !content.classList.contains('content-wrapper')) {
+        content = content.nextElementSibling;
+    }
     
-    // Encontrar el contenedor principal del timeline
-    const timelineContainer = headerEl.closest('.timeline');
-    if (!timelineContainer) return;
-
-    // Encontrar todos los elementos que pertenecen a este grupo
-    const childrenToToggle = timelineContainer.querySelectorAll(`[${groupSelector}="${groupID}"]`);
-    
-    childrenToToggle.forEach(child => {
-        if (isExpanding) {
-            child.classList.remove('collapsed');
-            // Si también expandimos un mes o año, NO expandir sus hijos (solo el primer nivel)
-            // La excepción es la semana, que sí expande sus días.
-            if (groupSelector !== 'data-week-id') {
-                const childChevron = child.querySelector('.chevron');
-                if (childChevron) childChevron.classList.remove('expanded');
-            }
-        } else {
-            child.classList.add('collapsed');
-            // Si colapsamos, también colapsamos visualmente todos sus hijos
-            const childChevrons = child.querySelectorAll('.chevron');
-            childChevrons.forEach(c => c.classList.remove('expanded'));
-        }
-    });
+    if (content) {
+        const chevron = headerEl.querySelector('.chevron');
+        content.classList.toggle('expanded');
+        if (chevron) chevron.classList.toggle('expanded');
+    }
 }
+
 
 /**
  * Initializes all event listeners for the timeline container.
+ * CAMBIO: Lógica de click actualizada para los nuevos cabeceros.
  */
 export function initTimeline() {
     document.getElementById('timeline-container').addEventListener('click', (e) => {
         
         // --- Lógica para colapsar/expandir ---
+        
+        // Handle Toggle Year
         const yearHeader = e.target.closest('.year-header');
         if (yearHeader) {
-            toggleGroup(yearHeader, 'data-year-id');
+            toggleGroup(yearHeader);
             return;
         }
         
+        // Handle Toggle Month
         const monthHeader = e.target.closest('.month-header');
         if (monthHeader) {
-            toggleGroup(monthHeader, 'data-month-id');
+            toggleGroup(monthHeader);
             return;
         }
 
+        // Handle Toggle Week
         const weekHeader = e.target.closest('.week-header');
         if (weekHeader) {
-            toggleGroup(weekHeader, 'data-week-id');
+            toggleGroup(weekHeader);
             return;
         }
 
+        // Handle Toggle Day
         const dayHeader = e.target.closest('.day-header');
         if (dayHeader) {
-            // El 'day-block' es el padre directo
-            toggleGroup(dayHeader, 'data-day-id');
+            // CAMBIO: La lógica del Día es especial (para la excepción de "hoy")
+            const dayBlock = dayHeader.closest('.day-block');
+            if (dayBlock) {
+                const dayKey = dayBlock.dataset.day;
+                const content = document.getElementById(`day-content-${dayKey}`);
+                const chevron = document.getElementById(`chevron-${dayKey}`);
+                if (content) content.classList.toggle('expanded');
+                if (chevron) chevron.classList.toggle('expanded');
+            }
             return;
         }
 
@@ -161,7 +182,7 @@ export function initTimeline() {
 
 /**
  * Renders the entire timeline based on the global state.
- * CAMBIO: Reescrito para renderizar una lista plana de cabeceras.
+ * CAMBIO: Reescrito para renderizar una lista plana con la lógica de "presente arriba".
  */
 export function renderTimeline() {
     const { entries } = getState();
@@ -185,19 +206,14 @@ export function renderTimeline() {
     const currentYearStr = today.getFullYear().toString();
     const currentMonthStr = getMonthName(today.getMonth());
     const currentWeekStr = getWeekNumber(today);
-    
-    // Identificadores únicos para data-attributes
-    const currentYearID = currentYearStr;
-    const currentMonthID = `${currentMonthStr}-${currentYearStr}`;
-    const currentWeekID = `${currentWeekStr}-${currentYearStr}`;
 
     let html = `<div class="timeline"><div class="timeline-line"></div>`;
 
     // 2. Trackers para saber cuándo imprimir una nueva cabecera
-    let lastYear = null;
-    let lastMonth = null;
-    let lastWeek = null;
-    let lastDay = null;
+    let currentYear = null;
+    let currentMonth = null;
+    let currentWeek = null;
+    let currentDay = null;
 
     // 3. Loop sobre las entradas (ya están ordenadas de más nuevas a más viejas)
     for (const entry of entries) {
@@ -208,79 +224,62 @@ export function renderTimeline() {
         const entryWeek = getWeekNumber(date);
         const entryDayKey = getDayKey(entry.timestamp);
         
-        // IDs únicos para los data-attributes de este item
-        const yearID = entryYear;
-        const monthID = `${entryMonth}-${entryYear}`;
-        const weekID = `${entryWeek}-${entryYear}`;
-        const dayID = entryDayKey;
+        const isToday = entryDayKey === todayKey;
         
-        // Define el estado de colapso por defecto
-        // Todo está colapsado, EXCEPTO la semana actual.
-        let isCollapsed = true;
-        let isExpanded = false;
-        if (yearID === currentYearID && monthID === currentMonthID && weekID === currentWeekID) {
-            isCollapsed = false;
-            isExpanded = true;
-        }
-        
-        const collapsedClass = isCollapsed ? 'collapsed' : '';
-        const expandedClass = isExpanded ? 'expanded' : '';
-        
-        // --- Imprimir Cabeceras ---
+        // --- Imprimir Cabeceras (en orden inverso) ---
 
         // Imprimir Cabecera de AÑO (si es un año nuevo)
-        if (entryYear !== lastYear) {
-            lastYear = entryYear;
-            lastMonth = null; // Forzar que el mes se imprima
-            lastWeek = null;  // Forzar que la semana se imprima
-            lastDay = null;   // Forzar que el día se imprima
+        if (entryYear !== currentYear) {
+            currentYear = entryYear;
+            currentMonth = null; // Forzar que el mes se imprima
+            currentWeek = null;  // Forzar que la semana se imprima
+            currentDay = null;   // Forzar que el día se imprima
             
-            // *** CAMBIO: 'year' no existía, se usa 'entryYear' o 'yearID' ***
-            const isCurrent = yearID === currentYearID;
-            const yearExpandedClass = isCurrent ? 'expanded' : '';
+            const isCurrent = entryYear === currentYearStr;
+            const expandedClass = isCurrent ? 'expanded' : '';
             
             html += `
-                <div class="year-block">
-                    <div class="year-header" data-id="${yearID}">
+                <div class="year-block" data-year="${entryYear}">
+                    <div class="year-header" data-id="${entryYear}">
                         <span>${entryYear}</span>
-                        <span class="chevron chevron-year ${yearExpandedClass}">▼</span>
+                        <span class="chevron chevron-year ${expandedClass}">▲</span>
                     </div>
                 </div>`;
         }
 
         // Imprimir Cabecera de MES (si es un mes nuevo)
-        if (entryMonth !== lastMonth) {
-            lastMonth = entryMonth;
-            lastWeek = null; // Forzar que la semana se imprima
-            lastDay = null;  // Forzar que el día se imprima
+        if (entryMonth !== currentMonth) {
+            currentMonth = entryMonth;
+            currentWeek = null; // Forzar que la semana se imprima
+            currentDay = null;  // Forzar que el día se imprima
             
-            const isCurrent = monthID === currentMonthID;
-            const monthExpandedClass = isCurrent ? 'expanded' : '';
-            const monthCollapsedClass = !isCurrent ? 'collapsed' : ''; // Colapsar si no es el mes actual
+            const isCurrent = (entryYear === currentYearStr) && (entryMonth === currentMonthStr);
+            const expandedClass = isCurrent ? 'expanded' : '';
+            const collapsedClass = !isCurrent ? 'collapsed' : '';
 
             html += `
-                <div class="month-block ${monthCollapsedClass}" data-year-id="${yearID}">
-                    <div class="month-header" data-id="${monthID}">
+                <div class="month-block content-wrapper ${collapsedClass}" data-year-id="${entryYear}">
+                    <div class="month-header" data-id="${entryYear}-${entryMonth}">
                         <span>${entryMonth}</span>
-                        <span class="chevron chevron-month ${monthExpandedClass}">▼</span>
+                        <span class="chevron chevron-month ${expandedClass}">▲</span>
                     </div>
                 </div>`;
         }
 
         // Imprimir Cabecera de SEMANA (si es una semana nueva)
-        if (entryWeek !== lastWeek) {
-            lastWeek = entryWeek;
-            lastDay = null; // Forzar que el día se imprima
+        if (entryWeek !== currentWeek) {
+            currentWeek = entryWeek;
+            currentDay = null; // Forzar que el día se imprima
 
-            const isCurrent = weekID === currentWeekID;
-            const weekExpandedClass = isCurrent ? 'expanded' : '';
-            const weekCollapsedClass = !isCurrent ? 'collapsed' : ''; // Colapsar si no es la semana actual
+            const isCurrent = (entryYear === currentYearStr) && (entryMonth === currentMonthStr) && (entryWeek === currentWeekStr);
+            const expandedClass = isCurrent ? 'expanded' : '';
+            const collapsedClass = !isCurrent ? 'collapsed' : '';
 
             html += `
-                <div class="week-block ${weekCollapsedClass}" data-year-id="${yearID}" data-month-id="${monthID}">
-                    <div class="week-header" data-id="${weekID}">
+                <div class="week-block content-wrapper ${collapsedClass}" data-year-id="${entryYear}" data-month-id="${entryYear}-${entryMonth}">
+                    <div class="week-header" data-id="${entryYear}-${entryWeek}">
                         <span>${entryWeek}</span>
-                        <span class="chevron chevron-week ${weekExpandedClass}">▼</span>
+                        <span class="chevron chevron-week ${expandedClass}">▲</span>
                     </div>
                 </div>`;
         }
@@ -288,23 +287,27 @@ export function renderTimeline() {
         // --- Agrupar por Día (Recaps y Entradas) ---
         
         // Imprimir Cabecera de DÍA (si es un día nuevo)
-        if (entryDayKey !== lastDay) {
-            lastDay = entryDayKey;
+        if (entryDayKey !== currentDay) {
+            currentDay = entryDayKey;
             
-            const isToday = entryDayKey === todayKey;
+            // Lógica de la EXCEPCIÓN: el día de hoy se expande hacia abajo
+            const isCurrentWeek = (entryYear === currentYearStr) && (entryMonth === currentMonthStr) && (entryWeek === currentWeekStr);
             const dayExpanded = isToday ? 'expanded' : '';
-            
+            const dayCollapsed = !isCurrentWeek ? 'collapsed' : '';
+
             // Buscar TODOS los Recaps y Entradas para ESTE día
-            // (Esto es ineficiente, pero lo arreglamos luego. De momento, filtramos)
             const dayEntries = entries.filter(e => getDayKey(e.timestamp) === entryDayKey);
             const recaps = dayEntries.filter(e => e.type === 'recap');
             const regularEntries = dayEntries.filter(e => e.type !== 'recap');
             
-            // *** CAMBIO: 'collapsedClass' se define aquí ***
-            const collapsedClass = isExpanded ? '' : 'collapsed'; // Colapsar si la semana no está expandida
-
+            // Render Recaps (si existen)
+            // Los Recaps van ANTES del Day-Header (excepto hoy)
+            if (!isToday) {
+                html += recaps.map(recap => renderRecapBlock(recap, yearID, monthID, weekID, dayCollapsed)).join('');
+            }
+            
             html += `
-            <div class="day-block ${collapsedClass}" 
+            <div class="day-block content-wrapper ${dayCollapsed}" 
                  data-day="${entryDayKey}" 
                  data-year-id="${yearID}" 
                  data-month-id="${monthID}" 
@@ -316,88 +319,15 @@ export function renderTimeline() {
                 </div>
             `;
             
-            // Render Recaps (si existen)
-            html += recaps.map(recap => `
-                <div class="recap-block ${collapsedClass}" data-id="${recap.id}" 
-                     data-year-id="${yearID}" 
-                     data-month-id="${monthID}" 
-                     data-week-id="${weekID}">
-                    
-                    <div class="recap-header">
-                        <span>🌟 Day Recap</span>
-                        <span class="chevron-recap">▼</span>
-                    </div>
-                    <div class="recap-content hidden" id="recap-content-${recap.id}">
-                        <button class="mac-button edit-button btn-edit">✏️ Edit</button>
-                        ${recap.rating ? `<div style="margin-bottom: 16px;"><strong>Rating:</strong> ${recap.rating}/10 ${'⭐'.repeat(Math.round(recap.rating / 2))}</div>` : ''}
-                        ${recap.reflection ? `<div style="margin-bottom: 16px;"><strong>Reflection:</strong><div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${recap.reflection}</div></div>` : ''}
-                        ${recap.highlights && recap.highlights.length > 0 ? `
-                            <div style="margin-bottom: 16px;">
-                                <strong>Highlights:</strong>
-                                <ul style="margin-top: 8px; padding-left: 20px;">
-                                    ${recap.highlights.map(h => `<li style="margin-bottom: 4px;">${h}</li>`).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
-                        ${recap.track ? `
-                            <div style="margin-bottom: 16px;">
-                                <strong>Day's Soundtrack:</strong>
-                                <div class="bso-result" style="display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 12px; border: 2px solid #000; background: #f9f9f9;">
-                                    <img src="${recap.track.artwork}" style="width: 50px; height: 50px; border: 2px solid #000;">
-                                    <div><div style="font-weight: bold; font-size: 13px;">${recap.track.name}</div><div style="font-size: 11px; color: #666;">${recap.track.artist}</div></div>
-                                    <a href="${recap.track.url}" target="_blank" style="text-decoration: none; font-size: 18px;">🔗</a>
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `).join('');
+            // EXCEPCIÓN: Si es hoy, el recap va DESPUÉS del header
+            if (isToday) {
+                html += recaps.map(recap => renderRecapBlock(recap, yearID, monthID, weekID, dayCollapsed)).join('');
+            }
 
             // Render Day Content (Crumbs)
-            // *** CAMBIO: Añadida la clase 'collapsedClass' y los data-attributes ***
-            html += `<div class="day-content ${dayExpanded} ${collapsedClass}" id="day-content-${dayID}" 
-                          data-year-id="${yearID}" 
-                          data-month-id="${monthID}" 
-                          data-week-id="${weekID}">`;
+            html += `<div class="day-content ${dayExpanded}" id="day-content-${dayID}">`;
                           
-            html += regularEntries.map(entry => {
-                const heightStyle = entry.isTimedActivity && entry.duration ? `min-height: ${Math.max(120, Math.min(150 + entry.duration * 0.5, 300))}px;` : '';
-                const trackClass = entry.isQuickTrack ? 'track-event' : '';
-                const spentClass = entry.isSpent ? 'spent-event' : '';
-                const crumbClass = (!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap') ? 'crumb-event' : '';
-                
-                const noteContent = entry.note || '';
-                const optionalNoteContent = entry.optionalNote || '';
-                const needsReadMore = noteContent.length > 200 || noteContent.split('\n').length > 4;
-                const needsReadMoreOptional = optionalNoteContent.length > 200 || optionalNoteContent.split('\n').length > 4;
-
-                return `
-                <div class="breadcrumb-entry ${entry.isTimedActivity ? 'time-event' : ''} ${trackClass} ${spentClass} ${crumbClass}" style="${heightStyle}" data-id="${entry.id}">
-                    <button class="mac-button edit-button btn-edit">✏️ Edit</button>
-                    ${entry.isTimedActivity ? 
-                        `<div><div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div><div class="activity-label">${entry.activity}</div><div style="font-size: 13px; color: #666; margin-top: 8px;">Duration: ${entry.duration} minutes</div></div>
-                        ${entry.optionalNote ? `<div class="optional-note">${entry.optionalNote}</div>${needsReadMoreOptional ? `<button class="read-more-btn">Read more</button>` : ''}` : ''}` :
-                        `<div class="breadcrumb-time">${entry.isQuickTrack ? `<span class="compact-time">⏰ ${formatTime(entry.timestamp)} ${entry.note}</span>` : `⏰ ${formatTime(entry.timestamp)}`}
-                        ${entry.isSpent ? `<span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>` : ''}</div>`
-                    }
-                    ${entry.isQuickTrack && entry.optionalNote ? `<div class="optional-note">${entry.optionalNote}</div>${needsReadMoreOptional ? `<button class="read-more-btn">Read more</button>` : ''}` : ''}
-                    ${!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap' ? `
-                        <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
-                            ${entry.mood ? `<span class="mood-display">${entry.mood.emoji}</span>` : ''}
-                            <div style="flex: 1;"><div class="breadcrumb-note">${entry.note}</div>
-                            ${needsReadMore ? `<button class="read-more-btn">Read more</button>` : ''}</div>
-                        </div>
-                    ` : ''}
-                    ${(entry.weather || entry.location) ? `<div class="breadcrumb-meta">${entry.weather ? `<span>${entry.weather}</span>` : ''}${entry.weather && entry.location ? ` • ` : ''}${entry.location ? `<span>📍 ${entry.location}</span>` : ''}</div>` : ''}
-                    ${entry.audio ? `<div style="margin-top: 12px; margin-bottom: 12px;"><audio controls style="width: 100%; max-width: 300px;"><source src="${entry.audio}"></audio></div>` : ''}
-                    <div class="breadcrumb-preview">
-                        ${entry.images && entry.images.length > 0 ? entry.images.map((img, idx) => `<img src="${img}" class="preview-image-thumb" alt="Thumbnail ${idx+1}" data-index="${idx}">`).join('') : ''}
-                        ${entry.coords ? `<div class="preview-map-thumb" id="mini-map-${entry.id}"></div>` : ''}
-                        <button class="mac-button preview-button btn-preview">🔍 Preview</button>
-                    </div>
-                </div>
-                `;
-            }).join('');
+            html += regularEntries.map(entry => renderEntryCard(entry)).join('');
 
             html += `</div></div>`; // Cierra day-content y day-block
         }
@@ -429,4 +359,87 @@ export function renderTimeline() {
             }, 100);
         }
     });
+}
+
+/**
+ * Función Ayudante para renderizar un Recap Block
+ */
+function renderRecapBlock(recap, yearID, monthID, weekID, collapsedClass) {
+    return `
+    <div class="recap-block content-wrapper ${collapsedClass}" data-id="${recap.id}" 
+         data-year-id="${yearID}" 
+         data-month-id="${monthID}" 
+         data-week-id="${weekID}">
+        
+        <div class="recap-header">
+            <span>🌟 Day Recap</span>
+            <span class="chevron-recap">▼</span>
+        </div>
+        <div class="recap-content hidden" id="recap-content-${recap.id}">
+            <button class="mac-button edit-button btn-edit">✏️ Edit</button>
+            ${recap.rating ? `<div style="margin-bottom: 16px;"><strong>Rating:</strong> ${recap.rating}/10 ${'⭐'.repeat(Math.round(recap.rating / 2))}</div>` : ''}
+            ${recap.reflection ? `<div style="margin-bottom: 16px;"><strong>Reflection:</strong><div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${recap.reflection}</div></div>` : ''}
+            ${recap.highlights && recap.highlights.length > 0 ? `
+                <div style="margin-bottom: 16px;">
+                    <strong>Highlights:</strong>
+                    <ul style="margin-top: 8px; padding-left: 20px;">
+                        ${recap.highlights.map(h => `<li style="margin-bottom: 4px;">${h}</li>`).join('')}
+                    </ul>
+                </div>
+            ` : ''}
+            ${recap.track ? `
+                <div style="margin-bottom: 16px;">
+                    <strong>Day's Soundtrack:</strong>
+                    <div class="bso-result" style="display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 12px; border: 2px solid #000; background: #f9f9f9;">
+                        <img src="${recap.track.artwork}" style="width: 50px; height: 50px; border: 2px solid #000;">
+                        <div><div style="font-weight: bold; font-size: 13px;">${recap.track.name}</div><div style="font-size: 11px; color: #666;">${recap.track.artist}</div></div>
+                        <a href="${recap.track.url}" target="_blank" style="text-decoration: none; font-size: 18px;">🔗</a>
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+    </div>
+    `;
+}
+
+/**
+ * Función Ayudante para renderizar una Tarjeta de Entrada (Crumb)
+ */
+function renderEntryCard(entry) {
+    const heightStyle = entry.isTimedActivity && entry.duration ? `min-height: ${Math.max(120, Math.min(150 + entry.duration * 0.5, 300))}px;` : '';
+    const trackClass = entry.isQuickTrack ? 'track-event' : '';
+    const spentClass = entry.isSpent ? 'spent-event' : '';
+    const crumbClass = (!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap') ? 'crumb-event' : '';
+    
+    const noteContent = entry.note || '';
+    const optionalNoteContent = entry.optionalNote || '';
+    const needsReadMore = noteContent.length > 200 || noteContent.split('\n').length > 4;
+    const needsReadMoreOptional = optionalNoteContent.length > 200 || optionalNoteContent.split('\n').length > 4;
+
+    return `
+    <div class="breadcrumb-entry ${entry.isTimedActivity ? 'time-event' : ''} ${trackClass} ${spentClass} ${crumbClass}" style="${heightStyle}" data-id="${entry.id}">
+        <button class="mac-button edit-button btn-edit">✏️ Edit</button>
+        ${entry.isTimedActivity ? 
+            `<div><div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div><div class="activity-label">${entry.activity}</div><div style="font-size: 13px; color: #666; margin-top: 8px;">Duration: ${entry.duration} minutes</div></div>
+            ${entry.optionalNote ? `<div class="optional-note">${entry.optionalNote}</div>${needsReadMoreOptional ? `<button class="read-more-btn">Read more</button>` : ''}` : ''}` :
+            `<div class="breadcrumb-time">${entry.isQuickTrack ? `<span class="compact-time">⏰ ${formatTime(entry.timestamp)} ${entry.note}</span>` : `⏰ ${formatTime(entry.timestamp)}`}
+            ${entry.isSpent ? `<span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>` : ''}</div>`
+        }
+        ${entry.isQuickTrack && entry.optionalNote ? `<div class="optional-note">${entry.optionalNote}</div>${needsReadMoreOptional ? `<button class="read-more-btn">Read more</button>` : ''}` : ''}
+        ${!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap' ? `
+            <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
+                ${entry.mood ? `<span class="mood-display">${entry.mood.emoji}</span>` : ''}
+                <div style="flex: 1;"><div class="breadcrumb-note">${entry.note}</div>
+                ${needsReadMore ? `<button class="read-more-btn">Read more</button>` : ''}</div>
+            </div>
+        ` : ''}
+        ${(entry.weather || entry.location) ? `<div class="breadcrumb-meta">${entry.weather ? `<span>${entry.weather}</span>` : ''}${entry.weather && entry.location ? ` • ` : ''}${entry.location ? `<span>📍 ${entry.location}</span>` : ''}</div>` : ''}
+        ${entry.audio ? `<div style="margin-top: 12px; margin-bottom: 12px;"><audio controls style="width: 100%; max-width: 300px;"><source src="${entry.audio}"></audio></div>` : ''}
+        <div class="breadcrumb-preview">
+            ${entry.images && entry.images.length > 0 ? entry.images.map((img, idx) => `<img src="${img}" class="preview-image-thumb" alt="Thumbnail ${idx+1}" data-index="${idx}">`).join('') : ''}
+            ${entry.coords ? `<div class="preview-map-thumb" id="mini-map-${entry.id}"></div>` : ''}
+            <button class="mac-button preview-button btn-preview">🔍 Preview</button>
+        </div>
+    </div>
+    `;
 }
