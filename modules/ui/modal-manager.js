@@ -1,7 +1,6 @@
 // ===== modules/ui/modal-manager.js (Modal Logic) =====
 
 // Imports
-// CAMBIO: Las rutas ahora apuntan a 'core/' y 'modules/settings/'
 import { clearFormState, clearTimerState, clearTrackState, clearSpentState, clearRecapState } from '../../core/state.js';
 import { updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from '../../modules/settings/settings-manager.js';
 import { renderMoodSelector } from '../../ui-renderer.js';
@@ -34,7 +33,15 @@ export function closeModal(modalId) {
 // --- Auth/Main App UI ---
 
 /**
- * Shows the main app UI and hides the auth panel.
+ * CAMBIO: Muestra el panel de autenticación y oculta la app.
+ */
+export function showAuthPanel() {
+    document.getElementById('auth-container').style.display = 'block';
+    document.getElementById('main-app').style.display = 'none';
+}
+
+/**
+ * CAMBIO: Oculta el panel de autenticación y muestra la app.
  * @param {object|null} user - The Firebase user object, or null for offline.
  */
 export function showMainApp(user) {
