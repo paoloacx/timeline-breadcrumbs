@@ -1,7 +1,7 @@
 // ===== modules/services/api-services.js (External APIs) =====
 
 // Imports
-// CAMBIO: Las rutas ahora suben dos niveles (../../)
+// CAMBIO: Las rutas ahora suben dos niveles (../../) y apuntan a 'core/'
 import { setCoords } from '../../core/state.js';
 import { showMiniMap } from '../../ui-renderer.js';
 import { getWeatherEmoji } from '../../utils.js';
@@ -41,7 +41,6 @@ export async function handleGps() {
         locationInput.placeholder = 'Getting location...';
         showMiniMap(lat, lon, 'form-map');
         
-        // Llama a getWeather, que está en este mismo archivo
         await getWeather(lat, lon); 
         
         btn.textContent = '🌍 GPS OK';
@@ -56,8 +55,6 @@ export async function handleGps() {
 
 /**
  * Fetches weather data from OpenWeatherMap.
- * @param {number} lat - Latitude.
- * @param {number} lon - Longitude.
  */
 async function getWeather(lat, lon) {
     const weatherInput = document.getElementById('weather-input');
@@ -76,7 +73,7 @@ async function getWeather(lat, lon) {
         const city = data.name || 'Unknown';
         
         weatherInput.value = `${emoji} ${description}, ${temp}°C in ${city}`;
-        if (!locationInput.value) { // Solo rellena si está vacío
+        if (!locationInput.value) {
             locationInput.value = city;
         }
     } catch (error) {
