@@ -65,7 +65,6 @@ function toggleGroup(headerEl, groupSelector) {
 
 /**
  * Initializes all event listeners for the timeline container.
- * CAMBIO: Lógica de click actualizada para los nuevos cabeceros planos.
  */
 export function initTimeline() {
     document.getElementById('timeline-container').addEventListener('click', (e) => {
@@ -182,6 +181,7 @@ export function renderTimeline() {
 
     // 1. Preparar IDs de la semana/mes/año actual
     const today = new Date();
+    const todayKey = getDayKey(today.toISOString());
     const currentYearStr = today.getFullYear().toString();
     const currentMonthStr = getMonthName(today.getMonth());
     const currentWeekStr = getWeekNumber(today);
@@ -194,10 +194,10 @@ export function renderTimeline() {
     let html = `<div class="timeline"><div class="timeline-line"></div>`;
 
     // 2. Trackers para saber cuándo imprimir una nueva cabecera
-    let currentYear = null;
-    let currentMonth = null;
-    let currentWeek = null;
-    let currentDay = null;
+    let lastYear = null;
+    let lastMonth = null;
+    let lastWeek = null;
+    let lastDay = null;
 
     // 3. Loop sobre las entradas (ya están ordenadas de más nuevas a más viejas)
     for (const entry of entries) {
@@ -217,65 +217,70 @@ export function renderTimeline() {
         // Define el estado de colapso por defecto
         // Todo está colapsado, EXCEPTO la semana actual.
         let isCollapsed = true;
+        let isExpanded = false;
         if (yearID === currentYearID && monthID === currentMonthID && weekID === currentWeekID) {
             isCollapsed = false;
+            isExpanded = true;
         }
+        
+        const collapsedClass = isCollapsed ? 'collapsed' : '';
+        const expandedClass = isExpanded ? 'expanded' : '';
         
         // --- Imprimir Cabeceras ---
 
         // Imprimir Cabecera de AÑO (si es un año nuevo)
-        if (entryYear !== currentYear) {
-            currentYear = entryYear;
-            currentMonth = null; // Forzar que el mes se imprima
-            currentWeek = null;  // Forzar que la semana se imprima
-            currentDay = null;   // Forzar que el día se imprima
+        if (entryYear !== lastYear) {
+            lastYear = entryYear;
+            lastMonth = null; // Forzar que el mes se imprima
+            lastWeek = null;  // Forzar que la semana se imprima
+            lastDay = null;   // Forzar que el día se imprima
             
+            // *** CAMBIO: 'year' no existía, se usa 'entryYear' o 'yearID' ***
             const isCurrent = yearID === currentYearID;
-            const expandedClass = isCurrent ? 'expanded' : '';
-            const collapsedClass = !isCurrent ? 'collapsed' : '';
+            const yearExpandedClass = isCurrent ? 'expanded' : '';
             
             html += `
                 <div class="year-block">
                     <div class="year-header" data-id="${yearID}">
-                        <span>${year}</span>
-                        <span class="chevron chevron-year ${expandedClass}">▼</span>
+                        <span>${entryYear}</span>
+                        <span class="chevron chevron-year ${yearExpandedClass}">▼</span>
                     </div>
                 </div>`;
         }
 
         // Imprimir Cabecera de MES (si es un mes nuevo)
-        if (entryMonth !== currentMonth) {
-            currentMonth = entryMonth;
-            currentWeek = null; // Forzar que la semana se imprima
-            currentDay = null;  // Forzar que el día se imprima
+        if (entryMonth !== lastMonth) {
+            lastMonth = entryMonth;
+            lastWeek = null; // Forzar que la semana se imprima
+            lastDay = null;  // Forzar que el día se imprima
             
             const isCurrent = monthID === currentMonthID;
-            const expandedClass = isCurrent ? 'expanded' : '';
-            const collapsedClass = !isCurrent ? 'collapsed' : '';
+            const monthExpandedClass = isCurrent ? 'expanded' : '';
+            const monthCollapsedClass = !isCurrent ? 'collapsed' : ''; // Colapsar si no es el mes actual
 
             html += `
-                <div class="month-block" data-year-id="${yearID}" class="${collapsedClass}">
+                <div class="month-block ${monthCollapsedClass}" data-year-id="${yearID}">
                     <div class="month-header" data-id="${monthID}">
-                        <span>${month}</span>
-                        <span class="chevron chevron-month ${expandedClass}">▼</span>
+                        <span>${entryMonth}</span>
+                        <span class="chevron chevron-month ${monthExpandedClass}">▼</span>
                     </div>
                 </div>`;
         }
 
         // Imprimir Cabecera de SEMANA (si es una semana nueva)
-        if (entryWeek !== currentWeek) {
-            currentWeek = entryWeek;
-            currentDay = null; // Forzar que el día se imprima
+        if (entryWeek !== lastWeek) {
+            lastWeek = entryWeek;
+            lastDay = null; // Forzar que el día se imprima
 
             const isCurrent = weekID === currentWeekID;
-            const expandedClass = isCurrent ? 'expanded' : '';
-            const collapsedClass = !isCurrent ? 'collapsed' : '';
+            const weekExpandedClass = isCurrent ? 'expanded' : '';
+            const weekCollapsedClass = !isCurrent ? 'collapsed' : ''; // Colapsar si no es la semana actual
 
             html += `
-                <div class="week-block" data-year-id="${yearID}" data-month-id="${monthID}" class="${collapsedClass}">
+                <div class="week-block ${weekCollapsedClass}" data-year-id="${yearID}" data-month-id="${monthID}">
                     <div class="week-header" data-id="${weekID}">
-                        <span>${week}</span>
-                        <span class="chevron chevron-week ${expandedClass}">▼</span>
+                        <span>${entryWeek}</span>
+                        <span class="chevron chevron-week ${weekExpandedClass}">▼</span>
                     </div>
                 </div>`;
         }
@@ -283,26 +288,27 @@ export function renderTimeline() {
         // --- Agrupar por Día (Recaps y Entradas) ---
         
         // Imprimir Cabecera de DÍA (si es un día nuevo)
-        if (entryDayKey !== currentDay) {
-            currentDay = entryDayKey;
+        if (entryDayKey !== lastDay) {
+            lastDay = entryDayKey;
             
-            const isToday = entryDayKey === getDayKey(new Date().toISOString());
+            const isToday = entryDayKey === todayKey;
             const dayExpanded = isToday ? 'expanded' : '';
             
             // Buscar TODOS los Recaps y Entradas para ESTE día
+            // (Esto es ineficiente, pero lo arreglamos luego. De momento, filtramos)
             const dayEntries = entries.filter(e => getDayKey(e.timestamp) === entryDayKey);
             const recaps = dayEntries.filter(e => e.type === 'recap');
             const regularEntries = dayEntries.filter(e => e.type !== 'recap');
             
-            const collapsedClass = isToday ? '' : 'collapsed'; // El día se colapsa con la semana
+            // *** CAMBIO: 'collapsedClass' se define aquí ***
+            const collapsedClass = isExpanded ? '' : 'collapsed'; // Colapsar si la semana no está expandida
 
             html += `
-            <div class="day-block" 
+            <div class="day-block ${collapsedClass}" 
                  data-day="${entryDayKey}" 
                  data-year-id="${yearID}" 
                  data-month-id="${monthID}" 
-                 data-week-id="${weekID}"
-                 class="${collapsedClass}">
+                 data-week-id="${weekID}">
                 
                 <div class="day-header" data-id="${dayID}">
                     <span>${formatDate(entry.timestamp)}</span>
@@ -312,11 +318,10 @@ export function renderTimeline() {
             
             // Render Recaps (si existen)
             html += recaps.map(recap => `
-                <div class="recap-block" data-id="${recap.id}" 
+                <div class="recap-block ${collapsedClass}" data-id="${recap.id}" 
                      data-year-id="${yearID}" 
                      data-month-id="${monthID}" 
-                     data-week-id="${weekID}"
-                     class="${collapsedClass}">
+                     data-week-id="${weekID}">
                     
                     <div class="recap-header">
                         <span>🌟 Day Recap</span>
@@ -349,11 +354,11 @@ export function renderTimeline() {
             `).join('');
 
             // Render Day Content (Crumbs)
-            html += `<div class="day-content ${dayExpanded}" id="day-content-${dayID}" 
+            // *** CAMBIO: Añadida la clase 'collapsedClass' y los data-attributes ***
+            html += `<div class="day-content ${dayExpanded} ${collapsedClass}" id="day-content-${dayID}" 
                           data-year-id="${yearID}" 
                           data-month-id="${monthID}" 
-                          data-week-id="${weekID}"
-                          class="${collapsedClass}">`;
+                          data-week-id="${weekID}">`;
                           
             html += regularEntries.map(entry => {
                 const heightStyle = entry.isTimedActivity && entry.duration ? `min-height: ${Math.max(120, Math.min(150 + entry.duration * 0.5, 300))}px;` : '';
