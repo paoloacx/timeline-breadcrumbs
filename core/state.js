@@ -1,4 +1,4 @@
-// ===== state.js (Single Source of Truth) =====
+// ===== core/state.js (Single Source of Truth) =====
 
 // Private state of the application
 const state = {
@@ -85,8 +85,7 @@ export function updateEntry(updatedEntry) {
     }
 }
 export function removeEntry(entryId) {
-    // *** CAMBIO CRÍTICO: Usar != en lugar de !== ***
-    // Esto compara el valor (ej: 123) sin importar si es Número o String.
+    // Comparación no estricta (==) para manejar números y strings
     state.entries = state.entries.filter(e => e.id != entryId);
 }
 
