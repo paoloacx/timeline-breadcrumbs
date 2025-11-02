@@ -12,6 +12,7 @@ function renderPreviewMap(coords) {
         const mapContainer = document.getElementById('preview-map-modal');
         if (mapContainer) {
             try {
+                // Asume que L (Leaflet) está disponible globalmente
                 const map = L.map('preview-map-modal').setView([coords.lat, coords.lon], 13);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap'
@@ -83,7 +84,7 @@ export function renderPreview(entry) {
                 <strong>Images:</strong>
                 <div class="preview-images-full">
                     ${entry.images.map((img, idx) => `
-                        <img src="${img}" class="preview-image-full">
+                        <img src="${img}" class="preview-image-full" data-index="${idx}">
                     `).join('')}
                 </div>
             </div>
