@@ -1,11 +1,12 @@
 // ===== modules/settings/settings-manager.js (Settings Logic) =====
 
 // Imports
-// CAMBIO: Las rutas ahora suben un nivel
-import { getState, setSettings } from '../state.js';
-import { saveSettingsToFirebase } from '../firebase-config.js';
-import { openModal, closeModal } from './modules/ui/modal-manager.js';
-import { renderMoodSelector } from '../ui-renderer.js';
+// CAMBIO: Las rutas ahora suben dos niveles (../../) para salir de /modules/settings/
+import { getState, setSettings } from '../../state.js';
+import { saveSettingsToFirebase } from '../../firebase-config.js';
+// CAMBIO: La ruta ahora sube un nivel y entra a /ui/
+import { openModal, closeModal } from '../ui/modal-manager.js';
+import { renderMoodSelector } from '../../ui-renderer.js';
 
 // --- Local Storage ---
 
