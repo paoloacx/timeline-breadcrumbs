@@ -4,8 +4,11 @@
 /* Importar el CSS del Day Recap */
 @import url('../modules/timeline/recap-styles.css');
 
-/* CAMBIO: Importar el CSS de los Modales */
+/* Importar el CSS de los Modales */
 @import url('../modules/ui/modals.css');
+
+/* CAMBIO: Importar el CSS del Preview Modal */
+@import url('../modules/ui/preview.css');
 
 
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
@@ -493,29 +496,7 @@ h1 {
     height: 60px; /* Match height of thumbnails */
 }
 
-/* ===== CAMBIO: Todo el bloque de CSS de Modales se ha MOVIDO a modules/ui/modals.css ===== */
-
-.preview-map-full {
-    width: 100%;
-    height: 300px;
-    border: 3px solid #000;
-    margin: 16px 0; /* Spacing */
-}
-
-.preview-images-full {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Smaller grid items */
-    gap: 12px;
-    margin: 16px 0; /* Spacing */
-}
-
-.preview-image-full {
-    width: 100%;
-    height: 150px; /* Adjust height */
-    object-fit: cover;
-    border: 2px solid #000;
-    cursor: pointer;
-}
+/* ===== CAMBIO: Estilos de Preview movidos a modules/ui/preview.css ===== */
 
 .image-preview {
     display: inline-block;
@@ -944,9 +925,6 @@ h1 {
     }
 }
 
-/* ===== CAMBIO: Todo el bloque de animación de Modales se ha MOVIDO a modules/ui/modals.css ===== */
-
-
 /* Smooth animation for footer buttons */
 .footer .mac-button {
     transition: transform 0.15s ease, background 0.15s ease;
@@ -1030,9 +1008,6 @@ h1 {
         transform: translateY(0);
     }
 }
-
-/* ===== RECAP STYLES ===== */
-/* (Movido a modules/timeline/recap-styles.css) */
 
 /* Mac-style range slider */
 input[type="range"] {
