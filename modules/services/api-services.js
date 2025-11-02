@@ -1,10 +1,11 @@
-// ===== api-services.js (External APIs) =====
+// ===== modules/services/api-services.js (External APIs) =====
 
 // Imports
-import { setCoords } from './state.js';
-import { showMiniMap } from './ui-renderer.js';
-import { getWeatherEmoji } from './utils.js';
-import { renderBSOResults, selectTrackUI } from './ui-renderer.js';
+// CAMBIO: Las rutas ahora suben dos niveles (../../)
+import { setCoords } from '../../core/state.js';
+import { showMiniMap } from '../../ui-renderer.js';
+import { getWeatherEmoji } from '../../utils.js';
+import { renderBSOResults, selectTrackUI } from '../../ui-renderer.js';
 
 const WEATHER_API_KEY = '317f7bcb07cf05e2c6265176c502a4bb';
 
