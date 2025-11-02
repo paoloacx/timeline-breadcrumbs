@@ -10,12 +10,7 @@ import { openSettings, toggleMoodConfig, saveSettings, updateTimerOptions, updat
 import { renderMoodSelector, renderImagePreviews, renderAudioPreview, selectTrackUI } from './ui-renderer.js';
 import { signInWithGoogle, signInWithEmail, signOutUser } from './firebase-config.js';
 import { initFabMenu } from './modules/ui/fab-menu.js';
-// CAMBIO: Importa el nuevo gestor de modales
 import { initModalManager, openCrumbForm, openTimerForm, openTrackForm, openSpentForm, openRecapForm, toggleUserMenu, closeModal } from './modules/ui/modal-manager.js';
-
-
-// --- CAMBIO: Toda la lógica de modales se ha movido a modules/ui/modal-manager.js ---
-// (openModal, closeModal, showMainApp, toggleUserMenu, openCrumbForm, etc. ya no están aquí)
 
 
 // --- Main UI Initialization ---
@@ -63,7 +58,7 @@ export function initUI(onOfflineCallback) {
         openRecapForm
     });
 
-    // --- CAMBIO: Inicializa el módulo de Modales ---
+    // --- Inicializa el módulo de Modales ---
     initModalManager();
 
     // --- Crumb Form ---
@@ -197,8 +192,11 @@ export function initUI(onOfflineCallback) {
             return; // Acción completada
         }
 
-        // Ahora, comprueba si el clic fue en un crumb
-        const entryEl = e.target.closest('.breadcrumb-entry'); // NOTA: Quitado .recap-block
+        // --- CAMBIO: Inicio del Arreglo ---
+        // Ahora, comprueba si el clic fue en un crumb O en un recap-block
+        const entryEl = e.target.closest('.breadcrumb-entry, .recap-block');
+        // --- CAMBIO: Fin del Arreglo ---
+        
         if (!entryEl) return; // Si no fue en un crumb, no hacer nada más
 
         const id = entryEl.dataset.id;
