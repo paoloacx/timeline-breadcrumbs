@@ -1,13 +1,13 @@
-// ===== app.js (Main Entry Point) =====
+// ===== core/app.js (Main Entry Point) =====
 // Imports
-import { initAuth, loadFirebaseData } from './firebase-config.js';
-import { initUI } from './ui-handlers.js'; 
-import { showMainApp } from './modules/ui/modal-manager.js';
-import { loadData as loadLocalData } from './data-storage.js';
-// CAMBIO: La ruta ahora apunta a 'modules/settings/'
-import { loadSettings as loadLocalSettings } from './modules/settings/settings-manager.js';
+// CAMBIO: Las rutas ahora suben un nivel
+import { initAuth, loadFirebaseData } from '../firebase-config.js';
+import { initUI } from '../ui-handlers.js'; 
+import { showMainApp } from '../modules/ui/modal-manager.js';
+import { loadData as loadLocalData } from './storage.js'; // CAMBIO: Apunta al nuevo 'storage.js'
+import { loadSettings as loadLocalSettings } from '../modules/settings/settings-manager.js';
 import { getState, setOfflineMode } from './state.js';
-import { initTimeline } from './modules/timeline/timeline.js';
+import { initTimeline } from '../modules/timeline/timeline.js';
 
 /**
  * Initializes the application.
