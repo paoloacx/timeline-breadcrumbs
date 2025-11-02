@@ -2,7 +2,8 @@
 
 // Imports
 import { getState, setEditingId, setSelectedMood, setSelectedDuration, setSelectedActivity, setSelectedTrackItem } from './state.js';
-import { handleSaveCrumb, handleSaveTime, handleSaveTrack, handleSaveSpent, handleSaveRecap, handleDeleteEntry, handleEditEntry, handlePreviewEntry } from './crud-handlers.js';
+// CAMBIO: 'handleEditEntry' y 'handlePreviewEntry' ya no son necesarios aquí
+import { handleSaveCrumb, handleSaveTime, handleSaveTrack, handleSaveSpent, handleSaveRecap, handleDeleteEntry } from './crud-handlers.js';
 import { handleGps, handleSearchBSO } from './api-services.js';
 import { handleImageInput, startRecording, stopRecording, removeImage, removeAudio } from './media-handlers.js';
 import { openStats, exportCSV, exportICS, openExportModal, performExport } from './modules/data/data-tools.js';
@@ -12,6 +13,7 @@ import { renderMoodSelector, renderImagePreviews, renderAudioPreview, selectTrac
 import { signInWithGoogle, signInWithEmail, signOutUser } from './firebase-config.js';
 import { initFabMenu } from './modules/ui/fab-menu.js';
 import { initModalManager, openCrumbForm, openTimerForm, openTrackForm, openSpentForm, openRecapForm, toggleUserMenu, closeModal } from './modules/ui/modal-manager.js';
+// CAMBIO: Importa el inicializador de la Timeline (pero no lo llama)
 import { initTimeline } from './modules/timeline/timeline.js';
 
 
@@ -63,8 +65,8 @@ export function initUI(onOfflineCallback) {
     // --- Inicializa el módulo de Modales ---
     initModalManager();
     
-    // --- Inicializa el módulo de Timeline ---
-    initTimeline();
+    // --- CAMBIO: La llamada a initTimeline() se quitó de aquí ---
+    // (Ahora se llama desde app.js)
 
     // --- Crumb Form ---
     document.getElementById('btn-toggle-mood-config').addEventListener('click', toggleMoodConfig);
@@ -166,4 +168,6 @@ export function initUI(onOfflineCallback) {
             selectTrackUI(target.dataset);
         }
     });
+    
+    // --- CAMBIO: TIMELINE EVENT DELEGATION se ha ELIMINADO de este archivo ---
 }
