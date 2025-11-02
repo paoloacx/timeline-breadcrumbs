@@ -1,3 +1,3 @@
-Voy a usar Gemini aqui
+Refactorización Gemini
 
-Version 23 Octubre antes del crash
+2 Nov
