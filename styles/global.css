@@ -13,9 +13,12 @@
 /* Importar el CSS del Módulo de Datos (Stats/Export) */
 @import url('../modules/data/data.css');
 
-/* CAMBIO: Importar los nuevos CSS de Timeline */
+/* Importar los nuevos CSS de Timeline */
 @import url('../modules/timeline/timeline.css');
 @import url('../modules/timeline/entry-card.css');
+
+/* CAMBIO: Importar el CSS del Módulo de Settings */
+@import url('../modules/settings/settings.css');
 
 
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
@@ -257,8 +260,6 @@ h1 {
     font-size: 14px;
 }
 
-/* ===== CAMBIO: Todo el bloque de CSS de Timeline se ha MOVIDO a modules/timeline/ ===== */
-
 .image-preview {
     display: inline-block;
     width: 80px;
@@ -399,39 +400,7 @@ h1 {
     margin-right: 6px;
 }
 
-.mood-config-btn {
-    font-size: 12px;
-    padding: 4px 8px;
-    margin-left: 8px;
-}
-
-.config-panel {
-    background: #ffffcc; /* Light yellow background */
-    border: 3px solid #000;
-    padding: 16px;
-    margin-bottom: 12px;
-}
-
-.config-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.config-item input[type="text"],
-.config-item input[type="number"] {
-    flex: 1;
-    padding: 4px;
-    border: 2px inset #999;
-    font-family: 'Courier New', monospace;
-}
-
-.config-item input[type="text"]:first-child { /* Style for emoji input */
-    flex: 0 0 60px; /* Fixed width */
-    text-align: center;
-    font-size: 20px;
-}
+/* ===== CAMBIO: Estilos de Settings movidos a modules/settings/settings.css ===== */
 
 .duration-selector,
 .activity-selector {
@@ -508,23 +477,6 @@ h1 {
  .sync-status {
     display: none; /* Hide it completely as requested */
  }
-
-/* ===== CAMBIO: Todo el bloque de CSS de Timeline se ha MOVIDO a modules/timeline/ ===== */
-
-@media (max-width: 768px) {
-    .preview-image-thumb,
-    .preview-map-thumb {
-        width: 50px !important;
-        height: 50px !important;
-    }
-
-    .header-image {
-        max-height: 150px;
-    }
-     .preview-button {
-        height: 50px; /* Match mobile thumbnail height */
-    }
-}
 
 /* Smooth animation for footer buttons */
 .footer .mac-button {
