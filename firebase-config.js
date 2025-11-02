@@ -1,11 +1,11 @@
 // ===== firebase-config.js (Firebase Logic) =====
 
 // Imports
-import { getState, setCurrentUser, setEntries, setSettings } from './state.js';
+// CAMBIO: Rutas actualizadas para apuntar a 'core/'
+import { getState, setCurrentUser, setEntries, setSettings } from './core/state.js';
 import { renderTimeline } from './modules/timeline/timeline.js';
-// CAMBIO: La ruta ahora apunta a 'modules/settings/'
 import * as settingsManager from './modules/settings/settings-manager.js';
-import { loadData as loadLocalData } from './data-storage.js';
+import { loadData as loadLocalData } from './core/storage.js';
 import { renderMoodSelector } from './ui-renderer.js';
 
 // Firebase Configuration
