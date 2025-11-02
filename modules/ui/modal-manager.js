@@ -1,9 +1,8 @@
 // ===== modules/ui/modal-manager.js (Modal Logic) =====
 
 // Imports
-// CAMBIO: La ruta ahora apunta a 'core/state.js'
+// CAMBIO: Las rutas ahora apuntan a 'core/' y 'modules/settings/'
 import { clearFormState, clearTimerState, clearTrackState, clearSpentState, clearRecapState } from '../../core/state.js';
-// CAMBIO: La ruta ahora apunta a 'modules/settings/' (ya estaba bien, pero la reviso)
 import { updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from '../../modules/settings/settings-manager.js';
 import { renderMoodSelector } from '../../ui-renderer.js';
 import { setCurrentDateTime } from '../../utils.js';
