@@ -3,7 +3,8 @@
 // Imports
 import { getState } from './state.js';
 import { formatDate, formatTime, calculateEndTime, getDayKey } from './utils.js';
-import { openModal } from './ui-handlers.js'; // Solo para mapas de preview
+// CAMBIO: La ruta de importación ahora apunta a 'modal-manager.js'
+import { openModal } from './modules/ui/modal-manager.js';
 
 // --- Form Renderers ---
 
