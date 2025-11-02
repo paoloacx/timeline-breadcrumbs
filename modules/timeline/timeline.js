@@ -1,17 +1,105 @@
 // ===== modules/timeline/timeline.js (Timeline Module) =====
 
 // Imports
-// CAMBIO: Las rutas ahora apuntan a 'core/'
 import { getState } from '../../core/state.js';
 import { formatDate, formatTime, calculateEndTime, getDayKey } from '../../utils.js';
 import { handleEditEntry, handlePreviewEntry } from '../../crud-handlers.js';
 
+// --- NUEVAS FUNCIONES DE AYUDA ---
+const MONTH_NAMES = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+];
+
+function getMonthName(monthIndex) {
+    return MONTH_NAMES[monthIndex];
+}
+
+// Función para obtener el número de la semana (ISO 8601)
+function getWeekNumber(d) {
+    d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+    var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    return weekNo;
+}
+
+/**
+ * Agrupa la lista plana de entradas en un objeto anidado por Año, Mes, Semana y Día.
+ * @param {Array} entries - La lista plana de entradas.
+ * @returns {object} - Un objeto anidado.
+ */
+function groupEntriesByTime(entries) {
+    const grouped = {};
+
+    entries.forEach(entry => {
+        const date = new Date(entry.timestamp);
+        const year = date.getFullYear().toString();
+        const month = getMonthName(date.getMonth());
+        const week = "Semana " + getWeekNumber(date);
+        const dayKey = getDayKey(entry.timestamp); // YYYY-MM-DD
+        
+        if (!grouped[year]) grouped[year] = {};
+        if (!grouped[year][month]) grouped[year][month] = {};
+        if (!grouped[year][month][week]) grouped[year][month][week] = {};
+        if (!grouped[year][month][week][dayKey]) grouped[year][month][week][dayKey] = [];
+        
+        grouped[year][month][week][dayKey].push(entry);
+    });
+    
+    return grouped;
+}
+// --- FIN DE NUEVAS FUNCIONES ---
+
+
 /**
  * Initializes all event listeners for the timeline container.
+ * CAMBIO: Añadidos listeners para los nuevos cabeceros.
  */
 export function initTimeline() {
     document.getElementById('timeline-container').addEventListener('click', (e) => {
         
+        // --- CAMBIO: Lógica para colapsar/expandir ---
+        
+        // Handle Toggle Year
+        const yearHeader = e.target.closest('.year-header');
+        if (yearHeader) {
+            const yearBlock = yearHeader.closest('.year-block');
+            if (yearBlock) {
+                const content = yearBlock.querySelector('.year-content');
+                const chevron = yearHeader.querySelector('.chevron-year');
+                if (content) content.classList.toggle('expanded');
+                if (chevron) chevron.classList.toggle('expanded');
+            }
+            return;
+        }
+        
+        // Handle Toggle Month
+        const monthHeader = e.target.closest('.month-header');
+        if (monthHeader) {
+            const monthBlock = monthHeader.closest('.month-block');
+            if (monthBlock) {
+                const content = monthBlock.querySelector('.month-content');
+                const chevron = monthHeader.querySelector('.chevron-month');
+                if (content) content.classList.toggle('expanded');
+                if (chevron) chevron.classList.toggle('expanded');
+            }
+            return;
+        }
+
+        // Handle Toggle Week
+        const weekHeader = e.target.closest('.week-header');
+        if (weekHeader) {
+            const weekBlock = weekHeader.closest('.week-block');
+            if (weekBlock) {
+                const content = weekBlock.querySelector('.week-content');
+                const chevron = weekHeader.querySelector('.chevron-week');
+                if (content) content.classList.toggle('expanded');
+                if (chevron) chevron.classList.toggle('expanded');
+            }
+            return;
+        }
+
         // Handle Toggle Day
         const dayHeader = e.target.closest('.day-header');
         if (dayHeader) {
@@ -38,6 +126,8 @@ export function initTimeline() {
             }
             return; // Acción completada
         }
+        // --- FIN DE LÓGICA DE COLAPSAR ---
+
 
         // Comprueba si el clic fue en un crumb O en un recap-block
         const entryEl = e.target.closest('.breadcrumb-entry, .recap-block');
@@ -91,6 +181,7 @@ export function initTimeline() {
 
 /**
  * Renders the entire timeline based on the global state.
+ * CAMBIO: Totalmente reescrito para renderizar por Año > Mes > Semana > Día.
  */
 export function renderTimeline() {
     const { entries } = getState();
@@ -108,169 +199,176 @@ export function renderTimeline() {
     emptyState.classList.add('hidden');
     footer.style.display = 'flex';
 
-    const groupedByDay = {};
-    entries.forEach(entry => {
-        const dayKey = getDayKey(entry.timestamp);
-        if (!groupedByDay[dayKey]) {
-            groupedByDay[dayKey] = [];
-        }
-        groupedByDay[dayKey].push(entry);
-    });
+    // 1. Agrupar todas las entradas
+    const groupedEntries = groupEntriesByTime(entries);
+    
+    const today = new Date();
+    const todayKey = getDayKey(today.toISOString());
+    const currentYear = today.getFullYear().toString();
+    const currentMonth = getMonthName(today.getMonth());
+    const currentWeek = "Semana " + getWeekNumber(today);
 
-    const sortedDayKeys = Object.keys(groupedByDay).sort((a, b) => b.localeCompare(a));
-    const todayKey = getDayKey(new Date().toISOString());
+    let html = `<div class="timeline"><div class="timeline-line"></div>`;
 
-    const html = `
-        <div class="timeline">
-            <div class="timeline-line"></div>
-            ${sortedDayKeys.map(dayKey => {
-                const dayEntries = groupedByDay[dayKey];
-                const firstEntry = dayEntries[0];
+    // 2. Loop Años (descendente)
+    const sortedYears = Object.keys(groupedEntries).sort((a, b) => b.localeCompare(a));
+    
+    for (const year of sortedYears) {
+        const isCurrentYear = year === currentYear;
+        const yearExpanded = isCurrentYear ? 'expanded' : '';
+        
+        html += `
+        <div class="year-block" data-year="${year}">
+            <div class="year-header">
+                <span>${year}</span>
+                <span class="chevron chevron-year ${yearExpanded}">▼</span>
+            </div>
+            <div class="year-content ${yearExpanded}">
+        `;
+
+        // 3. Loop Meses (descendente)
+        const yearData = groupedEntries[year];
+        const sortedMonths = Object.keys(yearData).sort((a, b) => MONTH_NAMES.indexOf(b) - MONTH_NAMES.indexOf(a));
+
+        for (const month of sortedMonths) {
+            const isCurrentMonth = isCurrentYear && month === currentMonth;
+            const monthExpanded = isCurrentMonth ? 'expanded' : '';
+            
+            html += `
+            <div class="month-block" data-month="${month}">
+                <div class="month-header">
+                    <span>${month}</span>
+                    <span class="chevron chevron-month ${monthExpanded}">▼</span>
+                </div>
+                <div class="month-content ${monthExpanded}">
+            `;
+            
+            // 4. Loop Semanas (descendente)
+            const monthData = yearData[month];
+            const sortedWeeks = Object.keys(monthData).sort((a, b) => parseInt(b.split(" ")[1]) - parseInt(a.split(" ")[1]));
+
+            for (const week of sortedWeeks) {
+                const isCurrentWeek = isCurrentMonth && week === currentWeek;
+                const weekExpanded = isCurrentWeek ? 'expanded' : '';
                 
-                const recaps = dayEntries.filter(e => e.type === 'recap');
-                const regularEntries = dayEntries.filter(e => e.type !== 'recap');
-                
-                const isToday = (dayKey === todayKey);
-                const expandedClass = isToday ? 'expanded' : '';
-                
-                return `
+                html += `
+                <div class="week-block" data-week="${week}">
+                    <div class="week-header">
+                        <span>${week}</span>
+                        <span class="chevron chevron-week ${weekExpanded}">▼</span>
+                    </div>
+                    <div class="week-content ${weekExpanded}">
+                `;
+
+                // 5. Loop Días (descendente)
+                const weekData = monthData[week];
+                const sortedDayKeys = Object.keys(weekData).sort((a, b) => b.localeCompare(a));
+
+                for (const dayKey of sortedDayKeys) {
+                    const dayEntries = weekData[dayKey];
+                    const firstEntry = dayEntries[0];
+                    const recaps = dayEntries.filter(e => e.type === 'recap');
+                    const regularEntries = dayEntries.filter(e => e.type !== 'recap');
+                    
+                    const isToday = dayKey === todayKey;
+                    const dayExpanded = isToday ? 'expanded' : '';
+
+                    html += `
                     <div class="day-block" data-day="${dayKey}">
                         <div class="day-header">
                             <span>${formatDate(firstEntry.timestamp)}</span>
-                            <span class="chevron ${expandedClass}" id="chevron-${dayKey}">▼</span>
+                            <span class="chevron ${dayExpanded}" id="chevron-${dayKey}">▼</span>
                         </div>
-                        
-                        ${recaps.map(recap => `
-                            <div class="recap-block" data-id="${recap.id}">
-                                <div class="recap-header">
-                                    <span>🌟 Day Recap</span>
-                                    <span class="chevron-recap" id="chevron-recap-${recap.id}">▼</span>
-                                </div>
-                                <div class="recap-content hidden" id="recap-content-${recap.id}">
-                                    <button class="mac-button edit-button btn-edit">✏️ Edit</button>
-                                    
-                                    <div style="margin-bottom: 16px;">
-                                        <strong>Rating:</strong> ${recap.rating}/10 ${'⭐'.repeat(Math.round(recap.rating / 2))}
-                                    </div>
-                                    
-                                    ${recap.reflection ? `
-                                        <div style="margin-bottom: 16px;">
-                                            <strong>Reflection:</strong>
-                                            <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${recap.reflection}</div>
-                                        </div>
-                                    ` : ''}
-                                    
-                                    ${recap.highlights && recap.highlights.length > 0 ? `
-                                        <div style="margin-bottom: 16px;">
-                                            <strong>Highlights:</strong>
-                                            <ul style="margin-top: 8px; padding-left: 20px;">
-                                                ${recap.highlights.map(h => `<li style="margin-bottom: 4px;">${h}</li>`).join('')}
-                                            </ul>
-                                        </div>
-                                    ` : ''}
-                                    
-                                    ${recap.track ? `
-                                        <div style="margin-bottom: 16px;">
-                                            <strong>Day's Soundtrack:</strong>
-                                            <div class="bso-result" style="display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 12px; border: 2px solid #000; background: #f9f9f9;">
-                                                <img src="${recap.track.artwork}" style="width: 50px; height: 50px; border: 2px solid #000;">
-                                                <div style="flex: 1;">
-                                                    <div style="font-weight: bold; font-size: 13px;">${recap.track.name}</div>
-                                                    <div style="font-size: 11px; color: #666;">${recap.track.artist}</div>
-                                                </div>
-                                                <a href="${recap.track.url}" target="_blank" style="text-decoration: none; font-size: 18px;">🔗</a>
-                                            </div>
-                                        </div>
-                                    ` : ''}
-                                </div>
+                    `;
+                    
+                    // Render Recaps
+                    html += recaps.map(recap => `
+                        <div class="recap-block" data-id="${recap.id}">
+                            <div class="recap-header">
+                                <span>🌟 Day Recap</span>
+                                <span class="chevron-recap" id="chevron-recap-${recap.id}">▼</span>
                             </div>
-                        `).join('')}
-                        
-                        <div class="day-content ${expandedClass}" id="day-content-${dayKey}">
-                            ${regularEntries.map(entry => {
-                                const heightStyle = entry.isTimedActivity && entry.duration ? `min-height: ${Math.max(120, Math.min(150 + entry.duration * 0.5, 300))}px;` : '';
-                                const trackClass = entry.isQuickTrack ? 'track-event' : '';
-                                const spentClass = entry.isSpent ? 'spent-event' : '';
-                                const crumbClass = (!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap') ? 'crumb-event' : '';
-                                
-                                const noteContent = entry.note || '';
-                                const optionalNoteContent = entry.optionalNote || '';
-                                const needsReadMore = noteContent.length > 200 || noteContent.split('\n').length > 4;
-                                const needsReadMoreOptional = optionalNoteContent.length > 200 || optionalNoteContent.split('\n').length > 4;
-
-                                return `
-                                <div class="breadcrumb-entry ${entry.isTimedActivity ? 'time-event' : ''} ${trackClass} ${spentClass} ${crumbClass}" style="${heightStyle}" data-id="${entry.id}">
-                                    <button class="mac-button edit-button btn-edit">✏️ Edit</button>
-                                    
-                                    ${entry.isTimedActivity ? 
-                                        `<div>
-                                            <div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div>
-                                            <div class="activity-label">${entry.activity}</div>
-                                            <div style="font-size: 13px; color: #666; margin-top: 8px;">Duration: ${entry.duration} minutes</div>
-                                        </div>
-                                        ${entry.optionalNote ? `
-                                            <div class="optional-note">${entry.optionalNote}</div>
-                                            ${needsReadMoreOptional ? `<button class="read-more-btn">Read more</button>` : ''}
-                                        ` : ''}` :
-                                        `<div class="breadcrumb-time">
-                                            ${entry.isQuickTrack ?
-                                                `<span class="compact-time">⏰ ${formatTime(entry.timestamp)} ${entry.note}</span>` :
-                                                `⏰ ${formatTime(entry.timestamp)}`
-                                            }
-                                            ${entry.isSpent ? `<span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>` : ''}
-                                        </div>`
-                                    }
-                                    
-                                    ${entry.isQuickTrack && entry.optionalNote ? `
-                                        <div class="optional-note">${entry.optionalNote}</div>
-                                        ${needsReadMoreOptional ? `<button class="read-more-btn">Read more</button>` : ''}
-                                    ` : ''}
-                                    
-                                    ${!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap' ? `
-                                        <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
-                                            ${entry.mood ? `<span class="mood-display">${entry.mood.emoji}</span>` : ''}
-                                            <div style="flex: 1;">
-                                                <div class="breadcrumb-note">${entry.note}</div>
-                                                ${needsReadMore ? `<button class="read-more-btn">Read more</button>` : ''}
-                                            </div>
-                                        </div>
-                                    ` : ''}
-                                    
-                                    ${(entry.weather || entry.location) ? `
-                                        <div class="breadcrumb-meta">
-                                            ${entry.weather ? `<span>${entry.weather}</span>` : ''}
-                                            ${entry.weather && entry.location ? ` • ` : ''}
-                                            ${entry.location ? `<span>📍 ${entry.location}</span>` : ''}
-                                        </div>
-                                    ` : ''}
-                                    
-                                    ${entry.audio ? `
-                                        <div style="margin-top: 12px; margin-bottom: 12px;">
-                                            <audio controls style="width: 100%; max-width: 300px;">
-                                                <source src="${entry.audio}">
-                                            </audio>
-                                        </div>
-                                    ` : ''}
-                                    
-                                    <div class="breadcrumb-preview">
-                                        ${entry.images && entry.images.length > 0 ? entry.images.map((img, idx) => `
-                                            <img src="${img}" class="preview-image-thumb" alt="Thumbnail ${idx+1}" data-index="${idx}">
-                                        `).join('') : ''}
-                                        ${entry.coords ? `<div class="preview-map-thumb" id="mini-map-${entry.id}"></div>` : ''}
-                                        <button class="mac-button preview-button btn-preview">🔍 Preview</button>
+                            <div class="recap-content hidden" id="recap-content-${recap.id}">
+                                <button class="mac-button edit-button btn-edit">✏️ Edit</button>
+                                ${recap.rating ? `<div style="margin-bottom: 16px;"><strong>Rating:</strong> ${recap.rating}/10 ${'⭐'.repeat(Math.round(recap.rating / 2))}</div>` : ''}
+                                ${recap.reflection ? `<div style="margin-bottom: 16px;"><strong>Reflection:</strong><div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${recap.reflection}</div></div>` : ''}
+                                ${recap.highlights && recap.highlights.length > 0 ? `
+                                    <div style="margin-bottom: 16px;">
+                                        <strong>Highlights:</strong>
+                                        <ul style="margin-top: 8px; padding-left: 20px;">
+                                            ${recap.highlights.map(h => `<li style="margin-bottom: 4px;">${h}</li>`).join('')}
+                                        </ul>
                                     </div>
-                                </div>
-                                `}).join('')}
+                                ` : ''}
+                                ${recap.track ? `
+                                    <div style="margin-bottom: 16px;">
+                                        <strong>Day's Soundtrack:</strong>
+                                        <div class="bso-result" style="display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 12px; border: 2px solid #000; background: #f9f9f9;">
+                                            <img src="${recap.track.artwork}" style="width: 50px; height: 50px; border: 2px solid #000;">
+                                            <div><div style="font-weight: bold; font-size: 13px;">${recap.track.name}</div><div style="font-size: 11px; color: #666;">${recap.track.artist}</div></div>
+                                            <a href="${recap.track.url}" target="_blank" style="text-decoration: none; font-size: 18px;">🔗</a>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
                         </div>
-                    </div>
-                `;
-            }).join('')}
-        </div>
-    `;
+                    `).join('');
 
+                    // Render Day Content (Crumbs)
+                    html += `<div class="day-content ${dayExpanded}" id="day-content-${dayKey}">`;
+                    html += regularEntries.map(entry => {
+                        const heightStyle = entry.isTimedActivity && entry.duration ? `min-height: ${Math.max(120, Math.min(150 + entry.duration * 0.5, 300))}px;` : '';
+                        const trackClass = entry.isQuickTrack ? 'track-event' : '';
+                        const spentClass = entry.isSpent ? 'spent-event' : '';
+                        const crumbClass = (!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap') ? 'crumb-event' : '';
+                        
+                        const noteContent = entry.note || '';
+                        const optionalNoteContent = entry.optionalNote || '';
+                        const needsReadMore = noteContent.length > 200 || noteContent.split('\n').length > 4;
+                        const needsReadMoreOptional = optionalNoteContent.length > 200 || optionalNoteContent.split('\n').length > 4;
+
+                        // (El HTML de la tarjeta de entrada no ha cambiado)
+                        return `
+                        <div class="breadcrumb-entry ${entry.isTimedActivity ? 'time-event' : ''} ${trackClass} ${spentClass} ${crumbClass}" style="${heightStyle}" data-id="${entry.id}">
+                            <button class="mac-button edit-button btn-edit">✏️ Edit</button>
+                            ${entry.isTimedActivity ? 
+                                `<div><div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div><div class="activity-label">${entry.activity}</div><div style="font-size: 13px; color: #666; margin-top: 8px;">Duration: ${entry.duration} minutes</div></div>
+                                ${entry.optionalNote ? `<div class="optional-note">${entry.optionalNote}</div>${needsReadMoreOptional ? `<button class="read-more-btn">Read more</button>` : ''}` : ''}` :
+                                `<div class="breadcrumb-time">${entry.isQuickTrack ? `<span class="compact-time">⏰ ${formatTime(entry.timestamp)} ${entry.note}</span>` : `⏰ ${formatTime(entry.timestamp)}`}
+                                ${entry.isSpent ? `<span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>` : ''}</div>`
+                            }
+                            ${entry.isQuickTrack && entry.optionalNote ? `<div class="optional-note">${entry.optionalNote}</div>${needsReadMoreOptional ? `<button class="read-more-btn">Read more</button>` : ''}` : ''}
+                            ${!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap' ? `
+                                <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
+                                    ${entry.mood ? `<span class="mood-display">${entry.mood.emoji}</span>` : ''}
+                                    <div style="flex: 1;"><div class="breadcrumb-note">${entry.note}</div>
+                                    ${needsReadMore ? `<button class="read-more-btn">Read more</button>` : ''}</div>
+                                </div>
+                            ` : ''}
+                            ${(entry.weather || entry.location) ? `<div class="breadcrumb-meta">${entry.weather ? `<span>${entry.weather}</span>` : ''}${entry.weather && entry.location ? ` • ` : ''}${entry.location ? `<span>📍 ${entry.location}</span>` : ''}</div>` : ''}
+                            ${entry.audio ? `<div style="margin-top: 12px; margin-bottom: 12px;"><audio controls style="width: 100%; max-width: 300px;"><source src="${entry.audio}"></audio></div>` : ''}
+                            <div class="breadcrumb-preview">
+                                ${entry.images && entry.images.length > 0 ? entry.images.map((img, idx) => `<img src="${img}" class="preview-image-thumb" alt="Thumbnail ${idx+1}" data-index="${idx}">`).join('') : ''}
+                                ${entry.coords ? `<div class="preview-map-thumb" id="mini-map-${entry.id}"></div>` : ''}
+                                <button class="mac-button preview-button btn-preview">🔍 Preview</button>
+                            </div>
+                        </div>
+                        `;
+                    }).join('');
+
+                    html += `</div></div>`; // Cierra day-content y day-block
+                } // Fin loop Días
+                html += `</div></div>`; // Cierra week-content y week-block
+            } // Fin loop Semanas
+            html += `</div></div>`; // Cierra month-content y month-block
+        } // Fin loop Meses
+        html += `</div></div>`; // Cierra year-content y year-block
+    } // Fin loop Años
+
+    html += `</div>`; // Cierra .timeline
     container.innerHTML = html;
     
-    // Render mini-maps after HTML is in the DOM
+    // Renderiza los mini-mapas (esta lógica no cambia)
     entries.forEach(entry => {
         if (entry.coords) {
             setTimeout(() => {
@@ -278,23 +376,13 @@ export function renderTimeline() {
                 if (mapEl && !mapEl.classList.contains('leaflet-container')) {
                     try {
                         const miniMap = L.map(`mini-map-${entry.id}`, {
-                            zoomControl: false,
-                            attributionControl: false,
-                            dragging: false,
-                            scrollWheelZoom: false,
-                            doubleClickZoom: false,
-                            boxZoom: false,
-                            keyboard: false
+                            zoomControl: false, attributionControl: false, dragging: false,
+                            scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false, keyboard: false
                         }).setView([entry.coords.lat, entry.coords.lon], 13);
                         
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            maxZoom: 19
-                        }).addTo(miniMap);
-                        
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(miniMap);
                         L.marker([entry.coords.lat, entry.coords.lon]).addTo(miniMap);
-                        
                         mapEl.style.cursor = 'pointer';
-                        // El click es manejado por delegación
                     } catch (e) {
                         console.error('Error creating mini map:', e);
                         mapEl.innerHTML = "Map failed";
