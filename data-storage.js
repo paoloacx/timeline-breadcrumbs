@@ -1,6 +1,7 @@
 // ===== data-storage.js (LocalStorage Handler) =====
 import { getState, setEntries } from './state.js';
-import { renderTimeline } from './ui-renderer.js';
+// CAMBIO: 'renderTimeline' se importa desde su nuevo módulo
+import { renderTimeline } from './modules/timeline/timeline.js';
 import { saveDataToFirebase } from './firebase-config.js';
 
 /**
