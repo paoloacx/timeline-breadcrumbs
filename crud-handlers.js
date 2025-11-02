@@ -1,15 +1,15 @@
 // ===== crud-handlers.js (Create, Read, Update, Delete Logic) =====
 
 // Imports
-import { getState, addEntry, updateEntry, removeEntry, setEditingId, setSelectedMood, setCoords, setAudio, addImage, clearFormState, clearTimerState, clearTrackState, clearSpentState, clearRecapState, setSelectedDuration, setSelectedActivity, setSelectedTrackItem } from './state.js';
-import { saveData } from './data-storage.js';
+// CAMBIO: Rutas actualizadas para apuntar a 'core/'
+import { getState, addEntry, updateEntry, removeEntry, setEditingId, setSelectedMood, setCoords, setAudio, addImage, clearFormState, clearTimerState, clearTrackState, clearSpentState, clearRecapState, setSelectedDuration, setSelectedActivity, setSelectedTrackItem } from './core/state.js';
+import { saveData } from './core/storage.js';
 import { deleteEntryFromFirebase } from './firebase-config.js';
 import { renderMoodSelector, renderImagePreviews, renderAudioPreview, showMiniMap, selectTrackUI } from './ui-renderer.js';
 import { renderPreview, renderImagePreviewModal } from './modules/ui/preview.js';
 import { closeModal, openModal, openCrumbForm, openTimerForm, openTrackForm, openSpentForm, openRecapForm } from './modules/ui/modal-manager.js';
 import { renderTimeline } from './modules/timeline/timeline.js';
 import { getTimestampFromInput, setCurrentDateTime } from './utils.js';
-// CAMBIO: La ruta ahora apunta a 'modules/settings/'
 import { updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from './modules/settings/settings-manager.js';
 
 // --- Save Handlers ---
