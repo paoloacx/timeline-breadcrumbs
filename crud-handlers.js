@@ -11,9 +11,6 @@ import { updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackRead
 
 // --- Save Handlers ---
 
-/**
- * Saves or updates a standard "Crumb" entry.
- */
 export function handleSaveCrumb() {
     const { editingEntryId, currentImages, currentAudio, currentCoords, selectedMood, settings } = getState();
     const note = document.getElementById('note-input').value.trim();
@@ -34,15 +31,11 @@ export function handleSaveCrumb() {
         audio: currentAudio,
         coords: currentCoords ? { ...currentCoords } : null,
         mood: moodData,
-        // Ensure other types are false
-        isTimedActivity: false,
-        isQuickTrack: false,
-        isSpent: false,
-        type: null
+        isTimedActivity: false, isQuickTrack: false, isSpent: false, type: null
     };
 
     if (editingEntryId) {
-        const existingEntry = getState().entries.find(e => e.id === editingEntryId);
+        const existingEntry = getState().entries.find(e => e.id == editingEntryId);
         updateEntry({ ...existingEntry, ...entryData, id: editingEntryId });
         alert('✅ Crumb updated!');
     } else {
@@ -55,9 +48,6 @@ export function handleSaveCrumb() {
     closeModal('crumb-modal');
 }
 
-/**
- * Saves or updates a "Time" event.
- */
 export function handleSaveTime() {
     const { editingEntryId, selectedDuration, selectedActivity } = getState();
     if (!selectedDuration || !selectedActivity) return;
@@ -72,20 +62,12 @@ export function handleSaveTime() {
         duration: selectedDuration,
         optionalNote: optionalNote,
         isTimedActivity: true,
-        // Clear other types
-        isQuickTrack: false,
-        isSpent: false,
-        type: null,
-        mood: null,
-        location: '',
-        weather: '',
-        images: [],
-        audio: null,
-        coords: null,
+        isQuickTrack: false, isSpent: false, type: null, mood: null,
+        location: '', weather: '', images: [], audio: null, coords: null,
     };
 
     if (editingEntryId) {
-        const existingEntry = getState().entries.find(e => e.id === editingEntryId);
+        const existingEntry = getState().entries.find(e => e.id == editingEntryId);
         updateEntry({ ...existingEntry, ...entryData, id: editingEntryId });
         alert('✅ Time event updated!');
     } else {
@@ -98,9 +80,6 @@ export function handleSaveTime() {
     closeModal('timer-modal');
 }
 
-/**
- * Saves or updates a "Track" event.
- */
 export function handleSaveTrack() {
     const { editingEntryId, selectedTrackItem } = getState();
     if (!selectedTrackItem) return;
@@ -113,20 +92,12 @@ export function handleSaveTrack() {
         note: selectedTrackItem,
         optionalNote: optionalNote,
         isQuickTrack: true,
-        // Clear other types
-        isTimedActivity: false,
-        isSpent: false,
-        type: null,
-        mood: null,
-        location: '',
-        weather: '',
-        images: [],
-        audio: null,
-        coords: null,
+        isTimedActivity: false, isSpent: false, type: null, mood: null,
+        location: '', weather: '', images: [], audio: null, coords: null,
     };
 
     if (editingEntryId) {
-        const existingEntry = getState().entries.find(e => e.id === editingEntryId);
+        const existingEntry = getState().entries.find(e => e.id == editingEntryId);
         updateEntry({ ...existingEntry, ...entryData, id: editingEntryId });
         alert(`✅ Track updated: ${selectedTrackItem}`);
     } else {
@@ -139,9 +110,6 @@ export function handleSaveTrack() {
     closeModal('track-modal');
 }
 
-/**
- * Saves or updates a "Spent" event.
- */
 export function handleSaveSpent() {
     const { editingEntryId } = getState();
     const description = document.getElementById('spent-description').value.trim();
@@ -159,20 +127,12 @@ export function handleSaveSpent() {
         note: description,
         spentAmount: amount,
         isSpent: true,
-        // Clear other types
-        isTimedActivity: false,
-        isQuickTrack: false,
-        type: null,
-        mood: null,
-        location: '',
-        weather: '',
-        images: [],
-        audio: null,
-        coords: null,
+        isTimedActivity: false, isQuickTrack: false, type: null, mood: null,
+        location: '', weather: '', images: [], audio: null, coords: null,
     };
 
     if (editingEntryId) {
-        const existingEntry = getState().entries.find(e => e.id === editingEntryId);
+        const existingEntry = getState().entries.find(e => e.id == editingEntryId);
         updateEntry({ ...existingEntry, ...entryData, id: editingEntryId });
         alert(`✅ Spent updated: €${amount.toFixed(2)}`);
     } else {
@@ -185,9 +145,6 @@ export function handleSaveSpent() {
     closeModal('spent-modal');
 }
 
-/**
- * Saves or updates a "Recap" event.
- */
 export function handleSaveRecap() {
     const { editingEntryId } = getState();
     
@@ -211,15 +168,11 @@ export function handleSaveRecap() {
         highlights: [h1, h2, h3].filter(h => h),
         track: trackJson ? JSON.parse(trackJson) : null,
         note: `Day Recap (Rating: ${rating}/10)`,
-        // Clear other types
-        isTimedActivity: false,
-        isQuickTrack: false,
-        isSpent: false,
-        mood: null,
+        isTimedActivity: false, isQuickTrack: false, isSpent: false, mood: null,
     };
 
     if (editingEntryId) {
-        const existingEntry = getState().entries.find(e => e.id === editingEntryId);
+        const existingEntry = getState().entries.find(e => e.id == editingEntryId);
         updateEntry({ ...existingEntry, ...entryData, id: editingEntryId });
         alert('🌟 Recap updated!');
     } else {
@@ -234,9 +187,6 @@ export function handleSaveRecap() {
 
 // --- Delete Handler ---
 
-/**
- * Deletes the entry currently being edited (from any form).
- */
 export function handleDeleteEntry() {
     const { editingEntryId } = getState();
     if (!editingEntryId) {
@@ -257,7 +207,7 @@ export function handleDeleteEntry() {
         // 4. Re-render timeline
         renderTimeline();
         
-        // 5. Close all modals (safest way)
+        // 5. Close all modals
         closeModal('crumb-modal');
         closeModal('timer-modal');
         closeModal('track-modal');
@@ -268,46 +218,45 @@ export function handleDeleteEntry() {
 
 // --- Edit & Preview Handlers ---
 
-/**
- * Finds an entry by ID and opens the correct modal populated with its data.
- * @param {number|string} entryId - The ID of the entry to edit.
- */
 export function handleEditEntry(entryId) {
     const entry = getState().entries.find(e => e.id == entryId);
     if (!entry) return;
-
-    // Set the global editing ID
-    setEditingId(entry.id);
 
     // Set timestamp for all forms
     const date = new Date(entry.timestamp);
     const isoString = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
 
     if (entry.isTimedActivity) {
-        // --- Populate Timer Form ---
+        clearTimerState(); // Limpia estado anterior
+        setEditingId(entry.id); // Setea el ID
+        
         document.getElementById('datetime-input-time').value = isoString;
         document.getElementById('time-optional-note').value = entry.optionalNote || '';
         document.getElementById('btn-save-time').textContent = '💾 Update Event';
         document.getElementById('btn-delete-time').classList.remove('hidden');
         setSelectedDuration(entry.duration);
         setSelectedActivity(entry.activity);
-        updateTimerOptions(); // Re-render selectors with items selected
+        updateTimerOptions(); 
         checkTimerReady();
         openTimerForm(entry);
 
     } else if (entry.isQuickTrack) {
-        // --- Populate Track Form ---
+        clearTrackState(); // Limpia estado anterior
+        setEditingId(entry.id); // Setea el ID
+
         document.getElementById('datetime-input-track').value = isoString;
         document.getElementById('track-optional-note').value = entry.optionalNote || '';
         document.getElementById('btn-save-track').textContent = '💾 Update Track';
         document.getElementById('btn-delete-track').classList.remove('hidden');
         setSelectedTrackItem(entry.note);
-        updateTrackOptions(); // Re-render selectors
+        updateTrackOptions();
         checkTrackReady();
         openTrackForm(entry);
 
     } else if (entry.isSpent) {
-        // --- Populate Spent Form ---
+        clearSpentState(); // Limpia estado anterior
+        setEditingId(entry.id); // Setea el ID
+
         document.getElementById('datetime-input-spent').value = isoString;
         document.getElementById('spent-description').value = entry.note;
         document.getElementById('spent-amount').value = entry.spentAmount;
@@ -315,7 +264,9 @@ export function handleEditEntry(entryId) {
         openSpentForm(entry);
 
     } else if (entry.type === 'recap') {
-        // --- Populate Recap Form ---
+        clearRecapState(); // Limpia estado anterior
+        setEditingId(entry.id); // Setea el ID
+
         document.getElementById('datetime-input-recap').value = isoString;
         document.getElementById('recap-reflection').value = entry.reflection || '';
         document.getElementById('recap-rating').value = entry.rating || 5;
@@ -334,21 +285,20 @@ export function handleEditEntry(entryId) {
 
     } else {
         // --- Populate Crumb Form ---
+        
+        // *** CAMBIO CRÍTICO: Limpia el estado ANTES de setear el nuevo ID ***
+        clearFormState();
+        setEditingId(entry.id);
+
         document.getElementById('datetime-input').value = isoString;
         document.getElementById('note-input').value = entry.note;
         document.getElementById('location-input').value = entry.location || '';
         document.getElementById('weather-input').value = entry.weather || '';
         
-        // --- CAMBIO: INICIO DEL ARREGLO ---
-        // Se elimina la llamada a clearFormState() que borraba el ID.
-        // La limpieza ahora se hace al abrir un formulario *nuevo* en modal-manager.
-        
-        // Set media state (se limpia en openCrumbForm si es nueva entrada)
+        // Set media state
         if (entry.images) entry.images.forEach(img => addImage(img));
         setAudio(entry.audio || null);
         setCoords(entry.coords ? { ...entry.coords } : null);
-        
-        // --- CAMBIO: FIN DEL ARREGLO ---
         
         // Set mood state
         const moodIndex = entry.mood ? getState().settings.moods.findIndex(m => m.emoji === entry.mood.emoji) : -1;
