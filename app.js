@@ -1,12 +1,14 @@
 // ===== app.js (Main Entry Point) =====
 // Imports
 import { initAuth, loadFirebaseData } from './firebase-config.js';
-// CAMBIO: showMainApp ahora viene de modal-manager
+// CAMBIO: 'initUI' ahora es más pequeño
 import { initUI } from './ui-handlers.js'; 
 import { showMainApp } from './modules/ui/modal-manager.js';
 import { loadData as loadLocalData } from './data-storage.js';
 import { loadSettings as loadLocalSettings } from './settings-manager.js';
 import { getState, setOfflineMode } from './state.js';
+// CAMBIO: Importa el inicializador de la Timeline
+import { initTimeline } from './modules/timeline/timeline.js';
 
 /**
  * Initializes the application.
@@ -18,8 +20,11 @@ function initApp() {
     // 1. Initialize Authentication (sets up onAuthStateChanged listener)
     initAuth(onUserLoggedIn, onUserLoggedOut);
     
-    // 2. Initialize all UI event listeners (buttons, clicks, etc.)
+    // 2. Initialize all UI event listeners (botones, formularios, etc.)
     initUI(onOfflineClicked);
+    
+    // 3. Initialize Timeline listeners (clicks en editar, preview, expandir)
+    initTimeline();
 }
 
 /**
