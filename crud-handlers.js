@@ -241,7 +241,7 @@ export function handleEditEntry(entryId) {
         setSelectedActivity(entry.activity);
         updateTimerOptions(); 
         checkTimerReady();
-        openTimerForm(entry);
+        openTimerForm(entry); // 'entry' es solo un marcador, no se usa en openTimerForm
 
     } else if (entry.isQuickTrack) {
         clearTrackState();
@@ -288,6 +288,7 @@ export function handleEditEntry(entryId) {
 
     } else {
         // --- Populate Crumb Form ---
+        // *** CAMBIO CRÍTICO: Limpia el estado ANTES de setear el nuevo ID ***
         clearFormState();
         setEditingId(entry.id);
 
