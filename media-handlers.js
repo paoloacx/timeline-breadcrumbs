@@ -1,7 +1,8 @@
 // ===== media-handlers.js (Image & Audio Logic) =====
 
 // Imports
-import { setMediaRecorder, getMediaRecorder, setAudioChunks, getAudioChunks, addImage, removeImage as removeImageFromState, setAudio } from './state.js';
+// CAMBIO: Rutas actualizadas para apuntar a 'core/'
+import { setMediaRecorder, getMediaRecorder, setAudioChunks, getAudioChunks, addImage, removeImage as removeImageFromState, setAudio } from './core/state.js';
 import { renderImagePreviews, renderAudioPreview } from './ui-renderer.js';
 
 /**
