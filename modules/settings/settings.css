@@ -1,0 +1,35 @@
+/* ===== SETTINGS MODULE STYLES ===== */
+
+.mood-config-btn {
+    font-size: 12px;
+    padding: 4px 8px;
+    margin-left: 8px;
+}
+
+.config-panel {
+    background: #ffffcc; /* Light yellow background */
+    border: 3px solid #000;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.config-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.config-item input[type="text"],
+.config-item input[type="number"] {
+    flex: 1;
+    padding: 4px;
+    border: 2px inset #999;
+    font-family: 'Courier New', monospace;
+}
+
+.config-item input[type="text"]:first-child { /* Style for emoji input */
+    flex: 0 0 60px; /* Fixed width */
+    text-align: center;
+    font-size: 20px;
+}
