@@ -4,7 +4,10 @@
 import { getState, addEntry, updateEntry, removeEntry, setEditingId, setSelectedMood, setCoords, setAudio, addImage, clearFormState, clearTimerState, clearTrackState, clearSpentState, clearRecapState, setSelectedDuration, setSelectedActivity, setSelectedTrackItem } from './state.js';
 import { saveData } from './data-storage.js';
 import { deleteEntryFromFirebase } from './firebase-config.js';
-import { renderTimeline, renderMoodSelector, renderImagePreviews, renderAudioPreview, showMiniMap, renderPreview, renderImagePreviewModal, selectTrackUI } from './ui-renderer.js';
+// CAMBIO: Se eliminan 'renderPreview' y 'renderImagePreviewModal' de esta importación
+import { renderTimeline, renderMoodSelector, renderImagePreviews, renderAudioPreview, showMiniMap, selectTrackUI } from './ui-renderer.js';
+// CAMBIO: Se importan las funciones de preview desde el nuevo módulo
+import { renderPreview, renderImagePreviewModal } from './modules/ui/preview.js';
 import { closeModal, openModal, openCrumbForm, openTimerForm, openTrackForm, openSpentForm, openRecapForm } from './modules/ui/modal-manager.js';
 import { getTimestampFromInput, setCurrentDateTime } from './utils.js';
 import { updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from './settings-manager.js';
@@ -227,8 +230,8 @@ export function handleEditEntry(entryId) {
     const isoString = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
 
     if (entry.isTimedActivity) {
-        clearTimerState(); // Limpia estado anterior
-        setEditingId(entry.id); // Setea el ID
+        clearTimerState(); 
+        setEditingId(entry.id);
         
         document.getElementById('datetime-input-time').value = isoString;
         document.getElementById('time-optional-note').value = entry.optionalNote || '';
@@ -241,8 +244,8 @@ export function handleEditEntry(entryId) {
         openTimerForm(entry);
 
     } else if (entry.isQuickTrack) {
-        clearTrackState(); // Limpia estado anterior
-        setEditingId(entry.id); // Setea el ID
+        clearTrackState();
+        setEditingId(entry.id);
 
         document.getElementById('datetime-input-track').value = isoString;
         document.getElementById('track-optional-note').value = entry.optionalNote || '';
@@ -254,8 +257,8 @@ export function handleEditEntry(entryId) {
         openTrackForm(entry);
 
     } else if (entry.isSpent) {
-        clearSpentState(); // Limpia estado anterior
-        setEditingId(entry.id); // Setea el ID
+        clearSpentState();
+        setEditingId(entry.id);
 
         document.getElementById('datetime-input-spent').value = isoString;
         document.getElementById('spent-description').value = entry.note;
@@ -264,8 +267,8 @@ export function handleEditEntry(entryId) {
         openSpentForm(entry);
 
     } else if (entry.type === 'recap') {
-        clearRecapState(); // Limpia estado anterior
-        setEditingId(entry.id); // Setea el ID
+        clearRecapState();
+        setEditingId(entry.id);
 
         document.getElementById('datetime-input-recap').value = isoString;
         document.getElementById('recap-reflection').value = entry.reflection || '';
@@ -285,8 +288,6 @@ export function handleEditEntry(entryId) {
 
     } else {
         // --- Populate Crumb Form ---
-        
-        // *** CAMBIO CRÍTICO: Limpia el estado ANTES de setear el nuevo ID ***
         clearFormState();
         setEditingId(entry.id);
 
@@ -295,16 +296,13 @@ export function handleEditEntry(entryId) {
         document.getElementById('location-input').value = entry.location || '';
         document.getElementById('weather-input').value = entry.weather || '';
         
-        // Set media state
         if (entry.images) entry.images.forEach(img => addImage(img));
         setAudio(entry.audio || null);
         setCoords(entry.coords ? { ...entry.coords } : null);
         
-        // Set mood state
         const moodIndex = entry.mood ? getState().settings.moods.findIndex(m => m.emoji === entry.mood.emoji) : -1;
         setSelectedMood(moodIndex !== -1 ? moodIndex : null);
 
-        // Render UI from state
         renderImagePreviews();
         renderAudioPreview();
         renderMoodSelector();
@@ -318,18 +316,15 @@ export function handleEditEntry(entryId) {
     }
 }
 
-/**
- * Finds an entry and renders it in the preview modal.
- * @param {number|string} entryId - The ID of the entry to preview.
- * @param {number|null} [imageIndex=null] - Optional specific image to show.
- */
 export function handlePreviewEntry(entryId, imageIndex = null) {
     const entry = getState().entries.find(e => e.id == entryId);
     if (!entry) return;
 
     if (imageIndex !== null && imageIndex !== undefined) {
+        // Llama a la función desde el nuevo módulo
         renderImagePreviewModal(entry, imageIndex);
     } else {
+        // Llama a la función desde el nuevo módulo
         renderPreview(entry);
     }
     
