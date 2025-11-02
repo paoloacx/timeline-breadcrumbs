@@ -1,7 +1,7 @@
 /* Importar el CSS del módulo FAB */
 @import url('../modules/ui/fab-menu.css');
 
-/* CAMBIO: Importar el CSS del Day Recap */
+/* Importar el CSS del Day Recap */
 @import url('../modules/timeline/recap-styles.css');
 
 /* CAMBIO: Importar el CSS de los Modales */
@@ -1032,10 +1032,7 @@ h1 {
 }
 
 /* ===== RECAP STYLES ===== */
-
-.recap-entry { /* Deprecated? Recap is now a block */
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3) !important;
-}
+/* (Movido a modules/timeline/recap-styles.css) */
 
 /* Mac-style range slider */
 input[type="range"] {
