@@ -85,7 +85,7 @@ export function updateEntry(updatedEntry) {
     }
 }
 export function removeEntry(entryId) {
-    // Comparación no estricta (==) para manejar números y strings
+    // *** CAMBIO CRÍTICO: Usar != para el fix del Delete (String vs Number) ***
     state.entries = state.entries.filter(e => e.id != entryId);
 }
 
