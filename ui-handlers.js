@@ -5,7 +5,8 @@ import { getState, setEditingId, setSelectedMood, setSelectedDuration, setSelect
 import { handleSaveCrumb, handleSaveTime, handleSaveTrack, handleSaveSpent, handleSaveRecap, handleDeleteEntry, handleEditEntry, handlePreviewEntry } from './crud-handlers.js';
 import { handleGps, handleSearchBSO } from './api-services.js';
 import { handleImageInput, startRecording, stopRecording, removeImage, removeAudio } from './media-handlers.js';
-import { openStats, exportCSV, exportICS, openExportModal, performExport } from './data-tools.js';
+// CAMBIO: La ruta de importación ahora apunta a 'modules/data/data-tools.js'
+import { openStats, exportCSV, exportICS, openExportModal, performExport } from './modules/data/data-tools.js';
 import { openSettings, toggleMoodConfig, saveSettings, updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from './settings-manager.js';
 import { renderMoodSelector, renderImagePreviews, renderAudioPreview, selectTrackUI } from './ui-renderer.js';
 import { signInWithGoogle, signInWithEmail, signOutUser } from './firebase-config.js';
@@ -192,10 +193,8 @@ export function initUI(onOfflineCallback) {
             return; // Acción completada
         }
 
-        // --- CAMBIO: Inicio del Arreglo ---
-        // Ahora, comprueba si el clic fue en un crumb O en un recap-block
+        // Ahora, comprueba si el clic fue en un crumb
         const entryEl = e.target.closest('.breadcrumb-entry, .recap-block');
-        // --- CAMBIO: Fin del Arreglo ---
         
         if (!entryEl) return; // Si no fue en un crumb, no hacer nada más
 
