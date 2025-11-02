@@ -1,8 +1,9 @@
 // ===== app.js (Main Entry Point) =====
 // Imports
 import { initAuth, loadFirebaseData } from './firebase-config.js';
-// CAMBIO: Eliminado 'continueOffline' de la importación
-import { initUI, showMainApp } from './ui-handlers.js'; // CAMBIO: Importado 'showMainApp'
+// CAMBIO: showMainApp ahora viene de modal-manager
+import { initUI } from './ui-handlers.js'; 
+import { showMainApp } from './modules/ui/modal-manager.js';
 import { loadData as loadLocalData } from './data-storage.js';
 import { loadSettings as loadLocalSettings } from './settings-manager.js';
 import { getState, setOfflineMode } from './state.js';
@@ -42,7 +43,6 @@ function onUserLoggedOut() {
     loadLocalData();
     
     // 3. Show the main app IF user clicked "Continue Offline"
-    // CAMBIO: Ahora llama a la función importada 'showMainApp'
     if (getState().isOfflineMode) {
         showMainApp(null);
     }
@@ -53,7 +53,6 @@ function onUserLoggedOut() {
  */
 function onOfflineClicked() {
     setOfflineMode(true);
-    // CAMBIO: Ya no llama a 'continueOffline', sino a 'onUserLoggedOut'
     onUserLoggedOut();
 }
 
