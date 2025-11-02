@@ -1,10 +1,8 @@
 // ===== ui-handlers.js (Event Listeners & UI Logic) =====
 
 // Imports
-// CAMBIO: La ruta ahora apunta a 'core/state.js'
 import { getState, setEditingId, setSelectedMood, setSelectedDuration, setSelectedActivity, setSelectedTrackItem } from './core/state.js';
-import { handleSaveCrumb, handleSaveTime, handleSaveTrack, handleSaveSpent, handleSaveRecap, handleDeleteEntry } from './crud-handlers.js';
-// CAMBIO: La ruta ahora apunta a 'modules/services/api-services.js'
+import { handleSaveCrumb, handleSaveTime, handleSaveTrack, handleSaveSpent, handleSaveRecap, handleDeleteEntry, handleEditEntry, handlePreviewEntry } from './crud-handlers.js';
 import { handleGps, handleSearchBSO } from './modules/services/api-services.js';
 import { handleImageInput, startRecording, stopRecording, removeImage, removeAudio } from './media-handlers.js';
 import { openStats, exportCSV, exportICS, openExportModal, performExport } from './modules/data/data-tools.js';
@@ -167,5 +165,5 @@ export function initUI(onOfflineCallback) {
         }
     });
     
-    // --- CAMBIO: EL BLOQUE 'TIMELINE EVENT DELEGATION' SE HA ELIMINADO ---
+    // --- CAMBIO: TIMELINE EVENT DELEGATION se ha ELIMINADO de este archivo ---
 }
