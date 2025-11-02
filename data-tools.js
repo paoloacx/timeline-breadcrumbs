@@ -2,7 +2,8 @@
 
 // Imports
 import { getState } from './state.js';
-import { openModal, closeModal } from './ui-handlers.js';
+// CAMBIO: La ruta de importación ahora apunta a 'modal-manager.js'
+import { openModal, closeModal } from './modules/ui/modal-manager.js';
 import { getDayKey, formatTime } from './utils.js';
 
 // --- Stats Functions ---
