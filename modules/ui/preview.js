@@ -3,6 +3,9 @@
 // Imports
 import { formatDate, formatTime } from '../../utils.js';
 
+// CAMBIO: Variable para guardar la instancia del mapa
+let previewMapInstance = null;
+
 /**
  * Renders the full-size map inside the preview modal.
  * @param {object} coords - { lat, lon }
@@ -11,15 +14,27 @@ function renderPreviewMap(coords) {
     setTimeout(() => {
         const mapContainer = document.getElementById('preview-map-modal');
         if (mapContainer) {
+            
+            // --- CAMBIO: INICIO DEL ARREGLO ---
+            // Destruye el mapa anterior (si existe) antes de crear uno nuevo
+            if (previewMapInstance) {
+                previewMapInstance.remove();
+                previewMapInstance = null;
+            }
+            // --- CAMBIO: FIN DEL ARREGLO ---
+
             try {
                 // Asume que L (Leaflet) está disponible globalmente
-                const map = L.map('preview-map-modal').setView([coords.lat, coords.lon], 13);
+                // Guarda la nueva instancia del mapa
+                previewMapInstance = L.map('preview-map-modal').setView([coords.lat, coords.lon], 13);
+                
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap'
-                }).addTo(map);
-                L.marker([coords.lat, coords.lon]).addTo(map);
+                }).addTo(previewMapInstance);
                 
-                setTimeout(() => map.invalidateSize(), 100);
+                L.marker([coords.lat, coords.lon]).addTo(previewMapInstance);
+                
+                setTimeout(() => previewMapInstance.invalidateSize(), 100);
             } catch(e) {
                 console.error("Error initializing preview map:", e);
                 mapContainer.innerHTML = "Map failed to load.";
