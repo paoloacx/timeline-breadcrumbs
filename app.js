@@ -1,13 +1,12 @@
 // ===== app.js (Main Entry Point) =====
 // Imports
 import { initAuth, loadFirebaseData } from './firebase-config.js';
-// CAMBIO: 'initUI' ahora es más pequeño
 import { initUI } from './ui-handlers.js'; 
 import { showMainApp } from './modules/ui/modal-manager.js';
 import { loadData as loadLocalData } from './data-storage.js';
-import { loadSettings as loadLocalSettings } from './settings-manager.js';
+// CAMBIO: La ruta ahora apunta a 'modules/settings/'
+import { loadSettings as loadLocalSettings } from './modules/settings/settings-manager.js';
 import { getState, setOfflineMode } from './state.js';
-// CAMBIO: Importa el inicializador de la Timeline
 import { initTimeline } from './modules/timeline/timeline.js';
 
 /**
