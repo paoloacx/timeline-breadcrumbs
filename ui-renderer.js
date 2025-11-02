@@ -3,7 +3,7 @@
 // Imports
 import { getState } from './state.js';
 import { formatDate, formatTime, calculateEndTime, getDayKey } from './utils.js';
-// CAMBIO: La importación de openModal (que estaba mal) se ha eliminado.
+// (Las funciones de Preview se han movido a modules/ui/preview.js)
 
 // --- Form Renderers ---
 
