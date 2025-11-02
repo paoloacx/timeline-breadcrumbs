@@ -1,9 +1,8 @@
 // ===== modules/ui/modal-manager.js (Modal Logic) =====
 
 // Imports
-// CAMBIO: Las rutas ahora suben dos niveles (../../) para salir de /modules/ui/
+// CAMBIO: 'handleEditEntry' ya no es necesario aquí, se elimina la importación.
 import { clearFormState, clearTimerState, clearTrackState, clearSpentState, clearRecapState } from '../../state.js';
-import { handleEditEntry } from '../../crud-handlers.js';
 import { updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from '../../settings-manager.js';
 import { renderMoodSelector } from '../../ui-renderer.js';
 import { setCurrentDateTime } from '../../utils.js';
@@ -65,9 +64,9 @@ export function toggleUserMenu(e) {
 // --- Form Toggle Functions (now open modals) ---
 
 export function openCrumbForm(entry = null) {
-    if (entry) {
-        handleEditEntry(entry); // Rellena el formulario
-    } else {
+    // CAMBIO: Eliminada la llamada recursiva a handleEditEntry
+    if (!entry) {
+        // Lógica de limpieza (solo para entradas nuevas)
         clearFormState();
         document.getElementById('note-input').value = '';
         document.getElementById('location-input').value = '';
@@ -96,9 +95,8 @@ export function openCrumbForm(entry = null) {
 }
 
 export function openTimerForm(entry = null) {
-    if (entry) {
-        handleEditEntry(entry); // Rellena el formulario
-    } else {
+    // CAMBIO: Eliminada la llamada recursiva a handleEditEntry
+    if (!entry) {
         clearTimerState();
         document.getElementById('time-optional-note').value = '';
         document.getElementById('btn-save-time').textContent = 'Create Event';
@@ -111,9 +109,8 @@ export function openTimerForm(entry = null) {
 }
 
 export function openTrackForm(entry = null) {
-    if (entry) {
-        handleEditEntry(entry); // Rellena el formulario
-    } else {
+    // CAMBIO: Eliminada la llamada recursiva a handleEditEntry
+    if (!entry) {
         clearTrackState();
         document.getElementById('track-optional-note').value = '';
         document.getElementById('btn-save-track').textContent = 'Save Track';
@@ -126,9 +123,8 @@ export function openTrackForm(entry = null) {
 }
 
 export function openSpentForm(entry = null) {
-    if (entry) {
-        handleEditEntry(entry); // Rellena el formulario
-    } else {
+    // CAMBIO: Eliminada la llamada recursiva a handleEditEntry
+    if (!entry) {
         clearSpentState();
         document.getElementById('spent-description').value = '';
         document.getElementById('spent-amount').value = '';
@@ -139,9 +135,8 @@ export function openSpentForm(entry = null) {
 }
 
 export function openRecapForm(entry = null) {
-    if (entry) {
-        handleEditEntry(entry); // Rellena el formulario
-    } else {
+    // CAMBIO: Eliminada la llamada recursiva a handleEditEntry
+    if (!entry) {
         clearRecapState();
         document.getElementById('recap-reflection').value = '';
         document.getElementById('recap-rating').value = '5';
