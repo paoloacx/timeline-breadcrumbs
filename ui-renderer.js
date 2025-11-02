@@ -1,9 +1,8 @@
 // ===== ui-renderer.js (DOM Painter) =====
 
 // Imports
-import { getState } from './state.js';
-// CAMBIO: Importaciones de 'utils.js' movidas a 'timeline.js'
-// CAMBIO: Funciones de 'Preview' movidas a 'preview.js'
+// CAMBIO: Rutas actualizadas para apuntar a 'core/'
+import { getState } from './core/state.js';
 
 // --- Form Renderers ---
 
@@ -136,5 +135,3 @@ export function showMiniMap(lat, lon, containerId) {
         mapContainer.innerHTML = "Map failed to load. Are you online?";
     }
 }
-
-// --- CAMBIO: 'renderTimeline' se ha movido a modules/timeline/timeline.js ---
