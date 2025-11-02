@@ -3,8 +3,8 @@
 // Imports
 import { getState, setSettings } from './state.js';
 import { saveSettingsToFirebase } from './firebase-config.js';
-// CAMBIO: Importar las funciones de modal que faltaban
-import { openModal, closeModal } from './ui-handlers.js';
+// CAMBIO: La ruta ahora apunta a 'modal-manager.js' en 'modules/ui/'
+import { openModal, closeModal } from './modules/ui/modal-manager.js';
 import { renderMoodSelector } from './ui-renderer.js';
 
 // --- Local Storage ---
@@ -121,8 +121,6 @@ function renderSettingsConfig() {
         </div>
     `).join('') + `<button class="mac-button" id="btn-add-duration">➕ Add Duration</button>`;
     
-    // (El listener para 'btn-add-duration' se añade dinámicamente)
-    // Usamos 'data-action' para un listener delegado más limpio en el futuro, pero onclick funciona por ahora.
     durationsContainer.querySelector('#btn-add-duration').addEventListener('click', () => {
         const newItem = `<div class="config-item">
             <input type="number" class="mac-input" value="15" min="1">
