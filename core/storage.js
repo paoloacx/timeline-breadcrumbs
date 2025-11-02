@@ -1,8 +1,8 @@
-// ===== data-storage.js (LocalStorage Handler) =====
+// ===== core/storage.js (LocalStorage Handler) =====
+// CAMBIO: Las rutas ahora suben un nivel
 import { getState, setEntries } from './state.js';
-// CAMBIO: 'renderTimeline' se importa desde su nuevo módulo
-import { renderTimeline } from './modules/timeline/timeline.js';
-import { saveDataToFirebase } from './firebase-config.js';
+import { renderTimeline } from '../modules/timeline/timeline.js';
+import { saveDataToFirebase } from '../firebase-config.js';
 
 /**
  * Loads entries from localStorage into the state.
