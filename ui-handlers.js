@@ -12,7 +12,7 @@ import { renderMoodSelector, renderImagePreviews, renderAudioPreview, selectTrac
 import { signInWithGoogle, signInWithEmail, signOutUser } from './firebase-config.js';
 import { initFabMenu } from './modules/ui/fab-menu.js';
 import { initModalManager, openCrumbForm, openTimerForm, openTrackForm, openSpentForm, openRecapForm, toggleUserMenu, closeModal } from './modules/ui/modal-manager.js';
-// CAMBIO: Importa el inicializador de la Timeline
+// CAMBIO: Importa el inicializador de la Timeline (pero no lo llama)
 import { initTimeline } from './modules/timeline/timeline.js';
 
 
@@ -64,8 +64,8 @@ export function initUI(onOfflineCallback) {
     // --- Inicializa el módulo de Modales ---
     initModalManager();
     
-    // --- CAMBIO: Inicializa el módulo de Timeline ---
-    initTimeline();
+    // --- CAMBIO: La llamada a initTimeline() se quitó de aquí ---
+    // (Ahora se llama desde app.js)
 
     // --- Crumb Form ---
     document.getElementById('btn-toggle-mood-config').addEventListener('click', toggleMoodConfig);
@@ -168,5 +168,5 @@ export function initUI(onOfflineCallback) {
         }
     });
     
-    // --- CAMBIO: TIMELINE EVENT DELEGATION se ha MOVIDO a modules/timeline/timeline.js ---
+    // --- CAMBIO: TIMELINE EVENT DELEGATION se ha ELIMINADO de este archivo ---
 }
