@@ -3,7 +3,7 @@
 // Imports
 // CAMBIO: La ruta ahora apunta a 'core/state.js'
 import { getState, setEditingId, setSelectedMood, setSelectedDuration, setSelectedActivity, setSelectedTrackItem } from './core/state.js';
-import { handleSaveCrumb, handleSaveTime, handleSaveTrack, handleSaveSpent, handleSaveRecap, handleDeleteEntry, handleEditEntry, handlePreviewEntry } from './crud-handlers.js';
+import { handleSaveCrumb, handleSaveTime, handleSaveTrack, handleSaveSpent, handleSaveRecap, handleDeleteEntry } from './crud-handlers.js';
 // CAMBIO: La ruta ahora apunta a 'modules/services/api-services.js'
 import { handleGps, handleSearchBSO } from './modules/services/api-services.js';
 import { handleImageInput, startRecording, stopRecording, removeImage, removeAudio } from './media-handlers.js';
@@ -64,8 +64,7 @@ export function initUI(onOfflineCallback) {
     // --- Inicializa el módulo de Modales ---
     initModalManager();
     
-    // --- Inicializa el módulo de Timeline ---
-    initTimeline();
+    // (La llamada a initTimeline() está en app.js)
 
     // --- Crumb Form ---
     document.getElementById('btn-toggle-mood-config').addEventListener('click', toggleMoodConfig);
@@ -167,4 +166,6 @@ export function initUI(onOfflineCallback) {
             selectTrackUI(target.dataset);
         }
     });
+    
+    // --- CAMBIO: EL BLOQUE 'TIMELINE EVENT DELEGATION' SE HA ELIMINADO ---
 }
