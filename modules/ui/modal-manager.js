@@ -1,7 +1,8 @@
 // ===== modules/ui/modal-manager.js (Modal Logic) =====
 
 // Imports
-import { clearFormState, clearTimerState, clearTrackState, clearSpentState, clearRecapState } from '../state.js';
+// CAMBIO: Las rutas ahora suben dos niveles (../../) para salir de /modules/ui/
+import { clearFormState, clearTimerState, clearTrackState, clearSpentState, clearRecapState } from '../../state.js';
 import { handleEditEntry } from '../../crud-handlers.js';
 import { updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from '../../settings-manager.js';
 import { renderMoodSelector } from '../../ui-renderer.js';
