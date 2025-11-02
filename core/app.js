@@ -2,7 +2,8 @@
 // Imports
 import { initAuth, loadFirebaseData } from '../firebase-config.js';
 import { initUI } from '../ui-handlers.js'; 
-import { showMainApp } from '../modules/ui/modal-manager.js';
+// CAMBIO: Importa 'showAuthPanel'
+import { showMainApp, showAuthPanel } from '../modules/ui/modal-manager.js';
 import { loadData as loadLocalData } from './storage.js';
 import { loadSettings as loadLocalSettings } from '../modules/settings/settings-manager.js';
 import { getState, setOfflineMode } from './state.js';
@@ -38,16 +39,16 @@ function onUserLoggedIn(user) {
  * Callback function executed when no user is logged in (or on logout).
  */
 function onUserLoggedOut() {
-    console.log('User is logged out. Loading local data.');
-    // 1. Load local settings (moods, etc.)
-    loadLocalSettings();
-    
-    // 2. Load local entries
-    loadLocalData();
-    
-    // 3. Show the main app IF user clicked "Continue Offline"
-    if (getState().isOfflineMode) {
-        showMainApp(null);
+    console.log('User is logged out.');
+    // CAMBIO: Si el usuario NO está en modo offline, muestra el panel de login
+    if (!getState().isOfflineMode) {
+        showAuthPanel();
+    } else {
+        // Si ESTÁ en modo offline, carga los datos locales
+        console.log('Loading local data for offline mode.');
+        loadLocalSettings();
+        loadLocalData();
+        showMainApp(null); // Muestra la app sin usuario
     }
 }
 
@@ -56,7 +57,7 @@ function onUserLoggedOut() {
  */
 function onOfflineClicked() {
     setOfflineMode(true);
-    onUserLoggedOut();
+    onUserLoggedOut(); // Llama a la lógica de logout, que ahora cargará los datos locales
 }
 
 // --- App Entry Point ---
