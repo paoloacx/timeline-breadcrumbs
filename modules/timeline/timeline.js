@@ -1,7 +1,8 @@
 // ===== modules/timeline/timeline.js (Timeline Module) =====
 
 // Imports
-import { getState } from '../../state.js';
+// CAMBIO: Las rutas ahora apuntan a 'core/'
+import { getState } from '../../core/state.js';
 import { formatDate, formatTime, calculateEndTime, getDayKey } from '../../utils.js';
 import { handleEditEntry, handlePreviewEntry } from '../../crud-handlers.js';
 
