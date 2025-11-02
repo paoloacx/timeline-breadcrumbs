@@ -5,7 +5,6 @@ import { getState, addEntry, updateEntry, removeEntry, setEditingId, setSelected
 import { saveData } from './data-storage.js';
 import { deleteEntryFromFirebase } from './firebase-config.js';
 import { renderTimeline, renderMoodSelector, renderImagePreviews, renderAudioPreview, showMiniMap, renderPreview, renderImagePreviewModal, selectTrackUI } from './ui-renderer.js';
-// CAMBIO: La ruta de importación ahora apunta a 'modal-manager.js'
 import { closeModal, openModal, openCrumbForm, openTimerForm, openTrackForm, openSpentForm, openRecapForm } from './modules/ui/modal-manager.js';
 import { getTimestampFromInput, setCurrentDateTime } from './utils.js';
 import { updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from './settings-manager.js';
@@ -240,7 +239,10 @@ export function handleSaveRecap() {
  */
 export function handleDeleteEntry() {
     const { editingEntryId } = getState();
-    if (!editingEntryId) return;
+    if (!editingEntryId) {
+        console.warn("Delete clicked but no editingEntryId is set in state.");
+        return; // No ID, no delete
+    }
     
     if (confirm('Delete this entry?')) {
         // 1. Remove from state
@@ -337,11 +339,16 @@ export function handleEditEntry(entryId) {
         document.getElementById('location-input').value = entry.location || '';
         document.getElementById('weather-input').value = entry.weather || '';
         
-        // Set media state
-        clearFormState(); // Limpia media anterior
+        // --- CAMBIO: INICIO DEL ARREGLO ---
+        // Se elimina la llamada a clearFormState() que borraba el ID.
+        // La limpieza ahora se hace al abrir un formulario *nuevo* en modal-manager.
+        
+        // Set media state (se limpia en openCrumbForm si es nueva entrada)
         if (entry.images) entry.images.forEach(img => addImage(img));
         setAudio(entry.audio || null);
         setCoords(entry.coords ? { ...entry.coords } : null);
+        
+        // --- CAMBIO: FIN DEL ARREGLO ---
         
         // Set mood state
         const moodIndex = entry.mood ? getState().settings.moods.findIndex(m => m.emoji === entry.mood.emoji) : -1;
