@@ -4,11 +4,12 @@
 import { getState, addEntry, updateEntry, removeEntry, setEditingId, setSelectedMood, setCoords, setAudio, addImage, clearFormState, clearTimerState, clearTrackState, clearSpentState, clearRecapState, setSelectedDuration, setSelectedActivity, setSelectedTrackItem } from './state.js';
 import { saveData } from './data-storage.js';
 import { deleteEntryFromFirebase } from './firebase-config.js';
-// CAMBIO: Se eliminan 'renderPreview' y 'renderImagePreviewModal' de esta importación
-import { renderTimeline, renderMoodSelector, renderImagePreviews, renderAudioPreview, showMiniMap, selectTrackUI } from './ui-renderer.js';
-// CAMBIO: Se importan las funciones de preview desde el nuevo módulo
+// CAMBIO: 'renderTimeline' ya no se importa desde aquí
+import { renderMoodSelector, renderImagePreviews, renderAudioPreview, showMiniMap, selectTrackUI } from './ui-renderer.js';
 import { renderPreview, renderImagePreviewModal } from './modules/ui/preview.js';
 import { closeModal, openModal, openCrumbForm, openTimerForm, openTrackForm, openSpentForm, openRecapForm } from './modules/ui/modal-manager.js';
+// CAMBIO: 'renderTimeline' se importa desde su nuevo módulo
+import { renderTimeline } from './modules/timeline/timeline.js';
 import { getTimestampFromInput, setCurrentDateTime } from './utils.js';
 import { updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from './settings-manager.js';
 
@@ -321,10 +322,8 @@ export function handlePreviewEntry(entryId, imageIndex = null) {
     if (!entry) return;
 
     if (imageIndex !== null && imageIndex !== undefined) {
-        // Llama a la función desde el nuevo módulo
         renderImagePreviewModal(entry, imageIndex);
     } else {
-        // Llama a la función desde el nuevo módulo
         renderPreview(entry);
     }
     
