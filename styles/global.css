@@ -1,6 +1,9 @@
-/* CAMBIO: Importa el CSS del módulo FAB. 
-   La ruta '../' sube de 'styles/' a la raíz. */
+/* CAMBIO: Importa el CSS del módulo FAB. */
 @import url('../modules/ui/fab-menu.css');
+
+/* CAMBIO: Importa el CSS del Day Recap que faltaba. */
+@import url('../modules/timeline/recap-styles.css');
+
 
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
@@ -1025,10 +1028,6 @@ h1 {
      transform: scale(1) translateY(0);
 }
 
-/* CAMBIO: Eliminadas las reglas de animación para los formularios, 
-   ya que ahora son modales y usan las reglas de .preview-modal */
-
-
 /* Smooth animation for footer buttons */
 .footer .mac-button {
     transition: transform 0.15s ease, background 0.15s ease;
@@ -1193,5 +1192,5 @@ input[type="range"]:active::-moz-range-thumb {
     }
 }
 
-/* ===== CAMBIO: TODO EL BLOQUE DEL FAB SE HA MOVIDO a fab-menu.css ===== */
-/* (El código del FAB ya no está aquí) */
+/* ===== FAB BUTTONS ===== */
+/* (Cortado y movido a modules/ui/fab-menu.css) */
