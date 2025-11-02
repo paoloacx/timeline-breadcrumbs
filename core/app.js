@@ -1,10 +1,9 @@
 // ===== core/app.js (Main Entry Point) =====
 // Imports
-// CAMBIO: Las rutas ahora suben un nivel
 import { initAuth, loadFirebaseData } from '../firebase-config.js';
 import { initUI } from '../ui-handlers.js'; 
 import { showMainApp } from '../modules/ui/modal-manager.js';
-import { loadData as loadLocalData } from './storage.js'; // CAMBIO: Apunta al nuevo 'storage.js'
+import { loadData as loadLocalData } from './storage.js';
 import { loadSettings as loadLocalSettings } from '../modules/settings/settings-manager.js';
 import { getState, setOfflineMode } from './state.js';
 import { initTimeline } from '../modules/timeline/timeline.js';
