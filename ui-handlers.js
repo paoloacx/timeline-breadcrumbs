@@ -2,16 +2,18 @@
 
 // Imports
 import { getState, setEditingId, setSelectedMood, setSelectedDuration, setSelectedActivity, setSelectedTrackItem } from './state.js';
-import { handleSaveCrumb, handleSaveTime, handleSaveTrack, handleSaveSpent, handleSaveRecap, handleDeleteEntry, handleEditEntry, handlePreviewEntry } from './crud-handlers.js';
+// CAMBIO: 'handleEditEntry' y 'handlePreviewEntry' ya no son necesarios aquí
+import { handleSaveCrumb, handleSaveTime, handleSaveTrack, handleSaveSpent, handleSaveRecap, handleDeleteEntry } from './crud-handlers.js';
 import { handleGps, handleSearchBSO } from './api-services.js';
 import { handleImageInput, startRecording, stopRecording, removeImage, removeAudio } from './media-handlers.js';
-// CAMBIO: La ruta de importación ahora apunta a 'modules/data/data-tools.js'
 import { openStats, exportCSV, exportICS, openExportModal, performExport } from './modules/data/data-tools.js';
 import { openSettings, toggleMoodConfig, saveSettings, updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from './settings-manager.js';
 import { renderMoodSelector, renderImagePreviews, renderAudioPreview, selectTrackUI } from './ui-renderer.js';
 import { signInWithGoogle, signInWithEmail, signOutUser } from './firebase-config.js';
 import { initFabMenu } from './modules/ui/fab-menu.js';
 import { initModalManager, openCrumbForm, openTimerForm, openTrackForm, openSpentForm, openRecapForm, toggleUserMenu, closeModal } from './modules/ui/modal-manager.js';
+// CAMBIO: Importa el inicializador de la Timeline
+import { initTimeline } from './modules/timeline/timeline.js';
 
 
 // --- Main UI Initialization ---
@@ -61,6 +63,9 @@ export function initUI(onOfflineCallback) {
 
     // --- Inicializa el módulo de Modales ---
     initModalManager();
+    
+    // --- CAMBIO: Inicializa el módulo de Timeline ---
+    initTimeline();
 
     // --- Crumb Form ---
     document.getElementById('btn-toggle-mood-config').addEventListener('click', toggleMoodConfig);
@@ -163,81 +168,5 @@ export function initUI(onOfflineCallback) {
         }
     });
     
-    // --- TIMELINE EVENT DELEGATION ---
-    document.getElementById('timeline-container').addEventListener('click', (e) => {
-        
-        // Handle Toggle Day
-        const dayHeader = e.target.closest('.day-header');
-        if (dayHeader) {
-            const dayBlock = dayHeader.closest('.day-block');
-            if (dayBlock) {
-                const dayKey = dayBlock.dataset.day;
-                const content = document.getElementById(`day-content-${dayKey}`);
-                const chevron = document.getElementById(`chevron-${dayKey}`);
-                if (content) content.classList.toggle('expanded');
-                if (chevron) chevron.classList.toggle('expanded');
-            }
-            return; // Acción completada
-        }
-
-        // Handle Toggle Recap
-        const recapHeader = e.target.closest('.recap-header');
-        if (recapHeader) {
-            const recapBlock = recapHeader.closest('.recap-block');
-            if (recapBlock) {
-                const content = recapBlock.querySelector('.recap-content');
-                const chevron = recapBlock.querySelector('.chevron-recap');
-                if (content) content.classList.toggle('hidden');
-                if (chevron) chevron.classList.toggle('expanded');
-            }
-            return; // Acción completada
-        }
-
-        // Ahora, comprueba si el clic fue en un crumb
-        const entryEl = e.target.closest('.breadcrumb-entry, .recap-block');
-        
-        if (!entryEl) return; // Si no fue en un crumb, no hacer nada más
-
-        const id = entryEl.dataset.id;
-        
-        // Handle Edit
-        if (e.target.closest('.btn-edit')) {
-            e.stopPropagation();
-            handleEditEntry(id);
-            return;
-        }
-        
-        // Handle Preview
-        if (e.target.closest('.btn-preview')) {
-            e.stopPropagation();
-            handlePreviewEntry(id);
-            return;
-        }
-
-        // Handle Image Click
-        if (e.target.closest('.preview-image-thumb')) {
-            e.stopPropagation();
-            const imageIndex = e.target.dataset.index;
-            handlePreviewEntry(id, imageIndex); // Preview specific image
-            return;
-        }
-
-        // Handle Map Click
-        if (e.target.closest('.preview-map-thumb')) {
-            e.stopPropagation();
-            handlePreviewEntry(id);
-            return;
-        }
-        
-        // Handle Read More
-        if (e.target.closest('.read-more-btn')) {
-            e.stopPropagation();
-            const noteEl = entryEl.querySelector('.breadcrumb-note, .optional-note');
-            if (noteEl) {
-                noteEl.classList.toggle('expanded');
-                e.target.textContent = noteEl.classList.contains('expanded') ? 'Show less' : 'Read more';
-            }
-            return;
-        }
-    });
+    // --- CAMBIO: TIMELINE EVENT DELEGATION se ha MOVIDO a modules/timeline/timeline.js ---
 }
