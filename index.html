@@ -73,12 +73,7 @@
             </div>
 
         <div class="mac-window hidden" id="empty-state">
-            <div class="mac-content empty-state">
-                <div style="font-size: 48px; margin-bottom: 16px;">📍</div>
-                <p><strong>No entries yet</strong></p>
-                <p style="color: #666; margin-top: 8px;">Create your first breadcrumb</p>
             </div>
-        </div>
     </div>
 
     <div class="footer" id="footer" style="display: none;">
@@ -115,15 +110,236 @@
     </div>
 
     
-    <div id="recap-modal" class="preview-modal form-modal">...</div>
-    <div id="crumb-modal" class="preview-modal form-modal">...</div>
-    <div id="timer-modal" class="preview-modal form-modal">...</div>
-    <div id="track-modal" class="preview-modal form-modal">...</div>
-    <div id="spent-modal" class="preview-modal form-modal">...</div>
-    <div id="preview-modal" class="preview-modal">...</div>
-    <div id="settings-modal" class="preview-modal">...</div>
-    <div id="stats-modal" class="preview-modal">...</div>
-    <div id="export-modal" class="preview-modal">...</div>
+    <div id="recap-modal" class="preview-modal form-modal">
+        <div class="preview-content" onclick="event.stopPropagation()">
+            <div class="mac-window" style="border: none; box-shadow: none; margin: 0;">
+                <div class="mac-title-bar">
+                    <span>🌟 Day Recap</span>
+                    <button id="btn-close-recap" class="btn-modal-close">✕</button>
+                </div>
+                <div class="mac-content">
+                    <label class="mac-label">📅 Date & Time:</label>
+                    <input type="datetime-local" class="mac-input" id="datetime-input-recap">
+                    <label class="mac-label">Reflexión del día</label>
+                    <textarea id="recap-reflection" class="mac-textarea" placeholder="¿Cómo fue tu día?"></textarea>
+                    <label class="mac-label">Valoración del día (1-10)</label>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                        <input type="range" id="recap-rating" min="1" max="10" value="5" style="flex: 1; height: 8px; border: 2px inset #999; background: #ddd;">
+                        <span id="recap-rating-value" style="font-size: 24px; font-weight: bold; min-width: 40px;">5</span>
+                    </div>
+                    <label class="mac-label">3 cosas destacadas del día</label>
+                    <input type="text" id="recap-highlight-1" class="mac-input" placeholder="1. Lo mejor del día">
+                    <input type="text" id="recap-highlight-2" class="mac-input" placeholder="2. Algo que aprendiste">
+                    <input type="text" id="recap-highlight-3" class="mac-input" placeholder="3. Momento favorito">
+                    <label class="mac-label">Banda Sonora del Día (BSO)</label>
+                    <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                        <input type="text" id="recap-bso" class="mac-input" placeholder="Buscar canción..." style="margin-bottom: 0;">
+                        <button class="mac-button mac-button-primary" id="btn-search-bso">🔍 Buscar</button>
+                    </div>
+                    <div id="recap-bso-results" style="max-height: 200px; overflow-y: auto;"></div>
+                    <input type="hidden" id="recap-selected-track">
+                    <div style="margin-top: 16px;">
+                        <button class="mac-button mac-button-primary" id="btn-save-recap">💾 Save Recap</button>
+                        <button class="mac-button btn-modal-cancel" id="btn-cancel-recap">Cancel</button>
+                        <button class="mac-button delete-button hidden" id="btn-delete-recap">🗑️ Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="crumb-modal" class="preview-modal form-modal">
+        <div class="preview-content" onclick="event.stopPropagation()">
+            <div class="mac-window" style="border: none; box-shadow: none; margin: 0;">
+                <div class="mac-title-bar">
+                    <span>New Entry</span>
+                    <button id="btn-close-crumb" class="btn-modal-close">✕</button>
+                </div>
+                <div class="mac-content">
+                    <label class="mac-label">📅 Date & Time:</label>
+                    <input type="datetime-local" class="mac-input" id="datetime-input">
+                    <label class="mac-label">
+                        😊 Mood:
+                        <button class="mac-button mood-config-btn" id="btn-toggle-mood-config">⚙️</button>
+                    </label>
+                    <div id="mood-config" class="config-panel hidden"></div>
+                    <div class="mood-selector" id="mood-selector"></div>
+                    <label class="mac-label">Note:</label>
+                    <textarea class="mac-textarea" id="note-input" placeholder="What's happening?"></textarea>
+                    <label class="mac-label">📍 Location:</label>
+                    <input type="text" class="mac-input" id="location-input" placeholder="Place">
+                    <button class="mac-button" id="btn-get-gps">🌍 Use GPS</button>
+                    <div id="form-map" class="mini-map" style="display: none;"></div>
+                    <label class="mac-label">☁️ Weather:</label>
+                    <input type="text" class="mac-input" id="weather-input" placeholder="Sunny, cloudy...">
+                    <label class="mac-label">🖼️ Images:</label>
+                    <input type="file" id="input-images" accept="image/*" multiple style="margin-bottom: 12px;">
+                    <div id="image-previews"></div>
+                    <label class="mac-label">🎤 Audio:</label>
+                    <div class="audio-recorder">
+                        <button class="mac-button" id="btn-record-start">🔴 Record</button>
+                        <button class="mac-button" id="btn-record-stop" disabled>⏹️ Stop</button>
+                        <div id="audio-preview" style="margin-top: 8px;"></div>
+                    </div>
+                    <button class="mac-button mac-button-primary" id="btn-save-crumb">💾 Save</button>
+                    <button class="mac-button delete-button hidden" id="btn-delete-crumb">🗑️ Delete</button>
+                    <button class="mac-button btn-modal-cancel" id="btn-cancel-crumb">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="timer-modal" class="preview-modal form-modal">
+        <div class="preview-content" onclick="event.stopPropagation()">
+            <div class="mac-window" style="border: none; box-shadow: none; margin: 0;">
+                <div class="mac-title-bar">
+                    <span>Time Event</span>
+                    <button id="btn-close-timer" class="btn-modal-close">✕</button>
+                </div>
+                <div class="mac-content">
+                    <label class="mac-label">📅 Date & Time:</label>
+                    <input type="datetime-local" class="mac-input" id="datetime-input-time">
+                    <label class="mac-label">Duration:</label>
+                    <div class="duration-selector" id="duration-selector"></div>
+                    <label class="mac-label">Activity:</label>
+                    <div class="activity-selector" id="activity-selector"></div>
+                    <label class="mac-label">Optional Note:</label>
+                    <input type="text" class="mac-input" id="time-optional-note" placeholder="Add a short note (optional)">
+                    <button class="mac-button mac-button-primary" id="btn-save-time" disabled style="width: 100%; margin-top: 16px;">Create Event</button>
+                    <button class="mac-button delete-button hidden" id="btn-delete-time" style="width: 100%; margin-top: 8px;">🗑️ Delete</button>
+                    <button class="mac-button btn-modal-cancel" id="btn-cancel-timer" style="width: 100%; margin-top: 8px;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="track-modal" class="preview-modal form-modal">
+        <div class="preview-content" onclick="event.stopPropagation()">
+            <div class="mac-window" style="border: none; box-shadow: none; margin: 0;">
+                <div class="mac-title-bar">
+                    <span>Quick Track</span>
+                    <button id="btn-close-track" class="btn-modal-close">✕</button>
+                </div>
+                <div class="mac-content">
+                    <label class="mac-label">📅 Date & Time:</label>
+                    <input type="datetime-local" class="mac-input" id="datetime-input-track">
+                    <label class="mac-label">Select Track Type:</label>
+                    <div class="activity-selector" id="track-selector"></div>
+                    <label class="mac-label">Optional Note:</label>
+                    <input type="text" class="mac-input" id="track-optional-note" placeholder="Add a short note (optional)">
+                    <button class="mac-button mac-button-primary" id="btn-save-track" disabled style="width: 100%; margin-top: 16px;">Save Track</button>
+                    <button class="mac-button delete-button hidden" id="btn-delete-track" style="width: 100%; margin-top: 8px;">🗑️ Delete</button>
+                    <button class="mac-button btn-modal-cancel" id="btn-cancel-track" style="width: 100%; margin-top: 8px;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="spent-modal" class="preview-modal form-modal">
+        <div class="preview-content" onclick="event.stopPropagation()">
+            <div class="mac-window" style="border: none; box-shadow: none; margin: 0;">
+                <div class="mac-title-bar">
+                    <span>Spent</span>
+                    <button id="btn-close-spent" class="btn-modal-close">✕</button>
+                </div>
+                <div class="mac-content">
+                    <label class="mac-label">📅 Date & Time:</label>
+                    <input type="datetime-local" class="mac-input" id="datetime-input-spent">
+                    <label class="mac-label">Description:</label>
+                    <input type="text" class="mac-input" id="spent-description" placeholder="What did you buy?">
+                    <label class="mac-label">Amount:</label>
+                    <div class="spent-input">
+                        <input type="number" class="mac-input" id="spent-amount" placeholder="0.00" step="0.01" style="margin: 0;">
+                        <span style="font-weight: bold;">€</span>
+                    </div>
+                    <button class="mac-button mac-button-primary" id="btn-save-spent" style="width: 100%;">💾 Save</button>
+                    <button class="mac-button delete-button hidden" id="btn-delete-spent" style="width: 100%; margin-top: 8px;">🗑️ Delete</button>
+                    <button class="mac-button btn-modal-cancel" id="btn-cancel-spent" style="width: 100%; margin-top: 8px;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="preview-modal" class="preview-modal">
+        <div class="preview-content" onclick="event.stopPropagation()">
+            <div class="mac-title-bar">
+                <span>Preview</span>
+                <button id="btn-close-preview" class="btn-modal-close">✕</button>
+            </div>
+            <div class="mac-content" id="preview-body"></div>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="preview-modal">
+        <div class="preview-content" onclick="event.stopPropagation()">
+            <div class="mac-title-bar">
+                <span>Settings</span>
+                <button id="btn-close-settings" class="btn-modal-close">✕</button>
+            </div>
+            <div class="mac-content">
+                <h3 style="margin-bottom: 16px;">Time Durations</h3>
+                <div id="time-durations-config"></div>
+                <h3 style="margin-top: 24px; margin-bottom: 16px;">Time Activities</h3>
+                <div id="time-activities-config"></div>
+                <h3 style="margin-top: 24px; margin-bottom: 16px;">Track Items</h3>
+                <div id="track-items-config"></div>
+                <h3 style="margin-top: 24px; margin-bottom: 16px;">Moods</h3>
+                <div id="mood-config-list"></div> 
+                <button class="mac-button mac-button-primary" id="btn-save-settings" style="width: 100%; margin-top: 24px;">💾 Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="stats-modal" class="preview-modal">
+        <div class="preview-content" onclick="event.stopPropagation()">
+            <div class="mac-title-bar">
+                <span>📊 Statistics</span>
+                <button id="btn-close-stats" class="btn-modal-close">✕</button>
+            </div>
+            <div class="mac-content">
+                <div class="stats-grid" id="stats-content"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="export-modal" class="preview-modal">
+        <div class="preview-content" onclick="event.stopPropagation()">
+            <div class="mac-title-bar">
+                <span>Export Data</span>
+                <button id="btn-close-export" class="btn-modal-close">✕</button>
+            </div>
+            <div class="mac-content">
+                <h3 id="export-title" style="margin-bottom: 16px;">Export as CSV</h3>
+                
+                <label class="mac-label">Date Range:</label>
+                <select id="export-range" class="mac-input" style="margin-bottom: 16px;">
+                    <option value="all">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="7days">Last 7 Days</option>
+                    <option value="30days">Last 30 Days</option>
+                    <option value="current_month">This Month</option>
+                </select>
+
+                <label class="mac-label">Entry Types:</label>
+                <div id="export-types" class="export-types-grid">
+                    </div>
+
+                <div id="ics-options" class="hidden" style="margin-top: 16px;">
+                    <label class="mac-label">iCal Format:</label>
+                    <div class="mac-radio-wrapper">
+                        <input type="radio" id="ics-separate" name="ics-format" value="separate" checked>
+                        <label for="ics-separate">Separate events (default)</label>
+                    </div>
+                    <div class="mac-radio-wrapper">
+                        <input type="radio" id="ics-single" name="ics-format" value="single">
+                        <label for="ics-single">Single all-day event (per day)</label>
+                    </div>
+                </div>
+
+                <button class="mac-button mac-button-primary" id="btn-perform-export" style="width: 100%; margin-top: 24px;">💾 Export</button>
+            </div>
+        </div>
+    </div>
 
     <script type="module" src="core/app.js"></script>
 
