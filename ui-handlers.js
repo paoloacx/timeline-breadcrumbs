@@ -10,6 +10,8 @@ import { openSettings, toggleMoodConfig, saveSettings, updateTimerOptions, updat
 import { renderMoodSelector, renderImagePreviews, renderAudioPreview, selectTrackUI } from './ui-renderer.js';
 import { setCurrentDateTime } from './utils.js';
 import { signInWithGoogle, signInWithEmail, signOutUser } from './firebase-config.js';
+// CAMBIO: Importa el inicializador del FAB
+import { initFabMenu } from './modules/ui/fab-menu.js';
 
 // --- Modal Management ---
 
@@ -78,8 +80,6 @@ export function openCrumbForm(entry = null) {
         document.getElementById('image-previews').innerHTML = '';
         document.getElementById('audio-preview').innerHTML = '';
         
-        // --- CAMBIO: Inicio del Arreglo (Bug 1) ---
-        // Añadidas comprobaciones para evitar el error 'Cannot read properties of null'
         const deleteBtn = document.getElementById('btn-delete-crumb');
         if (deleteBtn) deleteBtn.classList.add('hidden');
         
@@ -88,7 +88,6 @@ export function openCrumbForm(entry = null) {
         
         const moodConfig = document.getElementById('mood-config');
         if (moodConfig) moodConfig.classList.add('hidden');
-        // --- CAMBIO: Fin del Arreglo (Bug 1) ---
 
         const mapContainer = document.getElementById('form-map');
         if (mapContainer) {
@@ -164,39 +163,8 @@ export function openRecapForm(entry = null) {
     openModal('recap-modal');
 }
 
-// --- FAB Menu Logic ---
-let fabMenuOpen = false;
-function toggleFabMenu() {
-    const fabActions = document.querySelectorAll('.fab-action-wrapper');
-    const fabIcon = document.getElementById('fab-icon');
-    
-    fabMenuOpen = !fabMenuOpen;
-    
-    if (fabMenuOpen) {
-        fabIcon.textContent = '×';
-        fabIcon.style.transform = 'rotate(45deg)';
-        fabActions.forEach((wrapper, index) => {
-            setTimeout(() => {
-                wrapper.classList.remove('hidden');
-                setTimeout(() => wrapper.classList.add('show'), 10);
-            }, index * 50);
-        });
-    } else {
-        fabIcon.textContent = '+';
-        fabIcon.style.transform = 'rotate(0deg)';
-        fabActions.forEach((wrapper, index) => {
-            setTimeout(() => {
-                wrapper.classList.remove('show');
-                setTimeout(() => wrapper.classList.add('hidden'), 300);
-            }, (fabActions.length - index - 1) * 30);
-        });
-    }
-}
-function closeFabMenu() {
-    if (fabMenuOpen) {
-        toggleFabMenu();
-    }
-}
+// --- CAMBIO: Toda la lógica del FAB (variables y funciones) se ha movido ---
+// a modules/ui/fab-menu.js
 
 // --- Main UI Initialization ---
 
@@ -234,13 +202,15 @@ export function initUI(onOfflineCallback) {
     document.getElementById('btn-export-ics').addEventListener('click', () => openExportModal('ics'));
     document.getElementById('btn-open-settings').addEventListener('click', openSettings);
 
-    // --- FAB Menu ---
-    document.getElementById('fab-main').addEventListener('click', toggleFabMenu);
-    document.getElementById('fab-action-crumb').addEventListener('click', () => { closeFabMenu(); openCrumbForm(); });
-    document.getElementById('fab-action-time').addEventListener('click', () => { closeFabMenu(); openTimerForm(); });
-    document.getElementById('fab-action-track').addEventListener('click', () => { closeFabMenu(); openTrackForm(); });
-    document.getElementById('fab-action-spent').addEventListener('click', () => { closeFabMenu(); openSpentForm(); });
-    document.getElementById('fab-action-recap').addEventListener('click', () => { closeFabMenu(); openRecapForm(); });
+    // --- CAMBIO: Inicializa el módulo FAB ---
+    // Le pasamos las funciones que necesita para abrir los modales
+    initFabMenu({
+        openCrumbForm,
+        openTimerForm,
+        openTrackForm,
+        openSpentForm,
+        openRecapForm
+    });
 
     // --- Modal Close Buttons (Generic) ---
     document.querySelectorAll('.btn-modal-close, .btn-modal-cancel').forEach(btn => {
@@ -364,9 +334,6 @@ export function initUI(onOfflineCallback) {
     // --- TIMELINE EVENT DELEGATION ---
     document.getElementById('timeline-container').addEventListener('click', (e) => {
         
-        // --- CAMBIO: Inicio del Arreglo (Bug 2) ---
-        // Esta lógica DEBE ir antes que la comprobación de 'entryEl'
-        
         // Handle Toggle Day
         const dayHeader = e.target.closest('.day-header');
         if (dayHeader) {
@@ -393,8 +360,6 @@ export function initUI(onOfflineCallback) {
             }
             return; // Acción completada
         }
-        // --- CAMBIO: Fin del Arreglo (Bug 2) ---
-
 
         // Ahora, comprueba si el clic fue en un crumb
         const entryEl = e.target.closest('.breadcrumb-entry'); // NOTA: Quitado .recap-block
