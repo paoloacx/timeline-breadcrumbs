@@ -7,11 +7,8 @@
 /* Importar el CSS de los Modales */
 @import url('../modules/ui/modals.css');
 
-/* Importar el CSS del Preview Modal */
+/* CAMBIO: Importar el CSS del Preview Modal */
 @import url('../modules/ui/preview.css');
-
-/* CAMBIO: Importar el CSS del Módulo de Datos (Stats/Export) */
-@import url('../modules/data/data.css');
 
 
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
@@ -499,6 +496,8 @@ h1 {
     height: 60px; /* Match height of thumbnails */
 }
 
+/* ===== CAMBIO: Estilos de Preview movidos a modules/ui/preview.css ===== */
+
 .image-preview {
     display: inline-block;
     width: 80px;
@@ -585,10 +584,6 @@ h1 {
         flex: 1; /* Allow buttons to take equal space */
         min-width: 0;
         white-space: nowrap;
-    }
-
-    .preview-content {
-        width: 90%; /* More flexible width on mobile */
     }
 }
 
