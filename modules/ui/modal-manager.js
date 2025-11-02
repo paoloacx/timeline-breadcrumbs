@@ -1,9 +1,9 @@
 // ===== modules/ui/modal-manager.js (Modal Logic) =====
 
 // Imports
-// CAMBIO: 'handleEditEntry' ya no es necesario aquí, se elimina la importación.
 import { clearFormState, clearTimerState, clearTrackState, clearSpentState, clearRecapState } from '../../state.js';
-import { updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from '../../settings-manager.js';
+// CAMBIO: La ruta ahora apunta a 'modules/settings/'
+import { updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from '../../modules/settings/settings-manager.js';
 import { renderMoodSelector } from '../../ui-renderer.js';
 import { setCurrentDateTime } from '../../utils.js';
 
@@ -64,8 +64,9 @@ export function toggleUserMenu(e) {
 // --- Form Toggle Functions (now open modals) ---
 
 export function openCrumbForm(entry = null) {
-    // CAMBIO: Eliminada la llamada recursiva a handleEditEntry
-    if (!entry) {
+    if (entry) {
+        // La lógica de rellenar el formulario está en crud-handlers
+    } else {
         // Lógica de limpieza (solo para entradas nuevas)
         clearFormState();
         document.getElementById('note-input').value = '';
@@ -95,7 +96,6 @@ export function openCrumbForm(entry = null) {
 }
 
 export function openTimerForm(entry = null) {
-    // CAMBIO: Eliminada la llamada recursiva a handleEditEntry
     if (!entry) {
         clearTimerState();
         document.getElementById('time-optional-note').value = '';
@@ -109,7 +109,6 @@ export function openTimerForm(entry = null) {
 }
 
 export function openTrackForm(entry = null) {
-    // CAMBIO: Eliminada la llamada recursiva a handleEditEntry
     if (!entry) {
         clearTrackState();
         document.getElementById('track-optional-note').value = '';
@@ -123,7 +122,6 @@ export function openTrackForm(entry = null) {
 }
 
 export function openSpentForm(entry = null) {
-    // CAMBIO: Eliminada la llamada recursiva a handleEditEntry
     if (!entry) {
         clearSpentState();
         document.getElementById('spent-description').value = '';
@@ -135,7 +133,6 @@ export function openSpentForm(entry = null) {
 }
 
 export function openRecapForm(entry = null) {
-    // CAMBIO: Eliminada la llamada recursiva a handleEditEntry
     if (!entry) {
         clearRecapState();
         document.getElementById('recap-reflection').value = '';
