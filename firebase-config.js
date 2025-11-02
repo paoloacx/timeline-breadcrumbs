@@ -2,9 +2,9 @@
 
 // Imports
 import { getState, setCurrentUser, setEntries, setSettings } from './state.js';
-// CAMBIO: La ruta de importación ahora apunta al nuevo módulo
 import { renderTimeline } from './modules/timeline/timeline.js';
-import * as settingsManager from './settings-manager.js';
+// CAMBIO: La ruta ahora apunta a 'modules/settings/'
+import * as settingsManager from './modules/settings/settings-manager.js';
 import { loadData as loadLocalData } from './data-storage.js';
 import { renderMoodSelector } from './ui-renderer.js';
 
@@ -44,7 +44,6 @@ export function initAuth(onLoginCallback, onLogoutCallback) {
 
 // --- Auth Functions ---
 
-// CAMBIO: Añadido 'export'
 export function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).catch((error) => {
@@ -53,7 +52,6 @@ export function signInWithGoogle() {
     });
 }
 
-// CAMBIO: Añadido 'export'
 export function signInWithEmail() {
     const email = prompt('Enter your email:');
     const password = prompt('Enter your password:');
@@ -74,7 +72,6 @@ export function signInWithEmail() {
         });
 }
 
-// CAMBIO: Añadido 'export'
 export function signOutUser() {
     if (confirm('Sign out?')) {
         auth.signOut(); // onAuthStateChanged se encargará del resto
