@@ -18,16 +18,44 @@
     background: #000;
 }
 
-.day-block {
-    margin-bottom: 30px;
-    position: relative;
+/* --- CAMBIO: Nuevos Estilos de Anidado --- */
+
+/* Contenedores de Contenido (Iguales que .day-content) */
+.year-content,
+.month-content,
+.week-content,
+.day-content {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition:
+        max-height 0.45s ease,
+        opacity 0.4s ease,
+        transform 0.4s ease;
+    padding: 0 16px; /* Padding solo al expandir */
 }
 
-.day-header {
-    background: #000;
+.year-content.expanded,
+.month-content.expanded,
+.week-content.expanded,
+.day-content.expanded {
+    max-height: 5000px !important; /* Valor suficientemente grande */
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    padding: 16px !important;
+}
+
+/* Estilos específicos para los nuevos cabeceros */
+.year-block {
+    margin-bottom: 10px;
+    position: relative;
+}
+.year-header {
+    background: #444; /* Color oscuro para el año */
     color: white;
-    padding: 12px 16px;
-    font-size: 16px;
+    padding: 14px 16px;
+    font-size: 20px;
     font-weight: bold;
     cursor: pointer;
     border: 3px solid #000;
@@ -37,11 +65,108 @@
     position: relative;
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
+.year-header:hover { background: #555; }
+.year-header::before {
+    content: '';
+    position: absolute;
+    left: -33px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px;
+    background: #444;
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px #000;
+    z-index: 2;
+}
+
+.month-block {
+    margin-bottom: 10px;
+    position: relative;
+    border: 2px solid #ccc; /* Borde ligero para el mes */
+    background: #f9f9f9;
+}
+.month-header {
+    background: #eee;
+    color: #000;
+    padding: 10px 16px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    border-bottom: 2px solid #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+.month-header:hover { background: #f5f5f5; }
+.month-header::before {
+    content: '';
+    position: absolute;
+    left: -29px; top: 50%; transform: translateY(-50%);
+    width: 12px; height: 12px;
+    background: #eee;
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px #000;
+    z-index: 2;
+}
+
+.week-block {
+    margin-bottom: 10px;
+    position: relative;
+    border: 1px solid #ddd;
+    background: #fff;
+}
+.week-header {
+    background: #fdfdfd;
+    color: #333;
+    padding: 8px 16px;
+    font-size: 16px;
+    font-style: italic;
+    cursor: pointer;
+    border-bottom: 1px dashed #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+.week-header:hover { background: #f9f9f9; }
+.week-header::before {
+    content: '';
+    position: absolute;
+    left: -27px; top: 50%; transform: translateY(-50%);
+    width: 8px; height: 8px;
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+
+.day-block {
+    margin-bottom: 10px; /* Reducido de 30px */
+    position: relative;
+    border: 1px solid #000; /* Borde negro para el día */
+}
+
+.day-header {
+    background: #000;
+    color: white;
+    padding: 12px 16px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none; /* Borde ya puesto por day-block */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    box-shadow: none; /* Sombra ya puesta por day-block */
+}
 
 .day-header::before {
     content: '';
     position: absolute;
-    left: -33px; /* Adjust to align with the line */
+    left: -33px; /* Ajuste original */
     top: 50%;
     transform: translateY(-50%);
     width: 16px;
@@ -57,16 +182,8 @@
     background: #333;
 }
 
-/* Collapsible day content animation */
+/* El .day-content ya está definido arriba */
 .day-content {
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    transform: translateY(-6px);
-    transition:
-        max-height 0.45s ease,
-        opacity 0.4s ease,
-        transform 0.4s ease;
     background: repeating-radial-gradient(
         circle at 0 0,
         transparent 0,
@@ -75,17 +192,9 @@
         transparent 2px
     );
     background-size: 4px 4px;
-    padding: 0 16px; /* Padding only when expanded */
 }
 
-.day-content.expanded {
-    max-height: 5000px !important; /* Large enough value */
-    opacity: 1 !important;
-    transform: translateY(0) !important;
-    padding: 16px !important; /* Add padding back when expanded */
-}
-
-/* Chevron animation */
+/* Chevron animation (genérico) */
 .chevron {
     display: inline-block;
     transition: transform 0.3s ease;
