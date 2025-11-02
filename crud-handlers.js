@@ -5,7 +5,8 @@ import { getState, addEntry, updateEntry, removeEntry, setEditingId, setSelected
 import { saveData } from './data-storage.js';
 import { deleteEntryFromFirebase } from './firebase-config.js';
 import { renderTimeline, renderMoodSelector, renderImagePreviews, renderAudioPreview, showMiniMap, renderPreview, renderImagePreviewModal, selectTrackUI } from './ui-renderer.js';
-import { closeModal, openModal, openCrumbForm, openTimerForm, openTrackForm, openSpentForm, openRecapForm } from './ui-handlers.js';
+// CAMBIO: La ruta de importación ahora apunta a 'modal-manager.js'
+import { closeModal, openModal, openCrumbForm, openTimerForm, openTrackForm, openSpentForm, openRecapForm } from './modules/ui/modal-manager.js';
 import { getTimestampFromInput, setCurrentDateTime } from './utils.js';
 import { updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from './settings-manager.js';
 
@@ -337,7 +338,8 @@ export function handleEditEntry(entryId) {
         document.getElementById('weather-input').value = entry.weather || '';
         
         // Set media state
-        entry.images.forEach(img => addImage(img));
+        clearFormState(); // Limpia media anterior
+        if (entry.images) entry.images.forEach(img => addImage(img));
         setAudio(entry.audio || null);
         setCoords(entry.coords ? { ...entry.coords } : null);
         
@@ -368,7 +370,7 @@ export function handlePreviewEntry(entryId, imageIndex = null) {
     const entry = getState().entries.find(e => e.id == entryId);
     if (!entry) return;
 
-    if (imageIndex !== null) {
+    if (imageIndex !== null && imageIndex !== undefined) {
         renderImagePreviewModal(entry, imageIndex);
     } else {
         renderPreview(entry);
