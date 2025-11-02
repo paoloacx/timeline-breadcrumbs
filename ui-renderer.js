@@ -13,6 +13,7 @@ import { getState } from './core/state.js';
 export function renderMoodSelector() {
     const { settings, selectedMood } = getState();
     const container = document.getElementById('mood-selector');
+    if (!container) return; // Guard clause
     
     container.innerHTML = settings.moods.map((mood, index) => `
         <div class="mood-option ${selectedMood === index ? 'selected' : ''}" data-index="${index}">
@@ -29,6 +30,8 @@ export function renderMoodSelector() {
 export function renderImagePreviews() {
     const { currentImages } = getState();
     const container = document.getElementById('image-previews');
+    if (!container) return;
+    
     container.innerHTML = currentImages.map((img, idx) => `
         <div class="image-preview">
             <img src="${img}" alt="Preview image ${idx+1}">
@@ -44,6 +47,8 @@ export function renderImagePreviews() {
 export function renderAudioPreview() {
     const { currentAudio } = getState();
     const container = document.getElementById('audio-preview');
+    if (!container) return;
+    
     if (currentAudio) {
         container.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
@@ -64,6 +69,8 @@ export function renderAudioPreview() {
  */
 export function renderBSOResults(results) {
     const resultsDiv = document.getElementById('recap-bso-results');
+    if (!resultsDiv) return;
+    
     if (results.length > 0) {
         const html = results.map(track => `
             <div class="bso-result" 
