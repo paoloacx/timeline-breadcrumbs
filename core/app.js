@@ -29,9 +29,17 @@ function initApp() {
  * Callback function executed when a user is successfully logged in.
  */
 function onUserLoggedIn(user) {
-    console.log('User is logged in. Loading cloud data.');
+    console.log('User is logged in. Showing app and loading local data first.');
     showMainApp(user); // Muestra la UI principal
-    loadFirebaseData(); // Carga datos de Firebase (que carga settings y renderiza)
+    
+    // CHANGED: 1. Load local data for instant UI
+    // This renders the timeline immediately with stored data.
+    loadLocalData(); 
+    
+    // CHANGED: 2. Start cloud sync in the background
+    // This will fetch from Firebase, update the state, and re-render the timeline.
+    console.log('Starting cloud data sync...');
+    loadFirebaseData(); 
 }
 
 /**
