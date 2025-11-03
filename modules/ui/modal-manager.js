@@ -84,6 +84,7 @@ export function showMainApp(user) {
  */
 export function toggleUserMenu(e, menuId = 'gdrive-logout-menu') {
     e.stopPropagation();
+    // CHANGED: Use the provided menuId instead of the hardcoded 'logout-menu'
     const menu = document.getElementById(menuId);
     if (menu) {
         menu.classList.toggle('show');
