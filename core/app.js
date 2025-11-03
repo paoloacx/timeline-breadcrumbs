@@ -1,11 +1,11 @@
 // ===== core/app.js (Main Entry Point) =====
 // Imports
-import { initAuth, loadFirebaseData } from '../firebase-config.js';
+// REMOVED: Firebase imports
 import { initUI } from '../ui-handlers.js'; 
 import { showMainApp } from '../modules/ui/modal-manager.js';
 import { loadData as loadLocalData } from './storage.js';
 import { loadSettings as loadLocalSettings } from '../modules/settings/settings-manager.js';
-import { getState, setOfflineMode } from './state.js';
+import { getState, setOfflineMode } from './state.js'; // We'll need to modify setOfflineMode
 import { initTimeline } from '../modules/timeline/timeline.js';
 
 /**
@@ -13,56 +13,51 @@ import { initTimeline } from '../modules/timeline/timeline.js';
  * This function is called once the DOM is fully loaded.
  */
 function initApp() {
-    console.log('App initializing... Showing UI immediately.');
+    console.log('App initializing...');
+    
+    // 1. Check for persistent offline mode
+    const isOffline = localStorage.getItem('isOfflineMode') === 'true';
 
-    // CHANGED: Load UI and Local Data *immediately*
-    // This makes the app load instantly with cached data.
-    showMainApp(null); // 1. Show main app structure (title bar, etc.)
-    loadLocalSettings(); // 2. Load settings from local storage
-    loadLocalData();     // 3. Load entries from local storage & render timeline
+    if (isOffline) {
+        console.log('Offline mode is persistent. Loading app.');
+        // Run offline mode immediately
+        runOfflineMode();
+    } else {
+        console.log('No persistent session. Showing auth panel.');
+        // Show the login panel
+        document.getElementById('auth-container').style.display = 'block';
+        // Ensure main app is hidden
+        document.getElementById('main-app').style.display = 'none';
+    }
+
+    // 2. Initialize all UI event listeners (for login buttons, etc.)
+    // Pass 'runOfflineMode' as the callback for the "Continue Offline" button
+    initUI(runOfflineMode); 
     
-    // 4. Initialize Auth in the background
-    // This will check Firebase and trigger a login or logout callback
-    initAuth(onUserLoggedIn, onUserLoggedOut);
-    
-    // 5. Initialize UI listeners
-    initUI(onOfflineClicked);
-    
-    // 6. Initialize Timeline listeners
+    // 3. Initialize Timeline listeners
     initTimeline();
 }
 
 /**
- * Callback function executed when a user is successfully logged in.
+ * NEW: Encapsulated function to run the app in offline mode.
+ * This is called on init (if offline is persistent) or by ui-handler.
  */
-function onUserLoggedIn(user) {
-    console.log('User is logged in. Syncing cloud data.');
-    showMainApp(user);    // Update avatar with user info
-    loadFirebaseData(); // Sync from cloud (will update state and re-render)
-}
+function runOfflineMode() {
+    console.log('Running in offline mode.');
+    
+    // This function MUST be modified in state.js to save to localStorage
+    setOfflineMode(true); 
 
-/**
- * Callback function executed when no user is logged in (or on logout).
- */
-function onUserLoggedOut() {
-    console.log('User is logged out.');
-    // If user is not *intentionally* offline, hide the main app.
-    // (firebase-config.js will show the login panel)
-    if (!getState().isOfflineMode) {
-        document.getElementById('main-app').style.display = 'none';
-    }
-}
-
-/**
- * Callback for when the "Continue Offline" button is clicked.
- */
-function onOfflineClicked() {
-    setOfflineMode(true);
-    // Hide the login panel (it's shown by onUserLoggedOut by default)
+    // Hide auth panel if it's somehow visible
     document.getElementById('auth-container').style.display = 'none';
-    // Ensure the main app is visible
-    showMainApp(null);
+
+    // Load local data and show app
+    loadLocalSettings();
+    loadLocalData();
+    showMainApp(null); // Show app, (null = no user avatar)
 }
+
+// REMOVED: onUserLoggedIn and onUserLoggedOut (Firebase callbacks)
 
 // --- App Entry Point ---
 document.addEventListener('DOMContentLoaded', initApp);
