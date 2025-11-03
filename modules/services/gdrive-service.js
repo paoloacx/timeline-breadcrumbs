@@ -100,7 +100,7 @@ function initGsiClient() {
  * (Private) Callback for after the user signs in via the GIS popup.
  * @param {object} tokenResponse 
  */
-function tokenClientCallback(tokenResponse) {
+async function tokenClientCallback(tokenResponse) { // --- CHANGED: Made async ---
     if (tokenResponse.error) {
         console.error('Token Error:', tokenResponse.error);
         return;
@@ -108,19 +108,24 @@ function tokenClientCallback(tokenResponse) {
     
     console.log('GDrive: User has granted token.');
     
-    // Set the token for gapi to use
+    // Set the token for gapi to use in future Drive calls
     gapi.client.setToken({ access_token: tokenResponse.access_token });
     
-    // Now that we have a token, fetch user's profile info
-    gapi.client.request({
-        'path': 'https://www.googleapis.com/oauth2/v3/userinfo'
-    }).execute((userInfo) => {
-        if (userInfo.error) {
-            // This is where the 403 error happened
-            console.error('Error fetching user info:', userInfo);
-            return;
+    // --- CHANGED: Use 'fetch' to get user info WITH the token ---
+    try {
+        const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: {
+                'Authorization': `Bearer ${tokenResponse.access_token}`
+            }
+        });
+
+        if (!response.ok) {
+            // Manually throw an error if the response was bad
+            throw new Error(`Failed to fetch user info: ${response.status} ${response.statusText}`);
         }
-        
+
+        const userInfo = await response.json();
+
         const userProfile = {
             name: userInfo.name,
             email: userInfo.email,
@@ -135,7 +140,11 @@ function tokenClientCallback(tokenResponse) {
         if (onSignInCallback) {
             onSignInCallback(userProfile);
         }
-    });
+        
+    } catch (error) {
+        console.error('Error fetching user info:', error);
+        alert('Error getting user profile. Please try again.');
+    }
 }
 
 
