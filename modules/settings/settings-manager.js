@@ -3,7 +3,8 @@
 // Imports
 // CAMBIO: Las rutas ahora suben dos niveles (../../) y apuntan a 'core/'
 import { getState, setSettings } from '../../core/state.js';
-import { saveSettingsToFirebase } from '../../firebase-config.js';
+// REMOVED: Firebase import
+// import { saveSettingsToFirebase } from '../../firebase-config.js';
 import { openModal, closeModal } from '../ui/modal-manager.js';
 import { renderMoodSelector } from '../../ui-renderer.js';
 
@@ -93,7 +94,8 @@ export function saveSettings() {
     
     // Save to persistence
     saveSettingsToStorage();
-    saveSettingsToFirebase();
+    // REMOVED: Firebase call
+    // saveSettingsToFirebase();
     
     // Update UI components that depend on settings
     updateTimerOptions();
