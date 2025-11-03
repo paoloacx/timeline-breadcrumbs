@@ -141,7 +141,7 @@
 
 /* NEW: Style for the emoji-only preview button */
 .preview-button-emoji {
-    position: absolute !
+    position: absolute !;!important;
     bottom: 12px !important;
     right: 12px !important;
     padding: 4px 10px;
