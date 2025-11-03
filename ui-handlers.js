@@ -37,7 +37,9 @@ export function initUI(onOfflineCallback) {
     document.getElementById('btn-continue-offline').addEventListener('click', onOfflineCallback);
 
     // --- Header / User Menu ---
-    document.getElementById('btn-sync').addEventListener('click', () => location.reload());
+    // REMOVED: Sync button listener
+    // document.getElementById('btn-sync').addEventListener('click', () => location.reload());
+    
     // NEW: Open Tools Modal
     document.getElementById('btn-open-tools').addEventListener('click', openToolsModal);
     
@@ -55,16 +57,7 @@ export function initUI(onOfflineCallback) {
     });
 
     // --- Top Action Buttons (REMOVED) ---
-    // document.getElementById('btn-toggle-crumb').addEventListener('click', () => openCrumbForm());
-    // document.getElementById('btn-toggle-timer').addEventListener('click', () => openTimerForm());
-    // document.getElementById('btn-toggle-track').addEventListener('click', () => openTrackForm());
-    // document.getElementById('btn-toggle-spent').addEventListener('click', () => openSpentForm());
-
     // --- Footer Buttons (REMOVED) ---
-    // document.getElementById('btn-open-stats').addEventListener('click', openStats);
-    // document.getElementById('btn-export-csv').addEventListener('click', () => openExportModal('csv'));
-    // document.getElementById('btn-export-ics').addEventListener('click', () => openExportModal('ics'));
-    // document.getElementById('btn-open-settings').addEventListener('click', openSettings);
 
     // --- Inicializa el módulo FAB ---
     initFabMenu({
