@@ -83,7 +83,7 @@ body {
     background-size: 2px 2px;
     color: white;
     /* CHANGED: Set right padding to 5px for icon margin */
-    padding: 8px 5px 8px 16px; 
+    padding: 5px 0px 5px; 
     font-size: 20px;
     font-weight: bold;
     display: flex;
