@@ -85,7 +85,8 @@
     text-decoration: underline;
     padding: 0;
     margin-top: 4px;
-    font-family: 'Courier New', monospace;
+    /* CHANGED: Inherit global font */
+    font-family: inherit;
     display: inline-block;
 }
 
@@ -134,11 +135,19 @@
     margin: 0 !important;
 }
 
-.preview-button {
+/* REMOVED: Old .preview-button style */
+
+/* NEW: Style for the emoji-only preview button */
+.preview-button-emoji {
+    position: absolute !important;
+    bottom: 12px !important;
+    right: 12px !important;
     padding: 4px 10px;
     font-size: 11px;
-    height: 60px; /* Match height of thumbnails */
+    z-index: 5;
+    margin: 0 !important;
 }
+
 
 .activity-label {
     font-weight: bold !important;
@@ -223,9 +232,7 @@
         width: 50px !important;
         height: 50px !important;
     }
-     .preview-button {
-        height: 50px; /* Match mobile thumbnail height */
-    }
+    /* REMOVED: .preview-button height adjustment */
 }
 
 /* Animation for note expansion */
