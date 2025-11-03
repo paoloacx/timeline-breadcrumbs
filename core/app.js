@@ -6,8 +6,8 @@ import { loadData as loadLocalData } from './storage.js';
 import { loadSettings as loadLocalSettings } from '../modules/settings/settings-manager.js';
 import { getState, setOfflineMode, setCurrentUser, clearCurrentUser } from './state.js';
 import { initTimeline } from '../modules/timeline/timeline.js';
-// NEW: Import GDrive service and sync function
-import { initGoogleAuth, syncOnLogin } from '../modules/services/gdrive-service.js';
+// --- CHANGED: Import 'handleRedirectResult' ---
+import { initGoogleAuth, syncOnLogin, handleRedirectResult } from '../modules/services/gdrive-service.js';
 
 /**
  * Initializes the application.
@@ -15,6 +15,30 @@ import { initGoogleAuth, syncOnLogin } from '../modules/services/gdrive-service.
  */
 function initApp() {
     console.log('App initializing...');
+    
+    // --- NEW: Check for Google Auth Redirect ---
+    const params = new URLSearchParams(window.location.search);
+    const authCode = params.get('code');
+
+    if (authCode) {
+        console.log('Found auth code in URL. Handling redirect...');
+        // Clean the URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        // Show a temporary loading state
+        document.getElementById('main-app').style.display = 'block';
+        document.getElementById('main-app').innerHTML = '<h3 style="text-align: center; margin-top: 50px;">Authenticating...</h3>';
+        
+        // Initialize auth and handle the code
+        initGoogleAuth(onGdriveSignIn); // Pass the sign-in callback
+        handleRedirectResult(authCode); // Pass the code to GDrive service
+        
+        // Initialize basic listeners just in case
+        initUI(runOfflineMode); 
+        initTimeline();
+        return; // Stop further execution until auth is handled
+    }
+
+    // --- Standard App Load (No Auth Code) ---
     
     // 1. Check for persistent offline mode
     const isOffline = localStorage.getItem('isOfflineMode') === 'true';
@@ -31,18 +55,19 @@ function initApp() {
 
     if (isOffline) {
         console.log('Offline mode is persistent. Loading app.');
-        // Run offline mode immediately
         runOfflineMode();
     } else {
         console.log('No persistent session. Initializing Google Auth...');
-        
-        // --- CHANGED: Don't show anything. Wait for auth. ---
-        
+        // Show auth panel immediately
+        document.getElementById('auth-container').style.display = 'block';
+        document.getElementById('main-app').style.display = 'none';
+
         // 5. Initialize Google Auth in background
         const checkGapi = () => {
             if (window.gapi && window.google) {
-                // Pass both callbacks: onSignIn, and onSignOut (which handles silent fail)
-                initGoogleAuth(onGdriveSignIn, onGdriveSignOut);
+                // We only pass the onSignIn callback.
+                // The redirect flow doesn't have a "silent fail" callback.
+                initGoogleAuth(onGdriveSignIn);
             } else {
                 console.warn('GAPI/GSI script not loaded yet, retrying...');
                 setTimeout(checkGapi, 100); // Retry after 100ms
@@ -60,11 +85,11 @@ function onGdriveSignIn(userProfile) {
     console.log('GDrive Sign-In Success:', userProfile.email);
     setCurrentUser(userProfile);
     
-    // Show the app (this hides auth panel)
+    // Show the app (this hides auth panel and loading message)
     showMainApp(userProfile);
     
-    // Data was already loaded, so just re-render
-    renderTimeline(); 
+    // Data was already loaded, but we must re-render the *full* timeline
+    renderTimeline();
     
     // Now check GDrive for newer data
     console.log('Running initial sync...');
@@ -72,17 +97,16 @@ function onGdriveSignIn(userProfile) {
 }
 
 /**
- * NEW: Callback for GDrive Sign-Out OR if silent sign-in fails.
+ * NEW: Callback for GDrive Sign-Out.
  */
 function onGdriveSignOut() {
-    console.log('User is not signed in. Showing auth panel.');
+    // This is now only called by the user clicking "Sign Out"
+    console.log('User signed out.');
     clearCurrentUser();
     
-    // If user is *not* in offline mode, show the auth panel.
-    if (localStorage.getItem('isOfflineMode') !== 'true') {
-        document.getElementById('auth-container').style.display = 'block';
-        document.getElementById('main-app').style.display = 'none';
-    }
+    // Show the auth panel
+    document.getElementById('auth-container').style.display = 'block';
+    document.getElementById('main-app').style.display = 'none';
 }
 
 
