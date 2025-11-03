@@ -66,7 +66,19 @@ export function getState() {
 // --- Auth State ---
 export function setCurrentUser(user) {
     state.currentUser = user;
+    // NEW: If user logs in, they are no longer in 'offline mode'
+    if (user) {
+        localStorage.setItem('isOfflineMode', 'false');
+    }
 }
+
+// NEW: Clears user and auth persistence
+export function clearCurrentUser() {
+    state.currentUser = null;
+    // Remove auth persistence keys
+    localStorage.removeItem('isOfflineMode');
+}
+
 export function setOfflineMode(isOffline) {
     state.isOfflineMode = isOffline;
     // CHANGED: Persist this choice to localStorage
