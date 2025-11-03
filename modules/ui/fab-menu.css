@@ -131,3 +131,24 @@
         padding: 6px 10px;
     }
 }
+
+/* NEW: Styles for the FAB overlay */
+.fab-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Use a very subtle background to indicate clickability */
+    background: rgba(0,0,0,0.1);
+    z-index: 9997; /* Just below fab-container (9998) */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+}
+
+.fab-overlay.show {
+    display: block;
+    opacity: 1;
+}
