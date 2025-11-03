@@ -40,6 +40,15 @@
     transform: scale(1) translateY(0);
 }
 
+/* NEW: Make modal headers sticky when scrolling */
+.preview-content .mac-title-bar {
+    position: sticky;
+    top: 0;
+    z-index: 10; 
+    /* This ensures it's above .mac-content but below the modal overlay (10000) */
+}
+
+
 /* Estilo para los modales de formulario */
 .form-modal .preview-content {
     /* Los formularios no necesitan el borde/sombra porque .mac-window ya lo tiene */
