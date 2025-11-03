@@ -4,6 +4,8 @@
     background: white;
     border: 3px ridge #999;
     padding: 10px;
+    padding-top: 16px;
+    padding-bottom: 16px;
     margin-bottom: 12px;
     position: relative;
     color: #000;
@@ -139,7 +141,7 @@
 
 /* NEW: Style for the emoji-only preview button */
 .preview-button-emoji {
-    position: absolute !o
+    position: absolute !
     bottom: 12px !important;
     right: 12px !important;
     padding: 4px 10px;
