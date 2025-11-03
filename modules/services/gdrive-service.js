@@ -18,8 +18,9 @@ const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapi
 
 // --- NEW: Constants for Drive file ---
 const BACKUP_FILE_NAME = 'breadcrumbs_backup.json';
-const DRIVE_FOLDER_NAME = 'Breadcrumbs App Data'; // Opcional, pero recomendado
+const DRIVE_FOLDER_NAME = 'Breadcrumbs App Data'; // Nombre de la carpeta
 let backupFileId = null; // Almacenará el ID del archivo de backup
+let appFolderId = null; // Almacenará el ID de la carpeta
 
 // Module-level variables
 let gapi = window.gapi;
@@ -225,20 +226,63 @@ export function handleSignOut() {
 // --- NEW: GDrive File Operations ---
 
 /**
- * Finds the 'breadcrumbs_backup.json' file in the user's Drive.
- * We use 'drive.file' scope, so we can only see files this app created.
- * @returns {Promise<string|null>} The file ID or null if not found.
+ * NEW: Finds or creates the app's dedicated folder in GDrive.
+ * @returns {Promise<string|null>} The Folder ID or null on failure.
  */
-async function findBackupFile() {
+async function findOrCreateAppFolder() {
+    if (appFolderId) return appFolderId; // Return cached ID
+
     if (!gapi.client) return null;
     
     try {
+        // 1. Search for the folder
+        const query = `mimeType='application/vnd.google-apps.folder' and name='${DRIVE_FOLDER_NAME}' and trashed=false`;
         const response = await gapi.client.drive.files.list({
-            // 'appDataFolder' space is hidden from user, 'drive' space is visible.
-            // Since we use 'drive.file' scope, it's better to use 'drive' space.
-            spaces: 'drive', 
-            // q: `name='${BACKUP_FILE_NAME}' and trashed=false`, // This query seems to fail with drive.file scope
-            q: `name='${BACKUP_FILE_NAME}' and trashed=false`,
+            q: query,
+            fields: 'files(id, name)'
+        });
+        
+        const files = response.result.files;
+        if (files && files.length > 0) {
+            console.log(`Found app folder: ${files[0].name} (ID: ${files[0].id})`);
+            appFolderId = files[0].id; // Cache the ID
+            return appFolderId;
+        } else {
+            // 2. Not found, create it
+            console.log(`No app folder found. Creating '${DRIVE_FOLDER_NAME}'...`);
+            const folderMetadata = {
+                'name': DRIVE_FOLDER_NAME,
+                'mimeType': 'application/vnd.google-apps.folder',
+                'fields': 'id'
+            };
+            const createResponse = await gapi.client.drive.files.create({
+                resource: folderMetadata
+            });
+            
+            console.log('Folder created with ID:', createResponse.result.id);
+            appFolderId = createResponse.result.id; // Cache the new ID
+            return appFolderId;
+        }
+    } catch (error) {
+        console.error('Error finding or creating app folder:', error);
+        return null;
+    }
+}
+
+
+/**
+ * Finds the 'breadcrumbs_backup.json' file *inside* the app folder.
+ * @param {string} folderId - The ID of the app folder.
+ * @returns {Promise<string|null>} The file ID or null if not found.
+ */
+async function findBackupFile(folderId) {
+    if (!gapi.client || !folderId) return null;
+    
+    try {
+        // CHANGED: Query now searches *inside* the folderId
+        const query = `name='${BACKUP_FILE_NAME}' and '${folderId}' in parents and trashed=false`;
+        const response = await gapi.client.drive.files.list({
+            q: query,
             fields: 'files(id, name, modifiedTime)'
         });
         
@@ -248,7 +292,7 @@ async function findBackupFile() {
             backupFileId = files[0].id; // Cache the ID
             return files[0].id;
         } else {
-            console.log('No backup file found.');
+            console.log('No backup file found in app folder.');
             return null;
         }
     } catch (error) {
@@ -259,49 +303,58 @@ async function findBackupFile() {
 
 /**
  * (Private) Uploads the backup data to Google Drive.
- * Creates a new file or updates an existing one.
+ * Creates a new file or updates an existing one *inside* the app folder.
  * @param {string} data - The stringified JSON data.
- * @param {string|null} fileId - The ID of the file to update, or null to create new.
+ * @param {string|null} fileId - The ID of the file to update.
+ * @param {string} folderId - The ID of the parent folder.
  */
-async function uploadToDrive(data, fileId) {
-    const metadata = {
-        'name': BACKUP_FILE_NAME,
-        'mimeType': 'application/json'
-    };
-    
+async function uploadToDrive(data, fileId, folderId) {
     const blob = new Blob([data], { type: 'application/json' });
     
-    let request;
-    if (fileId) {
-        // Update existing file
-        console.log(`Updating existing file (ID: ${fileId})...`);
-        request = gapi.client.request({
-            path: `/upload/drive/v3/files/${fileId}`,
-            method: 'PATCH',
-            params: { uploadType: 'media' },
-            body: blob
-        });
-    } else {
-        // Create new file
-        console.log('Creating new backup file...');
-        metadata.parents = ['root']; // 'root' or a specific folder ID
-        
-        const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-        form.append('file', blob);
-
-        request = gapi.client.request({
-            path: '/upload/drive/v3/files',
-            method: 'POST',
-            params: { uploadType: 'multipart' },
-            body: form
-        });
-    }
-
     try {
-        const response = await request;
-        console.log('Upload successful:', response.result);
-        backupFileId = response.result.id; // Cache the new/updated ID
+        if (fileId) {
+            // --- Option 1: Update existing file (PATCH) ---
+            console.log(`Updating existing file (ID: ${fileId})...`);
+            const request = gapi.client.request({
+                path: `/upload/drive/v3/files/${fileId}`,
+                method: 'PATCH',
+                params: { uploadType: 'media' },
+                body: blob
+            });
+            const response = await request;
+            console.log('Upload (PATCH) successful:', response.result);
+            backupFileId = response.result.id; // Cache the ID
+        } else {
+            // --- Option 2: Create new file (CREATE + PATCH) ---
+            // This is more reliable than multipart for GAPI client
+            console.log('Creating new backup file...');
+            
+            // Step A: Create the file with metadata ONLY
+            const metadata = {
+                'name': BACKUP_FILE_NAME,
+                'mimeType': 'application/json',
+                'parents': [folderId] // <-- Puts it in the correct folder
+            };
+            const createResponse = await gapi.client.drive.files.create({
+                resource: metadata,
+                fields: 'id'
+            });
+            
+            const newFileId = createResponse.result.id;
+            console.log(`File created with name '${BACKUP_FILE_NAME}' (ID: ${newFileId})`);
+            
+            // Step B: Upload the content to the new file
+            const updateRequest = gapi.client.request({
+                path: `/upload/drive/v3/files/${newFileId}`,
+                method: 'PATCH',
+                params: { uploadType: 'media' },
+                body: blob
+            });
+            const updateResponse = await updateRequest;
+            
+            console.log('Upload (CREATE) successful:', updateResponse.result);
+            backupFileId = updateResponse.result.id; // Cache the ID
+        }
         return true;
     } catch (error) {
         console.error('Error uploading file:', error);
@@ -323,9 +376,20 @@ async function downloadFromDrive(fileId) {
         });
         
         console.log('Download successful.');
-        return response.result; // This is already parsed JSON
+        // GAPI v3 with alt=media returns the content directly
+        // It might be an object (if parsed) or string. We check.
+        const result = (typeof response.result === 'object') 
+            ? response.result 
+            : JSON.parse(response.result);
+            
+        return result;
     } catch (error) {
         console.error('Error downloading file:', error);
+        // Handle case where file is empty (GAPI returns empty string)
+        if (error.result && error.result.error.code === 404) {
+             console.log('Backup file is empty.');
+             return { entries: [], settings: {} }; // Return valid empty structure
+        }
         return null;
     }
 }
@@ -337,33 +401,43 @@ async function downloadFromDrive(fileId) {
  */
 export async function syncOnLogin() {
     console.log('Sync-on-login started...');
-    const fileId = await findBackupFile();
+    // 1. Find or create the app folder
+    const folderId = await findOrCreateAppFolder();
+    if (!folderId) {
+        alert('Could not access Google Drive folder. Sync failed.');
+        return;
+    }
+
+    // 2. Find the backup file inside that folder
+    const fileId = await findBackupFile(folderId);
     
     if (!fileId) {
         console.log('No remote backup found. Doing initial backup.');
-        await manualBackupToDrive(true); // 'true' for silent backup
+        // Pass folderId to avoid finding it again
+        await manualBackupToDrive(true, folderId); 
         return;
     }
     
+    // 3. File exists, download it
     const remoteData = await downloadFromDrive(fileId);
     if (!remoteData) {
         alert('Found a backup file, but could not read it.');
         return;
     }
 
-    // Compare local and remote data
+    // 4. Compare local and remote data
     const localEntries = getState().entries;
     
     // Simple check: if local is empty and remote has data, restore.
-    if (localEntries.length === 0 && remoteData.entries.length > 0) {
+    if (localEntries.length === 0 && remoteData.entries && remoteData.entries.length > 0) {
         if (confirm(`Found a backup in Google Drive with ${remoteData.entries.length} entries. Restore it now?`)) {
-            await manualRestoreFromDrive(true); // 'true' for silent restore
+            // Pass remoteData to avoid downloading again
+            await manualRestoreFromDrive(true, remoteData); 
         }
         return;
     }
     
-    // TODO: Implement more complex merge logic later if needed.
-    // For now, if both have data, we assume local is "master" until user restores.
+    // TODO: Implement more complex merge logic later (e.g., check modified time)
     console.log('Local and remote data both exist. No automatic action taken.');
 }
 
@@ -371,8 +445,17 @@ export async function syncOnLogin() {
  * Public function for "Manual Backup" button.
  * Gets local state and uploads it to Drive.
  * @param {boolean} [silent=false] - If true, suppresses the success alert.
+ * @param {string|null} [folderId=null] - Optional folderId to skip find/create.
  */
-export async function manualBackupToDrive(silent = false) {
+export async function manualBackupToDrive(silent = false, folderId = null) {
+    // 1. Get folder ID (use cache, or find/create it)
+    const driveFolderId = folderId || appFolderId || await findOrCreateAppFolder();
+    if (!driveFolderId) {
+        alert('❌ Backup failed. Could not access Google Drive folder.');
+        return;
+    }
+    
+    // 2. Get local data
     const { entries, settings } = getState();
     const backupData = {
         version: '1.0.0',
@@ -381,8 +464,11 @@ export async function manualBackupToDrive(silent = false) {
         entries: entries
     };
     
-    const fileId = backupFileId || await findBackupFile();
-    const success = await uploadToDrive(JSON.stringify(backupData), fileId);
+    // 3. Find existing file ID (use cache, or find it)
+    const fileId = backupFileId || await findBackupFile(driveFolderId);
+    
+    // 4. Upload
+    const success = await uploadToDrive(JSON.stringify(backupData), fileId, driveFolderId);
     
     if (success && !silent) {
         alert('✅ Manual backup to Google Drive complete!');
@@ -395,40 +481,54 @@ export async function manualBackupToDrive(silent = false) {
  * Public function for "Restore" button.
  * Downloads from Drive and overwrites local state.
  * @param {boolean} [force=false] - If true, skips the confirmation prompt.
+ * @param {object|null} [remoteData=null] - Optional data to skip download.
  */
-export async function manualRestoreFromDrive(force = false) {
+export async function manualRestoreFromDrive(force = false, remoteData = null) {
     if (!force) {
         if (!confirm('This will overwrite all local data with the backup from Google Drive. Are you sure?')) {
             return;
         }
     }
     
-    const fileId = backupFileId || await findBackupFile();
-    if (!fileId) {
-        alert('No backup file found in Google Drive.');
-        return;
+    // 1. Get data (if not already provided)
+    if (!remoteData) {
+        const folderId = appFolderId || await findOrCreateAppFolder();
+        if (!folderId) {
+             alert('❌ Restore failed. Could not access Google Drive folder.');
+             return;
+        }
+        
+        const fileId = backupFileId || await findBackupFile(folderId);
+        if (!fileId) {
+            alert('No backup file found in Google Drive.');
+            return;
+        }
+        
+        remoteData = await downloadFromDrive(fileId);
     }
-    
-    const remoteData = await downloadFromDrive(fileId);
+
+    // 2. Validate data
     if (!remoteData || !remoteData.entries || !remoteData.settings) {
         alert('❌ Restore failed. The backup file is empty or corrupted.');
         return;
     }
     
-    // --- Restore Data ---
-    // 1. Update state
-    setEntries(remoteData.entries);
-    setSettings(remoteData.settings);
+    // --- 3. Restore Data ---
+    // Update state
+    setEntries(remoteData.entries || []);
+    setSettings(remoteData.settings || {});
     
-    // 2. Save to local storage
+    // Save to local storage
     saveData(); // This saves the new entries
     settingsManager.saveSettingsToStorage(); // This saves the new settings
     
-    // 3. Re-render UI
+    // Re-render all UI components
     renderTimeline();
     settingsManager.updateTimerOptions();
     settingsManager.updateTrackOptions();
-    settingsManager.renderMoodSelector();
+    // Re-render mood selector in the (closed) form
+    const moodSelector = document.getElementById('mood-selector');
+    if (moodSelector) settingsManager.renderMoodSelector();
     
     if (!force) {
         alert(`✅ Restore complete! ${remoteData.entries.length} entries loaded.`);
