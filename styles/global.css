@@ -114,13 +114,13 @@ body {
     justify-content: center;
 }
 .mac-title-bar-button img,
-.mac-title-bar-button svg { /* <-- SVG ADDED HERE */
-    width: 28px;
-    height: 28px;
+.mac-title-bar-button svg {
+    width: 1.7em;  /* CHANGED: from 28px to 1.7em (scales with font-size) */
+    height: 1.7em; /* CHANGED: from 28px to 1.7em (scales with font-size) */
     filter: grayscale(1) brightness(2); /* Make it white-ish */
 }
 .mac-title-bar-button:hover img,
-.mac-title-bar-button:hover svg { /* <-- SVG ADDED HERE */
+.mac-title-bar-button:hover svg {
     filter: grayscale(0) brightness(1); /* Show color on hover (or normal b&w for svg) */
 }
 .mac-title-bar-button:active {
