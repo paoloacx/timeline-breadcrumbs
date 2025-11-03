@@ -69,6 +69,8 @@ export function setCurrentUser(user) {
 }
 export function setOfflineMode(isOffline) {
     state.isOfflineMode = isOffline;
+    // CHANGED: Persist this choice to localStorage
+    localStorage.setItem('isOfflineMode', isOffline);
 }
 
 // --- Data State ---
