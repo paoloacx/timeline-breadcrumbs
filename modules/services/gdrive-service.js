@@ -1,26 +1,24 @@
-// ===== modules/services/gdrive-service.js (NEW FILE) =====
+// ===== modules/services/gdrive-service.js (REWRITTEN for GIS) =====
 
 // Imports
 import { setCurrentUser, clearCurrentUser } from '../../core/state.js';
-// Importamos showMainApp para gestionar la UI
 import { showMainApp } from '../ui/modal-manager.js';
 
 // --- CONFIGURATION ---
-// !! DEBES RELLENAR ESTO con tus credenciales de Google Cloud Console !!
-const API_KEY = 'AIzaSyAee9UJ3HD8pkR1Fik2UFsUQD8yyxbwjgo';
-const CLIENT_ID = '605014519509-37up3noc8pprtodo9to35soge15albil.apps.googleusercontent.com';
-
-// Scopes: Ver y administrar archivos creados por esta app.
+const API_KEY = 'AIzaSyAee9UJ3HD8pkR1Fik2UFsUQD8yyxbwjgo'; // Tu API Key
+const CLIENT_ID = '605014519509-37up3noc8pprtodo9to35soge15albil.apps.googleusercontent.com'; // Tu Client ID
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
+// Module-level variables
 let gapi = window.gapi;
-let googleAuthInstance = null;
+let google = window.google;
+let tokenClient;
 let onSignInCallback = null;
 let onSignOutCallback = null;
 
 /**
  * Enables or disables GDrive sign-in buttons
- * @param {boolean} enable 
+ * @param {boolean} disabled 
  */
 function setButtonsDisabled(disabled) {
     const btn1 = document.getElementById('btn-signin-gdrive');
@@ -37,63 +35,94 @@ function setButtonsDisabled(disabled) {
 export function initGoogleAuth(onSignIn, onSignOut) {
     onSignInCallback = onSignIn;
     onSignOutCallback = onSignOut;
-    
-    // 1. Load the gapi client
-    // Usamos un 'listener' para asegurarnos que gapi está cargado
+
     const checkGapi = () => {
         if (window.gapi) {
             console.log('gapi loaded.');
             gapi = window.gapi;
-            gapi.load('client:auth2', initClient);
+            gapi.load('client', initGapiClient); // Load the GAPI client
         } else {
             console.warn('gapi not loaded yet, retrying...');
             setTimeout(checkGapi, 100);
         }
     };
+    
+    const checkGsi = () => {
+        if (window.google) {
+            console.log('gsi loaded.');
+            google = window.google;
+            initGsiClient(); // Initialize the GSI client
+        } else {
+            console.warn('gsi not loaded yet, retrying...');
+            setTimeout(checkGsi, 100);
+        }
+    };
+    
     checkGapi();
+    checkGsi();
 }
 
 /**
- * (Private) Initializes the API client and sets up the listener.
+ * (Private) Initializes the GAPI client for Drive API calls.
  */
-function initClient() {
+function initGapiClient() {
     gapi.client.init({
         apiKey: API_KEY,
-        clientId: CLIENT_ID,
-        scope: SCOPES,
         discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"]
-    }).then(() => {
-        console.log('Google API Client initialized.');
-        googleAuthInstance = gapi.auth2.getAuthInstance();
-        
-        // --- NEW: Enable buttons now that auth is ready ---
-        setButtonsDisabled(false);
-        console.log('Sign-in buttons enabled.');
-        
-        // Listen for sign-in state changes
-        googleAuthInstance.isSignedIn.listen(updateSigninStatus);
-        
-        // Handle the initial sign-in state
-        updateSigninStatus(googleAuthInstance.isSignedIn.get());
-    }).catch(error => {
-        console.error('Error initializing Google Client:', JSON.stringify(error, null, 2));
-        alert('Could not initialize Google Drive sync. (API_KEY or CLIENT_ID might be wrong)');
-    });
+    })
+    .then(() => console.log('GAPI client initialized.'))
+    .catch(err => console.error('Error initializing GAPI client:', err));
 }
 
 /**
- * (Private) Called when sign-in status changes.
- * @param {boolean} isSignedIn 
+ * (Private) Initializes the GSI client for Auth tokens.
  */
-function updateSigninStatus(isSignedIn) {
-    if (isSignedIn) {
-        console.log('GDrive: User is signed in.');
-        const user = googleAuthInstance.currentUser.get().getBasicProfile();
+function initGsiClient() {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: tokenClientCallback, // Function to call after token is received
+        error_callback: (error) => {
+            console.error('GSI Token Client Error:', error);
+        }
+    });
+    
+    // Auth is ready, enable buttons
+    setButtonsDisabled(false);
+    console.log('GSI client initialized. Sign-in buttons enabled.');
+}
+
+/**
+ * (Private) Callback for after the user signs in via the GIS popup.
+ * @param {object} tokenResponse 
+ */
+function tokenClientCallback(tokenResponse) {
+    if (tokenResponse.error) {
+        console.error('Token Error:', tokenResponse.error);
+        return;
+    }
+    
+    console.log('GDrive: User has granted token.');
+    
+    // Set the token for gapi to use
+    gapi.client.setToken({ access_token: tokenResponse.access_token });
+    
+    // Now that we have a token, fetch user's profile info
+    gapi.client.request({
+        'path': 'https://www.googleapis.com/oauth2/v3/userinfo'
+    }).execute((userInfo) => {
+        if (userInfo.error) {
+            console.error('Error fetching user info:', userInfo.error);
+            return;
+        }
+        
         const userProfile = {
-            name: user.getName(),
-            email: user.getEmail(),
-            imageUrl: user.getImageUrl()
+            name: userInfo.name,
+            email: userInfo.email,
+            imageUrl: userInfo.picture
         };
+        
+        console.log('GDrive: User info fetched:', userProfile.email);
         
         setCurrentUser(userProfile);
         updateUiWithUser(userProfile);
@@ -101,16 +130,9 @@ function updateSigninStatus(isSignedIn) {
         if (onSignInCallback) {
             onSignInCallback(userProfile);
         }
-    } else {
-        console.log('GDrive: User is signed out.');
-        clearCurrentUser();
-        updateUiWithUser(null); // Limpia la UI
-        
-        if (onSignOutCallback) {
-            onSignOutCallback();
-        }
-    }
+    });
 }
+
 
 /**
  * (Private) Updates the UI elements with user info.
@@ -147,8 +169,9 @@ function updateUiWithUser(userProfile) {
  * Triggers the Google Sign-In popup.
  */
 export function handleSignIn() {
-    if (googleAuthInstance) {
-        googleAuthInstance.signIn();
+    if (tokenClient) {
+        // This prompts the user for consent and gets the token
+        tokenClient.requestAccessToken();
     } else {
         alert('Google Auth is not ready yet. Please wait a moment.');
     }
@@ -158,7 +181,18 @@ export function handleSignIn() {
  * Triggers the Google Sign-Out.
  */
 export function handleSignOut() {
-    if (googleAuthInstance) {
-        googleAuthInstance.signOut();
+    const token = gapi.client.getToken();
+    if (token) {
+        google.accounts.oauth2.revoke(token.access_token, () => {
+            console.log('GDrive: Token revoked.');
+        });
+        gapi.client.setToken(null);
+    }
+    
+    // Manually trigger the sign-out flow
+    clearCurrentUser();
+    updateUiWithUser(null);
+    if (onSignOutCallback) {
+        onSignOutCallback();
     }
 }
