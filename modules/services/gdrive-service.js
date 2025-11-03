@@ -28,6 +28,18 @@ let codeClient;
 let onSignInCallback = null;
 let gapiClientReady = null; 
 
+// --- NEW: Function definition was missing ---
+/**
+ * Enables or disables GDrive sign-in buttons
+ * @param {boolean} disabled 
+ */
+function setButtonsDisabled(disabled) {
+    const btn1 = document.getElementById('btn-signin-gdrive');
+    const btn2 = document.getElementById('btn-tools-signin');
+    if (btn1) btn1.disabled = disabled;
+    if (btn2) btn2.disabled = disabled;
+}
+
 /**
  * Initializes the Google API client and Auth instance.
  * @param {function} onSignIn - Callback when user signs in.
@@ -109,14 +121,14 @@ export async function handleRedirectResult(code) {
     try {
         // 1. Exchange the code for an access token
         const tokenResponse = await new Promise((resolve, reject) => {
-            google.accounts.oauth2.tokenClient.requestAccessToken({
+            // --- NEW: We need to init a tokenClient *just* for this exchange ---
+            const client = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: SCOPES,
-                code: code,
                 redirect_uri: REDIRECT_URI,
-                grant_type: 'authorization_code',
                 callback: (token) => token.error ? reject(token) : resolve(token),
             });
+            client.requestAccessToken({ code: code });
         });
 
         console.log('GDrive: Access token received.');
