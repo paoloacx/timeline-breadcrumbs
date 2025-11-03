@@ -46,8 +46,9 @@ export function showMainApp(user) {
     const emailDisplay = document.getElementById('gdrive-user-email');
     const icon = document.getElementById('gdrive-user-icon');
     
-    // NEW: Get the sign-in button from the tools modal
+    // NEW: Get the sign-in button and sync controls from the tools modal
     const signInButton = document.getElementById('btn-tools-signin');
+    const syncControls = document.getElementById('gdrive-sync-controls');
 
     if (user) {
         // --- ONLINE STATE ---
@@ -67,6 +68,8 @@ export function showMainApp(user) {
         
         // Hide the offline sign-in button
         if (signInButton) signInButton.classList.add('hidden');
+        // --- NEW: Show the GDrive sync controls ---
+        if (syncControls) syncControls.classList.remove('hidden');
         
     } else {
         // --- OFFLINE STATE ---
@@ -74,6 +77,8 @@ export function showMainApp(user) {
         
         // Show the offline sign-in button
         if (signInButton) signInButton.classList.remove('hidden');
+        // --- NEW: Hide the GDrive sync controls ---
+        if (syncControls) syncControls.classList.add('hidden');
     }
 }
 
