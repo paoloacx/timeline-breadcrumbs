@@ -6,6 +6,21 @@ let fabMenuOpen = false;
 // --- Private Functions ---
 
 /**
+ * NEW: Shows or hides the FAB overlay.
+ * @param {boolean} show - True to show, false to hide.
+ */
+function showFabOverlay(show) {
+    const overlay = document.getElementById('fab-overlay');
+    if (show) {
+        overlay.style.display = 'block';
+        setTimeout(() => overlay.classList.add('show'), 10);
+    } else {
+        overlay.classList.remove('show');
+        setTimeout(() => (overlay.style.display = 'none'), 300); // Wait for transition
+    }
+}
+
+/**
  * Toggles the visibility and animation of the FAB menu.
  */
 function toggleFabMenu() {
@@ -17,6 +32,7 @@ function toggleFabMenu() {
     if (fabMenuOpen) {
         fabIcon.textContent = '×';
         fabIcon.style.transform = 'rotate(45deg)';
+        showFabOverlay(true); // NEW: Show overlay
         fabActions.forEach((wrapper, index) => {
             setTimeout(() => {
                 wrapper.classList.remove('hidden');
@@ -26,6 +42,7 @@ function toggleFabMenu() {
     } else {
         fabIcon.textContent = '+';
         fabIcon.style.transform = 'rotate(0deg)';
+        showFabOverlay(false); // NEW: Hide overlay
         fabActions.forEach((wrapper, index) => {
             setTimeout(() => {
                 wrapper.classList.remove('show');
@@ -58,6 +75,9 @@ function closeFabMenu() {
 export function initFabMenu(formActions) {
     document.getElementById('fab-main').addEventListener('click', toggleFabMenu);
     
+    // NEW: Add listener for the overlay to close the menu
+    document.getElementById('fab-overlay').addEventListener('click', closeFabMenu);
+
     document.getElementById('fab-action-crumb').addEventListener('click', () => { 
         closeFabMenu(); 
         formActions.openCrumbForm(); 
