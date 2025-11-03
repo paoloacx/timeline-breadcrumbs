@@ -82,9 +82,10 @@ body {
         repeating-linear-gradient(90deg, transparent, transparent 1px, #333 1px, #333 2px);
     background-size: 2px 2px;
     color: white;
-    /* CHANGED: Set right padding to 5px for icon margin */
-    padding: 5px 0px 5px;
-    padding-left: 5px;
+    /* CHANGED: Removed vertical padding, set 5px right, 16px left */
+    padding: 0 5px 0 16px;
+    /* ADDED: Set minimum height */
+    min-height: 40px;
     font-size: 20px;
     font-weight: bold;
     display: flex;
@@ -110,25 +111,26 @@ body {
     background: transparent;
     border: none;
     cursor: pointer;
-    /* CHANGED: Added 5px horizontal padding (for icon's left margin) */
-    padding: 0 5px; 
+    /* CHANGED: Removed padding, added left margin for 5px gap */
+    padding: 0;
+    margin-left: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 4px; /* Added for hover effect */
+    border-radius: 4px;
 }
 .mac-title-bar-button img,
-.mac-title-bar-button svg { 
-    /* CHANGED: Set exact pixel size */
+.mac-title-bar-button svg {
+    /* Kept 30px size (40px bar - 5px top - 5px bottom) */
     width: 30px;
     height: 30px;
     /* REMOVED: filter property */
 }
 .mac-title-bar-button:hover {
-    background: #333; /* Added hover feedback */
+    background: #333;
 }
 .mac-title-bar-button:hover img,
-.mac-title-bar-button:hover svg { 
+.mac-title-bar-button:hover svg {
     /* REMOVED: filter property */
 }
 .mac-title-bar-button:active {
