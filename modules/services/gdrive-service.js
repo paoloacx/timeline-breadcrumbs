@@ -2,12 +2,16 @@
 
 // Imports
 import { setCurrentUser, clearCurrentUser } from '../../core/state.js';
+// Importamos showMainApp para gestionar la UI
 import { showMainApp } from '../ui/modal-manager.js';
 
 // --- CONFIGURATION ---
 const API_KEY = 'AIzaSyAee9UJ3HD8pkR1Fik2UFsUQD8yyxbwjgo'; // Tu API Key
 const CLIENT_ID = '605014519509-37up3noc8pprtodo9to35soge15albil.apps.googleusercontent.com'; // Tu Client ID
-const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+// --- CHANGED: Added userinfo scopes ---
+// We now ask for file access, email, and profile info
+const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
 
 // Module-level variables
 let gapi = window.gapi;
@@ -112,7 +116,8 @@ function tokenClientCallback(tokenResponse) {
         'path': 'https://www.googleapis.com/oauth2/v3/userinfo'
     }).execute((userInfo) => {
         if (userInfo.error) {
-            console.error('Error fetching user info:', userInfo.error);
+            // This is where the 403 error happened
+            console.error('Error fetching user info:', userInfo);
             return;
         }
         
