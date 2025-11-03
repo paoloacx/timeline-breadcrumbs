@@ -125,7 +125,7 @@ export function renderTimeline() {
             <div class="timeline-line"></div>
             ${sortedDayKeys.map(dayKey => {
                 const dayEntries = groupedByDay[dayKey];
-                const firstEntry = dayEntries[0];
+                // REMOVED: const firstEntry = dayEntries[0];
                 
                 const recaps = dayEntries.filter(e => e.type === 'recap');
                 const regularEntries = dayEntries.filter(e => e.type !== 'recap');
@@ -136,7 +136,7 @@ export function renderTimeline() {
                 return `
                     <div class="day-block" data-day="${dayKey}">
                         <div class="day-header">
-                            <span>${formatDate(firstEntry.timestamp)}</span>
+                            <span>${formatDate(dayKey + 'T12:00:00')}</span>
                             <span class="chevron ${expandedClass}" id="chevron-${dayKey}">▼</span>
                         </div>
                         
@@ -202,6 +202,10 @@ export function renderTimeline() {
                                 <div class="breadcrumb-entry ${entry.isTimedActivity ? 'time-event' : ''} ${trackClass} ${spentClass} ${crumbClass}" style="${heightStyle}" data-id="${entry.id}">
                                     <button class="mac-button edit-button btn-edit">✏️ Edit</button>
                                     
+                                    ${crumbClass === 'crumb-event' ? `
+                                        <button class="mac-button preview-button-emoji btn-preview" title="Preview">🔍</button>
+                                    ` : ''}
+
                                     ${entry.isTimedActivity ? 
                                         `<div>
                                             <div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div>
@@ -257,8 +261,8 @@ export function renderTimeline() {
                                             <img src="${img}" class="preview-image-thumb" alt="Thumbnail ${idx+1}" data-index="${idx}">
                                         `).join('') : ''}
                                         ${entry.coords ? `<div class="preview-map-thumb" id="mini-map-${entry.id}"></div>` : ''}
-                                        <button class="mac-button preview-button btn-preview">🔍 Preview</button>
-                                    </div>
+                                        
+                                        </div>
                                 </div>
                                 `}).join('')}
                         </div>
