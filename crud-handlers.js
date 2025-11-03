@@ -4,7 +4,8 @@
 // CAMBIO: Rutas actualizadas para apuntar a 'core/'
 import { getState, addEntry, updateEntry, removeEntry, setEditingId, setSelectedMood, setCoords, setAudio, addImage, clearFormState, clearTimerState, clearTrackState, clearSpentState, clearRecapState, setSelectedDuration, setSelectedActivity, setSelectedTrackItem } from './core/state.js';
 import { saveData } from './core/storage.js';
-import { deleteEntryFromFirebase } from './firebase-config.js';
+// REMOVED: Firebase import
+// import { deleteEntryFromFirebase } from './firebase-config.js';
 import { renderMoodSelector, renderImagePreviews, renderAudioPreview, showMiniMap, selectTrackUI } from './ui-renderer.js';
 import { renderPreview, renderImagePreviewModal } from './modules/ui/preview.js';
 import { closeModal, openModal, openCrumbForm, openTimerForm, openTrackForm, openSpentForm, openRecapForm } from './modules/ui/modal-manager.js';
@@ -201,8 +202,8 @@ export function handleDeleteEntry() {
         // 1. Remove from state
         removeEntry(editingEntryId);
         
-        // 2. Sync with Firebase
-        deleteEntryFromFirebase(editingEntryId);
+        // 2. Sync with Firebase (REMOVED)
+        // deleteEntryFromFirebase(editingEntryId);
         
         // 3. Save local data
         saveData();
