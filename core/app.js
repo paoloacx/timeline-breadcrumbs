@@ -13,15 +13,22 @@ import { initTimeline } from '../modules/timeline/timeline.js';
  * This function is called once the DOM is fully loaded.
  */
 function initApp() {
-    console.log('App initializing...');
+    console.log('App initializing... Showing UI immediately.');
+
+    // CHANGED: Load UI and Local Data *immediately*
+    // This makes the app load instantly with cached data.
+    showMainApp(null); // 1. Show main app structure (title bar, etc.)
+    loadLocalSettings(); // 2. Load settings from local storage
+    loadLocalData();     // 3. Load entries from local storage & render timeline
     
-    // 1. Initialize Authentication (sets up onAuthStateChanged listener)
+    // 4. Initialize Auth in the background
+    // This will check Firebase and trigger a login or logout callback
     initAuth(onUserLoggedIn, onUserLoggedOut);
     
-    // 2. Initialize all UI event listeners (botones, formularios, etc.)
+    // 5. Initialize UI listeners
     initUI(onOfflineClicked);
     
-    // 3. Initialize Timeline listeners (clicks en editar, preview, expandir)
+    // 6. Initialize Timeline listeners
     initTimeline();
 }
 
@@ -29,33 +36,20 @@ function initApp() {
  * Callback function executed when a user is successfully logged in.
  */
 function onUserLoggedIn(user) {
-    console.log('User is logged in. Showing app and loading local data first.');
-    showMainApp(user); // Muestra la UI principal
-    
-    // CHANGED: 1. Load local data for instant UI
-    // This renders the timeline immediately with stored data.
-    loadLocalData(); 
-    
-    // CHANGED: 2. Start cloud sync in the background
-    // This will fetch from Firebase, update the state, and re-render the timeline.
-    console.log('Starting cloud data sync...');
-    loadFirebaseData(); 
+    console.log('User is logged in. Syncing cloud data.');
+    showMainApp(user);    // Update avatar with user info
+    loadFirebaseData(); // Sync from cloud (will update state and re-render)
 }
 
 /**
  * Callback function executed when no user is logged in (or on logout).
  */
 function onUserLoggedOut() {
-    console.log('User is logged out. Loading local data.');
-    // 1. Load local settings (moods, etc.)
-    loadLocalSettings();
-    
-    // 2. Load local entries
-    loadLocalData();
-    
-    // 3. Show the main app IF user clicked "Continue Offline"
-    if (getState().isOfflineMode) {
-        showMainApp(null);
+    console.log('User is logged out.');
+    // If user is not *intentionally* offline, hide the main app.
+    // (firebase-config.js will show the login panel)
+    if (!getState().isOfflineMode) {
+        document.getElementById('main-app').style.display = 'none';
     }
 }
 
@@ -64,7 +58,10 @@ function onUserLoggedOut() {
  */
 function onOfflineClicked() {
     setOfflineMode(true);
-    onUserLoggedOut();
+    // Hide the login panel (it's shown by onUserLoggedOut by default)
+    document.getElementById('auth-container').style.display = 'none';
+    // Ensure the main app is visible
+    showMainApp(null);
 }
 
 // --- App Entry Point ---
