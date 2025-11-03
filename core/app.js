@@ -19,28 +19,24 @@ function initApp() {
     // 1. Check for persistent offline mode
     const isOffline = localStorage.getItem('isOfflineMode') === 'true';
 
-    // 2. Load local data and show base UI immediately
-    // This provides an instant "app" feel, even while auth is loading.
-    loadLocalSettings();
-    loadLocalData();
-    // Show main app, but hide user avatar (null)
-    showMainApp(null); 
-
     if (isOffline) {
-        console.log('Offline mode is persistent. Running app.');
-        // We already loaded data, just make sure auth panel is hidden
-        document.getElementById('auth-container').style.display = 'none';
+        console.log('Offline mode is persistent. Loading app.');
+        // Run offline mode immediately
+        runOfflineMode();
     } else {
-        console.log('No persistent session. Initializing Google Auth.');
-        // --- CHANGED: Do NOT show auth panel yet. ---
-        // We wait for GAPI to tell us if the user is *already* logged in.
+        console.log('No persistent session. Waiting for GDrive auth...');
+        // --- CHANGED: DO NOT show auth panel yet ---
+        // We wait for GDrive's silent sign-in to fail first.
+        // document.getElementById('auth-container').style.display = 'block';
+        document.getElementById('main-app').style.display = 'none';
     }
 
-    // 3. Initialize Google Auth in background
+    // 2. Initialize Google Auth in background
     // This will decide if we need to show the auth panel or auto-login.
     console.log('Initializing Google Auth in background...');
     const checkGapi = () => {
         if (window.gapi) {
+            // Pass both callbacks: onSignIn, and onSignOut (which handles silent fail)
             initGoogleAuth(onGdriveSignIn, onGdriveSignOut);
         } else {
             console.warn('GAPI script not loaded yet, retrying...');
@@ -50,10 +46,10 @@ function initApp() {
     checkGapi();
 
 
-    // 4. Initialize all UI event listeners
+    // 3. Initialize all UI event listeners
     initUI(runOfflineMode); 
     
-    // 5. Initialize Timeline listeners
+    // 4. Initialize Timeline listeners
     initTimeline();
 }
 
@@ -64,15 +60,21 @@ function initApp() {
 function onGdriveSignIn(userProfile) {
     console.log('GDrive Sign-In Success:', userProfile.email);
     setCurrentUser(userProfile);
-    showMainApp(userProfile); // Show app and update avatar
     
-    // We already loaded local data, now we sync.
+    // Load local data first (in case it's newer)
+    loadLocalSettings();
+    loadLocalData();
+    
+    // Show the app (this hides auth panel)
+    showMainApp(userProfile);
+    
+    // Now check GDrive for newer data
     console.log('Running initial sync...');
     syncOnLogin();
 }
 
 /**
- * NEW: Callback for GDrive Sign-Out OR if user is not logged in.
+ * NEW: Callback for GDrive Sign-Out OR if silent sign-in fails.
  */
 function onGdriveSignOut() {
     console.log('User is not signed in.');
@@ -88,7 +90,7 @@ function onGdriveSignOut() {
 
 /**
  * Encapsulated function to run the app in offline mode.
- * Called by UI button.
+ * This is called on init (if offline is persistent) or by ui-handler.
  */
 function runOfflineMode() {
     console.log('Running in offline mode.');
@@ -97,13 +99,11 @@ function runOfflineMode() {
 
     // Hide auth panel
     document.getElementById('auth-container').style.display = 'none';
-
-    // Show app (if it was hidden)
-    showMainApp(null);
     
-    // Data is already loaded, but we call this just in case.
+    // Load local data and show app
     loadLocalSettings();
     loadLocalData();
+    showMainApp(null); // Show app, (null = no user avatar)
 }
 
 // --- App Entry Point ---
