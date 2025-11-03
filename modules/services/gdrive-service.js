@@ -44,7 +44,7 @@ export function initGoogleAuth(onSignIn, onSignOut) {
         if (window.gapi) {
             console.log('gapi loaded.');
             gapi = window.gapi;
-            gapi.load('client:oauth2', initClient);
+            gapi.load('client:auth2', initClient);
         } else {
             console.warn('gapi not loaded yet, retrying...');
             setTimeout(checkGapi, 100);
