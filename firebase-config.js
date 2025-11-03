@@ -31,12 +31,19 @@ const db = firebase.firestore();
  * @param {function} onLogoutCallback - Function to call when user logs out.
  */
 export function initAuth(onLoginCallback, onLogoutCallback) {
+    // CHANGED: Get auth container to manage visibility
+    const authContainer = document.getElementById('auth-container');
+
     auth.onAuthStateChanged((user) => {
         if (user) {
             setCurrentUser(user);
+            // Hide auth container (it's hidden by default, but good for safety)
+            if (authContainer) authContainer.style.display = 'none';
             onLoginCallback(user);
         } else {
             setCurrentUser(null);
+            // EXPLICITLY show auth container on logout
+            if (authContainer) authContainer.style.display = 'block';
             onLogoutCallback();
         }
     });
