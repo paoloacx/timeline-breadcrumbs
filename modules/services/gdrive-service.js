@@ -253,10 +253,11 @@ async function findOrCreateAppFolder() {
             const folderMetadata = {
                 'name': DRIVE_FOLDER_NAME,
                 'mimeType': 'application/vnd.google-apps.folder',
-                'fields': 'id'
             };
+            // Use 'fields' to request the 'id' of the new folder
             const createResponse = await gapi.client.drive.files.create({
-                resource: folderMetadata
+                resource: folderMetadata,
+                fields: 'id'
             });
             
             console.log('Folder created with ID:', createResponse.result.id);
@@ -305,6 +306,7 @@ async function findBackupFile(folderId) {
  * (Private) Uploads the backup data to Google Drive.
  * Creates a new file or updates an existing one *inside* the app folder.
  * @param {string} data - The stringified JSON data.
+ *axp
  * @param {string|null} fileId - The ID of the file to update.
  * @param {string} folderId - The ID of the parent folder.
  */
@@ -324,36 +326,33 @@ async function uploadToDrive(data, fileId, folderId) {
             const response = await request;
             console.log('Upload (PATCH) successful:', response.result);
             backupFileId = response.result.id; // Cache the ID
+        
         } else {
-            // --- Option 2: Create new file (CREATE + PATCH) ---
-            // This is more reliable than multipart for GAPI client
+            // --- Option 2: Create new file (Multipart Upload) ---
+            // This method creates and uploads in one go.
             console.log('Creating new backup file...');
             
-            // Step A: Create the file with metadata ONLY
             const metadata = {
                 'name': BACKUP_FILE_NAME,
                 'mimeType': 'application/json',
                 'parents': [folderId] // <-- Puts it in the correct folder
             };
-            const createResponse = await gapi.client.drive.files.create({
-                resource: metadata,
-                fields: 'id'
+            
+            const form = new FormData();
+            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+            form.append('file', blob);
+
+            const request = gapi.client.request({
+                path: '/upload/drive/v3/files',
+                method: 'POST',
+                params: { uploadType: 'multipart' },
+                // We MUST use the FormData object as the body
+                body: form
             });
             
-            const newFileId = createResponse.result.id;
-            console.log(`File created with name '${BACKUP_FILE_NAME}' (ID: ${newFileId})`);
-            
-            // Step B: Upload the content to the new file
-            const updateRequest = gapi.client.request({
-                path: `/upload/drive/v3/files/${newFileId}`,
-                method: 'PATCH',
-                params: { uploadType: 'media' },
-                body: blob
-            });
-            const updateResponse = await updateRequest;
-            
-            console.log('Upload (CREATE) successful:', updateResponse.result);
-            backupFileId = updateResponse.result.id; // Cache the ID
+            const response = await request;
+            console.log('Upload (Multipart Create) successful:', response.result);
+            backupFileId = response.result.id; // Cache the ID
         }
         return true;
     } catch (error) {
