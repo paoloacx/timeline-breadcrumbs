@@ -68,6 +68,11 @@ body {
     margin-top: 0;
 }
 
+/* NEW: Add top margin to the main app title bar window */
+#main-app > .mac-window:first-child {
+    margin-top: 10px;
+}
+
 /* Mac Classic dotted background */
 .mac-title-bar {
     background: #000;
