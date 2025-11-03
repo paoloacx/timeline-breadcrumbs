@@ -12,11 +12,19 @@ import { openSettings, toggleMoodConfig, saveSettings, updateTimerOptions, updat
 import { renderMoodSelector, renderImagePreviews, renderAudioPreview, selectTrackUI } from './ui-renderer.js';
 import { signInWithGoogle, signInWithEmail, signOutUser } from './firebase-config.js';
 import { initFabMenu } from './modules/ui/fab-menu.js';
-import { initModalManager, openCrumbForm, openTimerForm, openTrackForm, openSpentForm, openRecapForm, toggleUserMenu, closeModal } from './modules/ui/modal-manager.js';
+// CHANGED: Imported openModal
+import { initModalManager, openCrumbForm, openTimerForm, openTrackForm, openSpentForm, openRecapForm, toggleUserMenu, closeModal, openModal } from './modules/ui/modal-manager.js';
 import { initTimeline } from './modules/timeline/timeline.js';
 
 
 // --- Main UI Initialization ---
+
+/**
+ * Opens the new Tools & Account modal.
+ */
+function openToolsModal() {
+    openModal('tools-modal');
+}
 
 /**
  * Attaches all persistent event listeners to the DOM.
@@ -30,27 +38,33 @@ export function initUI(onOfflineCallback) {
 
     // --- Header / User Menu ---
     document.getElementById('btn-sync').addEventListener('click', () => location.reload());
+    // NEW: Open Tools Modal
+    document.getElementById('btn-open-tools').addEventListener('click', openToolsModal);
+    
+    // MOVED: These listeners are now for the *modal's* avatar/signout
     document.getElementById('btn-user-avatar').addEventListener('click', (e) => toggleUserMenu(e));
     document.getElementById('btn-signout').addEventListener('click', signOutUser);
+    
     // Close user menu on outside click
     document.addEventListener('click', (e) => {
         const menu = document.getElementById('logout-menu');
-        if (menu && !e.target.closest('#btn-user-avatar')) {
+        // MODIFIED: Also check if click is inside the modal title bar
+        if (menu && !e.target.closest('#btn-user-avatar') && !e.target.closest('.modal-title-bar-actions')) {
             menu.classList.remove('show');
         }
     });
 
-    // --- Top Action Buttons ---
-    document.getElementById('btn-toggle-crumb').addEventListener('click', () => openCrumbForm());
-    document.getElementById('btn-toggle-timer').addEventListener('click', () => openTimerForm());
-    document.getElementById('btn-toggle-track').addEventListener('click', () => openTrackForm());
-    document.getElementById('btn-toggle-spent').addEventListener('click', () => openSpentForm());
+    // --- Top Action Buttons (REMOVED) ---
+    // document.getElementById('btn-toggle-crumb').addEventListener('click', () => openCrumbForm());
+    // document.getElementById('btn-toggle-timer').addEventListener('click', () => openTimerForm());
+    // document.getElementById('btn-toggle-track').addEventListener('click', () => openTrackForm());
+    // document.getElementById('btn-toggle-spent').addEventListener('click', () => openSpentForm());
 
-    // --- Footer Buttons ---
-    document.getElementById('btn-open-stats').addEventListener('click', openStats);
-    document.getElementById('btn-export-csv').addEventListener('click', () => openExportModal('csv'));
-    document.getElementById('btn-export-ics').addEventListener('click', () => openExportModal('ics'));
-    document.getElementById('btn-open-settings').addEventListener('click', openSettings);
+    // --- Footer Buttons (REMOVED) ---
+    // document.getElementById('btn-open-stats').addEventListener('click', openStats);
+    // document.getElementById('btn-export-csv').addEventListener('click', () => openExportModal('csv'));
+    // document.getElementById('btn-export-ics').addEventListener('click', () => openExportModal('ics'));
+    // document.getElementById('btn-open-settings').addEventListener('click', openSettings);
 
     // --- Inicializa el módulo FAB ---
     initFabMenu({
@@ -65,6 +79,26 @@ export function initUI(onOfflineCallback) {
     initModalManager();
     
     // (La llamada a initTimeline() está en app.js)
+
+    // --- NEW: Tools Modal Listeners ---
+    document.getElementById('btn-close-tools').addEventListener('click', () => closeModal('tools-modal'));
+    document.getElementById('btn-tools-stats').addEventListener('click', () => {
+        openStats();
+        closeModal('tools-modal'); // Close tools modal when opening another
+    });
+    document.getElementById('btn-tools-csv').addEventListener('click', () => {
+        openExportModal('csv');
+        closeModal('tools-modal');
+    });
+    document.getElementById('btn-tools-ics').addEventListener('click', () => {
+        openExportModal('ics');
+        closeModal('tools-modal');
+    });
+    document.getElementById('btn-tools-settings').addEventListener('click', () => {
+        openSettings();
+        closeModal('tools-modal');
+    });
+
 
     // --- Crumb Form ---
     document.getElementById('btn-toggle-mood-config').addEventListener('click', toggleMoodConfig);
