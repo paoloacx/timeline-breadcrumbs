@@ -11,7 +11,8 @@ import { handleImageInput, startRecording, stopRecording, removeImage, removeAud
 import { openStats, exportCSV, exportICS, openExportModal, performExport, exportFullBackup } from './modules/data/data-tools.js';
 import { openSettings, toggleMoodConfig, saveSettings, updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from './modules/settings/settings-manager.js';
 import { renderMoodSelector, renderImagePreviews, renderAudioPreview, selectTrackUI } from './ui-renderer.js';
-import { signInWithGoogle, signInWithEmail, signOutUser } from './firebase-config.js';
+// REMOVED: Firebase imports
+// import { signInWithGoogle, signInWithEmail, signOutUser } from './firebase-config.js';
 import { initFabMenu } from './modules/ui/fab-menu.js';
 // CHANGED: Imported openModal
 import { initModalManager, openCrumbForm, openTimerForm, openTrackForm, openSpentForm, openRecapForm, toggleUserMenu, closeModal, openModal } from './modules/ui/modal-manager.js';
@@ -33,19 +34,28 @@ function openToolsModal() {
 export function initUI(onOfflineCallback) {
     
     // --- Auth Buttons ---
-    document.getElementById('btn-signin-google').addEventListener('click', signInWithGoogle);
-    document.getElementById('btn-signin-email').addEventListener('click', signInWithEmail);
+    // REMOVED: Old Firebase listeners
+    // document.getElementById('btn-signin-google').addEventListener('click', signInWithGoogle);
+    // document.getElementById('btn-signin-email').addEventListener('click', signInWithEmail);
+    
+    // NEW: GDrive Sign-in (placeholder)
+    document.getElementById('btn-signin-gdrive').addEventListener('click', () => {
+        console.log('Google Drive Sign-in clicked... (Not implemented)');
+        // TODO: Call GDrive auth logic here
+    });
+
+    // UPDATED: "Continue Offline" button
     document.getElementById('btn-continue-offline').addEventListener('click', onOfflineCallback);
 
     // --- Header / User Menu ---
-    // REMOVED: Sync button listener
     
     // NEW: Open Tools Modal
     document.getElementById('btn-open-tools').addEventListener('click', openToolsModal);
     
     // MOVED: These listeners are now for the *modal's* avatar/signout
     document.getElementById('btn-user-avatar').addEventListener('click', (e) => toggleUserMenu(e));
-    document.getElementById('btn-signout').addEventListener('click', signOutUser);
+    // REMOVED: Firebase signout
+    // document.getElementById('btn-signout').addEventListener('click', signOutUser);
     
     // Close user menu on outside click
     document.addEventListener('click', (e) => {
