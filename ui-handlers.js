@@ -13,7 +13,8 @@ import { openSettings, toggleMoodConfig, saveSettings, updateTimerOptions, updat
 import { renderMoodSelector, renderImagePreviews, renderAudioPreview, selectTrackUI } from './ui-renderer.js';
 
 // NEW: Import GDrive handlers
-import { handleSignIn, handleSignOut } from './modules/services/gdrive-service.js';
+// --- CHANGED: Import all GDrive functions ---
+import { handleSignIn, handleSignOut, manualBackupToDrive, manualRestoreFromDrive } from './modules/services/gdrive-service.js';
 
 import { initFabMenu } from './modules/ui/fab-menu.js';
 // CHANGED: Imported openModal
@@ -115,6 +116,15 @@ export function initUI(onOfflineCallback) {
     document.getElementById('btn-tools-signin').addEventListener('click', () => {
         closeModal('tools-modal');
         handleSignIn(); // Call the same sign-in function
+    });
+    // --- NEW: GDrive Manual Sync Listeners ---
+    document.getElementById('btn-tools-gdrive-backup').addEventListener('click', () => {
+        manualBackupToDrive();
+        closeModal('tools-modal');
+    });
+    document.getElementById('btn-tools-gdrive-restore').addEventListener('click', () => {
+        manualRestoreFromDrive();
+        closeModal('tools-modal');
     });
 
 
