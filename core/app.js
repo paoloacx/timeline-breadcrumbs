@@ -24,16 +24,28 @@ function initApp() {
         // Run offline mode immediately
         runOfflineMode();
     } else {
-        console.log('No persistent session. Initializing Google Auth.');
+        console.log('No persistent session. Showing auth panel.');
         // Show the login panel
         document.getElementById('auth-container').style.display = 'block';
         // Ensure main app is hidden
         document.getElementById('main-app').style.display = 'none';
-        
-        // 2. Initialize Google Auth
-        // The gapi script in index.html must be loaded first
-        window.gapi ? initGoogleAuth(onGdriveSignIn, onGdriveSignOut) : console.error("GAPI script not loaded");
     }
+
+    // --- CHANGED: Initialize Google Auth REGARDLESS of mode ---
+    // This ensures the API is ready even if the user starts offline
+    // and later decides to sign in from the Tools modal.
+    console.log('Initializing Google Auth in background...');
+    // We check if window.gapi exists first, just in case the script is slow
+    const checkGapi = () => {
+        if (window.gapi) {
+            initGoogleAuth(onGdriveSignIn, onGdriveSignOut);
+        } else {
+            console.warn('GAPI script not loaded yet, retrying...');
+            setTimeout(checkGapi, 100); // Retry after 100ms
+        }
+    };
+    checkGapi();
+
 
     // 3. Initialize all UI event listeners (for login buttons, etc.)
     // Pass 'runOfflineMode' as the callback for the "Continue Offline" button
@@ -66,6 +78,7 @@ function onGdriveSignIn(userProfile) {
 function onGdriveSignOut() {
     console.log('User signed out.');
     clearCurrentUser();
+    // Show auth panel and hide app
     document.getElementById('auth-container').style.display = 'block';
     document.getElementById('main-app').style.display = 'none';
 }
