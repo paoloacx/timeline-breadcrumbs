@@ -356,3 +356,45 @@ function exportICSData(entries, icsFormat) {
     link.click();
     document.body.removeChild(link);
 }
+
+// --- NEW: Full Backup Functions ---
+
+/**
+ * Generates a filename for the backup.
+ * @returns {string} e.g., "breadcrumbs_backup_2025-11-03.json"
+ */
+function getBackupFilename() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `breadcrumbs_backup_${year}-${month}-${day}.json`;
+}
+
+/**
+ * NEW: Exports the entire app state (entries and settings) as a single JSON file.
+ */
+export function exportFullBackup() {
+    console.log('Generating full backup...');
+    const { entries, settings } = getState();
+    
+    const backupData = {
+        version: '1.0.0', // App version this backup was made with
+        createdAt: new Date().toISOString(),
+        settings: settings,
+        entries: entries
+    };
+
+    const jsonString = JSON.stringify(backupData, null, 2); // Pretty-print JSON
+    const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", getBackupFilename());
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log('Full backup downloaded.');
+}
