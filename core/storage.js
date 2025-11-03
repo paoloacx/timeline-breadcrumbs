@@ -2,7 +2,8 @@
 // CAMBIO: Las rutas ahora suben un nivel
 import { getState, setEntries } from './state.js';
 import { renderTimeline } from '../modules/timeline/timeline.js';
-import { saveDataToFirebase } from '../firebase-config.js';
+// REMOVED: Firebase import
+// import { saveDataToFirebase } from '../firebase-config.js';
 
 /**
  * Loads entries from localStorage into the state.
@@ -23,13 +24,14 @@ export function loadData() {
 }
 
 /**
- * Saves the current state's entries to localStorage and triggers Firebase sync.
+ * Saves the current state's entries to localStorage.
  */
 export function saveData() {
-    const { entries, isOfflineMode, currentUser } = getState();
+    const { entries } = getState();
     localStorage.setItem('timeline-entries', JSON.stringify(entries));
     
-    if (!isOfflineMode && currentUser) {
-        saveDataToFirebase();
-    }
+    // REMOVED: Firebase sync logic
+    // if (!isOfflineMode && currentUser) {
+    //     saveDataToFirebase();
+    // }
 }
