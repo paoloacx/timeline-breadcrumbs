@@ -111,6 +111,11 @@ export function initUI(onOfflineCallback) {
         exportFullBackup();
         closeModal('tools-modal');
     });
+    // NEW: Listener for the offline sign-in button
+    document.getElementById('btn-tools-signin').addEventListener('click', () => {
+        closeModal('tools-modal');
+        handleSignIn(); // Call the same sign-in function
+    });
 
 
     // --- Crumb Form ---
