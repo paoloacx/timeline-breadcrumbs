@@ -80,7 +80,7 @@
     opacity: 1 !important;
     transform: translateY(0) !important;
     /* CHANGED: Removed !important, just padding */
-    padding: 16px; 
+    padding: 10px; 
 }
 
 /* Chevron animation */
