@@ -96,17 +96,17 @@ export function renderTimeline() {
     const { entries } = getState();
     const container = document.getElementById('timeline-container');
     const emptyState = document.getElementById('empty-state');
-    const footer = document.getElementById('footer');
+    // REMOVED: const footer = document.getElementById('footer');
 
     if (entries.length === 0) {
         container.innerHTML = '';
         emptyState.classList.remove('hidden');
-        footer.style.display = 'none';
+        // REMOVED: footer.style.display = 'none';
         return;
     }
 
     emptyState.classList.add('hidden');
-    footer.style.display = 'flex';
+    // REMOVED: footer.style.display = 'flex';
 
     const groupedByDay = {};
     entries.forEach(entry => {
