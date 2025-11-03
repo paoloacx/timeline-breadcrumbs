@@ -35,30 +35,59 @@ export function closeModal(modalId) {
 
 /**
  * Shows the main app UI and hides the auth panel.
- * @param {object|null} user - The Firebase user object, or null for offline.
+ * @param {object|null} user - The Google user profile object, or null for offline.
  */
 export function showMainApp(user) {
     document.getElementById('auth-container').style.display = 'none';
     document.getElementById('main-app').style.display = 'block';
     
+    // CHANGED: Get new GDrive elements
+    const avatar = document.getElementById('gdrive-user-avatar');
+    const emailDisplay = document.getElementById('gdrive-user-email');
+    const icon = document.getElementById('gdrive-user-icon');
+    
+    // NEW: Get the sign-in button from the tools modal
+    const signInButton = document.getElementById('btn-tools-signin');
+
     if (user) {
+        // --- ONLINE STATE ---
         const email = user.email;
-        document.getElementById('user-icon').textContent = '👤';
-        document.getElementById('user-email-full').textContent = email;
-        document.getElementById('btn-user-avatar').style.display = 'block';
+        
+        // Clear default emoji and add profile image
+        icon.innerHTML = ''; 
+        const img = document.createElement('img');
+        img.src = user.imageUrl;
+        img.style.width = '24px';
+        img.style.height = '24px';
+        img.style.borderRadius = '50%';
+        icon.appendChild(img);
+        
+        emailDisplay.textContent = email;
+        avatar.style.display = 'flex'; // Use flex to show it
+        
+        // Hide the offline sign-in button
+        if (signInButton) signInButton.classList.add('hidden');
+        
     } else {
-        document.getElementById('btn-user-avatar').style.display = 'none';
+        // --- OFFLINE STATE ---
+        avatar.style.display = 'none'; // Hide GDrive avatar
+        
+        // Show the offline sign-in button
+        if (signInButton) signInButton.classList.remove('hidden');
     }
 }
 
 /**
  * Toggles the visibility of the user logout menu.
  * @param {Event} e - The click event.
+ * @param {string} menuId - The ID of the menu to toggle.
  */
-export function toggleUserMenu(e) {
+export function toggleUserMenu(e, menuId = 'gdrive-logout-menu') {
     e.stopPropagation();
-    const menu = document.getElementById('logout-menu');
-    menu.classList.toggle('show');
+    const menu = document.getElementById(menuId);
+    if (menu) {
+        menu.classList.toggle('show');
+    }
 }
 
 // --- Form Toggle Functions (now open modals) ---
