@@ -89,7 +89,7 @@
     .fab-container {
         right: 16px;
         /* CHANGED: Adjusted for mobile (no footer) */
-        bottom: 16px; 
+        bottom: 20px; 
     }
 
     .fab-main {
