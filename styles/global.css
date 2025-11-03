@@ -83,7 +83,7 @@ body {
     background-size: 2px 2px;
     color: white;
     padding: 8px 16px;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: bold;
     display: flex;
     justify-content: space-between;
@@ -98,7 +98,7 @@ body {
     font-family: 'Space Mono', monospace;
     font-weight: 700;
     letter-spacing: 0px; /* Reset letter-spacing */
-    font-size: 22px;
+    font-size: 20px;
 }
 
 /* REMOVED: Sync Button styles */
