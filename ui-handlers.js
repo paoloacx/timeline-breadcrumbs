@@ -7,7 +7,8 @@ import { handleSaveCrumb, handleSaveTime, handleSaveTrack, handleSaveSpent, hand
 // CAMBIO: La ruta ahora apunta a 'modules/services/api-services.js'
 import { handleGps, handleSearchBSO } from './modules/services/api-services.js';
 import { handleImageInput, startRecording, stopRecording, removeImage, removeAudio } from './media-handlers.js';
-import { openStats, exportCSV, exportICS, openExportModal, performExport } from './modules/data/data-tools.js';
+// CHANGED: Added exportFullBackup
+import { openStats, exportCSV, exportICS, openExportModal, performExport, exportFullBackup } from './modules/data/data-tools.js';
 import { openSettings, toggleMoodConfig, saveSettings, updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from './modules/settings/settings-manager.js';
 import { renderMoodSelector, renderImagePreviews, renderAudioPreview, selectTrackUI } from './ui-renderer.js';
 import { signInWithGoogle, signInWithEmail, signOutUser } from './firebase-config.js';
@@ -38,7 +39,6 @@ export function initUI(onOfflineCallback) {
 
     // --- Header / User Menu ---
     // REMOVED: Sync button listener
-    // document.getElementById('btn-sync').addEventListener('click', () => location.reload());
     
     // NEW: Open Tools Modal
     document.getElementById('btn-open-tools').addEventListener('click', openToolsModal);
@@ -89,6 +89,11 @@ export function initUI(onOfflineCallback) {
     });
     document.getElementById('btn-tools-settings').addEventListener('click', () => {
         openSettings();
+        closeModal('tools-modal');
+    });
+    // NEW: Listener for the backup button
+    document.getElementById('btn-tools-backup').addEventListener('click', () => {
+        exportFullBackup();
         closeModal('tools-modal');
     });
 
