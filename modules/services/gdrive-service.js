@@ -30,8 +30,9 @@ let onSignInCallback = null;
 let onSignOutCallback = null;
 
 // --- NEW: Promises to track readiness ---
-let gapiClientReady = null; // This will hold the promise from gapi.client.init
-let gsiClientReady = false; // Simple flag for GSI
+// CHANGED: gapiClientReady is now a promise that resolves *after* drive is loaded
+let gapiClientReady = null; 
+let gsiClientReady = false; 
 
 // --- Auth Functions (Existentes) ---
 
@@ -53,13 +54,14 @@ function setButtonsDisabled(disabled) {
  */
 export function initGoogleAuth(onSignIn, onSignOut) {
     onSignInCallback = onSignIn;
-    onSignOutCallback = onSignOut;
+    onSignOutCallback = onSignOut; // This is the function that shows the login panel
 
     const checkGapi = () => {
         if (window.gapi) {
             console.log('gapi loaded.');
             gapi = window.gapi;
             // --- CHANGED: Assign the promise to our module variable ---
+            // This promise now includes loading the 'drive' module
             gapiClientReady = gapi.load('client', initGapiClient); 
         } else {
             console.warn('gapi not loaded yet, retrying...');
@@ -71,7 +73,8 @@ export function initGoogleAuth(onSignIn, onSignOut) {
         if (window.google) {
             console.log('gsi loaded.');
             google = window.google;
-            initGsiClient(); // Initialize the GSI client
+            // --- CHANGED: Pass the onSignOut callback to handle silent failures ---
+            initGsiClient(onSignOutCallback); // Initialize the GSI client
         } else {
             console.warn('gsi not loaded yet, retrying...');
             setTimeout(checkGsi, 100);
@@ -87,32 +90,40 @@ export function initGoogleAuth(onSignIn, onSignOut) {
  * This now returns the promise.
  */
 function initGapiClient() {
+    // This promise chain ensures gapi.client.drive is available
     return gapi.client.init({
         apiKey: API_KEY,
         discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"]
     })
-    .then(() => console.log('GAPI client initialized.'))
+    .then(() => {
+        console.log('GAPI client core initialized.');
+        // --- NEW: Load the 'drive' API *after* the client is init ---
+        return gapi.client.load('drive', 'v3');
+    })
+    .then(() => {
+        console.log('GAPI client *and* Drive API v3 loaded.');
+    })
     .catch(err => {
-        console.error('Error initializing GAPI client:', err);
+        console.error('Error initializing GAPI client or Drive API:', err);
         throw err; // Propagate the error
     });
 }
 
 /**
  * (Private) Initializes the GSI client for Auth tokens.
+ * @param {function} onSilentFail - Callback to run if silent sign-in fails.
  */
-function initGsiClient() {
+function initGsiClient(onSilentFail) {
     tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: CLIENT_ID,
         scope: SCOPES,
         callback: tokenClientCallback, // Function to call after token is received
         error_callback: (error) => {
             console.error('GSI Token Client Error:', error);
-            // This happens on silent sign-in fail, which is normal
-            if (error.type === 'popup_closed_by_user' || error.type === 'USER_CANCELLED') {
-                console.log('User cancelled sign-in.');
-            } else if (error.type === 'prohibited_origin' || error.type === 'invalid_request') {
-                alert('Error de autenticación. Verifica los Orígenes autorizados en Google Console.');
+            // --- NEW: If this wasn't a manual popup closure, it's a silent fail ---
+            if (error.type !== 'popup_closed_by_user' && error.type !== 'USER_CANCELLED') {
+                console.log('Silent sign-in failed, showing auth panel.');
+                onSilentFail(); // <-- CALL THE CALLBACK
             }
         }
     });
@@ -123,7 +134,6 @@ function initGsiClient() {
     console.log('GSI client initialized. Sign-in buttons enabled.');
 
     // --- NEW: Attempt silent sign-in on page load ---
-    // This fixes the "logged out on refresh" problem.
     console.log('Attempting silent sign-in...');
     tokenClient.requestAccessToken({ prompt: 'none' });
 }
@@ -144,7 +154,7 @@ async function tokenClientCallback(tokenResponse) {
     gapi.client.setToken({ access_token: tokenResponse.access_token });
     
     // --- NEW: Wait for GAPI client (Drive) to be ready ---
-    // This fixes the "empty file" bug, by ensuring Drive is ready *before* we try to use it.
+    // This fixes the "empty file" bug.
     try {
         await gapiClientReady;
         console.log('GAPI client is ready, proceeding with user info fetch.');
