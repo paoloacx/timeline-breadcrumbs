@@ -16,6 +16,8 @@
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+    
     </head>
 <body>
     <div id="auth-container" class="auth-panel" style="display: none;">
@@ -260,11 +262,11 @@
             <div class="mac-content">
                 <h3 style="margin-bottom: 16px;">Time Durations</h3>
                 <div id="time-durations-config"></div>
-                <h3 style="margin-top: 24px; margin-bottom: 16px;">Time Activities</h3>
+                <h3 style-="margin-top: 24px; margin-bottom: 16px;">Time Activities</h3>
                 <div id="time-activities-config"></div>
-                <h3 style="margin-top: 24px; margin-bottom: 16px;">Track Items</h3>
+                <h3 style-="margin-top: 24px; margin-bottom: 16px;">Track Items</h3>
                 <div id="track-items-config"></div>
-                <h3 style="margin-top: 24px; margin-bottom: 16px;">Moods</h3>
+                <h3 style-="margin-top: 24px; margin-bottom: 16px;">Moods</h3>
                 <div id="mood-config-list"></div> 
                 <button class="mac-button mac-button-primary" id="btn-save-settings" style="width: 100%; margin-top: 24px;">💾 Save Settings</button>
             </div>
@@ -288,11 +290,11 @@
             <div class="mac-title-bar">
                 <span>Tools & Account</span>
                 <div class="modal-title-bar-actions">
-                    <div class="user-avatar" id="btn-user-avatar" style="display: none;">
-                        <span id="user-icon">👤</span>
-                        <div class="logout-menu" id="logout-menu">
-                            <div class="user-email-display" id="user-email-full"></div>
-                            <button id="btn-signout">🚪 Sign Out</button>
+                    <div classs="user-avatar" id="gdrive-user-avatar" style="display: none;">
+                        <span id="gdrive-user-icon">👤</span>
+                        <div class="logout-menu" id="gdrive-logout-menu">
+                            <div class="user-email-display" id="gdrive-user-email"></div>
+                            <button id="btn-gdrive-signout">🚪 Sign Out</button>
                         </div>
                     </div>
                     <button id="btn-close-tools" class="btn-modal-close">✕</button>
