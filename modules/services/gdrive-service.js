@@ -154,7 +154,7 @@ async function tokenClientCallback(tokenResponse) {
     gapi.client.setToken({ access_token: tokenResponse.access_token });
     
     // --- NEW: Wait for GAPI client (Drive) to be ready ---
-    // This fixes the "empty file" bug.
+    // This fixes the "empty file" bug, by ensuring Drive is ready *before* we try to use it.
     try {
         await gapiClientReady;
         console.log('GAPI client is ready, proceeding with user info fetch.');
@@ -568,7 +568,7 @@ export async function manualRestoreFromDrive(force = false, remoteData = null) {
     settingsManager.updateTrackOptions();
     // Re-render mood selector in the (closed) form
     const moodSelector = document.getElementById('mood-selector');
-    if (moodSelector) settingsManager.renderMoodSelector(); // This function must exist in settingsManager
+    if (moodSelector) settingsManager.renderMoodSelector(); 
     
     if (!force) {
         alert(`✅ Restore complete! ${remoteData.entries.length} entries loaded.`);
