@@ -44,42 +44,15 @@ body {
         #d0d0d0 2px
     );
     padding: 0;
-    padding-bottom: 80px; /* Space for the fixed footer */
+    /* CHANGED: Removed space for the fixed footer */
+    padding-bottom: 20px; 
     position: relative;
     min-height: 100vh;
 }
 
-.header-image {
-    width: 100%;
-    height: auto;
-    display: block;
-    max-height: 200px;
-    object-fit: cover;
-    border-bottom: none;
-}
-
-.header-container {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
-    margin-bottom: 0;
-}
-
-@media (max-width: 768px) {
-    .header-image {
-        max-height: 120px;
-    }
-
-    body {
-        padding-bottom: 65px; /* Adjust for smaller footer maybe */
-    }
-}
-
-@media (max-width: 480px) {
-    .header-image {
-        max-height: 80px;
-    }
-}
+/* REMOVED: .header-image */
+/* REMOVED: .header-container */
+/* REMOVED: header media queries */
 
 .container {
     max-width: 800px;
@@ -138,6 +111,42 @@ body {
 .sync-button:active {
     transform: scale(0.95);
 }
+
+/* NEW: Styles for the 'Happy Mac' button in the title bar */
+.mac-title-bar-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.mac-title-bar-button img {
+    width: 28px;
+    height: 28px;
+    filter: grayscale(1) brightness(2); /* Make it white-ish */
+}
+.mac-title-bar-button:hover img {
+    filter: grayscale(0) brightness(1); /* Show color on hover */
+}
+.mac-title-bar-button:active {
+    transform: scale(0.9);
+}
+
+/* NEW: Wrapper for actions in modal title bars */
+.modal-title-bar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.modal-title-bar-actions .user-avatar {
+    display: flex; /* Ensure it's visible */
+}
+.modal-title-bar-actions .logout-menu {
+    z-index: 10001; /* Ensure it's above the modal (10000) */
+}
+
 
 .user-avatar {
     cursor: pointer;
@@ -301,53 +310,7 @@ h1 {
     display: none;
 }
 
-.footer {
-    position: fixed !important; /* Keep it fixed */
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    background: #000;
-    color: white;
-    padding: 6px 8px;
-    border-top: 3px solid #666;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-    box-shadow: 0 -3px 10px rgba(0,0,0,0.3); /* Shadow on top */
-    z-index: 9999 !important;
-    flex-wrap: nowrap;
-}
-
-.footer .mac-button {
-    margin: 0 2px;
-    font-size: 10px;
-    padding: 5px 8px;
-    min-width: fit-content;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.footer .mac-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 3px 3px 0 rgba(255,255,255,0.2);
-}
-
-@media (max-width: 768px) {
-    .footer {
-        padding: 8px 8px;
-        gap: 6px;
-    }
-
-    .footer .mac-button {
-        font-size: 9px;
-        padding: 4px 6px;
-        margin: 0;
-        flex: 1; /* Allow buttons to take equal space */
-        min-width: 0;
-        white-space: nowrap;
-    }
-}
+/* REMOVED: .footer styles (all blocks and media queries) */
 
 .edit-mode {
     background: #fff8dc; /* Consistent background for edit */
@@ -478,14 +441,7 @@ h1 {
     display: none; /* Hide it completely as requested */
  }
 
-/* Smooth animation for footer buttons */
-.footer .mac-button {
-    transition: transform 0.15s ease, background 0.15s ease;
-}
-
-.footer .mac-button:active {
-    transform: scale(0.95);
-}
+/* Smooth animation for footer buttons (REMOVED) */
 
 /* Animation for mood selector */
 .mood-option {
@@ -600,26 +556,4 @@ input[type="range"]:active::-moz-range-thumb {
     transform: scale(0.98);
 }
 
-/* Responsive footer with 4 buttons */
-@media (max-width: 768px) {
-    .footer {
-        padding: 8px;
-        gap: 8px;
-        justify-content: center;
-    }
-
-    .footer .mac-button {
-        font-size: 10px;
-        padding: 8px;
-        flex: 1; /* Equal width */
-        min-width: 0;
-        white-space: nowrap;
-    }
-}
-
-@media (max-width: 480px) {
-    .footer .mac-button {
-        font-size: 9px;
-        padding: 6px;
-    }
-}
+/* REMOVED: Responsive footer media queries */
