@@ -6,8 +6,8 @@ import { loadData as loadLocalData } from './storage.js';
 import { loadSettings as loadLocalSettings } from '../modules/settings/settings-manager.js';
 import { getState, setOfflineMode, setCurrentUser, clearCurrentUser } from './state.js';
 import { initTimeline } from '../modules/timeline/timeline.js';
-// NEW: Import GDrive service
-import { initGoogleAuth } from '../modules/services/gdrive-service.js';
+// NEW: Import GDrive service and sync function
+import { initGoogleAuth, syncOnLogin } from '../modules/services/gdrive-service.js';
 
 /**
  * Initializes the application.
@@ -68,8 +68,9 @@ function onGdriveSignIn(userProfile) {
     loadLocalSettings();
     loadLocalData();
     
-    // TODO: Implement GDrive data synchronization
-    console.log('TODO: Sync data from GDrive...');
+    // --- CHANGED: Call syncOnLogin ---
+    console.log('Running initial sync...');
+    syncOnLogin();
 }
 
 /**
