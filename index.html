@@ -262,11 +262,11 @@
             <div class="mac-content">
                 <h3 style="margin-bottom: 16px;">Time Durations</h3>
                 <div id="time-durations-config"></div>
-                <h3 style-="margin-top: 24px; margin-bottom: 16px;">Time Activities</h3>
+                <h3 style="margin-top: 24px; margin-bottom: 16px;">Time Activities</h3>
                 <div id="time-activities-config"></div>
-                <h3 style-="margin-top: 24px; margin-bottom: 16px;">Track Items</h3>
+                <h3 style="margin-top: 24px; margin-bottom: 16px;">Track Items</h3>
                 <div id="track-items-config"></div>
-                <h3 style-="margin-top: 24px; margin-bottom: 16px;">Moods</h3>
+                <h3 style="margin-top: 24px; margin-bottom: 16px;">Moods</h3>
                 <div id="mood-config-list"></div> 
                 <button class="mac-button mac-button-primary" id="btn-save-settings" style="width: 100%; margin-top: 24px;">💾 Save Settings</button>
             </div>
@@ -290,7 +290,7 @@
             <div class="mac-title-bar">
                 <span>Tools & Account</span>
                 <div class="modal-title-bar-actions">
-                    <div classs="user-avatar" id="gdrive-user-avatar" style="display: none;">
+                    <div class="user-avatar" id="gdrive-user-avatar" style="display: none;">
                         <span id="gdrive-user-icon">👤</span>
                         <div class="logout-menu" id="gdrive-logout-menu">
                             <div class="user-email-display" id="gdrive-user-email"></div>
@@ -307,6 +307,10 @@
                 <button class="mac-button" id="btn-tools-settings" style="width: 100%; margin-bottom: 8px;">⚙️ Settings</button>
                 
                 <button class="mac-button mac-button-primary" id="btn-tools-backup" style="width: 100%; margin-top: 16px; margin-bottom: 8px;">📦 Full Backup (JSON)</button>
+                
+                <button class="mac-button mac-button-primary hidden" id="btn-tools-signin" style="width: 100%; margin-top: 8px; background-color: #0070c0; border-color: #0050a0;">
+                    🔐 Sign in to Sync
+                </button>
             </div>
         </div>
     </div>
@@ -329,7 +333,7 @@
                     <option value="current_month">This Month</option>
                 </select>
 
-                <label class="mac-label">Entry Types:</label>
+                <label classa="mac-label">Entry Types:</label>
                 <div id="export-types" class="export-types-grid">
                     </div>
 
