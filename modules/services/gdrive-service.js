@@ -29,6 +29,10 @@ let tokenClient;
 let onSignInCallback = null;
 let onSignOutCallback = null;
 
+// --- NEW: Promises to track readiness ---
+let gapiClientReady = null; // This will hold the promise from gapi.client.init
+let gsiClientReady = false; // Simple flag for GSI
+
 // --- Auth Functions (Existentes) ---
 
 /**
@@ -55,7 +59,8 @@ export function initGoogleAuth(onSignIn, onSignOut) {
         if (window.gapi) {
             console.log('gapi loaded.');
             gapi = window.gapi;
-            gapi.load('client', initGapiClient); // Load the GAPI client
+            // --- CHANGED: Assign the promise to our module variable ---
+            gapiClientReady = gapi.load('client', initGapiClient); 
         } else {
             console.warn('gapi not loaded yet, retrying...');
             setTimeout(checkGapi, 100);
@@ -79,14 +84,18 @@ export function initGoogleAuth(onSignIn, onSignOut) {
 
 /**
  * (Private) Initializes the GAPI client for Drive API calls.
+ * This now returns the promise.
  */
 function initGapiClient() {
-    gapi.client.init({
+    return gapi.client.init({
         apiKey: API_KEY,
         discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"]
     })
     .then(() => console.log('GAPI client initialized.'))
-    .catch(err => console.error('Error initializing GAPI client:', err));
+    .catch(err => {
+        console.error('Error initializing GAPI client:', err);
+        throw err; // Propagate the error
+    });
 }
 
 /**
@@ -99,19 +108,31 @@ function initGsiClient() {
         callback: tokenClientCallback, // Function to call after token is received
         error_callback: (error) => {
             console.error('GSI Token Client Error:', error);
+            // This happens on silent sign-in fail, which is normal
+            if (error.type === 'popup_closed_by_user' || error.type === 'USER_CANCELLED') {
+                console.log('User cancelled sign-in.');
+            } else if (error.type === 'prohibited_origin' || error.type === 'invalid_request') {
+                alert('Error de autenticación. Verifica los Orígenes autorizados en Google Console.');
+            }
         }
     });
     
     // Auth is ready, enable buttons
+    gsiClientReady = true;
     setButtonsDisabled(false);
     console.log('GSI client initialized. Sign-in buttons enabled.');
+
+    // --- NEW: Attempt silent sign-in on page load ---
+    // This fixes the "logged out on refresh" problem.
+    console.log('Attempting silent sign-in...');
+    tokenClient.requestAccessToken({ prompt: 'none' });
 }
 
 /**
  * (Private) Callback for after the user signs in via the GIS popup.
  * @param {object} tokenResponse 
  */
-async function tokenClientCallback(tokenResponse) { // --- CHANGED: Made async ---
+async function tokenClientCallback(tokenResponse) {
     if (tokenResponse.error) {
         console.error('Token Error:', tokenResponse.error);
         return;
@@ -122,7 +143,18 @@ async function tokenClientCallback(tokenResponse) { // --- CHANGED: Made async -
     // Set the token for gapi to use in future Drive calls
     gapi.client.setToken({ access_token: tokenResponse.access_token });
     
-    // --- CHANGED: Use 'fetch' to get user info WITH the token ---
+    // --- NEW: Wait for GAPI client (Drive) to be ready ---
+    // This fixes the "empty file" bug, by ensuring Drive is ready *before* we try to use it.
+    try {
+        await gapiClientReady;
+        console.log('GAPI client is ready, proceeding with user info fetch.');
+    } catch (err) {
+        console.error('GAPI client failed to init, cannot proceed.', err);
+        alert('Error: Could not connect to Google Drive API.');
+        return;
+    }
+    
+    // --- (Fetch user info - this part was correct) ---
     try {
         const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
             headers: {
@@ -131,12 +163,10 @@ async function tokenClientCallback(tokenResponse) { // --- CHANGED: Made async -
         });
 
         if (!response.ok) {
-            // Manually throw an error if the response was bad
             throw new Error(`Failed to fetch user info: ${response.status} ${response.statusText}`);
         }
 
         const userInfo = await response.json();
-
         const userProfile = {
             name: userInfo.name,
             email: userInfo.email,
@@ -194,9 +224,9 @@ function updateUiWithUser(userProfile) {
  * Triggers the Google Sign-In popup.
  */
 export function handleSignIn() {
-    if (tokenClient) {
-        // This prompts the user for consent and gets the token
-        tokenClient.requestAccessToken();
+    if (gsiClientReady) {
+        // --- CHANGED: Force 'consent' prompt to ensure refresh token ---
+        tokenClient.requestAccessToken({ prompt: 'consent' });
     } else {
         alert('Google Auth is not ready yet. Please wait a moment.');
     }
@@ -230,9 +260,14 @@ export function handleSignOut() {
  * @returns {Promise<string|null>} The Folder ID or null on failure.
  */
 async function findOrCreateAppFolder() {
+    // --- NEW: Wait for GAPI client ---
+    await gapiClientReady;
     if (appFolderId) return appFolderId; // Return cached ID
-
-    if (!gapi.client) return null;
+    
+    if (!gapi.client || !gapi.client.drive) {
+         console.error('GAPI client or drive service not loaded.');
+         return null;
+    }
     
     try {
         // 1. Search for the folder
@@ -277,6 +312,8 @@ async function findOrCreateAppFolder() {
  * @returns {Promise<string|null>} The file ID or null if not found.
  */
 async function findBackupFile(folderId) {
+    // --- NEW: Wait for GAPI client ---
+    await gapiClientReady;
     if (!gapi.client || !folderId) return null;
     
     try {
@@ -310,7 +347,8 @@ async function findBackupFile(folderId) {
  * @param {string} folderId - The ID of the parent folder.
  */
 async function uploadToDrive(data, fileId, folderId) {
-    // --- CHANGED: Swapped to a more reliable 2-step create/update ---
+    // --- NEW: Wait for GAPI client ---
+    await gapiClientReady;
     const blob = new Blob([data], { type: 'application/json' });
     
     try {
@@ -358,6 +396,8 @@ async function uploadToDrive(data, fileId, folderId) {
  * @returns {Promise<object|null>} The parsed JSON data or null on failure.
  */
 async function downloadFromDrive(fileId) {
+    // --- NEW: Wait for GAPI client ---
+    await gapiClientReady;
     if (!fileId) return null;
     try {
         const response = await gapi.client.drive.files.get({
@@ -518,7 +558,7 @@ export async function manualRestoreFromDrive(force = false, remoteData = null) {
     settingsManager.updateTrackOptions();
     // Re-render mood selector in the (closed) form
     const moodSelector = document.getElementById('mood-selector');
-    if (moodSelector) settingsManager.renderMoodSelector();
+    if (moodSelector) settingsManager.renderMoodSelector(); // This function must exist in settingsManager
     
     if (!force) {
         alert(`✅ Restore complete! ${remoteData.entries.length} entries loaded.`);
