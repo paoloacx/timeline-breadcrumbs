@@ -1,7 +1,8 @@
 // ===== modules/services/gdrive-service.js (NEW FILE) =====
 
 // Imports
-import { setCurrentUser } from '../../core/state.js';
+import { setCurrentUser, clearCurrentUser } from '../../core/state.js';
+// Importamos showMainApp para gestionar la UI
 import { showMainApp } from '../ui/modal-manager.js';
 
 // --- CONFIGURATION ---
@@ -18,6 +19,17 @@ let onSignInCallback = null;
 let onSignOutCallback = null;
 
 /**
+ * Enables or disables GDrive sign-in buttons
+ * @param {boolean} enable 
+ */
+function setButtonsDisabled(disabled) {
+    const btn1 = document.getElementById('btn-signin-gdrive');
+    const btn2 = document.getElementById('btn-tools-signin');
+    if (btn1) btn1.disabled = disabled;
+    if (btn2) btn2.disabled = disabled;
+}
+
+/**
  * Initializes the Google API client and Auth instance.
  * @param {function} onSignIn - Callback when user signs in.
  * @param {function} onSignOut - Callback when user signs out.
@@ -27,7 +39,18 @@ export function initGoogleAuth(onSignIn, onSignOut) {
     onSignOutCallback = onSignOut;
     
     // 1. Load the gapi client
-    gapi.load('client:oauth2', initClient);
+    // Usamos un 'listener' para asegurarnos que gapi está cargado
+    const checkGapi = () => {
+        if (window.gapi) {
+            console.log('gapi loaded.');
+            gapi = window.gapi;
+            gapi.load('client:oauth2', initClient);
+        } else {
+            console.warn('gapi not loaded yet, retrying...');
+            setTimeout(checkGapi, 100);
+        }
+    };
+    checkGapi();
 }
 
 /**
@@ -43,14 +66,18 @@ function initClient() {
         console.log('Google API Client initialized.');
         googleAuthInstance = gapi.auth2.getAuthInstance();
         
+        // --- NEW: Enable buttons now that auth is ready ---
+        setButtonsDisabled(false);
+        console.log('Sign-in buttons enabled.');
+        
         // Listen for sign-in state changes
         googleAuthInstance.isSignedIn.listen(updateSigninStatus);
         
         // Handle the initial sign-in state
         updateSigninStatus(googleAuthInstance.isSignedIn.get());
     }).catch(error => {
-        console.error('Error initializing Google Client:', error);
-        alert('Could not initialize Google Drive sync. Please check API keys.');
+        console.error('Error initializing Google Client:', JSON.stringify(error, null, 2));
+        alert('Could not initialize Google Drive sync. (API_KEY or CLIENT_ID might be wrong)');
     });
 }
 
@@ -60,6 +87,7 @@ function initClient() {
  */
 function updateSigninStatus(isSignedIn) {
     if (isSignedIn) {
+        console.log('GDrive: User is signed in.');
         const user = googleAuthInstance.currentUser.get().getBasicProfile();
         const userProfile = {
             name: user.getName(),
@@ -67,12 +95,17 @@ function updateSigninStatus(isSignedIn) {
             imageUrl: user.getImageUrl()
         };
         
+        setCurrentUser(userProfile);
         updateUiWithUser(userProfile);
         
         if (onSignInCallback) {
             onSignInCallback(userProfile);
         }
     } else {
+        console.log('GDrive: User is signed out.');
+        clearCurrentUser();
+        updateUiWithUser(null); // Limpia la UI
+        
         if (onSignOutCallback) {
             onSignOutCallback();
         }
@@ -81,21 +114,33 @@ function updateSigninStatus(isSignedIn) {
 
 /**
  * (Private) Updates the UI elements with user info.
- * @param {object} userProfile - Google User Profile object
+ * @param {object | null} userProfile - Google User Profile object or null
  */
 function updateUiWithUser(userProfile) {
-    document.getElementById('gdrive-user-avatar').style.display = 'flex';
-    document.getElementById('gdrive-user-email').textContent = userProfile.email;
-    document.getElementById('gdrive-user-icon').textContent = ''; // Clear emoji
-    const img = document.createElement('img');
-    img.src = userProfile.imageUrl;
-    img.style.width = '24px';
-    img.style.height = '24px';
-    img.style.borderRadius = '50%';
-    document.getElementById('gdrive-user-icon').appendChild(img);
+    const avatar = document.getElementById('gdrive-user-avatar');
+    const icon = document.getElementById('gdrive-user-icon');
+    const emailDisplay = document.getElementById('gdrive-user-email');
 
-    // Hide auth panel, show app
-    document.getElementById('auth-container').style.display = 'none';
+    if (userProfile) {
+        avatar.style.display = 'flex';
+        emailDisplay.textContent = userProfile.email;
+        icon.innerHTML = ''; // Limpia el emoji '👤'
+        const img = document.createElement('img');
+        img.src = userProfile.imageUrl;
+        img.style.width = '24px';
+        img.style.height = '24px';
+        img.style.borderRadius = '50%';
+        icon.appendChild(img);
+
+        // Oculta el panel de autenticación y muestra la app
+        document.getElementById('auth-container').style.display = 'none';
+        showMainApp(userProfile); // Esta función ya la teníamos
+    } else {
+        // Oculta el avatar
+        avatar.style.display = 'none';
+        emailDisplay.textContent = '';
+        icon.innerHTML = '👤'; // Restaura el emoji por defecto
+    }
 }
 
 /**
@@ -104,6 +149,8 @@ function updateUiWithUser(userProfile) {
 export function handleSignIn() {
     if (googleAuthInstance) {
         googleAuthInstance.signIn();
+    } else {
+        alert('Google Auth is not ready yet. Please wait a moment.');
     }
 }
 
