@@ -2,14 +2,14 @@
 
 .timeline {
     position: relative;
-    padding-left: 20px; /* Space for the line and dots */
+    padding-left: 16px; /* Space for the line and dots */
     /* REMOVED: background, padding, border (moved to blocks) */
     margin-bottom: 20px;
 }
 
 .timeline-line {
     position: absolute;
-    left: 0px; /* Center the line */
+    left: -5px; /* Center the line */
     top: 0;
     bottom: 0;
     width: 4px;
