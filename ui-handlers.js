@@ -11,8 +11,10 @@ import { handleImageInput, startRecording, stopRecording, removeImage, removeAud
 import { openStats, exportCSV, exportICS, openExportModal, performExport, exportFullBackup } from './modules/data/data-tools.js';
 import { openSettings, toggleMoodConfig, saveSettings, updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from './modules/settings/settings-manager.js';
 import { renderMoodSelector, renderImagePreviews, renderAudioPreview, selectTrackUI } from './ui-renderer.js';
-// REMOVED: Firebase imports
-// import { signInWithGoogle, signInWithEmail, signOutUser } from './firebase-config.js';
+
+// NEW: Import GDrive handlers
+import { handleSignIn, handleSignOut } from './modules/services/gdrive-service.js';
+
 import { initFabMenu } from './modules/ui/fab-menu.js';
 // CHANGED: Imported openModal
 import { initModalManager, openCrumbForm, openTimerForm, openTrackForm, openSpentForm, openRecapForm, toggleUserMenu, closeModal, openModal } from './modules/ui/modal-manager.js';
@@ -34,15 +36,9 @@ function openToolsModal() {
 export function initUI(onOfflineCallback) {
     
     // --- Auth Buttons ---
-    // REMOVED: Old Firebase listeners
-    // document.getElementById('btn-signin-google').addEventListener('click', signInWithGoogle);
-    // document.getElementById('btn-signin-email').addEventListener('click', signInWithEmail);
     
-    // NEW: GDrive Sign-in (placeholder)
-    document.getElementById('btn-signin-gdrive').addEventListener('click', () => {
-        console.log('Google Drive Sign-in clicked... (Not implemented)');
-        // TODO: Call GDrive auth logic here
-    });
+    // CHANGED: GDrive Sign-in
+    document.getElementById('btn-signin-gdrive').addEventListener('click', handleSignIn);
 
     // UPDATED: "Continue Offline" button
     document.getElementById('btn-continue-offline').addEventListener('click', onOfflineCallback);
@@ -53,15 +49,24 @@ export function initUI(onOfflineCallback) {
     document.getElementById('btn-open-tools').addEventListener('click', openToolsModal);
     
     // MOVED: These listeners are now for the *modal's* avatar/signout
-    document.getElementById('btn-user-avatar').addEventListener('click', (e) => toggleUserMenu(e));
-    // REMOVED: Firebase signout
-    // document.getElementById('btn-signout').addEventListener('click', signOutUser);
+    // CHANGED: ID to match GDrive avatar
+    document.getElementById('gdrive-user-avatar').addEventListener('click', (e) => toggleUserMenu(e, 'gdrive-logout-menu'));
+    
+    // NEW: GDrive Sign-out button
+    document.getElementById('btn-gdrive-signout').addEventListener('click', () => {
+        if (confirm('Sign out from Google Drive?')) {
+            handleSignOut();
+            // The listener in app.js (onGdriveSignOut) will handle the UI change
+        }
+    });
+
     
     // Close user menu on outside click
     document.addEventListener('click', (e) => {
-        const menu = document.getElementById('logout-menu');
+        // CHANGED: ID to match GDrive menu
+        const menu = document.getElementById('gdrive-logout-menu'); 
         // MODIFIED: Also check if click is inside the modal title bar
-        if (menu && !e.target.closest('#btn-user-avatar') && !e.target.closest('.modal-title-bar-actions')) {
+        if (menu && !e.target.closest('#gdrive-user-avatar') && !e.target.closest('.modal-title-bar-actions')) {
             menu.classList.remove('show');
         }
     });
