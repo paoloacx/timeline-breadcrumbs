@@ -5,7 +5,7 @@ import { showMainApp } from '../modules/ui/modal-manager.js';
 import { loadData as loadLocalData } from './storage.js';
 import { loadSettings as loadLocalSettings } from '../modules/settings/settings-manager.js';
 import { getState, setOfflineMode, setCurrentUser, clearCurrentUser } from './state.js';
-import { initTimeline } from '../modules/timeline/timeline.js';
+import { initTimeline, renderTimeline } from '../modules/timeline/timeline.js';
 // --- CHANGED: Import 'handleRedirectResult' ---
 import { initGoogleAuth, syncOnLogin, handleRedirectResult } from '../modules/services/gdrive-service.js';
 
@@ -22,20 +22,25 @@ function initApp() {
 
     if (authCode) {
         console.log('Found auth code in URL. Handling redirect...');
-        // Clean the URL
         window.history.replaceState({}, document.title, window.location.pathname);
-        // Show a temporary loading state
-        document.getElementById('main-app').style.display = 'block';
-        document.getElementById('main-app').innerHTML = '<h3 style="text-align: center; margin-top: 50px;">Authenticating...</h3>';
+        
+        // Show loading in auth panel, not main-app
+        document.getElementById('auth-container').style.display = 'block';
+        document.getElementById('auth-container').innerHTML = '<h3 style="text-align: center; margin-top: 50px;">Authenticating...</h3>';
+        
+        // Load data first (needed for UI)
+        loadLocalSettings();
+        loadLocalData();
+        
+        // Initialize UI and Timeline
+        initUI(runOfflineMode);
+        initTimeline();
         
         // Initialize auth and handle the code
-        initGoogleAuth(onGdriveSignIn); // Pass the sign-in callback
-        handleRedirectResult(authCode); // Pass the code to GDrive service
+        initGoogleAuth(onGdriveSignIn);
+        handleRedirectResult(authCode);
         
-        // Initialize basic listeners just in case
-        initUI(runOfflineMode); 
-        initTimeline();
-        return; // Stop further execution until auth is handled
+        return;
     }
 
     // --- Standard App Load (No Auth Code) ---
