@@ -26,7 +26,42 @@ let google = window.google;
 // --- CHANGED: We now use a 'Code' client ---
 let codeClient; 
 let onSignInCallback = null;
-let gapiClientReady = null; 
+let gapiClientReady = null;
+
+// --- Token Persistence ---
+const TOKEN_STORAGE_KEY = 'gdrive_access_token';
+const TOKEN_EXPIRY_KEY = 'gdrive_token_expiry';
+
+function saveToken(token, expiresIn) {
+    const expiryTime = Date.now() + (expiresIn * 1000);
+    localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    localStorage.setItem(TOKEN_EXPIRY_KEY, expiryTime.toString());
+    console.log('Token saved to localStorage');
+}
+
+function loadToken() {
+    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+    const expiry = localStorage.getItem(TOKEN_EXPIRY_KEY);
+    
+    if (!token || !expiry) {
+        return null;
+    }
+    
+    if (Date.now() > parseInt(expiry)) {
+        console.log('Stored token expired');
+        clearToken();
+        return null;
+    }
+    
+    console.log('Valid token found in localStorage');
+    return token;
+}
+
+function clearToken() {
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    localStorage.removeItem(TOKEN_EXPIRY_KEY);
+    console.log('Token cleared from localStorage');
+} 
 
 // --- NEW: Function definition was missing ---
 /**
@@ -64,7 +99,7 @@ export function initGoogleAuth(onSignIn) {
         if (window.google) {
             console.log('gsi loaded.');
             google = window.google;
-            initGsiClient(); // Initialize the GSI client
+            initGsiClient();
         } else {
             console.warn('gsi not loaded yet, retrying...');
             setTimeout(checkGsi, 100);
@@ -73,6 +108,60 @@ export function initGoogleAuth(onSignIn) {
     
     checkGapi();
     checkGsi();
+}
+
+/**
+ * NEW: Attempts to restore session from saved token.
+ * @returns {Promise<boolean>} True if session restored successfully
+ */
+export async function tryRestoreSession() {
+    const savedToken = loadToken();
+    if (!savedToken) {
+        console.log('No saved token found');
+        return false;
+    }
+    
+    console.log('Attempting to restore session from saved token...');
+    
+    try {
+        // Wait for GAPI to be ready
+        await gapiClientReady;
+        
+        // Set the token
+        gapi.client.setToken({ access_token: savedToken });
+        
+        // Verify token by fetching user info
+        const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { 'Authorization': `Bearer ${savedToken}` }
+        });
+        
+        if (!response.ok) {
+            console.log('Saved token is invalid');
+            clearToken();
+            return false;
+        }
+        
+        const userInfo = await response.json();
+        const userProfile = {
+            name: userInfo.name,
+            email: userInfo.email,
+            imageUrl: userInfo.picture
+        };
+        
+        console.log('Session restored successfully:', userProfile.email);
+        setCurrentUser(userProfile);
+        updateUiWithUser(userProfile);
+        
+        if (onSignInCallback) {
+            onSignInCallback(userProfile);
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Error restoring session:', error);
+        clearToken();
+        return false;
+    }
 }
 
 /**
@@ -150,6 +239,10 @@ export async function handleRedirectResult(code) {
         });
 
         console.log('GDrive: Access token received.');
+        
+        // Save token with expiry (default 3600 seconds = 1 hour)
+        const expiresIn = tokenResponse.expires_in || 3600;
+        saveToken(tokenResponse.access_token, expiresIn);
         
         // Wait for GAPI to be ready
         await gapiClientReady;
@@ -238,9 +331,9 @@ export function handleSignOut() {
         gapi.client.setToken(null);
     }
     
+    clearToken();
     clearCurrentUser();
     updateUiWithUser(null);
-    // Reload the page to force a clean state (shows auth panel)
     window.location.reload();
 }
 
@@ -311,33 +404,77 @@ async function findBackupFile(folderId) {
 
 async function uploadToDrive(data, fileId, folderId) {
     await gapiClientReady;
-    const blob = new Blob([data], { type: 'application/json' });
+    
     try {
         let targetFileId = fileId;
+        
         if (!targetFileId) {
-            console.log(`Creating new file metadata: '${BACKUP_FILE_NAME}'...`);
+            console.log(`Creating new file: '${BACKUP_FILE_NAME}'...`);
             const metadata = {
                 'name': BACKUP_FILE_NAME,
                 'mimeType': 'application/json',
                 'parents': [folderId]
             };
-            const createResponse = await gapi.client.drive.files.create({
-                resource: metadata,
-                fields: 'id'
+            
+            // Create file with content in one request using multipart upload
+            const boundary = '-------314159265358979323846';
+            const delimiter = "\r\n--" + boundary + "\r\n";
+            const close_delim = "\r\n--" + boundary + "--";
+            
+            const multipartRequestBody =
+                delimiter +
+                'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+                JSON.stringify(metadata) +
+                delimiter +
+                'Content-Type: application/json\r\n\r\n' +
+                data +
+                close_delim;
+            
+            const request = gapi.client.request({
+                path: '/upload/drive/v3/files',
+                method: 'POST',
+                params: { uploadType: 'multipart' },
+                headers: {
+                    'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+                },
+                body: multipartRequestBody
             });
-            targetFileId = createResponse.result.id;
+            
+            const response = await request;
+            targetFileId = response.result.id;
             backupFileId = targetFileId;
             console.log(`File created with ID: ${targetFileId}`);
+        } else {
+            console.log(`Updating existing file (ID: ${targetFileId})...`);
+            
+            // Update existing file content
+            const boundary = '-------314159265358979323846';
+            const delimiter = "\r\n--" + boundary + "\r\n";
+            const close_delim = "\r\n--" + boundary + "--";
+            
+            const multipartRequestBody =
+                delimiter +
+                'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+                '{}' +
+                delimiter +
+                'Content-Type: application/json\r\n\r\n' +
+                data +
+                close_delim;
+            
+            const request = gapi.client.request({
+                path: `/upload/drive/v3/files/${targetFileId}`,
+                method: 'PATCH',
+                params: { uploadType: 'multipart' },
+                headers: {
+                    'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+                },
+                body: multipartRequestBody
+            });
+            
+            await request;
         }
-        console.log(`Uploading data to file (ID: ${targetFileId})...`);
-        const request = gapi.client.request({
-            path: `/upload/drive/v3/files/${targetFileId}`,
-            method: 'PATCH',
-            params: { uploadType: 'media' },
-            body: blob
-        });
-        const response = await request;
-        console.log('Upload successful:', response.result);
+        
+        console.log('Upload successful!');
         return true;
     } catch (error) {
         console.error('Error uploading file:', error);
