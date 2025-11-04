@@ -44,31 +44,7 @@ function renderPreviewMap(coords) {
 }
 
 
-/**
- * Appends the Edit button to the modal's content wrapper.
- * @param {HTMLElement} bodyEl - The body element of the modal.
- * @param {string} entryId - The ID of the entry.
- */
-function addEditButtonToModal(bodyEl, entryId) {
-    if (!bodyEl) return;
-    
-    const contentWrapper = bodyEl.closest('.preview-content');
-    if (!contentWrapper) {
-        console.error("Could not find .preview-content to attach edit button.");
-        return;
-    }
-    
-    // Remove old button if it exists
-    const oldBtn = contentWrapper.querySelector('.preview-edit-button');
-    if (oldBtn) oldBtn.remove();
-    
-    // Create new button
-    const editBtn = document.createElement('button');
-    editBtn.className = 'mac-button preview-edit-button';
-    editBtn.innerHTML = '✏️ Edit';
-    editBtn.dataset.id = entryId;
-    contentWrapper.appendChild(editBtn);
-}
+// --- REMOVED: addEditButtonToModal function ---
 
 
 /**
@@ -152,8 +128,7 @@ export function renderPreview(entry) {
                 <strong>Amount Spent:</strong> €${entry.spentAmount.toFixed(2)}
             </div>
         ` : ''}
-        
-        `;
+    `;
     
     body.innerHTML = html;
     
@@ -162,8 +137,12 @@ export function renderPreview(entry) {
         renderPreviewMap(entry.coords);
     }
     
-    // NEW: Add the button to the modal wrapper
-    addEditButtonToModal(body, entry.id);
+    // NEW: Find, update, and show the static edit button
+    const editBtn = document.getElementById('btn-preview-edit');
+    if (editBtn) {
+        editBtn.dataset.id = entry.id;
+        editBtn.classList.remove('hidden');
+    }
 }
 
 /**
@@ -182,9 +161,12 @@ export function renderImagePreviewModal(entry, imageIndex) {
         <div style="text-align: center; padding: 20px;">
             <img src="${entry.images[imageIndex]}" style="max-width: 100%; max-height: 80vh; border: 2px solid #000;">
         </div>
-        
-        `;
+    `;
     
-    // NEW: Add the button to the modal wrapper
-    addEditButtonToModal(body, entry.id);
+    // NEW: Find, update, and show the static edit button
+    const editBtn = document.getElementById('btn-preview-edit');
+    if (editBtn) {
+        editBtn.dataset.id = entry.id;
+        editBtn.classList.remove('hidden');
+    }
 }
