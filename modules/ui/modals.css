@@ -2,13 +2,10 @@
 
 /* Modal animation (smooth pop-in) */
 .preview-modal {
-    visibility: hidden; /* NEW: Use visibility to allow animation */
-    
-    /* NEW: Moved from .show to base */
+    visibility: hidden; /* Use visibility to allow animation */
     display: flex !important; 
     align-items: center;
     justify-content: center;
-    
     position: fixed;
     top: 0;
     left: 0;
@@ -19,15 +16,13 @@
     overflow-y: auto;
     padding: 20px;
     opacity: 0;
-    
-    /* NEW: Transition opacity and delay visibility */
     transition: opacity 0.25s ease, visibility 0s 0.25s;
 }
 
 .preview-modal.show {
     opacity: 1;
-    visibility: visible; /* NEW */
-    transition: opacity 0.25s ease; /* NEW: Only transition opacity on show */
+    visibility: visible; 
+    transition: opacity 0.25s ease;
 }
 
 .preview-content {
@@ -53,28 +48,13 @@
     position: sticky;
     top: 0;
     z-index: 10; 
-    
-    /* --- NEW: Flexbox layout for title bar --- */
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    /* REMOVED: Flexbox layout rules */
 }
 
-/* --- NEW: Title styling --- */
-.preview-content .mac-title-bar .mac-title {
-    flex: 1; /* Title takes up available space */
-    padding-right: 10px; /* Space before edit button */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+/* REMOVED: .preview-content .mac-title-bar .mac-title */
 
-/* --- NEW: Static Edit button styling --- */
-#btn-preview-edit {
-    margin: 0 8px 0 0 !important; /* Margin between edit and close */
-    padding: 2px 8px !important;
-    font-size: 11px !important;
-}
+/* REMOVED: Old #btn-preview-edit style */
+
 
 /* Estilo para los modales de formulario */
 .form-modal .preview-content {
@@ -94,8 +74,24 @@
     color: #000; 
 }
 
-/* REMOVED: Redundant animation block was here */
 
+/* --- NEW: Footer bar for modals --- */
+.mac-footer-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: flex-end; /* Aligns button to the right */
+    padding: 6px;
+    
+    /* Mimic header style */
+    background: #ccc;
+    border-top: 3px ridge #999;
+}
 
-/* --- REMOVED: .preview-edit-button style --- */
-/* (The old absolute positioned style is gone) */
+/* --- NEW: Edit button in footer --- */
+#btn-preview-edit {
+    margin: 0 !important; /* Reset margin */
+    padding: 2px 8px !important;
+    font-size: 11px !important;
+}
