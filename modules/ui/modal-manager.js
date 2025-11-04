@@ -200,7 +200,6 @@ export function openRecapForm(entry = null) {
 export function initModalManager() {
     
     // --- Listener for Close/Cancel buttons ---
-    // (This block is correct and works)
     document.querySelectorAll('.btn-modal-close, .btn-modal-cancel').forEach(btn => {
         btn.addEventListener('click', () => {
             const modal = btn.closest('.preview-modal');
@@ -211,28 +210,27 @@ export function initModalManager() {
     });
     
     // --- Listener for Backdrop click ---
-    // (This block is correct and works)
     document.querySelectorAll('.preview-modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
+            // Cierra solo si se hace clic en el fondo (el propio modal)
             if (e.target.classList.contains('preview-modal')) {
                 closeModal(modal.id);
             }
         });
     });
-    
-    // --- FIXED: Delegated listener for the Preview Edit Button ---
-    // This is separate and attached to the document, so it will
-    // always be active and catch the click on '#btn-preview-edit'.
-    document.addEventListener('click', (e) => {
-        const editButton = e.target.closest('#btn-preview-edit');
-        if (!editButton) return; // Click wasn't on the edit button
 
-        e.stopPropagation(); // Stop it from triggering the backdrop click
-        const id = editButton.dataset.id;
-        
-        if (id) {
-            closeModal('preview-modal');   // Close current modal
-            handleEditEntry(id);         // Open edit form
-        }
-    });
+    // --- FIXED: Static listener for the Preview Edit Button ---
+    // This is the correct, reliable way for this static button.
+    const previewEditBtn = document.getElementById('btn-preview-edit');
+    if (previewEditBtn) {
+        previewEditBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent backdrop click
+            const id = previewEditBtn.dataset.id;
+            
+            if (id) {
+                closeModal('preview-modal');   // Close current modal
+                handleEditEntry(id);         // Open edit form
+            }
+        });
+    }
 }
