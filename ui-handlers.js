@@ -175,7 +175,7 @@ export function initUI(onOfflineCallback) {
 
     // --- EVENT DELEGATION for dynamic content ---
     
-    // --- NEW: Collapsible sections in Crumb Form ---
+    // --- Collapsible sections in Crumb Form ---
     document.getElementById('crumb-modal').addEventListener('click', (e) => {
         const header = e.target.closest('.form-section-header');
         if (!header) return;
@@ -185,7 +185,7 @@ export function initUI(onOfflineCallback) {
         const chevron = header.querySelector('.chevron');
 
         if (content && chevron) {
-            content.classList.toggle('hidden');
+            content.classList.toggle('expanded'); // MODIFIED: Toggle .expanded
             chevron.classList.toggle('expanded');
         }
     });
