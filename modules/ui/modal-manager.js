@@ -1,12 +1,11 @@
 // ===== modules/ui/modal-manager.js (Modal Logic) =====
 
 // Imports
-// CAMBIO: Las rutas ahora apuntan a 'core/' y 'modules/settings/'
 import { clearFormState, clearTimerState, clearTrackState, clearSpentState, clearRecapState } from '../../core/state.js';
 import { updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from '../../modules/settings/settings-manager.js';
 import { renderMoodSelector } from '../../ui-renderer.js';
 import { setCurrentDateTime } from '../../utils.js';
-import { handleEditEntry } from '../../crud-handlers.js'; // NEW: Import handler
+import { handleEditEntry } from '../../crud-handlers.js'; // Import handler
 
 // --- Modal Management ---
 
@@ -190,36 +189,36 @@ export function openRecapForm(entry = null) {
  * Initializes generic modal close listeners (backdrop and buttons).
  */
 export function initModalManager() {
-    // --- Modal Close Buttons (Generic) ---
-    document.querySelectorAll('.btn-modal-close, .btn-modal-cancel').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const modal = btn.closest('.preview-modal');
-            if (modal) {
-                closeModal(modal.id);
-            }
-        });
-    });
     
-    // Backdrop click to close (and edit button)
-    document.querySelectorAll('.preview-modal').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            
-            // --- NEW: Handle Preview Edit Button ---
-            const editButton = e.target.closest('.preview-edit-button');
-            if (editButton) {
-                e.stopPropagation(); // Prevent backdrop click
-                const id = editButton.dataset.id;
-                if (id) {
-                    closeModal(modal.id);       // Close current modal
-                    handleEditEntry(id);      // Open edit form
-                }
-                return; // Action handled
+    // --- REFACTORED: Combined Modal Click Handler ---
+    // This single listener handles all modal interactions using event delegation.
+    document.addEventListener('click', (e) => {
+        // Find the closest modal, if any
+        const modal = e.target.closest('.preview-modal');
+        if (!modal) return; // Click wasn't in a modal
+
+        // --- Handle Close/Cancel buttons ---
+        if (e.target.closest('.btn-modal-close') || e.target.closest('.btn-modal-cancel')) {
+            e.stopPropagation();
+            closeModal(modal.id);
+            return;
+        }
+
+        // --- Handle Preview Edit Button ---
+        const editButton = e.target.closest('.preview-edit-button');
+        if (editButton) {
+            e.stopPropagation();
+            const id = editButton.dataset.id;
+            if (id) {
+                closeModal(modal.id);       // Close current modal
+                handleEditEntry(id);      // Open edit form
             }
-            
-            // --- Existing: Cierra solo si se hace clic en el fondo ---
-            if (e.target.classList.contains('preview-modal')) {
-                closeModal(modal.id);
-            }
-        });
+            return; // Action handled
+        }
+        
+        // --- Handle backdrop click (e.target IS the modal itself) ---
+        if (e.target === modal) {
+            closeModal(modal.id);
+        }
     });
 }
