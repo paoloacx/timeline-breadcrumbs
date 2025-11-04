@@ -6,8 +6,8 @@ import { loadData as loadLocalData } from './storage.js';
 import { loadSettings as loadLocalSettings } from '../modules/settings/settings-manager.js';
 import { getState, setOfflineMode, setCurrentUser, clearCurrentUser } from './state.js';
 import { initTimeline, renderTimeline } from '../modules/timeline/timeline.js';
-// --- CHANGED: Import 'handleRedirectResult' ---
-import { initGoogleAuth, syncOnLogin, handleRedirectResult } from '../modules/services/gdrive-service.js';
+// --- CHANGED: Import 'handleRedirectResult' and 'tryRestoreSession' ---
+import { initGoogleAuth, syncOnLogin, handleRedirectResult, tryRestoreSession } from '../modules/services/gdrive-service.js';
 
 /**
  * Initializes the application.
@@ -73,19 +73,23 @@ function initApp() {
         runOfflineMode();
     } else {
         console.log('No persistent session. Initializing Google Auth...');
-        // Show auth panel immediately
-        document.getElementById('auth-container').style.display = 'block';
-        document.getElementById('main-app').style.display = 'none';
-
+        
         // 5. Initialize Google Auth in background
         const checkGapi = () => {
             if (window.gapi && window.google) {
-                // We only pass the onSignIn callback.
-                // The redirect flow doesn't have a "silent fail" callback.
                 initGoogleAuth(onGdriveSignIn);
+                
+                // Try to restore session from saved token
+                tryRestoreSession().then(restored => {
+                    if (!restored) {
+                        // No saved session, show auth panel
+                        document.getElementById('auth-container').style.display = 'block';
+                        document.getElementById('main-app').style.display = 'none';
+                    }
+                });
             } else {
                 console.warn('GAPI/GSI script not loaded yet, retrying...');
-                setTimeout(checkGapi, 100); // Retry after 100ms
+                setTimeout(checkGapi, 100);
             }
         };
         checkGapi();
