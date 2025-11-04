@@ -36,13 +36,17 @@ function openToolsModal() {
  */
 export function initUI(onOfflineCallback) {
     
-    // --- Auth Buttons ---
+    // --- Auth Buttons (optional - may not exist during redirect flow) ---
     
-    // CHANGED: GDrive Sign-in
-    document.getElementById('btn-signin-gdrive').addEventListener('click', handleSignIn);
+    const btnSigninGdrive = document.getElementById('btn-signin-gdrive');
+    if (btnSigninGdrive) {
+        btnSigninGdrive.addEventListener('click', handleSignIn);
+    }
 
-    // UPDATED: "Continue Offline" button
-    document.getElementById('btn-continue-offline').addEventListener('click', onOfflineCallback);
+    const btnContinueOffline = document.getElementById('btn-continue-offline');
+    if (btnContinueOffline) {
+        btnContinueOffline.addEventListener('click', onOfflineCallback);
+    }
 
     // --- Header / User Menu ---
     
