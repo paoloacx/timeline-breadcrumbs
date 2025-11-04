@@ -6,6 +6,7 @@ import { clearFormState, clearTimerState, clearTrackState, clearSpentState, clea
 import { updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from '../../modules/settings/settings-manager.js';
 import { renderMoodSelector } from '../../ui-renderer.js';
 import { setCurrentDateTime } from '../../utils.js';
+import { handleEditEntry } from '../../crud-handlers.js'; // NEW: Import handler
 
 // --- Modal Management ---
 
@@ -199,10 +200,23 @@ export function initModalManager() {
         });
     });
     
-    // Backdrop click to close
+    // Backdrop click to close (and edit button)
     document.querySelectorAll('.preview-modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
-            // Cierra solo si se hace clic en el fondo (el propio modal)
+            
+            // --- NEW: Handle Preview Edit Button ---
+            const editButton = e.target.closest('.preview-edit-button');
+            if (editButton) {
+                e.stopPropagation(); // Prevent backdrop click
+                const id = editButton.dataset.id;
+                if (id) {
+                    closeModal(modal.id);       // Close current modal
+                    handleEditEntry(id);      // Open edit form
+                }
+                return; // Action handled
+            }
+            
+            // --- Existing: Cierra solo si se hace clic en el fondo ---
             if (e.target.classList.contains('preview-modal')) {
                 closeModal(modal.id);
             }
