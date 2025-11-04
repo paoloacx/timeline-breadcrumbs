@@ -204,8 +204,7 @@
                     <div class="duration-selector" id="duration-selector"></div>
                     <label class="mac-label">Activity:</label>
                     <div class="activity-selector" id="activity-selector"></div>
-                    <label class="mac-label">Optional Note:</label>
-                    <input type="text" class="mac-input" id="time-optional-note" placeholder="Add a short note (optional)">
+                    
                     <button class="mac-button mac-button-primary" id="btn-save-time" disabled style="width: 100%; margin-top: 16px;">Create Event</button>
                     <button class="mac-button delete-button hidden" id="btn-delete-time" style="width: 100%; margin-top: 8px;">🗑️ Delete</button>
                     <button class="mac-button btn-modal-cancel" id="btn-cancel-timer" style="width: 100%; margin-top: 8px;">Cancel</button>
@@ -265,10 +264,15 @@
         <div class="preview-content" onclick="event.stopPropagation()">
             <div class="mac-title-bar">
                 <span class="mac-title" id="preview-title">Preview</span>
-                <button class="mac-button hidden" id="btn-preview-edit" data-id="">✏️ Edit</button>
                 <button id="btn-close-preview" class="btn-modal-close">✕</button>
             </div>
-            <div class="mac-content" id="preview-body"></div>
+            
+            <div class="mac-content" id="preview-body">
+                </div>
+            
+            <div class="mac-footer-bar">
+                <button class="mac-button hidden" id="btn-preview-edit" data-id="">✏️ Edit</button>
+            </div>
         </div>
     </div>
     <div id="settings-modal" class="preview-modal">
