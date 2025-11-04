@@ -188,6 +188,7 @@
 
 .optional-note {
     font-size: 14px !important;
+    font-style: italic;
     font-weight: normal !important; /* Not bold */
     color: #333 !important; /* Darker text */
     margin-top: 16px !important; /* Less space */
