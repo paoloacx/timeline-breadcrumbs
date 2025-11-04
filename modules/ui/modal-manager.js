@@ -28,6 +28,15 @@ export function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.remove('show');
+        
+        // NEW: When closing preview, find and hide the static edit button
+        if (modalId === 'preview-modal') {
+            const editBtn = document.getElementById('btn-preview-edit');
+            if (editBtn) {
+                editBtn.classList.add('hidden');
+                editBtn.dataset.id = ''; // Clear the ID
+            }
+        }
     }
 }
 
@@ -190,8 +199,7 @@ export function openRecapForm(entry = null) {
  */
 export function initModalManager() {
     
-    // --- RESTORED: Original listeners for existing elements ---
-    // This fixes the 'X' and Cancel buttons.
+    // --- Listener for Close/Cancel buttons ---
     document.querySelectorAll('.btn-modal-close, .btn-modal-cancel').forEach(btn => {
         btn.addEventListener('click', () => {
             const modal = btn.closest('.preview-modal');
@@ -201,7 +209,7 @@ export function initModalManager() {
         });
     });
     
-    // RESTORED: Backdrop click to close
+    // --- Listener for Backdrop click ---
     document.querySelectorAll('.preview-modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
             // Cierra solo si se hace clic en el fondo (el propio modal)
@@ -211,21 +219,19 @@ export function initModalManager() {
         });
     });
 
-    // --- NEW: Delegated listener for dynamic Edit button ---
-    // This listener is attached to the document to catch clicks
-    // on buttons added later (like the preview's edit button).
-    document.addEventListener('click', (e) => {
-        const editButton = e.target.closest('.preview-edit-button');
-        if (!editButton) return; // Click wasn't on an edit button
-        
-        e.stopPropagation(); // Stop it from triggering backdrop click
-        
-        const modal = e.target.closest('.preview-modal');
-        const id = editButton.dataset.id;
-        
-        if (id && modal) {
-            closeModal(modal.id);     // Close current modal
-            handleEditEntry(id);    // Open edit form
-        }
-    });
+    // --- REMOVED: Delegated listener for dynamic Edit button ---
+    
+    // --- NEW: Static listener for the Preview Edit Button ---
+    const previewEditBtn = document.getElementById('btn-preview-edit');
+    if (previewEditBtn) {
+        previewEditBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent backdrop click
+            const id = previewEditBtn.dataset.id;
+            
+            if (id) {
+                closeModal('preview-modal');   // Close current modal
+                handleEditEntry(id);         // Open edit form
+            }
+        });
+    }
 }
