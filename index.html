@@ -159,29 +159,47 @@
                 <div class="mac-content">
                     <label class="mac-label">📅 Date & Time:</label>
                     <input type="datetime-local" class="mac-input" id="datetime-input">
-                    <label class="mac-label">
-                        😊 Mood:
-                        <button class="mac-button mood-config-btn" id="btn-toggle-mood-config">⚙️</button>
-                    </label>
-                    <div id="mood-config" class="config-panel hidden"></div>
-                    <div class="mood-selector" id="mood-selector"></div>
+                    
+                    <div class="form-section-header" data-target="mood-collapsible-content">
+                        <label class="mac-label">😊 Mood:</label>
+                        <span class="chevron">▼</span>
+                    </div>
+                    <div id="mood-collapsible-content" class="form-section-content hidden">
+                        <div class="mood-selector" id="mood-selector"></div>
+                    </div>
+
                     <label class="mac-label">Note:</label>
                     <textarea class="mac-textarea" id="note-input" placeholder="What's happening?"></textarea>
+                    
                     <label class="mac-label">📍 Location:</label>
                     <input type="text" class="mac-input" id="location-input" placeholder="Place">
                     <button class="mac-button" id="btn-get-gps">🌍 Use GPS</button>
                     <div id="form-map" class="mini-map" style="display: none;"></div>
+                    
                     <label class="mac-label">☁️ Weather:</label>
                     <input type="text" class="mac-input" id="weather-input" placeholder="Sunny, cloudy...">
-                    <label class="mac-label">🖼️ Images:</label>
-                    <input type="file" id="input-images" accept="image/*" multiple style="margin-bottom: 12px;">
-                    <div id="image-previews"></div>
-                    <label class="mac-label">🎤 Audio:</label>
-                    <div class="audio-recorder">
-                        <button class="mac-button" id="btn-record-start">🔴 Record</button>
-                        <button class="mac-button" id="btn-record-stop" disabled>⏹️ Stop</button>
-                        <div id="audio-preview" style="margin-top: 8px;"></div>
+                    
+                    <div class="form-section-header" data-target="images-collapsible-content">
+                        <label class="mac-label">🖼️ Images:</label>
+                        <span class="chevron">▼</span>
                     </div>
+                    <div id="images-collapsible-content" class="form-section-content hidden">
+                        <input type="file" id="input-images" accept="image/*" multiple style="margin-bottom: 12px;">
+                        <div id="image-previews"></div>
+                    </div>
+                    
+                    <div class="form-section-header" data-target="audio-collapsible-content">
+                        <label class="mac-label">🎤 Audio:</label>
+                        <span class="chevron">▼</span>
+                    </div>
+                    <div id="audio-collapsible-content" class="form-section-content hidden">
+                        <div class="audio-recorder">
+                            <button class="mac-button" id="btn-record-start">🔴 Record</button>
+                            <button class="mac-button" id="btn-record-stop" disabled>⏹️ Stop</button>
+                            <div id="audio-preview" style="margin-top: 8px;"></div>
+                        </div>
+                    </div>
+                    
                     <button class="mac-button mac-button-primary" id="btn-save-crumb">💾 Save</button>
                     <button class="mac-button delete-button hidden" id="btn-delete-crumb">🗑️ Delete</button>
                     <button class="mac-button btn-modal-cancel" id="btn-cancel-crumb">Cancel</button>
@@ -189,7 +207,6 @@
             </div>
         </div>
     </div>
-
     <div id="timer-modal" class="preview-modal form-modal">
         <div class="preview-content" onclick="event.stopPropagation()">
             <div class="mac-window" style="border: none; box-shadow: none; margin: 0;">
