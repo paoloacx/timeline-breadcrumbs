@@ -43,10 +43,6 @@ function renderPreviewMap(coords) {
     }, 100); // Espera a que el modal sea visible
 }
 
-
-// --- REMOVED: addEditButtonToModal function ---
-
-
 /**
  * Renders the content for the general preview modal.
  * @param {object} entry - The entry object to preview.
@@ -65,10 +61,12 @@ export function renderPreview(entry) {
             </div>
         ` : ''}
         
-        <div style="margin-bottom: 16px;">
-            <strong>Note:</strong>
-            <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${entry.note || ''}</div>
-        </div>
+        ${!entry.isTimedActivity ? `
+            <div style="margin-bottom: 16px;">
+                <strong>Note:</strong>
+                <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${entry.note || ''}</div>
+            </div>
+        ` : ''}
         
         ${entry.location ? `
             <div style="margin-bottom: 16px;">
@@ -112,13 +110,12 @@ export function renderPreview(entry) {
         ${entry.isTimedActivity ? `
             <div style="margin-bottom: 16px;">
                 <strong>Activity:</strong> ${entry.activity} (${entry.duration} minutes)
-                ${entry.optionalNote ? `<div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap; font-style: italic;">${entry.optionalNote}</div>` : ''}
             </div>
         ` : ''}
         
-        ${entry.isQuickTrack && entry.optionalNote ? `
+        ${(entry.isTimedActivity || entry.isQuickTrack) && entry.optionalNote ? `
             <div style="margin-bottom: 16px;">
-                <strong>Optional Note:</strong>
+                <strong>Note:</strong>
                 <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap; font-style: italic;">${entry.optionalNote}</div>
             </div>
         ` : ''}
@@ -137,7 +134,7 @@ export function renderPreview(entry) {
         renderPreviewMap(entry.coords);
     }
     
-    // NEW: Find, update, and show the static edit button
+    // Find, update, and show the static edit button
     const editBtn = document.getElementById('btn-preview-edit');
     if (editBtn) {
         editBtn.dataset.id = entry.id;
@@ -163,7 +160,7 @@ export function renderImagePreviewModal(entry, imageIndex) {
         </div>
     `;
     
-    // NEW: Find, update, and show the static edit button
+    // Find, update, and show the static edit button
     const editBtn = document.getElementById('btn-preview-edit');
     if (editBtn) {
         editBtn.dataset.id = entry.id;
