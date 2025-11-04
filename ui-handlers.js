@@ -9,7 +9,8 @@ import { handleGps, handleSearchBSO } from './modules/services/api-services.js';
 import { handleImageInput, startRecording, stopRecording, removeImage, removeAudio } from './media-handlers.js';
 // CHANGED: Added exportFullBackup
 import { openStats, exportCSV, exportICS, openExportModal, performExport, exportFullBackup } from './modules/data/data-tools.js';
-import { openSettings, toggleMoodConfig, saveSettings, updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady, handleImportBackup } from './modules/settings/settings-manager.js';
+// REMOVED: toggleMoodConfig
+import { openSettings, saveSettings, updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady, handleImportBackup } from './modules/settings/settings-manager.js';
 import { renderMoodSelector, renderImagePreviews, renderAudioPreview, selectTrackUI } from './ui-renderer.js';
 
 // NEW: Import GDrive handlers
@@ -138,7 +139,7 @@ export function initUI(onOfflineCallback) {
 
 
     // --- Crumb Form ---
-    document.getElementById('btn-toggle-mood-config').addEventListener('click', toggleMoodConfig);
+    // REMOVED: document.getElementById('btn-toggle-mood-config').addEventListener('click', toggleMoodConfig);
     document.getElementById('btn-get-gps').addEventListener('click', handleGps);
     document.getElementById('input-images').addEventListener('change', handleImageInput);
     document.getElementById('btn-record-start').addEventListener('click', startRecording);
@@ -173,6 +174,21 @@ export function initUI(onOfflineCallback) {
     document.getElementById('btn-perform-export').addEventListener('click', performExport);
 
     // --- EVENT DELEGATION for dynamic content ---
+    
+    // --- NEW: Collapsible sections in Crumb Form ---
+    document.getElementById('crumb-modal').addEventListener('click', (e) => {
+        const header = e.target.closest('.form-section-header');
+        if (!header) return;
+
+        const targetId = header.dataset.target;
+        const content = document.getElementById(targetId);
+        const chevron = header.querySelector('.chevron');
+
+        if (content && chevron) {
+            content.classList.toggle('hidden');
+            chevron.classList.toggle('expanded');
+        }
+    });
     
     // Mood Selector
     document.getElementById('mood-selector').addEventListener('click', (e) => {
