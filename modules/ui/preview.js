@@ -124,6 +124,8 @@ export function renderPreview(entry) {
                 <strong>Amount Spent:</strong> €${entry.spentAmount.toFixed(2)}
             </div>
         ` : ''}
+
+        <button class="mac-button preview-edit-button" data-id="${entry.id}">✏️ Edit</button>
     `;
     
     body.innerHTML = html;
@@ -150,5 +152,7 @@ export function renderImagePreviewModal(entry, imageIndex) {
         <div style="text-align: center; padding: 20px;">
             <img src="${entry.images[imageIndex]}" style="max-width: 100%; max-height: 80vh; border: 2px solid #000;">
         </div>
+        
+        <button class="mac-button preview-edit-button" data-id="${entry.id}">✏️ Edit</button>
     `;
 }
