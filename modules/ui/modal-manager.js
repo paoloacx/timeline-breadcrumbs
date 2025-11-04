@@ -142,7 +142,7 @@ export function openCrumbForm(entry = null) {
 export function openTimerForm(entry = null) {
     if (!entry) {
         clearTimerState();
-        document.getElementById('time-optional-note').value = '';
+        // REMOVED: document.getElementById('time-optional-note').value = '';
         document.getElementById('btn-save-time').textContent = 'Create Event';
         document.getElementById('btn-delete-time').classList.add('hidden');
         updateTimerOptions(); // Re-renderiza para limpiar selección
@@ -219,9 +219,7 @@ export function initModalManager() {
         });
     });
 
-    // --- REMOVED: Delegated listener for dynamic Edit button ---
-    
-    // --- NEW: Static listener for the Preview Edit Button ---
+    // --- Static listener for the Preview Edit Button ---
     const previewEditBtn = document.getElementById('btn-preview-edit');
     if (previewEditBtn) {
         previewEditBtn.addEventListener('click', (e) => {
