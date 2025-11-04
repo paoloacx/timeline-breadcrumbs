@@ -2,11 +2,12 @@
 
 // Imports
 // CAMBIO: Las rutas ahora suben dos niveles (../../) y apuntan a 'core/'
-import { getState, setSettings } from '../../core/state.js';
-// REMOVED: Firebase import
-// import { saveSettingsToFirebase } from '../../firebase-config.js';
+import { getState, setSettings, setEntries } from '../../core/state.js';
+import { saveData } from '../../core/storage.js';
 import { openModal, closeModal } from '../ui/modal-manager.js';
 import { renderMoodSelector } from '../../ui-renderer.js';
+import { importFullBackup } from '../data/data-tools.js';
+import { renderTimeline } from '../timeline/timeline.js';
 
 // --- Local Storage ---
 
@@ -32,7 +33,7 @@ export function loadSettings() {
 /**
  * Saves the current state's settings to localStorage.
  */
-function saveSettingsToStorage() {
+export function saveSettingsToStorage() {
     const { settings } = getState();
     localStorage.setItem('timeline-settings', JSON.stringify(settings));
 }
@@ -291,4 +292,52 @@ export function checkTrackReady() {
     if (btn) {
         btn.disabled = !selectedTrackItem;
     }
+}
+
+// --- Import Backup Function ---
+/**
+ * Handles importing a JSON backup file.
+ */
+export async function handleImportBackup() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+    
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        try {
+            const backupData = await importFullBackup(file);
+            
+            const confirmMsg = `Import backup from ${new Date(backupData.createdAt).toLocaleString()}?\n\n` +
+                             `This will replace your current data:\n` +
+                             `- ${backupData.entries.length} entries\n` +
+                             `- Settings configuration\n\n` +
+                             `Current data will be overwritten!`;
+            
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+            
+            setEntries(backupData.entries || []);
+            setSettings(backupData.settings || {});
+            
+            saveData();
+            saveSettingsToStorage();
+            
+            renderTimeline();
+            updateTimerOptions();
+            updateTrackOptions();
+            renderMoodSelector();
+            
+            alert(`✅ Import successful! ${backupData.entries.length} entries loaded.`);
+            
+        } catch (error) {
+            console.error('Import error:', error);
+            alert(`❌ Import failed: ${error.message}`);
+        }
+    };
+    
+    input.click();
 }
