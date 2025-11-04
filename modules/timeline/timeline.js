@@ -46,7 +46,7 @@ export function initTimeline() {
 
         const id = entryEl.dataset.id;
         
-        // Handle Edit
+        // Handle Edit (Still needed for Recaps)
         if (e.target.closest('.btn-edit')) {
             e.stopPropagation();
             handleEditEntry(id);
@@ -208,7 +208,7 @@ export function renderTimeline() {
 
                                 return `
                                 <div class="breadcrumb-entry ${entry.isTimedActivity ? 'time-event' : ''} ${trackClass} ${spentClass} ${crumbClass}" style="${heightStyle}" data-id="${entry.id}">
-                                    <button class="mac-button edit-button btn-edit">✏️ Edit</button>
+                                    ${'' /* REMOVED: Edit button was here */}
                                     
                                     ${'' /* REMOVED: Preview button was here */}
 
