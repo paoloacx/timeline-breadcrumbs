@@ -118,10 +118,28 @@ function initGsiClient() {
  */
 export async function handleRedirectResult(code) {
     console.log('GDrive: Handling redirect result...');
+    
+    // Wait for google to be ready
+    const waitForGoogle = () => {
+        return new Promise((resolve) => {
+            const checkGoogle = () => {
+                if (window.google && window.google.accounts) {
+                    google = window.google;
+                    resolve();
+                } else {
+                    setTimeout(checkGoogle, 100);
+                }
+            };
+            checkGoogle();
+        });
+    };
+    
     try {
+        await waitForGoogle();
+        console.log('GDrive: Google SDK ready for token exchange.');
+        
         // 1. Exchange the code for an access token
         const tokenResponse = await new Promise((resolve, reject) => {
-            // --- NEW: We need to init a tokenClient *just* for this exchange ---
             const client = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: SCOPES,
@@ -132,10 +150,12 @@ export async function handleRedirectResult(code) {
         });
 
         console.log('GDrive: Access token received.');
+        
+        // Wait for GAPI to be ready
+        await gapiClientReady;
         gapi.client.setToken({ access_token: tokenResponse.access_token });
         
-        // 2. Fetch user info (same as before)
-        await gapiClientReady; // Ensure GAPI is ready
+        // 2. Fetch user info
         const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
             headers: { 'Authorization': `Bearer ${tokenResponse.access_token}` }
         });
@@ -159,7 +179,6 @@ export async function handleRedirectResult(code) {
     } catch (error) {
         console.error('Error handling auth redirect:', error);
         alert('Error signing in. Please try again.');
-        // Clear the bad URL and show auth panel
         window.history.replaceState({}, document.title, window.location.pathname);
         document.getElementById('auth-container').style.display = 'block';
     }
