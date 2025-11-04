@@ -264,13 +264,13 @@
     <div id="preview-modal" class="preview-modal">
         <div class="preview-content" onclick="event.stopPropagation()">
             <div class="mac-title-bar">
-                <span>Preview</span>
+                <span class="mac-title" id="preview-title">Preview</span>
+                <button class="mac-button hidden" id="btn-preview-edit" data-id="">✏️ Edit</button>
                 <button id="btn-close-preview" class="btn-modal-close">✕</button>
             </div>
             <div class="mac-content" id="preview-body"></div>
         </div>
     </div>
-
     <div id="settings-modal" class="preview-modal">
         <div class="preview-content" onclick="event.stopPropagation()">
             <div class="mac-title-bar">
