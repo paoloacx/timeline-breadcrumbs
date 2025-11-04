@@ -379,13 +379,13 @@ export function exportFullBackup() {
     const { entries, settings } = getState();
     
     const backupData = {
-        version: '1.0.0', // App version this backup was made with
+        version: '1.0.0',
         createdAt: new Date().toISOString(),
         settings: settings,
         entries: entries
     };
 
-    const jsonString = JSON.stringify(backupData, null, 2); // Pretty-print JSON
+    const jsonString = JSON.stringify(backupData, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     
@@ -397,4 +397,43 @@ export function exportFullBackup() {
     document.body.removeChild(link);
     
     console.log('Full backup downloaded.');
+}
+
+/**
+ * NEW: Imports app state from a JSON backup file.
+ * @param {File} file - The JSON file to import
+ * @returns {Promise<object>} The parsed backup data
+ */
+export function importFullBackup(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        
+        reader.onload = (event) => {
+            try {
+                const backupData = JSON.parse(event.target.result);
+                
+                if (!backupData.entries || !backupData.settings) {
+                    reject(new Error('Invalid backup file format. Missing entries or settings.'));
+                    return;
+                }
+                
+                console.log('Backup file parsed successfully:', {
+                    version: backupData.version,
+                    createdAt: backupData.createdAt,
+                    entriesCount: backupData.entries.length
+                });
+                
+                resolve(backupData);
+            } catch (error) {
+                console.error('Error parsing backup file:', error);
+                reject(new Error('Invalid JSON file. Could not parse backup.'));
+            }
+        };
+        
+        reader.onerror = () => {
+            reject(new Error('Error reading file.'));
+        };
+        
+        reader.readAsText(file);
+    });
 }
