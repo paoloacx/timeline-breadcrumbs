@@ -2,7 +2,6 @@
 
 /* Modal animation (smooth pop-in) */
 .preview-modal {
-    /* REMOVED: display: none; */
     visibility: hidden; /* NEW: Use visibility to allow animation */
     
     /* NEW: Moved from .show to base */
@@ -26,8 +25,6 @@
 }
 
 .preview-modal.show {
-    /* REMOVED: display: flex !important; */
-    /* REMOVED: opacity: 1 !important; */
     opacity: 1;
     visibility: visible; /* NEW */
     transition: opacity 0.25s ease; /* NEW: Only transition opacity on show */
@@ -51,22 +48,39 @@
     transform: scale(1) translateY(0);
 }
 
-/* NEW: Make modal headers sticky when scrolling */
+/* Make modal headers sticky when scrolling */
 .preview-content .mac-title-bar {
     position: sticky;
     top: 0;
     z-index: 10; 
-    /* This ensures it's above .mac-content but below the modal overlay (10000) */
+    
+    /* --- NEW: Flexbox layout for title bar --- */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
+/* --- NEW: Title styling --- */
+.preview-content .mac-title-bar .mac-title {
+    flex: 1; /* Title takes up available space */
+    padding-right: 10px; /* Space before edit button */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- NEW: Static Edit button styling --- */
+#btn-preview-edit {
+    margin: 0 8px 0 0 !important; /* Margin between edit and close */
+    padding: 2px 8px !important;
+    font-size: 11px !important;
+}
 
 /* Estilo para los modales de formulario */
 .form-modal .preview-content {
-    /* Los formularios no necesitan el borde/sombra porque .mac-window ya lo tiene */
     border: none;
     box-shadow: none;
     background: transparent;
-    /* Previene que el modal sea más ancho que el formulario */
     width: auto; 
     max-width: 600px;
 }
@@ -77,17 +91,11 @@
     border: 2px solid #000; 
     padding: 2px 8px; 
     cursor: pointer;
-    color: #000; /* Añadido para visibilidad */
+    color: #000; 
 }
 
 /* REMOVED: Redundant animation block was here */
 
 
-/* --- NEW: Edit Button in Preview Modal --- */
-.preview-edit-button {
-    position: absolute !important;
-    bottom: 12px;
-    right: 12px;
-    z-index: 20; /* Above sticky header (10) */
-    margin: 0 !important; /* Override default button margins */
-}
+/* --- REMOVED: .preview-edit-button style --- */
+/* (The old absolute positioned style is gone) */
