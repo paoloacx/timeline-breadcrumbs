@@ -190,35 +190,42 @@ export function openRecapForm(entry = null) {
  */
 export function initModalManager() {
     
-    // --- REFACTORED: Combined Modal Click Handler ---
-    // This single listener handles all modal interactions using event delegation.
-    document.addEventListener('click', (e) => {
-        // Find the closest modal, if any
-        const modal = e.target.closest('.preview-modal');
-        if (!modal) return; // Click wasn't in a modal
-
-        // --- Handle Close/Cancel buttons ---
-        if (e.target.closest('.btn-modal-close') || e.target.closest('.btn-modal-cancel')) {
-            e.stopPropagation();
-            closeModal(modal.id);
-            return;
-        }
-
-        // --- Handle Preview Edit Button ---
-        const editButton = e.target.closest('.preview-edit-button');
-        if (editButton) {
-            e.stopPropagation();
-            const id = editButton.dataset.id;
-            if (id) {
-                closeModal(modal.id);       // Close current modal
-                handleEditEntry(id);      // Open edit form
+    // --- RESTORED: Original listeners for existing elements ---
+    // This fixes the 'X' and Cancel buttons.
+    document.querySelectorAll('.btn-modal-close, .btn-modal-cancel').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = btn.closest('.preview-modal');
+            if (modal) {
+                closeModal(modal.id);
             }
-            return; // Action handled
-        }
+        });
+    });
+    
+    // RESTORED: Backdrop click to close
+    document.querySelectorAll('.preview-modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            // Cierra solo si se hace clic en el fondo (el propio modal)
+            if (e.target.classList.contains('preview-modal')) {
+                closeModal(modal.id);
+            }
+        });
+    });
+
+    // --- NEW: Delegated listener for dynamic Edit button ---
+    // This listener is attached to the document to catch clicks
+    // on buttons added later (like the preview's edit button).
+    document.addEventListener('click', (e) => {
+        const editButton = e.target.closest('.preview-edit-button');
+        if (!editButton) return; // Click wasn't on an edit button
         
-        // --- Handle backdrop click (e.target IS the modal itself) ---
-        if (e.target === modal) {
-            closeModal(modal.id);
+        e.stopPropagation(); // Stop it from triggering backdrop click
+        
+        const modal = e.target.closest('.preview-modal');
+        const id = editButton.dataset.id;
+        
+        if (id && modal) {
+            closeModal(modal.id);     // Close current modal
+            handleEditEntry(id);    // Open edit form
         }
     });
 }
