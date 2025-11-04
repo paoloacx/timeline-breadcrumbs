@@ -33,7 +33,7 @@ export function loadSettings() {
 /**
  * Saves the current state's settings to localStorage.
  */
-function saveSettingsToStorage() {
+export function saveSettingsToStorage() {
     const { settings } = getState();
     localStorage.setItem('timeline-settings', JSON.stringify(settings));
 }
