@@ -53,12 +53,7 @@ export function initTimeline() {
             return;
         }
         
-        // Handle Preview
-        if (e.target.closest('.btn-preview')) {
-            e.stopPropagation();
-            handlePreviewEntry(id);
-            return;
-        }
+        // REMOVED: Handle Preview button click (now handled by card click)
 
         // Handle Image Click
         if (e.target.closest('.preview-image-thumb')) {
@@ -84,6 +79,19 @@ export function initTimeline() {
                 e.target.textContent = noteEl.classList.contains('expanded') ? 'Show less' : 'Read more';
             }
             return;
+        }
+
+        // Handle Audio Controls (Prevent preview)
+        if (e.target.closest('audio')) {
+            e.stopPropagation(); // Prevent card click
+            return;
+        }
+
+        // NEW: Handle click on the card itself to open preview
+        // (if it's not a recap block and no other button was clicked)
+        if (entryEl.classList.contains('breadcrumb-entry')) {
+            handlePreviewEntry(id);
+            return; // Action completed
         }
     });
 }
@@ -202,9 +210,7 @@ export function renderTimeline() {
                                 <div class="breadcrumb-entry ${entry.isTimedActivity ? 'time-event' : ''} ${trackClass} ${spentClass} ${crumbClass}" style="${heightStyle}" data-id="${entry.id}">
                                     <button class="mac-button edit-button btn-edit">✏️ Edit</button>
                                     
-                                    ${crumbClass === 'crumb-event' ? `
-                                        <button class="mac-button preview-button-emoji btn-preview" title="Preview">🔍</button>
-                                    ` : ''}
+                                    ${'' /* REMOVED: Preview button was here */}
 
                                     ${entry.isTimedActivity ? 
                                         `<div>
