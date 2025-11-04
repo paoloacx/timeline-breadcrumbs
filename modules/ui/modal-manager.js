@@ -125,14 +125,31 @@ export function openCrumbForm(entry = null) {
         const saveBtn = document.getElementById('btn-save-crumb');
         if (saveBtn) saveBtn.textContent = '💾 Save';
         
-        const moodConfig = document.getElementById('mood-config');
-        if (moodConfig) moodConfig.classList.add('hidden');
+        // REMOVED: moodConfig logic
 
         const mapContainer = document.getElementById('form-map');
         if (mapContainer) {
             mapContainer.style.display = 'none';
             mapContainer.innerHTML = '';
         }
+        
+        // NEW: Reset collapsible sections to closed state
+        // Mood
+        document.getElementById('mood-collapsible-content').classList.add('hidden');
+        const moodChevron = document.querySelector('[data-target="mood-collapsible-content"] .chevron');
+        if (moodChevron) moodChevron.classList.remove('expanded');
+        
+        // Images
+        document.getElementById('images-collapsible-content').classList.add('hidden');
+        const imagesChevron = document.querySelector('[data-target="images-collapsible-content"] .chevron');
+        if (imagesChevron) imagesChevron.classList.remove('expanded');
+        
+        // Audio
+        document.getElementById('audio-collapsible-content').classList.add('hidden');
+        const audioChevron = document.querySelector('[data-target="audio-collapsible-content"] .chevron');
+        if (audioChevron) audioChevron.classList.remove('expanded');
+
+        
         renderMoodSelector();
         setCurrentDateTime('datetime-input');
     }
