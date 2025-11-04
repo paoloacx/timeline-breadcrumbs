@@ -133,19 +133,19 @@ export function openCrumbForm(entry = null) {
             mapContainer.innerHTML = '';
         }
         
-        // NEW: Reset collapsible sections to closed state
+        // MODIFIED: Reset collapsible sections to closed state (using .expanded)
         // Mood
-        document.getElementById('mood-collapsible-content').classList.add('hidden');
+        document.getElementById('mood-collapsible-content').classList.remove('expanded');
         const moodChevron = document.querySelector('[data-target="mood-collapsible-content"] .chevron');
         if (moodChevron) moodChevron.classList.remove('expanded');
         
         // Images
-        document.getElementById('images-collapsible-content').classList.add('hidden');
+        document.getElementById('images-collapsible-content').classList.remove('expanded');
         const imagesChevron = document.querySelector('[data-target="images-collapsible-content"] .chevron');
         if (imagesChevron) imagesChevron.classList.remove('expanded');
         
         // Audio
-        document.getElementById('audio-collapsible-content').classList.add('hidden');
+        document.getElementById('audio-collapsible-content').classList.remove('expanded');
         const audioChevron = document.querySelector('[data-target="audio-collapsible-content"] .chevron');
         if (audioChevron) audioChevron.classList.remove('expanded');
 
