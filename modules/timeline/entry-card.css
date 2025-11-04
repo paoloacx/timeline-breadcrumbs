@@ -10,6 +10,7 @@
     position: relative;
     color: #000;
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+    cursor: pointer; /* NEW: Indicate the card is clickable */
 }
 
 .breadcrumb-entry.track-event {
@@ -137,18 +138,7 @@
     margin: 0 !important;
 }
 
-/* REMOVED: Old .preview-button style */
-
-/* NEW: Style for the emoji-only preview button */
-.preview-button-emoji {
-    position: absolute !;!important;
-    bottom: 12px !important;
-    right: 12px !important;
-    padding: 4px 10px;
-    font-size: 11px;
-    z-index: 5;
-    margin: 0 !important;
-}
+/* REMOVED: .preview-button-emoji style */
 
 
 .activity-label {
@@ -234,7 +224,7 @@
         width: 50px !important;
         height: 50px !important;
     }
-    /* REMOVED: .preview-button height adjustment */
+    /* REMOVED: .preview-button height adjustment comment */
 }
 
 /* Animation for note expansion */
