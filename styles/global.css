@@ -566,7 +566,7 @@ input[type="range"]:active::-moz-range-thumb {
 /* REMOVED: Responsive footer media queries */
 
 
-/* --- NEW: Form Collapsible Sections --- */
+/* --- MODIFIED: Form Collapsible Sections --- */
 .form-section-header {
     display: flex;
     justify-content: space-between;
@@ -598,9 +598,27 @@ input[type="range"]:active::-moz-range-thumb {
 }
 
 .form-section-content {
-    /* Content is hidden by default using .hidden class */
-    padding: 12px;
+    /* MODIFIED: Animation setup */
+    overflow: hidden;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
     border: 2px solid #ccc;
     border-top: none;
     margin-bottom: 12px; /* Space before next section */
+    
+    /* NEW: Transition */
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+}
+
+/* NEW: Expanded state for animation */
+.form-section-content.expanded {
+    max-height: 500px; /* Or a value larger than any content */
+    padding: 12px;
+    transition: max-height 0.3s ease-in, padding 0.3s ease-in;
+}
+
+/* NEW: Margin override for the last section (Audio) */
+#audio-collapsible-content {
+    margin-bottom: 15px;
 }
