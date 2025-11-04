@@ -9,7 +9,7 @@ import { handleGps, handleSearchBSO } from './modules/services/api-services.js';
 import { handleImageInput, startRecording, stopRecording, removeImage, removeAudio } from './media-handlers.js';
 // CHANGED: Added exportFullBackup
 import { openStats, exportCSV, exportICS, openExportModal, performExport, exportFullBackup } from './modules/data/data-tools.js';
-import { openSettings, toggleMoodConfig, saveSettings, updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady } from './modules/settings/settings-manager.js';
+import { openSettings, toggleMoodConfig, saveSettings, updateTimerOptions, updateTrackOptions, checkTimerReady, checkTrackReady, handleImportBackup } from './modules/settings/settings-manager.js';
 import { renderMoodSelector, renderImagePreviews, renderAudioPreview, selectTrackUI } from './ui-renderer.js';
 
 // NEW: Import GDrive handlers
@@ -110,6 +110,11 @@ export function initUI(onOfflineCallback) {
     // NEW: Listener for the backup button
     document.getElementById('btn-tools-backup').addEventListener('click', () => {
         exportFullBackup();
+        closeModal('tools-modal');
+    });
+    // NEW: Listener for the import button
+    document.getElementById('btn-tools-import').addEventListener('click', () => {
+        handleImportBackup();
         closeModal('tools-modal');
     });
     // NEW: Listener for the offline sign-in button
