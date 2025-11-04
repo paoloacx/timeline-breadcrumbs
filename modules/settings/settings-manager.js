@@ -309,19 +309,36 @@ export async function handleImportBackup() {
         
         try {
             const backupData = await importFullBackup(file);
+            const currentState = getState();
+            const existingEntries = currentState.entries;
+            const existingIds = new Set(existingEntries.map(e => e.id));
             
-            const confirmMsg = `Import backup from ${new Date(backupData.createdAt).toLocaleString()}?\n\n` +
-                             `This will replace your current data:\n` +
-                             `- ${backupData.entries.length} entries\n` +
-                             `- Settings configuration\n\n` +
-                             `Current data will be overwritten!`;
+            // Filter out duplicates based on ID
+            const newEntries = backupData.entries.filter(entry => !existingIds.has(entry.id));
+            const duplicateCount = backupData.entries.length - newEntries.length;
+            
+            let confirmMsg = `Import backup from ${new Date(backupData.createdAt).toLocaleString()}?\n\n`;
+            confirmMsg += `- ${newEntries.length} new entries will be added\n`;
+            if (duplicateCount > 0) {
+                confirmMsg += `- ${duplicateCount} duplicate entries will be skipped\n`;
+            }
+            confirmMsg += `- Settings will be merged\n\n`;
+            confirmMsg += `Continue with import?`;
             
             if (!confirm(confirmMsg)) {
                 return;
             }
             
-            setEntries(backupData.entries || []);
-            setSettings(backupData.settings || {});
+            // Merge entries (add new ones)
+            const mergedEntries = [...existingEntries, ...newEntries];
+            setEntries(mergedEntries);
+            
+            // Merge settings (imported settings take priority)
+            const mergedSettings = {
+                ...currentState.settings,
+                ...backupData.settings
+            };
+            setSettings(mergedSettings);
             
             saveData();
             saveSettingsToStorage();
@@ -331,7 +348,7 @@ export async function handleImportBackup() {
             updateTrackOptions();
             renderMoodSelector();
             
-            alert(`✅ Import successful! ${backupData.entries.length} entries loaded.`);
+            alert(`✅ Import successful!\n${newEntries.length} entries added${duplicateCount > 0 ? `, ${duplicateCount} duplicates skipped` : ''}.`);
             
         } catch (error) {
             console.error('Import error:', error);
