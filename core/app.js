@@ -24,9 +24,19 @@ function initApp() {
         console.log('Found auth code in URL. Handling redirect...');
         window.history.replaceState({}, document.title, window.location.pathname);
         
-        // Show loading in auth panel, not main-app
+        // Keep auth panel visible but hide buttons
         document.getElementById('auth-container').style.display = 'block';
-        document.getElementById('auth-container').innerHTML = '<h3 style="text-align: center; margin-top: 50px;">Authenticating...</h3>';
+        const authButtons = document.querySelectorAll('#btn-signin-gdrive, #btn-continue-offline');
+        authButtons.forEach(btn => {
+            if (btn) btn.style.display = 'none';
+        });
+        
+        // Add loading message
+        const loadingMsg = document.createElement('div');
+        loadingMsg.style.textAlign = 'center';
+        loadingMsg.style.marginTop = '20px';
+        loadingMsg.textContent = 'Authenticating...';
+        document.getElementById('auth-container').appendChild(loadingMsg);
         
         // Load data first (needed for UI)
         loadLocalSettings();
