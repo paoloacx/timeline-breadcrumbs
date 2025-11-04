@@ -332,7 +332,7 @@ h1 {
     display: grid;
     grid-template-columns: repeat(5, 1fr); /* 5 moods per row */
     gap: 6px;
-    margin-bottom: 12px;
+    margin-bottom: 0; /* MODIFIED: Removed margin */
 }
 
 .mood-option {
@@ -564,3 +564,43 @@ input[type="range"]:active::-moz-range-thumb {
 }
 
 /* REMOVED: Responsive footer media queries */
+
+
+/* --- NEW: Form Collapsible Sections --- */
+.form-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 4px 8px; /* Add some padding */
+    border: 2px outset #ccc; /* Mac style */
+    background: #eee;
+    margin-bottom: 0; /* Content will be directly below */
+}
+
+.form-section-header:active {
+    border-style: inset;
+}
+
+.form-section-header .mac-label {
+    margin-bottom: 0; /* Override default label margin */
+    font-size: 13px; /* Slightly smaller */
+}
+
+.form-section-header .chevron {
+    font-size: 12px;
+    transition: transform 0.2s ease;
+    transform-origin: center;
+}
+
+.form-section-header .chevron.expanded {
+    transform: rotate(180deg);
+}
+
+.form-section-content {
+    /* Content is hidden by default using .hidden class */
+    padding: 12px;
+    border: 2px solid #ccc;
+    border-top: none;
+    margin-bottom: 12px; /* Space before next section */
+}
