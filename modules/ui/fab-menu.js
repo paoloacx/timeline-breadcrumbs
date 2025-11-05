@@ -30,8 +30,9 @@ function toggleFabMenu() {
     fabMenuOpen = !fabMenuOpen;
     
     if (fabMenuOpen) {
-        fabIcon.textContent = '×';
-        fabIcon.style.transform = 'rotate(45deg)';
+        // CHANGED: Use close icon
+        fabIcon.innerHTML = `<img src="assets/icons/close.svg" alt="Close" class="icon-mac">`;
+        fabIcon.style.transform = 'rotate(0deg)'; // Remove old rotation
         showFabOverlay(true); // NEW: Show overlay
         fabActions.forEach((wrapper, index) => {
             setTimeout(() => {
@@ -40,7 +41,8 @@ function toggleFabMenu() {
             }, index * 50);
         });
     } else {
-        fabIcon.textContent = '+';
+        // CHANGED: Use add icon
+        fabIcon.innerHTML = `<img src="assets/icons/add.svg" alt="Add" class="icon-mac">`;
         fabIcon.style.transform = 'rotate(0deg)';
         showFabOverlay(false); // NEW: Hide overlay
         fabActions.forEach((wrapper, index) => {
@@ -102,4 +104,12 @@ export function initFabMenu(formActions) {
         closeFabMenu(); 
         formActions.openRecapForm(); 
     });
+
+    // --- CHANGED: Set FAB icons on initialization ---
+    document.getElementById('fab-icon').innerHTML = `<img src="assets/icons/add.svg" alt="Add" class="icon-mac">`;
+    document.getElementById('fab-action-crumb').innerHTML = `<img src="assets/icons/crumb.svg" alt="Crumb" class="icon-mac">`;
+    document.getElementById('fab-action-time').innerHTML = `<img src="assets/icons/time.svg" alt="Time" class="icon-mac">`;
+    document.getElementById('fab-action-track').innerHTML = `<img src="assets/icons/track.svg" alt="Track" class="icon-mac">`;
+    document.getElementById('fab-action-spent').innerHTML = `<img src="assets/icons/money.svg" alt="Spent" class="icon-mac">`;
+    document.getElementById('fab-action-recap').innerHTML = `<img src="assets/icons/star.svg" alt="Recap" class="icon-mac">`;
 }
