@@ -11,7 +11,7 @@
 .timeline::before {
     content: '';
     position: absolute;
-    left: 0; /* Start at left edge */
+    left: -1px; /* Start at left edge */
     right: 80vw; /* End 20% from left */
     top: -45px; /* Position at header mid-point */
     height: 4px;
