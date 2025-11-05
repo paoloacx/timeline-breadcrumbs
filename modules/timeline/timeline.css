@@ -106,3 +106,86 @@
 .chevron.expanded {
     transform: rotate(180deg);
 }
+
+
+/* --- NEW: Nesting Block Styles --- */
+
+/* Base header for Year, Month, Week */
+.nested-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    border: 3px solid #000;
+    padding: 10px 16px;
+    margin-bottom: 12px;
+}
+
+/* Chevron for "expand up" blocks */
+.chevron-up {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    transform: rotate(180deg); /* Start pointing up */
+}
+
+.chevron-up.expanded {
+    transform: rotate(0deg); /* Point down when expanded */
+}
+
+/* Base content for Year, Month, Week */
+.nested-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-out;
+}
+
+.nested-content.expanded {
+    max-height: 10000px; /* Large value */
+    transition: max-height 0.8s ease-in;
+}
+
+/* Year Styles */
+.year-block {
+    margin-bottom: 20px;
+}
+
+.year-header {
+    background: #e0e0e0; /* Light grey */
+    font-size: 20px;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+}
+
+.year-content {
+    /* No extra styles needed */
+}
+
+/* Month Styles */
+.month-block {
+    margin-bottom: 16px;
+}
+
+.month-header {
+    background: #f0f0f0; /* Lighter grey */
+    font-size: 18px;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.2);
+}
+
+.month-content {
+    /* No extra styles needed */
+}
+
+/* Week Styles */
+.week-block {
+    margin-bottom: 12px;
+}
+
+.week-header {
+    background: #f9f9f9; /* Off-white */
+    font-size: 16px;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+}
+
+.week-content {
+    /* No extra styles needed */
+}
