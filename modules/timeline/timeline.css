@@ -90,7 +90,7 @@
 }
 
 .day-content.expanded {
-    max-height: 5000px !important; /* Large enough value */
+    max-height: 5000px !important; /* Large value */
     opacity: 1 !important;
     transform: translateY(0) !important;
     /* CHANGED: Removed !important, just padding */
@@ -120,7 +120,7 @@
     border: 3px solid #000;
     padding: 10px 16px;
     margin-bottom: 12px;
-    position: relative; /* <-- ADDED this */
+    position: relative; /* <-- NEW: Added */
 }
 
 /* --- NEW: This adds the CIRCLE to Year, Month, and Week headers --- */
@@ -166,12 +166,14 @@
 /* Year Styles */
 .year-block {
     margin-bottom: 20px;
+    /* NEW: Add shadow to the block */
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
 
 .year-header {
     background: #e0e0e0; /* Light grey */
     font-size: 20px;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+    /* REMOVED: box-shadow */
 }
 
 .year-content {
@@ -181,12 +183,14 @@
 /* Month Styles */
 .month-block {
     margin-bottom: 16px;
+    /* NEW: Add shadow to the block */
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.2);
 }
 
 .month-header {
     background: #f0f0f0; /* Lighter grey */
     font-size: 18px;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.2);
+    /* REMOVED: box-shadow */
 }
 
 .month-content {
@@ -196,12 +200,14 @@
 /* Week Styles */
 .week-block {
     margin-bottom: 12px;
+    /* NEW: Add shadow to the block */
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
 }
 
 .week-header {
     background: #f9f9f9; /* Off-white */
     font-size: 16px;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+    /* REMOVED: box-shadow */
 }
 
 .week-content {
