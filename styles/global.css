@@ -267,8 +267,9 @@ h1 {
 
 
 .mac-button-primary {
-    background: #000;
-    color: white;
+    /* CAMBIADO: Se desactiva el fondo negro para que los iconos sean visibles */
+    /* background: #000; */
+    /* color: white; */
 }
 
 .mac-input,
@@ -292,6 +293,10 @@ h1 {
     font-weight: bold;
     margin-bottom: 6px;
     font-size: 14px;
+    /* Añadido para alinear iconos en etiquetas */
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .image-preview {
@@ -655,7 +660,7 @@ input[type="range"]:active::-moz-range-thumb {
     /* * ADDED: Force SVG to inherit parent color.
      * This fixes invisible/broken SVGs that are exported without a fill.
      */
-    fill: currentColor; 
+    fill: currentColor;
     /* Align icon with text inside buttons */
     vertical-align: middle;
 }
@@ -677,7 +682,7 @@ input[type="range"]:active::-moz-range-thumb {
 .fab-action:not(:disabled):hover {
     background: black !important;
     color: white !important;
-    border-color: black !importan;
+    border-color: black !important;
 }
 
 .mac-button:not(:disabled):hover img,
