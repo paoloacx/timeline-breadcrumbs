@@ -157,7 +157,6 @@
                         <button class="mac-button mac-button-primary" id="btn-save-recap">
                             <img src="assets/icons/save.svg" alt="Save" class="icon-mac"> Save Recap
                         </button>
-                        <button class="mac-button btn-modal-cancel" id="btn-cancel-recap">Cancel</button>
                         <button class="mac-button delete-button hidden" id="btn-delete-recap">
                             <img src="assets/icons/trash.svg" alt="Delete" class="icon-mac"> Delete
                         </button>
@@ -204,7 +203,9 @@
                     </button>
                     <div id="form-map" class="mini-map" style="display: none;"></div>
                     
-                    <label class="mac-label">☁️ Weather:</label>
+                    <label class="mac-label">
+                        <img src="assets/icons/weather.svg" alt="Weather" class="icon-mac"> Weather:
+                    </label>
                     <input type="text" class="mac-input" id="weather-input" placeholder="Sunny, cloudy...">
                     
                     <div class="form-section-header" data-target="images-collapsible-content">
@@ -236,13 +237,14 @@
                         </div>
                     </div>
                     
-                    <button class="mac-button mac-button-primary" id="btn-save-crumb">
-                        <img src="assets/icons/save.svg" alt="Save" class="icon-mac"> Save
-                    </button>
-                    <button class="mac-button delete-button hidden" id="btn-delete-crumb">
-                        <img src="assets/icons/trash.svg" alt="Delete" class="icon-mac"> Delete
-                    </button>
-                    <button class="mac-button btn-modal-cancel" id="btn-cancel-crumb">Cancel</button>
+                    <div class="modal-actions-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                        <button class="mac-button delete-button hidden" id="btn-delete-crumb">
+                            <img src="assets/icons/trash.svg" alt="Delete" class="icon-mac"> Delete
+                        </button>
+                        <button class="mac-button mac-button-primary" id="btn-save-crumb" style="padding: 8px 16px; font-size: 14px; margin-left: auto;">
+                            <img src="assets/icons/save.svg" alt="Save" class="icon-mac"> Save
+                        </button>
+                        </div>
                 </div>
             </div>
         </div>
@@ -273,8 +275,7 @@
                     <button class="mac-button delete-button hidden" id="btn-delete-time" style="width: 100%; margin-top: 8px;">
                         <img src="assets/icons/trash.svg" alt="Delete" class="icon-mac"> Delete
                     </button>
-                    <button class="mac-button btn-modal-cancel" id="btn-cancel-timer" style="width: 100%; margin-top: 8px;">Cancel</button>
-                </div>
+                    </div>
             </div>
         </div>
     </div>
@@ -301,8 +302,7 @@
                     <button class="mac-button delete-button hidden" id="btn-delete-track" style="width: 100%; margin-top: 8px;">
                         <img src="assets/icons/trash.svg" alt="Delete" class="icon-mac"> Delete
                     </button>
-                    <button class="mac-button btn-modal-cancel" id="btn-cancel-track" style="width: 100%; margin-top: 8px;">Cancel</button>
-                </div>
+                    </div>
             </div>
         </div>
     </div>
@@ -334,8 +334,7 @@
                     <button class="mac-button delete-button hidden" id="btn-delete-spent" style="width: 100%; margin-top: 8px;">
                         <img src="assets/icons/trash.svg" alt="Delete" class="icon-mac"> Delete
                     </button>
-                    <button class="mac-button btn-modal-cancel" id="btn-cancel-spent" style="width: 100%; margin-top: 8px;">Cancel</button>
-                </div>
+                    </div>
             </div>
         </div>
     </div>
