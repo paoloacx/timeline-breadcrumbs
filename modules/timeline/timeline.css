@@ -7,13 +7,26 @@
     margin-bottom: 20px;
 }
 
+/* NEW: Horizontal line across the header */
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; /* Start at left edge */
+    right: 80vw; /* End 20% from left */
+    top: -45px; /* Position at header mid-point */
+    height: 4px;
+    background: #000;
+    z-index: 0; /* Sit behind the header window */
+}
+
 .timeline-line {
     position: absolute;
     left: -5px; /* Center the line */
-    top: 0;
+    top: -45px;  /* MODIFIED: Start from the horizontal line */
     bottom: 0;
     width: 4px;
     background: #000;
+    z-index: 1;  /* Sit above horizontal line */
 }
 
 .day-block {
@@ -54,7 +67,7 @@
     border: 3px solid white;
     border-radius: 50%;
     box-shadow: 0 0 0 3px #000;
-    z-index: 2;
+    z-index: 2; /* Sit above vertical line */
 }
 
 .day-header:hover {
