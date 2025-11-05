@@ -199,7 +199,7 @@ body {
     font-size: 11px;
     color: #666;
     word-break: break-all;
-    background: #f5f5ff;
+    background: #f5f5f5;
 }
 
 .logout-menu button {
@@ -652,10 +652,10 @@ input[type="range"]:active::-moz-range-thumb {
     height: 20px;
     display: inline-block;
     image-rendering: pixelated;
-    /* * REMOVED: filter: grayscale(100%);
-     * This was making the default state of SVGs invisible.
-     * The hover/active filters will apply on their own.
+    /* * ADDED: Force SVG to inherit parent color.
+     * This fixes invisible/broken SVGs that are exported without a fill.
      */
+    fill: currentColor;
     /* Align icon with text inside buttons */
     vertical-align: middle;
 }
