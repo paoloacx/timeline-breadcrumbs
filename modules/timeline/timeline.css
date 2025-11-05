@@ -18,6 +18,7 @@
 
 .day-block {
     margin-bottom: 30px;
+    margin-right: -8px;
     position: relative;
     /* NEW: Moved shadow and border to the block container */
     background: #fff;
