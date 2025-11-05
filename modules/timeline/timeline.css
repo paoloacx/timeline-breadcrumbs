@@ -1,102 +1,42 @@
-/* ===== TIMELINE LAYOUT ===== */
+/* ===== TIMELINE STRUCTURE STYLES ===== */
 
 .timeline {
     position: relative;
-    /* NEW: Add padding for the spine (linea izquierda) */
-    padding-left: 30px; 
+    padding-left: 16px; /* Space for the line and dots */
+    /* REMOVED: background, padding, border (moved to blocks) */
     margin-bottom: 20px;
 }
 
-/* NEW: Horizontal line across the header (as requested) */
+/* NEW: Horizontal line across the header */
 .timeline::before {
     content: '';
     position: absolute;
-    left: 0;
-    right: 80vw;
-    top: -45px;
+    left: -1px; /* Start at left edge */
+    right: 80vw; /* End 20% from left */
+    top: -45px; /* Position at header mid-point */
     height: 4px;
     background: #000;
-    z-index: 0; /* Sit behind the header (header needs z-index > 0) */
+    z-index: 0; /* Sit behind the header window */
 }
 
-/* NEW: Spine (vertical line) container */
-.timeline-spine {
+.timeline-line {
     position: absolute;
-    top: -45px; /* MODIFIED: Start from horizontal line */
-    left: 10px; /* Position spine on the far left */
-    width: 20px;
-    /* MODIFIED: Use 100% height to fill container */
-    height: 100%;
-    z-index: 1;
-}
-
-.timeline-line-vertical {
-    position: absolute;
-    top: 0; 
-    left: 8px; /* Centered in 20px width */
+    left: -5px; /* Center the line */
+    top: -45px;  /* MODIFIED: Start from the horizontal line */
+    bottom: 0;
     width: 4px;
     background: #000;
-    height: 100%;
+    z-index: 1;  /* Sit above horizontal line */
 }
 
-/* NEW: Content wrapper (holds all blocks) */
-.timeline-content {
-    position: relative;
-    width: 100%;
-}
-
-/* NEW: Wrapper for a day (node + block) */
-.timeline-day-wrapper {
-    position: relative;
-    /* This wrapper contains the node and the block */
-}
-
-/* NEW: The Circle Node (ONLY FOR DAY BLOCKS) */
-.timeline-node {
-    position: absolute;
-    top: 25px; /* Aligns with middle of day-header */
-    left: -22px; /* Pulls it left into the spine area */
-    width: 20px;
-    height: 20px;
-    background: #fff;
-    border: 2px solid #000;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 3; /* Above vertical line */
-}
-
-/* Connector from node to block */
-.timeline-node::before {
-    content: '';
-    position: absolute;
-    left: 100%;
-    top: 8px; /* Center (20px / 2) - 2px */
-    width: 12px; /* Connector width */
-    height: 4px;
-    background: #000;
-    z-index: 2;
-}
-
-/* Dot inside the node */
-.timeline-node::after {
-    content: '';
-    width: 10px;
-    height: 10px;
-    background: #000;
-    border-radius: 50%;
-}
-
-
-/* Day Block positioning */
 .day-block {
-    margin-bottom: 12px;
-    background: white;
-    border: 3px solid #000;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3); /* SHADOW for Day */
+    margin-bottom: 30px;
+    margin-right: -5px;
     position: relative;
-    margin-left: 20px; /* MODIFIED: Space from the node */
+    /* NEW: Moved shadow and border to the block container */
+    background: #fff;
+    border: 3px solid #000;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
 
 .day-header {
@@ -106,16 +46,29 @@
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
+    /* REMOVED: border, box-shadow */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 5; 
+    position: relative;
+    /* NEW: Add separator line */
     border-bottom: 3px solid #000;
 }
 
-/* REMOVED: .day-header::before (replaced by .timeline-node in HTML) */
+.day-header::before {
+    content: '';
+    position: absolute;
+    left: -33px; /* Adjust to align with the line */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    background: #000;
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px #000;
+    z-index: 2; /* Sit above vertical line */
+}
 
 .day-header:hover {
     background: #333;
@@ -131,13 +84,16 @@
         max-height 0.45s ease,
         opacity 0.4s ease,
         transform 0.4s ease;
+    /* CHANGED: Removed dotted background, now solid white */
     background: #fff;
+    /* REMOVED: padding: 0 16px; (padding is added on expand) */
 }
 
 .day-content.expanded {
-    max-height: 5000px !important; /* Large value */
+    max-height: 5000px !important; /* Large enough value */
     opacity: 1 !important;
     transform: translateY(0) !important;
+    /* CHANGED: Removed !important, just padding */
     padding: 10px; 
 }
 
@@ -163,42 +119,8 @@
     font-weight: bold;
     border: 3px solid #000;
     padding: 10px 16px;
-    margin-bottom: 0; /* No margin between header and content */
-    margin-left: 20px; /* Align with day-blocks */
-    position: relative; /* For the circle */
+    margin-bottom: 12px;
 }
-
-/* --- NEW: This adds the CIRCLE to Year, Month, and Week headers --- */
-.nested-header::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    left: -22px; /* Pulls it left into the spine area (same as .timeline-node) */
-    width: 20px;
-    height: 20px;
-    background: #fff;
-    border: 2px solid #000;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 3;
-}
-/* Dot inside the circle */
-.nested-header::after { 
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -17px; /* (20/2) - (10/2) - 22 = -17 */
-    transform: translateY(-50%);
-    width: 10px;
-    height: 10px;
-    background: #000;
-    border-radius: 50%;
-    z-index: 4;
-}
-
 
 /* Chevron for "expand up" blocks */
 .chevron-up {
@@ -225,42 +147,45 @@
 
 /* Year Styles */
 .year-block {
-    margin-bottom: 12px;
-    /* REMOVED: shadow, border, margin-left */
+    margin-bottom: 20px;
 }
+
 .year-header {
-    background: #e0e0e0;
+    background: #e0e0e0; /* Light grey */
     font-size: 20px;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3); /* SHADOW on header */
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
+
 .year-content {
-     padding-left: 20px; /* Indent content */
+    /* No extra styles needed */
 }
 
 /* Month Styles */
 .month-block {
-    margin-bottom: 12px;
-    /* REMOVED: shadow, border, margin-left */
+    margin-bottom: 16px;
 }
+
 .month-header {
-    background: #f0f0f0;
+    background: #f0f0f0; /* Lighter grey */
     font-size: 18px;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.2); /* SHADOW on header */
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.2);
 }
+
 .month-content {
-     padding-left: 20px; /* Indent content */
+    /* No extra styles needed */
 }
 
 /* Week Styles */
 .week-block {
     margin-bottom: 12px;
-    /* REMOVED: shadow, border, margin-left */
 }
+
 .week-header {
-    background: #f9f9f9;
+    background: #f9f9f9; /* Off-white */
     font-size: 16px;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.1); /* SHADOW on header */
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
 }
+
 .week-content {
-     padding-left: 20px; /* Indent content */
+    /* No extra styles needed */
 }
