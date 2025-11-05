@@ -9,6 +9,14 @@ import {
 } from '../../utils.js';
 import { handleEditEntry, handlePreviewEntry } from '../../crud-handlers.js';
 
+// --- NEW: Icon Helper Functions ---
+const createIcon = (iconName, altText, extraStyle = '') => {
+    return `<img src="assets/icons/${iconName}.svg" alt="${altText}" class="icon-mac" style="vertical-align: middle; margin-right: 4px; ${extraStyle}">`;
+};
+const createLocationIcon = () => {
+     return `<img src="assets/icons/keep.svg" class="icon-mac" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 2px;">`;
+}
+
 /**
  * Initializes all event listeners for the timeline container.
  */
@@ -135,14 +143,19 @@ function renderDayBlock(dayKey, dayEntries) {
             ${recaps.map(recap => `
                 <div class="recap-block" data-id="${recap.id}">
                     <div class="recap-header">
-                        <span>🌟 Day Recap</span>
+                        <span>${createIcon('star', 'Recap')} Day Recap</span>
                         <span class="chevron-recap" id="chevron-recap-${recap.id}">▼</span>
                     </div>
                     <div class="recap-content hidden" id="recap-content-${recap.id}">
-                        <button class="mac-button edit-button btn-edit">✏️ Edit</button>
+                        <button class="mac-button edit-button btn-edit">
+                            ${createIcon('edit', 'Edit')} Edit
+                        </button>
                         
                         <div style="margin-bottom: 16px;">
-                            <strong>Rating:</strong> ${recap.rating}/10 ${'⭐'.repeat(Math.round(recap.rating / 2))}
+                            <strong>Rating:</strong> ${recap.rating}/10
+                            <div style="font-size: 12px; letter-spacing: -1px; margin-top: 4px; line-height: 1.2;">
+                                ${'⭐'.repeat(recap.rating)}
+                            </div>
                         </div>
                         
                         ${recap.reflection ? `
@@ -170,7 +183,9 @@ function renderDayBlock(dayKey, dayEntries) {
                                         <div style="font-weight: bold; font-size: 13px;">${recap.track.name}</div>
                                         <div style="font-size: 11px; color: #666;">${recap.track.artist}</div>
                                     </div>
-                                    <a href="${recap.track.url}" target="_blank" style="text-decoration: none; font-size: 18px;">🔗</a>
+                                    <a href="${recap.track.url}" target="_blank" style="text-decoration: none; font-size: 18px;">
+                                        <img src="assets/icons/link.svg" alt="Link" class="icon-mac" style="filter: none;">
+                                    </a>
                                 </div>
                             </div>
                         ` : ''}
@@ -194,7 +209,7 @@ function renderDayBlock(dayKey, dayEntries) {
                     <div class="breadcrumb-entry ${entry.isTimedActivity ? 'time-event' : ''} ${trackClass} ${spentClass} ${crumbClass}" style="${heightStyle}" data-id="${entry.id}">
                         ${entry.isTimedActivity ? 
                             `<div>
-                                <div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div>
+                                <div class="breadcrumb-time">${createIcon('time', 'Time')} ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div>
                                 <div class="time-event-duration">Duration: ${entry.duration} minutes</div>
                                 <div class="time-event-activity-box">${entry.activity}</div>
                             </div>
@@ -203,10 +218,10 @@ function renderDayBlock(dayKey, dayEntries) {
                             ` : ''}` :
                             `<div class="breadcrumb-time">
                                 ${entry.isQuickTrack ?
-                                    `<span class="compact-time">⏰ ${formatTime(entry.timestamp)} ${entry.note}</span>` :
-                                    `⏰ ${formatTime(entry.timestamp)}`
+                                    `<span class="compact-time">${createIcon('time', 'Time')} ${formatTime(entry.timestamp)} ${entry.note}</span>` :
+                                    `${createIcon('time', 'Time')} ${formatTime(entry.timestamp)}`
                                 }
-                                ${entry.isSpent ? `<span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>` : ''}
+                                ${entry.isSpent ? `<span class="spent-badge">${createIcon('money', 'Spent')} €${entry.spentAmount.toFixed(2)}</span>` : ''}
                             </div>`
                         }
                         
@@ -217,7 +232,7 @@ function renderDayBlock(dayKey, dayEntries) {
                         
                         ${!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap' ? `
                             <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
-                                ${entry.mood ? `<span class="mood-display">${entry.mood.emoji}</span>` : ''}
+                                ${entry.mood ? `` : ''}
                                 <div style="flex: 1;">
                                     <div class="breadcrumb-note">${noteContent}</div>
                                     ${needsReadMore ? `<button class="read-more-btn">Read more</button>` : ''}
@@ -229,7 +244,7 @@ function renderDayBlock(dayKey, dayEntries) {
                             <div class="breadcrumb-meta">
                                 ${entry.weather ? `<span>${entry.weather}</span>` : ''}
                                 ${entry.weather && entry.location ? ` • ` : ''}
-                                ${entry.location ? `<span>📍 ${entry.location}</span>` : ''}
+                                ${entry.location ? `<span>${createLocationIcon()} ${entry.location}</span>` : ''}
                             </div>
                         ` : ''}
                         
