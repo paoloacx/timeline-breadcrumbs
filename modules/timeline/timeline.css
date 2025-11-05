@@ -169,7 +169,7 @@
 .month-header {
     background: #f0f0f0; /* Lighter grey */
     font-size: 18px;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.2);
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
 
 .month-content {
@@ -184,7 +184,7 @@
 .week-header {
     background: #f9f9f9; /* Off-white */
     font-size: 16px;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
 
 .week-content {
