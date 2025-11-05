@@ -31,7 +31,7 @@
 
 .day-block {
     margin-bottom: 30px;
-    margin-right: -5px; /* Mantenemos el ancho extra original */
+    margin-right: -5px; /* Mantenemos el ancho extra */
     position: relative;
     /* NEW: Moved shadow and border to the block container */
     background: #fff;
@@ -54,7 +54,7 @@
     position: relative;
     /* NEW: Add separator line */
     border-bottom: 3px solid #000;
-    /* CAMBIADO: Sombra añadida aquí, igual que los .nested-header */
+    /* CAMBIADO: Sombra añadida aquí, para ser consistente con .year-header */
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
 
@@ -167,7 +167,7 @@
 /* Month Styles */
 .month-block {
     margin-bottom: 16px;
-    /* REVERTIDO: Eliminado el margin-right que añadí */
+    /* Este bloque NO lleva margen negativo */
 }
 
 .month-header {
@@ -183,11 +183,11 @@
 /* Week Styles */
 .week-block {
     margin-bottom: 12px;
-    /* REVERTIDO: Eliminado el margin-right que añadí */
+    /* Este bloque NO lleva margen negativo */
 }
 
 .week-header {
-    background: #f9f9ff; /* Off-white */
+    background: #f9f9f9; /* Off-white */
     font-size: 16px;
     box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
 }
