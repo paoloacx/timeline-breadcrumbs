@@ -655,7 +655,7 @@ input[type="range"]:active::-moz-range-thumb {
     /* * ADDED: Force SVG to inherit parent color.
      * This fixes invisible/broken SVGs that are exported without a fill.
      */
-    fill: currentColor;
+    fill: currentColor; 
     /* Align icon with text inside buttons */
     vertical-align: middle;
 }
@@ -677,7 +677,7 @@ input[type="range"]:active::-moz-range-thumb {
 .fab-action:not(:disabled):hover {
     background: black !important;
     color: white !important;
-    border-color: black !important;
+    border-color: black !importan;
 }
 
 .mac-button:not(:disabled):hover img,
