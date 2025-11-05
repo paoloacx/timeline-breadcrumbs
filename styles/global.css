@@ -243,13 +243,8 @@ h1 {
     margin-bottom: 4px;
 }
 
-.mac-button:hover {
-    background: #eee;
-}
-
-.mac-button:active {
-    border-style: inset;
-}
+/* REMOVED: .mac-button:hover (replaced by new rules) */
+/* REMOVED: .mac-button:active (replaced by new rules) */
 
 .mac-button-primary {
     background: #000;
@@ -346,7 +341,7 @@ h1 {
     text-align: center;
     cursor: pointer;
     font-size: 16px;
-    transition: all 0.2s;
+    /* transition: all 0.2s; */ /* REMOVED */
 }
 
 .mood-option:hover {
@@ -455,20 +450,11 @@ h1 {
 /* Smooth animation for footer buttons (REMOVED) */
 
 /* Animation for mood selector */
-.mood-option {
-    transition: all 0.2s cubic-bezier(.18,.89,.32,1.28);
-}
-
 .mood-option:active {
     transform: scale(0.9);
 }
 
 /* Animation for activity/duration selectors */
-.duration-option,
-.activity-option {
-    transition: all 0.2s cubic-bezier(.18,.89,.32,1.28);
-}
-
 .duration-option:active,
 .activity-option:active {
     transform: scale(0.95);
@@ -477,7 +463,7 @@ h1 {
 /* Animation for image preview */
 .preview-image-thumb,
 .preview-map-thumb {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* transition: transform 0.2s ease, box-shadow 0.2s ease; */ /* REMOVED */
 }
 
 .preview-image-thumb:hover,
@@ -493,7 +479,7 @@ h1 {
 
 /* Animation for edit button */
 .edit-button {
-    transition: all 0.15s ease;
+    /* transition: all 0.15s ease; */ /* REMOVED */
 }
 
 .edit-button:hover {
@@ -507,7 +493,7 @@ h1 {
 
 /* Animation for read more button */
 .read-more-btn {
-    transition: all 0.2s ease;
+    /* transition: all 0.2s ease; */ /* REMOVED */
     padding: 4px 8px;
     margin-top: 4px;
 }
@@ -626,6 +612,7 @@ input[type="range"]:active::-moz-range-thumb {
 #audio-collapsible-content {
     margin-bottom: 15px;
 }
+
 
 /* --- NEW: ICONOS MAC CLASSIC (interacción estilo System 6/7) --- */
 /* (Added from user prompt, cleaned spaces) */
