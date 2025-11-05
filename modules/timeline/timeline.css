@@ -31,13 +31,13 @@
 
 .day-block {
     margin-bottom: 30px;
-    /* CAMBIADO: Eliminado el margin-right: -5px; que ocultaba la sombra */
-    /* margin-right: -5px; */ 
+    margin-right: -5px; /* Mantenemos el ancho extra */
     position: relative;
     /* NEW: Moved shadow and border to the block container */
     background: #fff;
     border: 3px solid #000;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+    /* CAMBIADO: Aumentada la sombra a 10px para compensar el margen */
+    box-shadow: 10px 5px 0 rgba(0,0,0,0.3);
 }
 
 .day-header {
@@ -47,8 +47,7 @@
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    /* CAMBIADO: Eliminada la sombra duplicada que añadí por error */
-    /* box-shadow: 5px 5px 0 rgba(0,0,0,0.3); */
+    /* REMOVED: border, box-shadow */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -156,7 +155,8 @@
 .year-header {
     background: #e0e0e0; /* Light grey */
     font-size: 20px;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+    /* CAMBIADO: Aumentada la sombra a 10px para compensar el margen */
+    box-shadow: 10px 5px 0 rgba(0,0,0,0.3);
 }
 
 .year-content {
@@ -166,12 +166,14 @@
 /* Month Styles */
 .month-block {
     margin-bottom: 16px;
+    margin-right: -5px; /* AÑADIDO: Ancho extra */
 }
 
 .month-header {
     background: #f0f0f0; /* Lighter grey */
     font-size: 18px;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.2);
+    /* CAMBIADO: Aumentada la sombra a 10px para compensar el margen */
+    box-shadow: 10px 5px 0 rgba(0,0,0,0.2);
 }
 
 .month-content {
@@ -181,12 +183,14 @@
 /* Week Styles */
 .week-block {
     margin-bottom: 12px;
+    margin-right: -5px; /* AÑADIDO: Ancho extra */
 }
 
 .week-header {
     background: #f9f9f9; /* Off-white */
     font-size: 16px;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+    /* CAMBIADO: Aumentada la sombra a 10px para compensar el margen */
+    box-shadow: 10px 5px 0 rgba(0,0,0,0.1);
 }
 
 .week-content {
