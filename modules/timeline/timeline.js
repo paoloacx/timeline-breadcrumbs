@@ -2,8 +2,11 @@
 
 // Imports
 import { getState } from '../../core/state.js';
-// NEW: Import new date utils
-import { formatDate, formatTime, calculateEndTime, getDayKey, getYearKey, getMonthKey, getWeekKey, getMonthName } from '../../utils.js';
+// MODIFIED: Import new date utils
+import { 
+    formatDate, formatTime, calculateEndTime, getDayKey, 
+    getYearKey, getMonthKey, getWeekNumberKey, getMonthName 
+} from '../../utils.js';
 import { handleEditEntry, handlePreviewEntry } from '../../crud-handlers.js';
 
 /**
@@ -274,7 +277,7 @@ export function renderTimeline() {
     entries.forEach(entry => {
         const yearKey = getYearKey(entry.timestamp);
         const monthKey = getMonthKey(entry.timestamp);
-        const weekKey = getWeekKey(entry.timestamp);
+        const weekKey = getWeekNumberKey(entry.timestamp); // MODIFIED: Use week number key
         const dayKey = getDayKey(entry.timestamp);
 
         if (!grouped[yearKey]) grouped[yearKey] = {};
@@ -287,47 +290,59 @@ export function renderTimeline() {
 
     // --- NEW: HTML generation from nested groups ---
     
-    // Sort Years: Oldest at the bottom (ascending)
-    const sortedYearKeys = Object.keys(grouped).sort((a, b) => a.localeCompare(b));
+    // MODIFIED Sort Years: Newest at the top (descending)
+    const sortedYearKeys = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
 
     const html = `
         <div class="timeline">
             <div class="timeline-line"></div>
-            ${sortedYearKeys.map(yearKey => {
+            ${sortedYearKeys.map((yearKey, yearIdx) => {
                 const yearData = grouped[yearKey];
-                // Sort Months: Oldest at the bottom (ascending)
-                const sortedMonthKeys = Object.keys(yearData).sort((a, b) => a.localeCompare(b));
+                // MODIFIED Sort Months: Newest at the top (descending)
+                const sortedMonthKeys = Object.keys(yearData).sort((a, b) => b.localeCompare(a));
+                
+                // MODIFIED: Expand the first (newest) year by default
+                const yearExpandedClass = yearIdx === 0 ? 'expanded' : '';
                 
                 // --- Render Year Block (Inverted: content first) ---
                 return `
                 <div class="year-block" data-year="${yearKey}">
-                    <div class="nested-content" id="year-content-${yearKey}">
-                        ${sortedMonthKeys.map(monthKey => {
+                    <div class="nested-content ${yearExpandedClass}" id="year-content-${yearKey}">
+                        ${sortedMonthKeys.map((monthKey, monthIdx) => {
                             const monthData = yearData[monthKey];
-                            // Sort Weeks: Oldest at the bottom (ascending)
-                            const sortedWeekKeys = Object.keys(monthData).sort((a, b) => a.localeCompare(b));
+                            // MODIFIED Sort Weeks: Newest at the top (descending)
+                            const sortedWeekKeys = Object.keys(monthData).sort((a, b) => b.localeCompare(a));
+                            
+                            // MODIFIED: Expand the first (newest) month by default
+                            const monthExpandedClass = monthIdx === 0 ? 'expanded' : '';
                             
                             // --- Render Month Block (Inverted: content first) ---
                             return `
                             <div class="month-block" data-month="${monthKey}">
-                                <div class="nested-content" id="month-content-${monthKey}">
-                                    ${sortedWeekKeys.map(weekKey => {
+                                <div class="nested-content ${monthExpandedClass}" id="month-content-${monthKey}">
+                                    ${sortedWeekKeys.map((weekKey, weekIdx) => {
                                         const weekData = monthData[weekKey];
-                                        // Sort Days: Newest at the top (descending) - This is the EXCEPTION
+                                        // MODIFIED Sort Days: Newest at the top (descending)
                                         const sortedDayKeys = Object.keys(weekData).sort((a, b) => b.localeCompare(a));
+                                        
+                                        // MODIFIED: Expand the first (newest) week by default
+                                        const weekExpandedClass = weekIdx === 0 ? 'expanded' : '';
+                                        
+                                        // MODIFIED: Get week number from key
+                                        const weekNum = weekKey.split('-W')[1].replace(/^0+/, ''); // "2025-W05" -> "5"
                                         
                                         // --- Render Week Block (Inverted: content first) ---
                                         return `
                                         <div class="week-block" data-week="${weekKey}">
-                                            <div class="nested-content" id="week-content-${weekKey}">
+                                            <div class="nested-content ${weekExpandedClass}" id="week-content-${weekKey}">
                                                 ${sortedDayKeys.map(dayKey => {
                                                     // --- Render Day Block (NORMAL: header first) ---
                                                     return renderDayBlock(dayKey, weekData[dayKey]);
                                                 }).join('')}
                                             </div>
                                             <div class="nested-header week-header" data-target="week-content-${weekKey}">
-                                                <span>Week of ${formatDate(weekKey + 'T12:00:00')}</span>
-                                                <span class="chevron-up">▼</span>
+                                                <span>Week ${weekNum}</span>
+                                                <span class="chevron-up ${weekExpandedClass}">▼</span>
                                             </div>
                                         </div>
                                         `;
@@ -335,7 +350,7 @@ export function renderTimeline() {
                                 </div>
                                 <div class="nested-header month-header" data-target="month-content-${monthKey}">
                                     <span>${getMonthName(monthKey)}</span>
-                                    <span class="chevron-up">▼</span>
+                                    <span class="chevron-up ${monthExpandedClass}">▼</span>
                                 </div>
                             </div>
                             `;
@@ -343,7 +358,7 @@ export function renderTimeline() {
                     </div>
                     <div class="nested-header year-header" data-target="year-content-${yearKey}">
                         <span>${yearKey}</span>
-                        <span class="chevron-up">▼</span>
+                        <span class="chevron-up ${yearExpandedClass}">▼</span>
                     </div>
                 </div>
                 `;
@@ -354,7 +369,6 @@ export function renderTimeline() {
     container.innerHTML = html;
     
     // --- Post-render logic (for mini-maps) ---
-    // This logic remains the same, as maps are rendered inside day blocks.
     entries.forEach(entry => {
         if (entry.coords) {
             setTimeout(() => {
