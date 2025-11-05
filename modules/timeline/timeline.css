@@ -7,27 +7,13 @@
     margin-bottom: 20px;
 }
 
-/* NEW: Horizontal line across the header */
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: -100vw; /* Start way off-screen */
-    right: -100vw; /* End way off-screen */
-    /* This negative 'top' aligns it with the middle of the main header */
-    top: -40px; 
-    height: 4px;
-    background: #000;
-    z-index: 0; /* Sit behind the header window */
-}
-
 .timeline-line {
     position: absolute;
     left: -5px; /* Center the line */
-    top: -70px; /* MODIFIED: Extend line to top of page */
+    top: 0;
     bottom: 0;
     width: 4px;
     background: #000;
-    z-index: 1; /* Sit above the new horizontal line */
 }
 
 .day-block {
