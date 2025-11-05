@@ -123,7 +123,7 @@
     border: 3px solid #000;
     padding: 10px 16px;
     position: relative;
-    /* REMOVED margin-bottom - will be on container */
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
 
 /* Circle dot for all nested headers */
@@ -158,13 +158,11 @@
 .year-block {
     margin-bottom: 20px;
     margin-right: -5px;
-    /* NO border/shadow here - it's on the header */
 }
 
 .year-header {
     background: #e0e0e0;
     font-size: 20px;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
     margin-bottom: 12px;
 }
 
@@ -175,61 +173,45 @@
 /* ===== MONTH BLOCK (Inverted: expands UP) ===== */
 .month-block {
     margin-bottom: 16px;
-    /* Container - border and shadow go on HEADER */
 }
 
 .month-header {
     background: #f0f0f0;
     font-size: 18px;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
     margin-bottom: 12px;
 }
 
 .month-content {
-    /* Container for weeks - uses striped pattern from global.css */
-    background-image: 
-        repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 10px,
-            rgba(0,0,0,0.03) 10px,
-            rgba(0,0,0,0.03) 20px
-        );
-    padding: 12px;
-}
-
-.month-content.expanded {
-    /* Pattern visible when expanded */
+    /* Container for weeks - horizontal striped pattern */
+    background: repeating-linear-gradient(
+        0deg,
+        #f8f8f8,
+        #f8f8f8 1px,
+        #fefefe 1px,
+        #fefefe 2px
+    );
 }
 
 /* ===== WEEK BLOCK (Inverted: expands UP) ===== */
 .week-block {
     margin-bottom: 12px;
-    /* Container - border and shadow go on HEADER */
 }
 
 .week-header {
     background: #f9f9f9;
     font-size: 16px;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
     margin-bottom: 12px;
 }
 
 .week-content {
-    /* Container for days - uses striped pattern from global.css */
-    background-image: 
-        repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 10px,
-            rgba(0,0,0,0.03) 10px,
-            rgba(0,0,0,0.03) 20px
-        );
-    padding: 12px;
-}
-
-.week-content.expanded {
-    /* Pattern visible when expanded */
+    /* Container for days - horizontal striped pattern */
+    background: repeating-linear-gradient(
+        0deg,
+        #fcfcfc,
+        #fcfcfc 1px,
+        #ffffff 1px,
+        #ffffff 2px
+    );
 }
 
 /* Current week styling */
