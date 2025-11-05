@@ -30,9 +30,9 @@ function toggleFabMenu() {
     fabMenuOpen = !fabMenuOpen;
     
     if (fabMenuOpen) {
-        // CHANGED: Use close icon
-        fabIcon.innerHTML = `<img src="assets/icons/close.svg" alt="Close" class="icon-mac">`;
-        fabIcon.style.transform = 'rotate(0deg)'; // Remove old rotation
+        // CHANGED: Reverted to text '×' as requested
+        fabIcon.textContent = '×';
+        fabIcon.style.transform = 'rotate(45deg)'; // Keep rotation for '×'
         showFabOverlay(true); // NEW: Show overlay
         fabActions.forEach((wrapper, index) => {
             setTimeout(() => {
@@ -41,8 +41,8 @@ function toggleFabMenu() {
             }, index * 50);
         });
     } else {
-        // CHANGED: Use add icon
-        fabIcon.innerHTML = `<img src="assets/icons/add.svg" alt="Add" class="icon-mac">`;
+        // CHANGED: Reverted to emoji '+' as requested
+        fabIcon.textContent = '+';
         fabIcon.style.transform = 'rotate(0deg)';
         showFabOverlay(false); // NEW: Hide overlay
         fabActions.forEach((wrapper, index) => {
@@ -106,10 +106,14 @@ export function initFabMenu(formActions) {
     });
 
     // --- CHANGED: Set FAB icons on initialization ---
-    document.getElementById('fab-icon').innerHTML = `<img src="assets/icons/add.svg" alt="Add" class="icon-mac">`;
+    // The main icon is set to '+' by default in the HTML or by toggleFabMenu
+    // We only set the action button icons here
     document.getElementById('fab-action-crumb').innerHTML = `<img src="assets/icons/crumb.svg" alt="Crumb" class="icon-mac">`;
     document.getElementById('fab-action-time').innerHTML = `<img src="assets/icons/time.svg" alt="Time" class="icon-mac">`;
     document.getElementById('fab-action-track').innerHTML = `<img src="assets/icons/track.svg" alt="Track" class="icon-mac">`;
     document.getElementById('fab-action-spent').innerHTML = `<img src="assets/icons/money.svg" alt="Spent" class="icon-mac">`;
     document.getElementById('fab-action-recap').innerHTML = `<img src="assets/icons/star.svg" alt="Recap" class="icon-mac">`;
+
+    // Ensure fab icon is set to '+' on load
+    document.getElementById('fab-icon').textContent = '+';
 }
