@@ -168,12 +168,12 @@ export function renderTimeline() {
                                         </div>
                                     ` : ''}
                                     
-                                    ${recap.highlights && recap.highlights.length > 0 ? `
+                                    ${recap.highlights && recap.highlights.length > 0 && recap.highlights.some(h => h) ? `
                                         <div style="margin-bottom: 16px;">
                                             <strong>Highlights:</strong>
-                                            <ul style="margin-top: 8px; padding-left: 20px;">
-                                                ${recap.highlights.map(h => `<li style="margin-bottom: 4px;">${h}</li>`).join('')}
-                                            </ul>
+                                            <div class="recap-highlights-container" style="margin-top: 8px;">
+                                                ${recap.highlights.filter(h => h).map(h => `<span class="recap-highlight-tag">${h}</span>`).join('')}
+                                            </div>
                                         </div>
                                     ` : ''}
                                     
@@ -215,12 +215,12 @@ export function renderTimeline() {
                                     ${entry.isTimedActivity ? 
                                         `<div>
                                             <div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div>
-                                            <div class="activity-label">${entry.activity}</div>
-                                            <div style="font-size: 13px; color: #666; margin-top: 8px;">Duration: ${entry.duration} minutes</div>
+                                            <div class="time-event-duration">Duration: ${entry.duration} minutes</div>
+                                            <div class="time-event-activity-box">${entry.activity}</div>
                                         </div>
                                         ${entry.optionalNote ? `
-                                            <div class="optional-note">${entry.optionalNote}</div>
-                                            ${needsReadMoreOptional ? `<button class="read-more-btn">Read more</button>` : ''}
+                                            <div class="time-event-note-box">${entry.optionalNote}</div>
+                                            ${'' /* Read More button removed for this specific note type */}
                                         ` : ''}` :
                                         `<div class="breadcrumb-time">
                                             ${entry.isQuickTrack ?
@@ -255,14 +255,14 @@ export function renderTimeline() {
                                     ` : ''}
                                     
                                     ${entry.audio ? `
-                                        <div style="margin-top: 12px; margin-bottom: 12px;">
+                                        <div style="margin-top: 12px; margin-bottom: 12px; text-align: left;">
                                             <audio controls style="width: 100%; max-width: 300px;">
                                                 <source src="${entry.audio}">
                                             </audio>
                                         </div>
                                     ` : ''}
                                     
-                                    <div class="breadcrumb-preview">
+                                    <div class="breadcrumb-preview" style="text-align: left;">
                                         ${entry.images && entry.images.length > 0 ? entry.images.map((img, idx) => `
                                             <img src="${img}" class="preview-image-thumb" alt="Thumbnail ${idx+1}" data-index="${idx}">
                                         `).join('') : ''}
