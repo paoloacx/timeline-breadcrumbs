@@ -98,17 +98,17 @@ function toggleNote(entryId) {
 function renderTimeline(entries) {
     const container = document.getElementById('timeline-container');
     const emptyState = document.getElementById('empty-state');
-    const footer = document.getElementById('footer');
+    const footer = document.getElementById('footer'); // NOTE: footer no existe en el index.html, pero mantengo la lógica
 
     if (!entries || entries.length === 0) {
         container.innerHTML = '';
         emptyState.classList.remove('hidden');
-        footer.style.display = 'none';
+        if (footer) footer.style.display = 'none'; // Check if footer exists
         return;
     }
 
     emptyState.classList.add('hidden');
-    footer.style.display = 'flex';
+    if (footer) footer.style.display = 'flex'; // Check if footer exists
 
     const groupedByDay = {};
     entries.forEach(entry => {
@@ -118,6 +118,11 @@ function renderTimeline(entries) {
         }
         groupedByDay[dayKey].push(entry);
     });
+
+    // Helper function to create icon HTML
+    const createIcon = (iconName, altText) => {
+        return `<img src="assets/icons/${iconName}.svg" alt="${altText}" class="icon-mac" style="vertical-align: middle; margin-right: 4px;">`;
+    };
 
     const html = `
         <div class="timeline">
@@ -140,11 +145,13 @@ function renderTimeline(entries) {
                         ${recaps.map(recap => `
                             <div class="recap-block">
                                 <div class="recap-header" onclick="toggleRecap('${recap.id}')">
-                                    <span>Day Recap</span>
+                                    <span>${createIcon('star', 'Recap')} Day Recap</span>
                                     <span class="chevron-recap" id="chevron-recap-${recap.id}">▼</span>
                                 </div>
                                 <div class="recap-content hidden" id="recap-content-${recap.id}">
-                                    <button class="mac-button edit-button" onclick="editEntry(${recap.id})" style="position: absolute; top: 12px; right: 12px;">✏️ Edit</button>
+                                    <button class="mac-button edit-button" onclick="editEntry(${recap.id})" style="position: absolute; top: 12px; right: 12px;">
+                                        ${createIcon('edit', 'Edit')} Edit
+                                    </button>
                                     
                                     <div style="margin-bottom: 16px;">
                                         <strong>Rating:</strong> ${recap.rating}/10 ${'⭐'.repeat(Math.round(recap.rating / 2))}
@@ -191,10 +198,12 @@ function renderTimeline(entries) {
                                 
                                 return `
                                 <div class="breadcrumb-entry ${entry.isTimedActivity ? 'edit-mode' : ''} ${trackClass} ${spentClass}" style="${heightStyle}">
-                                    <button class="mac-button edit-button" onclick="editEntry(${entry.id})">✏️ Edit</button>
+                                    <button class="mac-button edit-button" onclick="editEntry(${entry.id})">
+                                        ${createIcon('edit', 'Edit')} Edit
+                                    </button>
                                     
                                     ${entry.isTimedActivity ? 
-                                        `<div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div>
+                                        `<div class="breadcrumb-time">${createIcon('time', 'Time')} ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div>
                                         <div class="activity-label">${entry.activity}</div>
                                         <div style="font-size: 13px; color: #666; margin-top: 8px;">Duration: ${entry.duration} minutes</div>
                                         ${entry.optionalNote ? `
@@ -203,10 +212,10 @@ function renderTimeline(entries) {
                                         ` : ''}` :
                                         `<div class="breadcrumb-time">
                                             ${entry.isQuickTrack ?
-                                                `<span class="compact-time">⏰ ${formatTime(entry.timestamp)} ${entry.note}</span>` :
-                                                `⏰ ${formatTime(entry.timestamp)}`
+                                                `<span class="compact-time">${createIcon('time', 'Time')} ${formatTime(entry.timestamp)} ${entry.note}</span>` :
+                                                `${createIcon('time', 'Time')} ${formatTime(entry.timestamp)}`
                                             }
-                                            ${entry.isSpent ? `<span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>` : ''}
+                                            ${entry.isSpent ? `<span class="spent-badge">${createIcon('money', 'Spent')} €${entry.spentAmount.toFixed(2)}</span>` : ''}
                                         </div>`
                                     }
                                     
@@ -248,7 +257,9 @@ function renderTimeline(entries) {
                                         `).join('') : ''}
                                         ${entry.coords ? `<div class="preview-map-thumb" id="mini-map-${entry.id}"></div>` : ''}
                                         ${(entry.images && entry.images.length > 0) || entry.coords || entry.audio ? `
-                                            <button class="mac-button preview-button" onclick="previewEntry(${entry.id})">🔍</button>
+                                            <button class="mac-button preview-button" onclick="previewEntry(${entry.id})">
+                                                ${createIcon('search', 'Preview')}
+                                            </button>
                                         ` : ''}
                                     </div>
                                 </div>
