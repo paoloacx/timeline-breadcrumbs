@@ -100,7 +100,7 @@ export function renderBSOResults(results) {
                  data-artist="${track.artistName.replace(/'/g, "\\'")}" 
                  data-url="${track.trackViewUrl}" 
                  data-artwork="${track.artworkUrl100}"
-                 style="display: flex; align-items: center; gap: 12px; padding: 8px; border: 2px solid #999; margin-bottom: 8px; cursor: pointer; background: white;">
+                 style="display: flex; align: items: center; gap: 12px; padding: 8px; border: 2px solid #999; margin-bottom: 8px; cursor: pointer; background: white;">
                 
                 <img src="${track.artworkUrl100}" style="width: 50px; height: 50px; border: 2px solid #000;">
                 <div style="flex: 1;">
@@ -124,7 +124,7 @@ export function selectTrackUI(trackData) {
     const { name, artist, url, artwork } = trackData;
     document.getElementById('recap-selected-track').value = JSON.stringify(trackData);
     
-    // CHANGED: Use link.svg icon instead of '🔗'
+    // CHANGED: Reverted to '🔗' emoji as link.svg does not exist
     document.getElementById('recap-bso-results').innerHTML = `
         <div class="bso-result" style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 3px solid #000; background: #f0f0f0;">
             <img src="${artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
@@ -132,9 +132,7 @@ export function selectTrackUI(trackData) {
                 <div style="font-weight: bold;">${name}</div>
                 <div style="font-size: 12px; color: #666;">${artist}</div>
             </div>
-            <a href="${url}" target="_blank" style="text-decoration: none;">
-                <img src="assets/icons/link.svg" alt="Link" class="icon-mac" style="filter: grayscale(0%);">
-            </a>
+            <a href="${url}" target="_blank" style="text-decoration: none; font-size: 20px;">🔗</a>
         </div>
     `;
 }
@@ -144,7 +142,6 @@ export function selectTrackUI(trackData) {
 /**
  * Displays a mini-map in the specified container.
  * @param {number} lat - Latitude.
- *." alt="Link" class="icon-mac">
  * @param {number} lon - Longitude.
  * @param {string} containerId - The ID of the map container element.
  */
