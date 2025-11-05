@@ -30,7 +30,7 @@ function toggleFabMenu() {
     fabMenuOpen = !fabMenuOpen;
     
     if (fabMenuOpen) {
-        // CHANGED: Reverted to text '×' as requested
+        // REVERTED: Use text '×' as requested
         fabIcon.textContent = '×';
         fabIcon.style.transform = 'rotate(45deg)'; // Keep rotation for '×'
         showFabOverlay(true); // NEW: Show overlay
@@ -41,7 +41,7 @@ function toggleFabMenu() {
             }, index * 50);
         });
     } else {
-        // CHANGED: Reverted to emoji '+' as requested
+        // REVERTED: Use emoji '+' as requested
         fabIcon.textContent = '+';
         fabIcon.style.transform = 'rotate(0deg)';
         showFabOverlay(false); // NEW: Hide overlay
@@ -104,16 +104,10 @@ export function initFabMenu(formActions) {
         closeFabMenu(); 
         formActions.openRecapForm(); 
     });
-
-    // --- CHANGED: Set FAB icons on initialization ---
-    // The main icon is set to '+' by default in the HTML or by toggleFabMenu
-    // We only set the action button icons here
-    document.getElementById('fab-action-crumb').innerHTML = `<img src="assets/icons/crumb.svg" alt="Crumb" class="icon-mac">`;
-    document.getElementById('fab-action-time').innerHTML = `<img src="assets/icons/time.svg" alt="Time" class="icon-mac">`;
-    document.getElementById('fab-action-track').innerHTML = `<img src="assets/icons/track.svg" alt="Track" class="icon-mac">`;
-    document.getElementById('fab-action-spent').innerHTML = `<img src="assets/icons/money.svg" alt="Spent" class="icon-mac">`;
-    document.getElementById('fab-action-recap').innerHTML = `<img src="assets/icons/star.svg" alt="Recap" class="icon-mac">`;
-
+    
+    // REVERTED: Removed the code that set innerHTML,
+    // as the index.html now handles the icons.
+    
     // Ensure fab icon is set to '+' on load
     document.getElementById('fab-icon').textContent = '+';
 }
