@@ -154,7 +154,10 @@ function renderTimeline(entries) {
                                     </button>
                                     
                                     <div style="margin-bottom: 16px;">
-                                        <strong>Rating:</strong> ${recap.rating}/10 ${'⭐'.repeat(Math.round(recap.rating / 2))}
+                                        <strong>Rating:</strong> ${recap.rating}/10
+                                        <div style="font-size: 12px; letter-spacing: -1px; margin-top: 4px; line-height: 1.2;">
+                                            ${'⭐'.repeat(recap.rating)}
+                                        </div>
                                     </div>
                                     
                                     ${recap.reflection ? `
@@ -182,7 +185,9 @@ function renderTimeline(entries) {
                                                     <div style="font-weight: bold; font-size: 13px;">${recap.track.name}</div>
                                                     <div style="font-size: 11px; color: #666;">${recap.track.artist}</div>
                                                 </div>
-                                                <a href="${recap.track.url}" target="_blank" style="text-decoration: none; font-size: 18px;">🔗</a>
+                                                <a href="${recap.track.url}" target="_blank" style="text-decoration: none; font-size: 18px;">
+                                                    <img src="assets/icons/link.svg" alt="Link" class="icon-mac" style="filter: none;">
+                                                </a>
                                             </div>
                                         </div>
                                     ` : ''}
@@ -208,7 +213,7 @@ function renderTimeline(entries) {
                                         <div style="font-size: 13px; color: #666; margin-top: 8px;">Duration: ${entry.duration} minutes</div>
                                         ${entry.optionalNote ? `
                                             <div class="optional-note" id="note-${entry.id}">${entry.optionalNote}</div>
-                                            ${entry.optionalNote.length > 200 ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
+                                            ${entry.optionalNote.length > 200 ? `<button class="read-more-btn" id="read-more-${id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
                                         ` : ''}` :
                                         `<div class="breadcrumb-time">
                                             ${entry.isQuickTrack ?
@@ -222,7 +227,7 @@ function renderTimeline(entries) {
                                     ${entry.isTimedActivity ? '' : ''}
                                     ${entry.isQuickTrack && entry.optionalNote ? `
                                         <div class="optional-note" id="note-${entry.id}">${entry.optionalNote}</div>
-                                        ${entry.optionalNote.length > 200 ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
+                                        ${entry.optionalNote.length > 200 ? `<button class="read-more-btn" id="read-more-${id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
                                     ` : ''}
                                     
                                     ${!entry.isTimedActivity && !entry.isQuickTrack ? `
@@ -230,7 +235,7 @@ function renderTimeline(entries) {
                                             ${entry.mood ? `<span class="mood-display">${entry.mood.emoji}</span>` : ''}
                                             <div style="flex: 1;">
                                                 <div class="breadcrumb-note" id="note-${entry.id}">${entry.note}</div>
-                                                ${entry.note && entry.note.length > 200 ? `<button class="read-more-btn" id="read-more-${entry.id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
+                                                ${entry.note && entry.note.length > 200 ? `<button class="read-more-btn" id="read-more-${id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
                                             </div>
                                         </div>
                                     ` : ''}
