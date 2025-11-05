@@ -232,7 +232,7 @@ function renderTimeline(entries) {
                                     
                                     ${!entry.isTimedActivity && !entry.isQuickTrack ? `
                                         <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
-                                            ${entry.mood ? `<span class="mood-display">${entry.mood.emoji}</span>` : ''}
+                                            ${entry.mood ? `` : ''}
                                             <div style="flex: 1;">
                                                 <div class="breadcrumb-note" id="note-${entry.id}">${entry.note}</div>
                                                 ${entry.note && entry.note.length > 200 ? `<button class="read-more-btn" id="read-more-${id}" onclick="toggleReadMore(${entry.id})">Read more</button>` : ''}
