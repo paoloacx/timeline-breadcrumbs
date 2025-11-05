@@ -139,3 +139,45 @@ export function getMonthName(monthKey) {
     const date = new Date(parseInt(year), parseInt(month) - 1, 1);
     return date.toLocaleDateString('en', { month: 'long' });
 }
+
+/**
+ * Gets the ISO 8601 week number for a given timestamp.
+ * @param {string} timestamp - ISO date string.
+ * @returns {number} Week number (1-53).
+ */
+export function getWeekNumber(timestamp) {
+    const d = new Date(Date.UTC(
+        new Date(timestamp).getFullYear(), 
+        new Date(timestamp).getMonth(), 
+        new Date(timestamp).getDate()
+    ));
+    // Set to nearest Thursday: current date + 4 - current day number
+    // Make Sunday's day number 7
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+    // Get first day of year
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    // Calculate full weeks to nearest Thursday
+    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    return weekNo;
+}
+
+/**
+ * Gets a sortable Week key (e.g., "2025-W45").
+ * @param {string} timestamp - ISO date string.
+ * @returns {string} Week key.
+ */
+export function getWeekNumberKey(timestamp) {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const week = String(getWeekNumber(timestamp)).padStart(2, '0');
+    
+    // Handle edge case: Week 52/53 belonging to the *next* year
+    if (week > 50 && date.getMonth() === 0) {
+        return `${year - 1}-W${week}`;
+    }
+    // Handle edge case: Week 01 belonging to the *previous* year
+    if (week === 1 && date.getMonth() === 11) {
+        return `${year + 1}-W01`;
+    }
+    return `${year}-W${week}`;
+}
