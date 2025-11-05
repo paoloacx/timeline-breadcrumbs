@@ -31,7 +31,7 @@
 
 .day-block {
     margin-bottom: 30px;
-    margin-right: -5px; /* Mantenemos el ancho extra */
+    margin-right: -5px; /* Mantenemos el ancho extra original */
     position: relative;
     /* NEW: Moved shadow and border to the block container */
     background: #fff;
@@ -167,7 +167,7 @@
 /* Month Styles */
 .month-block {
     margin-bottom: 16px;
-    margin-right: -5px; /* AÑADIDO: Ancho extra para consistencia */
+    /* REVERTIDO: Eliminado el margin-right que añadí */
 }
 
 .month-header {
@@ -183,11 +183,11 @@
 /* Week Styles */
 .week-block {
     margin-bottom: 12px;
-    margin-right: -5px; /* AÑADIDO: Ancho extra para consistencia */
+    /* REVERTIDO: Eliminado el margin-right que añadí */
 }
 
 .week-header {
-    background: #f9f9f9; /* Off-white */
+    background: #f9f9ff; /* Off-white */
     font-size: 16px;
     box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
 }
