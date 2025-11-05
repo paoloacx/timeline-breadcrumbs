@@ -28,7 +28,7 @@ export function initTimeline() {
         if (nestedHeader) {
             const contentId = nestedHeader.dataset.target;
             const content = document.getElementById(contentId);
-            const chevron = nestedHeader.querySelector('.chevron-up, .chevron-down');
+            const chevron = nestedHeader.querySelector('.chevron-up');
             
             if (content) content.classList.toggle('expanded');
             if (chevron) chevron.classList.toggle('expanded');
@@ -210,35 +210,61 @@ function renderDayBlock(dayKey, dayEntries) {
             `).join('')}
             
             <div class="day-content ${expandedClass}" id="day-content-${dayKey}">
-                ${regularEntries.map(entry => `
-                    <div class="breadcrumb-entry" data-id="${entry.id}">
-                        <div class="breadcrumb-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 12px;">
-                            <div style="flex: 1;">
-                                <div style="font-weight: bold; font-size: 14px;">${formatTime(entry.timestamp)}</div>
-                                ${entry.endTime ? `<div style="font-size: 12px; color: #666;">Ended: ${entry.endTime}</div>` : ''}
+                ${regularEntries.map(entry => {
+                    const heightStyle = entry.isTimedActivity && entry.duration ? 
+                        `min-height: ${Math.max(100, entry.duration * 1.5)}px;` : '';
+                    
+                    const trackClass = entry.isQuickTrack ? 'track-event' : '';
+                    const spentClass = entry.isSpent ? 'spent-event' : '';
+                    const crumbClass = (!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap') ? 'crumb-event' : '';
+                    
+                    const noteContent = entry.note || '';
+                    const optionalNoteContent = entry.optionalNote || '';
+                    const needsReadMore = noteContent.length > 200 || noteContent.split('\n').length > 4;
+                    const needsReadMoreOptional = optionalNoteContent.length > 200 || optionalNoteContent.split('\n').length > 4;
+
+                    return `
+                    <div class="breadcrumb-entry ${entry.isTimedActivity ? 'time-event' : ''} ${trackClass} ${spentClass} ${crumbClass}" style="${heightStyle}" data-id="${entry.id}">
+                        ${entry.isTimedActivity ? 
+                            `<div>
+                                <div class="breadcrumb-time">${createIcon('time', 'Time')} ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div>
+                                <div class="time-event-duration">Duration: ${entry.duration} minutes</div>
+                                <div class="time-event-activity-box">${entry.activity}</div>
                             </div>
-                            <div class="breadcrumb-mood">
+                            ${entry.optionalNote ? `
+                                <div class="time-event-note-box">${entry.optionalNote}</div>
+                            ` : ''}` :
+                            `<div class="breadcrumb-time">
+                                ${entry.isQuickTrack ?
+                                    `<span class="compact-time">${createIcon('time', 'Time')} ${formatTime(entry.timestamp)} ${entry.note}</span>` :
+                                    `${createIcon('time', 'Time')} ${formatTime(entry.timestamp)}`
+                                }
+                                ${entry.isSpent ? `<span class="spent-badge">${createIcon('money', 'Spent')} €${entry.spentAmount.toFixed(2)}</span>` : ''}
+                            </div>`
+                        }
+                        
+                        ${entry.isQuickTrack && entry.optionalNote ? `
+                            <div class="optional-note">${optionalNoteContent}</div>
+                            ${needsReadMoreOptional ? `<button class="read-more-btn">Read more</button>` : ''}
+                        ` : ''}
+                        
+                        ${!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap' ? `
+                            <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
                                 ${entry.mood !== undefined && entry.mood !== null ? 
-                                    `<img src="assets/icons/mood-icon-${entry.mood}.svg" alt="Mood" class="icon-mac" style="width: 24px; height: 24px;">` 
+                                    `<img src="assets/icons/mood-icon-${entry.mood}.svg" alt="Mood" class="icon-mac" style="width: 32px; height: 32px; flex-shrink: 0;">` 
                                     : ''}
+                                <div style="flex: 1;">
+                                    <div class="breadcrumb-note">${noteContent}</div>
+                                    ${needsReadMore ? `<button class="read-more-btn">Read more</button>` : ''}
+                                </div>
                             </div>
-                        </div>
-                        
-                        ${entry.title ? `
-                            <div class="breadcrumb-title">${entry.title}</div>
                         ` : ''}
                         
-                        ${entry.note ? `
-                            <div class="breadcrumb-note ${entry.note.length > 200 ? 'truncated' : ''}" style="margin-bottom: 12px;">
-                                ${entry.note}
-                            </div>
-                            ${entry.note.length > 200 ? '<button class="read-more-btn mac-button">Read more</button>' : ''}
-                        ` : ''}
-                        
-                        ${entry.location ? `
-                            <div style="font-size: 12px; color: #666; margin-bottom: 12px; display: flex; align-items: center; gap: 4px;">
-                                ${createLocationIcon()}
-                                <span>${entry.location}</span>
+                        ${(entry.weather || entry.location) ? `
+                            <div class="breadcrumb-meta">
+                                ${entry.weather ? `<span>${entry.weather}</span>` : ''}
+                                ${entry.weather && entry.location ? ` • ` : ''}
+                                ${entry.location ? `<span>${createLocationIcon()} ${entry.location}</span>` : ''}
                             </div>
                         ` : ''}
                         
@@ -257,7 +283,7 @@ function renderDayBlock(dayKey, dayEntries) {
                             ${entry.coords ? `<div class="preview-map-thumb" id="mini-map-${entry.id}"></div>` : ''}
                         </div>
                     </div>
-                    `).join('')}
+                    `}).join('')}
             </div>
         </div>
     `;
@@ -280,10 +306,9 @@ export function renderTimeline() {
 
     emptyState.classList.add('hidden');
 
-    // Get current week and year for comparison
+    // Get current week for comparison
     const now = new Date();
     const currentWeekKey = getWeekNumberKey(now.toISOString());
-    const currentYearKey = getYearKey(now.toISOString());
 
     // --- NEW: Multi-level grouping ---
     const grouped = {};
@@ -312,29 +337,28 @@ export function renderTimeline() {
             <div class="timeline-line"></div>
             ${sortedYearKeys.map((yearKey, yearIdx) => {
                 const yearData = grouped[yearKey];
-                const isCurrentYear = (yearKey === currentYearKey);
                 // Sort Months: Newest at the top (descending)
                 const sortedMonthKeys = Object.keys(yearData).sort((a, b) => b.localeCompare(a));
                 
-                // Expand the current year by default
-                const yearExpandedClass = isCurrentYear ? 'expanded' : '';
+                // Expand the first (newest) year by default
+                const yearExpandedClass = yearIdx === 0 ? 'expanded' : '';
                 
                 // --- Render Year Block (Inverted: content first, header after) ---
                 return `
                 <div class="year-block" data-year="${yearKey}">
-                    <div class="nested-content ${yearExpandedClass}" id="year-content-${yearKey}">
+                    <div class="nested-content year-content ${yearExpandedClass}" id="year-content-${yearKey}">
                         ${sortedMonthKeys.map((monthKey, monthIdx) => {
                             const monthData = yearData[monthKey];
                             // Sort Weeks: Newest at the top (descending)
                             const sortedWeekKeys = Object.keys(monthData).sort((a, b) => b.localeCompare(a));
                             
-                            // Expand the first (newest) month of current year by default
-                            const monthExpandedClass = (isCurrentYear && monthIdx === 0) ? 'expanded' : '';
+                            // Expand the first (newest) month by default
+                            const monthExpandedClass = monthIdx === 0 ? 'expanded' : '';
                             
                             // --- Render Month Block (Inverted: content first, header after) ---
                             return `
                             <div class="month-block" data-month="${monthKey}">
-                                <div class="nested-content ${monthExpandedClass}" id="month-content-${monthKey}">
+                                <div class="nested-content month-content ${monthExpandedClass}" id="month-content-${monthKey}">
                                     ${sortedWeekKeys.map((weekKey, weekIdx) => {
                                         const weekData = monthData[weekKey];
                                         const isCurrentWeek = (weekKey === currentWeekKey);
@@ -347,38 +371,20 @@ export function renderTimeline() {
                                         // Get week number from key
                                         const weekNum = weekKey.split('-W')[1].replace(/^0+/, ''); // "2025-W05" -> "5"
                                         
-                                        // --- MODIFIED: Render Week Block with different structure for current week ---
-                                        if (isCurrentWeek) {
-                                            // Current week: NORMAL structure (header first, expands DOWN)
-                                            return `
-                                            <div class="week-block week-current" data-week="${weekKey}">
-                                                <div class="nested-header week-header" data-target="week-content-${weekKey}">
-                                                    <span>Week ${weekNum}</span>
-                                                    <span class="chevron-down ${weekExpandedClass}">▼</span>
-                                                </div>
-                                                <div class="nested-content ${weekExpandedClass}" id="week-content-${weekKey}">
-                                                    ${sortedDayKeys.map(dayKey => {
-                                                        return renderDayBlock(dayKey, weekData[dayKey]);
-                                                    }).join('')}
-                                                </div>
+                                        // --- Render Week Block (Always INVERTED: content first, expands UP) ---
+                                        return `
+                                        <div class="week-block ${isCurrentWeek ? 'week-current' : ''}" data-week="${weekKey}">
+                                            <div class="nested-content week-content ${weekExpandedClass}" id="week-content-${weekKey}">
+                                                ${sortedDayKeys.map(dayKey => {
+                                                    return renderDayBlock(dayKey, weekData[dayKey]);
+                                                }).join('')}
                                             </div>
-                                            `;
-                                        } else {
-                                            // Other weeks: INVERTED structure (content first, expands UP)
-                                            return `
-                                            <div class="week-block" data-week="${weekKey}">
-                                                <div class="nested-content ${weekExpandedClass}" id="week-content-${weekKey}">
-                                                    ${sortedDayKeys.map(dayKey => {
-                                                        return renderDayBlock(dayKey, weekData[dayKey]);
-                                                    }).join('')}
-                                                </div>
-                                                <div class="nested-header week-header" data-target="week-content-${weekKey}">
-                                                    <span>Week ${weekNum}</span>
-                                                    <span class="chevron-up ${weekExpandedClass}">▼</span>
-                                                </div>
+                                            <div class="nested-header week-header" data-target="week-content-${weekKey}">
+                                                <span>Week ${weekNum}</span>
+                                                <span class="chevron-up ${weekExpandedClass}">▼</span>
                                             </div>
-                                            `;
-                                        }
+                                        </div>
+                                        `;
                                     }).join('')}
                                 </div>
                                 <div class="nested-header month-header" data-target="month-content-${monthKey}">

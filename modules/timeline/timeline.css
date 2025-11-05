@@ -111,16 +111,6 @@
     transform: rotate(0deg); /* Point down when expanded */
 }
 
-/* Chevron for "expand down" blocks (normal structure like current week) */
-.chevron-down {
-    display: inline-block;
-    transition: transform 0.3s ease;
-}
-
-.chevron-down.expanded {
-    transform: rotate(180deg);
-}
-
 /* ===== BASE STYLES FOR NESTED BLOCKS ===== */
 
 /* Base header for Year, Month, Week */
@@ -183,6 +173,8 @@
 /* ===== MONTH BLOCK (Inverted: expands UP) ===== */
 .month-block {
     margin-bottom: 16px;
+    background: #fff;
+    position: relative;
 }
 
 .month-header {
@@ -193,11 +185,14 @@
 
 .month-content {
     /* Container for weeks */
+    background: #fff;
 }
 
-/* ===== WEEK BLOCK ===== */
+/* ===== WEEK BLOCK (Inverted: expands UP) ===== */
 .week-block {
     margin-bottom: 12px;
+    background: #fff;
+    position: relative;
 }
 
 .week-header {
@@ -208,9 +203,10 @@
 
 .week-content {
     /* Container for days */
+    background: #fff;
 }
 
-/* Current week (expands DOWN) - specific adjustments if needed */
+/* Current week styling */
 .week-block.week-current .week-header {
-    /* Same styling but different structure in HTML */
+    /* Same styling, just marked as current */
 }
