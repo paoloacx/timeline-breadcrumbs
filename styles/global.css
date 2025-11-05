@@ -241,6 +241,11 @@ h1 {
     cursor: pointer;
     margin-right: 4px;
     margin-bottom: 4px;
+    /* ADDED: Ensure vertical alignment for text and future icons */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
 .mac-button:hover {
@@ -250,6 +255,16 @@ h1 {
 .mac-button:active {
     border-style: inset;
 }
+
+/* ADDED: Disabled state for standard buttons */
+.mac-button:disabled {
+    background: #ccc;
+    color: #888;
+    border-color: #aaa;
+    border-style: solid;
+    cursor: not-allowed;
+}
+
 
 .mac-button-primary {
     background: #000;
@@ -625,4 +640,75 @@ input[type="range"]:active::-moz-range-thumb {
 /* NEW: Margin override for the last section (Audio) */
 #audio-collapsible-content {
     margin-bottom: 15px;
+}
+
+
+/* ──────────────────────────────────────────────
+   CLASSIC MAC ICONS (System 6/7 interaction)
+   ────────────────────────────────────────────── */
+
+.icon-mac {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    image-rendering: pixelated;
+    filter: grayscale(100%);
+    /* Align icon with text inside buttons */
+    vertical-align: middle;
+}
+
+/* Icon containers (buttons) */
+.mac-button svg,
+.mac-button img,
+.fab svg,
+.fab img {
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+
+/* Hover — classic invert effect */
+/* We use :not(:disabled) to prevent reactions on disabled buttons */
+.mac-button:not(:disabled):hover,
+.fab:not(:disabled):hover,
+.fab-action:not(:disabled):hover {
+    background: black !important;
+    color: white !important;
+    border-color: black !important;
+}
+
+.mac-button:not(:disabled):hover img,
+.fab:not(:disabled):hover img,
+.fab-action:not(:disabled):hover img,
+.mac-button:not(:disabled):hover svg,
+.fab:not(:disabled):hover svg,
+.fab-action:not(:disabled):hover svg {
+    filter: invert(1);
+}
+
+/* Click — Mac OS 7 fast flash */
+.mac-button:not(:disabled):active,
+.fab:not(:disabled):active,
+.fab-action:not(:disabled):active {
+    /* This combines with the existing .mac-button:active 'border-style: inset' */
+    transform: translateY(1px);
+    filter: contrast(150%);
+}
+
+/* Active state (for menus or navigation) */
+.is-active {
+    background: black !important;
+    color: white !important;
+}
+
+.is-active img,
+.is-active svg {
+    filter: invert(1);
+}
+
+/* Prevent smooth transitions for a retro hard-click effect */
+.mac-button,
+.fab,
+.fab-action {
+    transition: none !important;
 }
