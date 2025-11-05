@@ -67,15 +67,15 @@ body {
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
     margin-bottom: 20px;
     margin-top: 0;
+    position: relative; /* z-index context */
+    z-index: 2; /* Sits above timeline horizontal line */
 }
 
 /* NEW: Add top margin to the main app title bar window */
 #main-app > .mac-window:first-child {
     margin-top: 10px;
-    position: relative;
-    z-index: 2;
-    margin-right: -5px;
-    margin-left: 16px;
+    position: relative; /* <-- Added this */
+    z-index: 2;         /* <-- Added this */
 }
 
 /* Mac Classic dotted background */
@@ -570,7 +570,7 @@ input[type="range"]:active::-moz-range-thumb {
 /* REMOVED: Responsive footer media queries */
 
 
-/* --- MODIFIED: Form Collapsible Sections --- */
+/* --- NEW: Form Collapsible Sections --- */
 .form-section-header {
     display: flex;
     justify-content: space-between;
@@ -625,4 +625,70 @@ input[type="range"]:active::-moz-range-thumb {
 /* NEW: Margin override for the last section (Audio) */
 #audio-collapsible-content {
     margin-bottom: 15px;
+}
+
+
+/* --- NEW: ICONOS MAC CLASSIC (interacción estilo System 6/7) --- */
+/* (Added from user prompt, cleaned spaces) */
+
+.icon-mac {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    image-rendering: pixelated;
+    filter: grayscale(100%);
+}
+
+/* Contenedores de iconos (botones) */
+.mac-button svg,
+.mac-button img,
+.fab svg,
+.fab img {
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+
+/* Hover — efecto invertido clásico */
+.mac-button:hover,
+.fab:hover,
+.fab-action:hover {
+    background: black !important;
+    color: white !important;
+    border-color: black !important;
+}
+
+.mac-button:hover img,
+.fab:hover img,
+.fab-action:hover img,
+.mac-button:hover svg,
+.fab:hover svg,
+.fab-action:hover svg {
+    filter: invert(1);
+}
+
+/* Click — parpadeo rápido estilo Mac OS 7 */
+.mac-button:active,
+.fab:active,
+.fab-action:active {
+    transform: translateY(1px);
+    filter: contrast(150%);
+}
+
+/* Indicador activo (si lo usas en menús o navegación) */
+.is-active {
+    background: black !important;
+    color: white !important;
+}
+
+.is-active img,
+.is-active svg {
+    filter: invert(1);
+}
+
+/* Para que el hover no anime suavemente (efecto duro retro) */
+.mac-button,
+.fab,
+.fab-action {
+    transition: none !important;
 }
