@@ -124,7 +124,7 @@ export function selectTrackUI(trackData) {
     const { name, artist, url, artwork } = trackData;
     document.getElementById('recap-selected-track').value = JSON.stringify(trackData);
     
-    // REVERTED: Back to '🔗' emoji because link.svg is missing
+    // CHANGED: Replaced '🔗' emoji with link.svg
     document.getElementById('recap-bso-results').innerHTML = `
         <div class="bso-result" style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 3px solid #000; background: #f0f0f0;">
             <img src="${artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
@@ -132,7 +132,9 @@ export function selectTrackUI(trackData) {
                 <div style="font-weight: bold;">${name}</div>
                 <div style="font-size: 12px; color: #666;">${artist}</div>
             </div>
-            <a href="${url}" target="_blank" style="text-decoration: none; font-size: 20px;">🔗</a>
+            <a href="${url}" target="_blank" style="text-decoration: none; font-size: 20px;">
+                <img src="assets/icons/link.svg" alt="Link" class="icon-mac" style="filter: none;">
+            </a>
         </div>
     `;
 }
