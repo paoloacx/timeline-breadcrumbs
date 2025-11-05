@@ -148,6 +148,7 @@
 /* Year Styles */
 .year-block {
     margin-bottom: 20px;
+    margin-right: -5px;
 }
 
 .year-header {
