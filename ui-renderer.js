@@ -16,19 +16,19 @@ export function renderMoodSelector() {
     if (!container) return; // Guard clause
     
     // CHANGED: Use icons instead of emojis
+    // Ensure these names match your files (e.g., mood-happy.svg)
     const moodIcons = [
         'assets/icons/mood-happy.svg',
         'assets/icons/mood-sad.svg',
         'assets/icons/mood-angry.svg',
         'assets/icons/mood-neutral.svg',
         'assets/icons/mood-tired.svg',
-        // ADDED: Default icon in case settings has more moods
-        'assets/icons/mood-neutral.svg' 
+        'assets/icons/mood-stressed.svg' // Assuming 6th icon
     ];
 
     container.innerHTML = settings.moods.map((mood, index) => {
-        // Use happy icon as default if index is out of bounds
-        const iconSrc = moodIcons[index] || moodIcons[0]; 
+        // Use neutral icon as fallback if index is out of bounds
+        const iconSrc = moodIcons[index] || 'assets/icons/mood-neutral.svg'; 
         return `
             <div class="mood-option ${selectedMood === index ? 'selected' : ''}" data-index="${index}">
                 <img src="${iconSrc}" alt="${mood.label}" class="icon-mac">
@@ -100,14 +100,14 @@ export function renderBSOResults(results) {
                  data-artist="${track.artistName.replace(/'/g, "\\'")}" 
                  data-url="${track.trackViewUrl}" 
                  data-artwork="${track.artworkUrl100}"
-                 style="display: flex; align: items: center; gap: 12px; padding: 8px; border: 2px solid #999; margin-bottom: 8px; cursor: pointer; background: white;">
+                 style="display: flex; align-items: center; gap: 12px; padding: 8px; border: 2px solid #999; margin-bottom: 8px; cursor: pointer; background: white;">
                 
                 <img src="${track.artworkUrl100}" style="width: 50px; height: 50px; border: 2px solid #000;">
                 <div style="flex: 1;">
                     <div style="font-weight: bold; font-size: 13px;">${track.trackName}</div>
                     <div style="font-size: 11px; color: #666;">${track.artistName}</div>
                 </div>
-                <img src="assets/icons/caret-right.svg" alt="Play" class="icon-mac" style="filter: grayscale(0%);">
+                <img src="assets/icons/caret-right.svg" alt="Play" class="icon-mac" style="filter: none;">
             </div>
         `).join('');
         resultsDiv.innerHTML = html;
@@ -124,7 +124,7 @@ export function selectTrackUI(trackData) {
     const { name, artist, url, artwork } = trackData;
     document.getElementById('recap-selected-track').value = JSON.stringify(trackData);
     
-    // CHANGED: Reverted to '🔗' emoji as link.svg does not exist
+    // REVERTED: Back to '🔗' emoji because link.svg is missing
     document.getElementById('recap-bso-results').innerHTML = `
         <div class="bso-result" style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 3px solid #000; background: #f0f0f0;">
             <img src="${artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
