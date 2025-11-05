@@ -720,3 +720,31 @@ input[type="range"]:active::-moz-range-thumb {
 .fab-action {
     transition: none !important;
 }
+
+/* ──────────────────────────────────────────────
+   NUEVO: Modal Footer Button Layout
+   ────────────────────────────────────────────── */
+.modal-actions-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    gap: 8px; /* Espacio entre botones */
+}
+
+/* Botón Delete (izquierda) */
+.modal-actions-footer .mac-button.delete-button {
+    flex-basis: 30%; /* Ocupa ~30% */
+    margin-right: 0;
+    margin-bottom: 0;
+    width: auto; /* Sobrescribe el width: 100% si lo tuviera */
+}
+
+/* Botón Save/Create (derecha) */
+.modal-actions-footer .mac-button.mac-button-primary {
+    flex-basis: 68%; /* Ocupa el resto */
+    flex-grow: 1;
+    margin-right: 0;
+    margin-bottom: 0;
+    width: auto; /* Sobrescribe el width: 100% si lo tuviera */
+}
