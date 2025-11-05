@@ -90,7 +90,7 @@
 }
 
 .day-content.expanded {
-    max-height: 5000px !important; /* Large value */
+    max-height: 5000px !important; /* Large enough value */
     opacity: 1 !important;
     transform: translateY(0) !important;
     /* CHANGED: Removed !important, just padding */
@@ -166,14 +166,13 @@
 /* Year Styles */
 .year-block {
     margin-bottom: 20px;
-    /* NEW: Add shadow to the block */
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+    /* REMOVED: shadow */
 }
 
 .year-header {
     background: #e0e0e0; /* Light grey */
     font-size: 20px;
-    /* REMOVED: box-shadow */
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3); /* MOVED shadow to header */
 }
 
 .year-content {
@@ -183,14 +182,13 @@
 /* Month Styles */
 .month-block {
     margin-bottom: 16px;
-    /* NEW: Add shadow to the block */
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.2);
+    /* REMOVED: shadow */
 }
 
 .month-header {
     background: #f0f0f0; /* Lighter grey */
     font-size: 18px;
-    /* REMOVED: box-shadow */
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.2); /* MOVED shadow to header */
 }
 
 .month-content {
@@ -200,14 +198,13 @@
 /* Week Styles */
 .week-block {
     margin-bottom: 12px;
-    /* NEW: Add shadow to the block */
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+    /* REMOVED: shadow */
 }
 
 .week-header {
     background: #f9f9f9; /* Off-white */
     font-size: 16px;
-    /* REMOVED: box-shadow */
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.1); /* MOVED shadow to header */
 }
 
 .week-content {
