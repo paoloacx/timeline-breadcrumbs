@@ -153,12 +153,13 @@
                     </div>
                     <div id="recap-bso-results" style="max-height: 200px; overflow-y: auto;"></div>
                     <input type="hidden" id="recap-selected-track">
-                    <div style="margin-top: 16px;">
-                        <button class="mac-button mac-button-primary" id="btn-save-recap">
-                            <img src="assets/icons/save.svg" alt="Save" class="icon-mac"> Save Recap
-                        </button>
+                    
+                    <div class="modal-actions-footer">
                         <button class="mac-button delete-button hidden" id="btn-delete-recap">
                             <img src="assets/icons/trash.svg" alt="Delete" class="icon-mac"> Delete
+                        </button>
+                        <button class="mac-button mac-button-primary" id="btn-save-recap">
+                            <img src="assets/icons/save.svg" alt="Save" class="icon-mac"> Save Recap
                         </button>
                     </div>
                 </div>
@@ -194,19 +195,22 @@
                     <label class="mac-label">Note:</label>
                     <textarea class="mac-textarea" id="note-input" placeholder="What's happening?"></textarea>
                     
-                    <label class="mac-label">
-                        <img src="assets/icons/keep.svg" alt="Location" class="icon-mac"> Location:
-                    </label>
-                    <input type="text" class="mac-input" id="location-input" placeholder="Place">
-                    <button class="mac-button" id="btn-get-gps">
-                        <img src="assets/icons/gps.svg" alt="GPS" class="icon-mac"> Use GPS
-                    </button>
-                    <div id="form-map" class="mini-map" style="display: none;"></div>
-                    
-                    <label class="mac-label">
-                        <img src="assets/icons/weather.svg" alt="Weather" class="icon-mac"> Weather:
-                    </label>
-                    <input type="text" class="mac-input" id="weather-input" placeholder="Sunny, cloudy...">
+                    <div style="position: relative; margin-bottom: 12px;">
+                        <button class="mac-button" id="btn-get-gps" style="position: absolute; top: 0px; right: 0px;">
+                            <img src="assets/icons/gps.svg" alt="GPS" class="icon-mac"> Use GPS
+                        </button>
+                        
+                        <label class="mac-label">
+                            <img src="assets/icons/keep.svg" alt="Location" class="icon-mac"> Location:
+                        </label>
+                        <input type="text" class="mac-input" id="location-input" placeholder="Place" style="max-width: calc(100% - 130px);">
+                        <div id="form-map" class="mini-map" style="display: none;"></div>
+                        
+                        <label class="mac-label" style="margin-top: 12px;">
+                            <img src="assets/icons/weather.svg" alt="Weather" class="icon-mac"> Weather:
+                        </label>
+                        <input type="text" class="mac-input" id="weather-input" placeholder="Sunny, cloudy...">
+                    </div>
                     
                     <div class="form-section-header" data-target="images-collapsible-content">
                         <label class="mac-label">
@@ -237,14 +241,14 @@
                         </div>
                     </div>
                     
-                    <div class="modal-actions-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                    <div class="modal-actions-footer">
                         <button class="mac-button delete-button hidden" id="btn-delete-crumb">
                             <img src="assets/icons/trash.svg" alt="Delete" class="icon-mac"> Delete
                         </button>
-                        <button class="mac-button mac-button-primary" id="btn-save-crumb" style="padding: 8px 16px; font-size: 14px; margin-left: auto;">
+                        <button class="mac-button mac-button-primary" id="btn-save-crumb" style="padding: 8px 16px; font-size: 14px;">
                             <img src="assets/icons/save.svg" alt="Save" class="icon-mac"> Save
                         </button>
-                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -271,11 +275,15 @@
                     <label class="mac-label">Optional Note:</label>
                     <input type="text" class="mac-input" id="time-optional-note" placeholder="Add a short note (optional)">
                     
-                    <button class="mac-button mac-button-primary" id="btn-save-time" disabled style="width: 100%; margin-top: 16px;">Create Event</button>
-                    <button class="mac-button delete-button hidden" id="btn-delete-time" style="width: 100%; margin-top: 8px;">
-                        <img src="assets/icons/trash.svg" alt="Delete" class="icon-mac"> Delete
-                    </button>
+                    <div class="modal-actions-footer">
+                        <button class="mac-button delete-button hidden" id="btn-delete-time">
+                            <img src="assets/icons/trash.svg" alt="Delete" class="icon-mac"> Delete
+                        </button>
+                        <button class="mac-button mac-button-primary" id="btn-save-time" disabled>
+                            Create Event
+                        </button>
                     </div>
+                </div>
             </div>
         </div>
     </div>
@@ -298,11 +306,16 @@
                     <div class="activity-selector" id="track-selector"></div>
                     <label class="mac-label">Optional Note:</label>
                     <input type="text" class="mac-input" id="track-optional-note" placeholder="Add a short note (optional)">
-                    <button class="mac-button mac-button-primary" id="btn-save-track" disabled style="width: 100%; margin-top: 16px;">Save Track</button>
-                    <button class="mac-button delete-button hidden" id="btn-delete-track" style="width: 100%; margin-top: 8px;">
-                        <img src="assets/icons/trash.svg" alt="Delete" class="icon-mac"> Delete
-                    </button>
+                    
+                    <div class="modal-actions-footer">
+                        <button class="mac-button delete-button hidden" id="btn-delete-track">
+                            <img src="assets/icons/trash.svg" alt="Delete" class="icon-mac"> Delete
+                        </button>
+                        <button class="mac-button mac-button-primary" id="btn-save-track" disabled>
+                            Save Track
+                        </button>
                     </div>
+                </div>
             </div>
         </div>
     </div>
@@ -328,13 +341,16 @@
                         <input type="number" class="mac-input" id="spent-amount" placeholder="0.00" step="0.01" style="margin: 0;">
                         <span style="font-weight: bold;">€</span>
                     </div>
-                    <button class="mac-button mac-button-primary" id="btn-save-spent" style="width: 100%;">
-                        <img src="assets/icons/save.svg" alt="Save" class="icon-mac"> Save
-                    </button>
-                    <button class="mac-button delete-button hidden" id="btn-delete-spent" style="width: 100%; margin-top: 8px;">
-                        <img src="assets/icons/trash.svg" alt="Delete" class="icon-mac"> Delete
-                    </button>
+                    
+                    <div class="modal-actions-footer">
+                        <button class="mac-button delete-button hidden" id="btn-delete-spent">
+                            <img src="assets/icons/trash.svg" alt="Delete" class="icon-mac"> Delete
+                        </button>
+                        <button class="mac-button mac-button-primary" id="btn-save-spent">
+                            <img src="assets/icons/save.svg" alt="Save" class="icon-mac"> Save
+                        </button>
                     </div>
+                </div>
             </div>
         </div>
     </div>
