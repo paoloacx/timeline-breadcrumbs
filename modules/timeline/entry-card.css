@@ -43,7 +43,7 @@
 .breadcrumb-entry.time-event {
     background: #fff8dc;
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
-    text-align: center; /* NEW: Center all children */
+    /* REMOVED: text-align: center; */
 }
 
 .breadcrumb-time {
@@ -57,6 +57,7 @@
 /* MODIFIED: Override for time-event */
 .breadcrumb-entry.time-event .breadcrumb-time {
     margin-bottom: 16px;
+    text-align: left; /* NEW: Ensure left alignment */
 }
 
 /* Overwrite for track event time */
@@ -157,7 +158,7 @@
     font-size: 13px;
     color: #666;
     margin-bottom: 16px;
-    text-align: center;
+    text-align: center; /* MODIFIED: Explicitly centered */
 }
 
 .time-event-activity-box {
@@ -169,9 +170,10 @@
     border: 2px solid #000;
     box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     border-radius: 4px;
-    text-align: center;
-    margin: 0 auto 16px auto; /* Center horizontally */
+    text-align: left; /* MODIFIED: Align left */
+    margin: 0 0 16px 0; /* MODIFIED: Removed auto margin */
     max-width: 90%;
+    display: inline-block; /* Fit content */
 }
 
 .time-event-note-box {
@@ -183,9 +185,9 @@
     font-style: italic;
     text-align: center;
     border-radius: 4px;
-    margin: 0 auto; /* Center horizontally */
-    display: inline-block; /* Fit content width */
-    min-width: 50px;
+    margin: 0 auto; /* MODIFIED: Center horizontally */
+    display: block; /* MODIFIED: Make block to center */
+    width: fit-content; /* Fit content width */
     max-width: 90%;
     white-space: pre-wrap; /* Respect line breaks */
 }
@@ -208,9 +210,9 @@
 .spent-badge {
     background: #4caf50; /* Green badge */
     color: white;
-    padding: 2px 8px;
+    padding: 3px 8px;
     border-radius: 3px;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: bold;
     margin-left: 8px;
 }
