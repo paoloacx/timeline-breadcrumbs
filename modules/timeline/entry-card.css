@@ -23,7 +23,7 @@
 .breadcrumb-entry.track-event .breadcrumb-time,
 .breadcrumb-entry.track-event .breadcrumb-note,
 .breadcrumb-entry.track-event .optional-note, /* Specific for optional note */
-.breadcrumb-entry.track-event .activity-label,
+/* .breadcrumb-entry.track-event .activity-label, */ /* REMOVED */
 .breadcrumb-entry.track-event .breadcrumb-meta span, /* Target spans inside meta */
 .breadcrumb-entry.track-event div { /* General fallback, use sparingly */
     color: white !important;
@@ -43,6 +43,7 @@
 .breadcrumb-entry.time-event {
     background: #fff8dc;
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+    text-align: center; /* NEW: Center all children */
 }
 
 .breadcrumb-time {
@@ -51,6 +52,11 @@
     color: #000;
     display: block;
     margin-bottom: 8px;
+}
+
+/* MODIFIED: Override for time-event */
+.breadcrumb-entry.time-event .breadcrumb-time {
+    margin-bottom: 16px;
 }
 
 /* Overwrite for track event time */
@@ -70,6 +76,7 @@
     -webkit-box-orient: vertical;
     transition: all 0.3s ease;
     white-space: pre-wrap; /* Respect line breaks */
+    text-align: left; /* Reset for non-time-events */
 }
 
 .breadcrumb-note.expanded {
@@ -97,6 +104,7 @@
     font-size: 12px; /* Smaller meta text */
     margin-bottom: 8px;
     color: #666; /* Grey text */
+    text-align: left; /* Reset for non-time-events */
 }
 /* Overwrite for track event meta */
 .breadcrumb-entry.track-event .breadcrumb-meta {
@@ -109,6 +117,7 @@
     margin-top: 12px;
     flex-wrap: wrap;
     align-items: center; /* Vertically align items */
+    text-align: left; /* Reset for time-events */
 }
 
 .preview-image-thumb {
@@ -136,32 +145,52 @@
     font-size: 11px;
     z-index: 5;
     margin: 0 !important;
+    text-align: left; /* Reset for time-events */
 }
 
 /* REMOVED: .preview-button-emoji style */
 
+/* REMOVED: .activity-label styles (2 blocks) */
 
-.activity-label {
-    font-weight: bold !important;
-    font-size: 18px !important;
-    margin-top: 30px !important; /* Space above */
-    display: block !important;
-    text-align: center !important;
-    padding: 12px 20px !important;
-    background: rgba(0,0,0,0.12) !important;
-    border: 2px solid rgba(0,0,0,0.15) !important;
-    box-shadow: 2px 2px 4px rgba(0,0,0,0.2) !important;
-    border-radius: 4px !important;
-    letter-spacing: 1px !important;
-    color: #000 !important;
+/* --- NEW: Time Event Redesign --- */
+.time-event-duration {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 16px;
+    text-align: center;
 }
 
-.breadcrumb-entry.track-event .activity-label { /* Style for dark background */
-    background: rgba(255,255,255,0.25) !important;
-    border-color: rgba(255,255,255,0.3) !important;
-    box-shadow: 2px 2px 4px rgba(0,0,0,0.4) !important;
-    color: white !important;
+.time-event-activity-box {
+    background: #4a4a4a; /* Dark grey */
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 12px 20px;
+    border: 2px solid #000;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    border-radius: 4px;
+    text-align: center;
+    margin: 0 auto 16px auto; /* Center horizontally */
+    max-width: 90%;
 }
+
+.time-event-note-box {
+    background: #eee; /* Light grey */
+    color: #000;
+    border: 2px solid #ccc;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-style: italic;
+    text-align: center;
+    border-radius: 4px;
+    margin: 0 auto; /* Center horizontally */
+    display: inline-block; /* Fit content width */
+    min-width: 50px;
+    max-width: 90%;
+    white-space: pre-wrap; /* Respect line breaks */
+}
+/* --- End Time Event Redesign --- */
+
 
 .compact-time {
     display: inline-flex;
@@ -204,6 +233,7 @@
     line-height: 1.6 !important;
     background: #fffacd !important; /* Light yellow */
     white-space: pre-wrap; /* Respect line breaks */
+    text-align: left; /* Reset */
 }
 
 .optional-note.expanded {
