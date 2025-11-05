@@ -46,7 +46,9 @@
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    /* REMOVED: border, box-shadow */
+    /* REMOVED: border */
+    /* CAMBIADO: Añadida la sombra para consistencia con los otros bloques */
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
     display: flex;
     justify-content: space-between;
     align-items: center;
