@@ -130,160 +130,152 @@ export function renderTimeline() {
 
     const html = `
         <div class="timeline">
-            <div class="timeline-spine">
-                <div class="timeline-line-horizontal"></div>
-                <div class="timeline-line-vertical"></div>
-            </div>
-            
-            <div class="timeline-content">
-                ${sortedDayKeys.map(dayKey => {
-                    const dayEntries = groupedByDay[dayKey];
-                    // REMOVED: const firstEntry = dayEntries[0];
-                    
-                    const recaps = dayEntries.filter(e => e.type === 'recap');
-                    const regularEntries = dayEntries.filter(e => e.type !== 'recap');
-                    
-                    const isToday = (dayKey === todayKey);
-                    const expandedClass = isToday ? 'expanded' : '';
-                    
-                    return `
-                        <div class="timeline-day-wrapper">
-                            <div class="timeline-node"></div>
-                            
-                            <div class="day-block" data-day="${dayKey}">
-                                <div class="day-header">
-                                    <span>${formatDate(dayKey + 'T12:00:00')}</span>
-                                    <span class="chevron ${expandedClass}" id="chevron-${dayKey}">▼</span>
+            <div class="timeline-line"></div>
+            ${sortedDayKeys.map(dayKey => {
+                const dayEntries = groupedByDay[dayKey];
+                // REMOVED: const firstEntry = dayEntries[0];
+                
+                const recaps = dayEntries.filter(e => e.type === 'recap');
+                const regularEntries = dayEntries.filter(e => e.type !== 'recap');
+                
+                const isToday = (dayKey === todayKey);
+                const expandedClass = isToday ? 'expanded' : '';
+                
+                return `
+                    <div class="day-block" data-day="${dayKey}">
+                        <div class="day-header">
+                            <span>${formatDate(dayKey + 'T12:00:00')}</span>
+                            <span class="chevron ${expandedClass}" id="chevron-${dayKey}">▼</span>
+                        </div>
+                        
+                        ${recaps.map(recap => `
+                            <div class="recap-block" data-id="${recap.id}">
+                                <div class="recap-header">
+                                    <span>🌟 Day Recap</span>
+                                    <span class="chevron-recap" id="chevron-recap-${recap.id}">▼</span>
                                 </div>
-                                
-                                ${recaps.map(recap => `
-                                    <div class="recap-block" data-id="${recap.id}">
-                                        <div class="recap-header">
-                                            <span>🌟 Day Recap</span>
-                                            <span class="chevron-recap" id="chevron-recap-${recap.id}">▼</span>
-                                        </div>
-                                        <div class="recap-content hidden" id="recap-content-${recap.id}">
-                                            <button class="mac-button edit-button btn-edit">✏️ Edit</button>
-                                            
-                                            <div style="margin-bottom: 16px;">
-                                                <strong>Rating:</strong> ${recap.rating}/10 ${'⭐'.repeat(Math.round(recap.rating / 2))}
-                                            </div>
-                                            
-                                            ${recap.reflection ? `
-                                                <div style="margin-bottom: 16px;">
-                                                    <strong>Reflection:</strong>
-                                                    <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${recap.reflection}</div>
-                                                </div>
-                                            ` : ''}
-                                            
-                                            ${recap.highlights && recap.highlights.length > 0 && recap.highlights.some(h => h) ? `
-                                                <div style="margin-bottom: 16px;">
-                                                    <strong>Highlights:</strong>
-                                                    <div class="recap-highlights-container" style="margin-top: 8px;">
-                                                        ${recap.highlights.filter(h => h).map(h => `<span class="recap-highlight-tag">${h}</span>`).join('')}
-                                                    </div>
-                                                </div>
-                                            ` : ''}
-                                            
-                                            ${recap.track ? `
-                                                <div style="margin-bottom: 16px;">
-                                                    <strong>Day's Soundtrack:</strong>
-                                                    <div class="bso-result" style="display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 12px; border: 2px solid #000; background: #f9f9f9;">
-                                                        <img src="${recap.track.artwork}" style="width: 50px; height: 50px; border: 2px solid #000;">
-                                                        <div style="flex: 1;">
-                                                            <div style="font-weight: bold; font-size: 13px;">${recap.track.name}</div>
-                                                            <div style="font-size: 11px; color: #666;">${recap.track.artist}</div>
-                                                        </div>
-                                                        <a href="${recap.track.url}" target="_blank" style="text-decoration: none; font-size: 18px;">🔗</a>
-                                                    </div>
-                                                </div>
-                                            ` : ''}
-                                        </div>
+                                <div class="recap-content hidden" id="recap-content-${recap.id}">
+                                    <button class="mac-button edit-button btn-edit">✏️ Edit</button>
+                                    
+                                    <div style="margin-bottom: 16px;">
+                                        <strong>Rating:</strong> ${recap.rating}/10 ${'⭐'.repeat(Math.round(recap.rating / 2))}
                                     </div>
-                                `).join('')}
-                                
-                                <div class="day-content ${expandedClass}" id="day-content-${dayKey}">
-                                    ${regularEntries.map(entry => {
-                                        const heightStyle = entry.isTimedActivity && entry.duration ? `min-height: ${Math.max(120, Math.min(150 + entry.duration * 0.5, 300))}px;` : '';
-                                        const trackClass = entry.isQuickTrack ? 'track-event' : '';
-                                        const spentClass = entry.isSpent ? 'spent-event' : '';
-                                        const crumbClass = (!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap') ? 'crumb-event' : '';
-                                        
-                                        const noteContent = entry.note || '';
-                                        const optionalNoteContent = entry.optionalNote || '';
-                                        const needsReadMore = noteContent.length > 200 || noteContent.split('\n').length > 4;
-                                        const needsReadMoreOptional = optionalNoteContent.length > 200 || optionalNoteContent.split('\n').length > 4;
-
-                                        return `
-                                        <div class="breadcrumb-entry ${entry.isTimedActivity ? 'time-event' : ''} ${trackClass} ${spentClass} ${crumbClass}" style="${heightStyle}" data-id="${entry.id}">
-                                            ${'' /* REMOVED: Edit button was here */}
-                                            
-                                            ${'' /* REMOVED: Preview button was here */}
-
-                                            ${entry.isTimedActivity ? 
-                                                `<div>
-                                                    <div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div>
-                                                    <div class="time-event-duration">Duration: ${entry.duration} minutes</div>
-                                                    <div class="time-event-activity-box">${entry.activity}</div>
-                                                </div>
-                                                ${entry.optionalNote ? `
-                                                    <div class="time-event-note-box">${entry.optionalNote}</div>
-                                                    ${'' /* Read More button removed for this specific note type */}
-                                                ` : ''}` :
-                                                `<div class="breadcrumb-time">
-                                                    ${entry.isQuickTrack ?
-                                                        `<span class="compact-time">⏰ ${formatTime(entry.timestamp)} ${entry.note}</span>` :
-                                                        `⏰ ${formatTime(entry.timestamp)}`
-                                                    }
-                                                    ${entry.isSpent ? `<span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>` : ''}
-                                                </div>`
-                                            }
-                                            
-                                            ${entry.isQuickTrack && entry.optionalNote ? `
-                                                <div class="optional-note">${optionalNoteContent}</div>
-                                                ${needsReadMoreOptional ? `<button class="read-more-btn">Read more</button>` : ''}
-                                            ` : ''}
-                                            
-                                            ${!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap' ? `
-                                                <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
-                                                    ${entry.mood ? `<span class="mood-display">${entry.mood.emoji}</span>` : ''}
-                                                    <div style="flex: 1;">
-                                                        <div class="breadcrumb-note">${noteContent}</div>
-                                                        ${needsReadMore ? `<button class="read-more-btn">Read more</button>` : ''}
-                                                    </div>
-                                                </div>
-                                            ` : ''}
-                                            
-                                            ${(entry.weather || entry.location) ? `
-                                                <div class="breadcrumb-meta">
-                                                    ${entry.weather ? `<span>${entry.weather}</span>` : ''}
-                                                    ${entry.weather && entry.location ? ` • ` : ''}
-                                                    ${entry.location ? `<span>📍 ${entry.location}</span>` : ''}
-                                                </div>
-                                            ` : ''}
-                                            
-                                            ${entry.audio ? `
-                                                <div style="margin-top: 12px; margin-bottom: 12px; text-align: left;">
-                                                    <audio controls style="width: 100%; max-width: 300px;">
-                                                        <source src="${entry.audio}">
-                                                    </audio>
-                                                </div>
-                                            ` : ''}
-                                            
-                                            <div class="breadcrumb-preview" style="text-align: left;">
-                                                ${entry.images && entry.images.length > 0 ? entry.images.map((img, idx) => `
-                                                    <img src="${img}" class="preview-image-thumb" alt="Thumbnail ${idx+1}" data-index="${idx}">
-                                                `).join('') : ''}
-                                                ${entry.coords ? `<div class="preview-map-thumb" id="mini-map-${entry.id}"></div>` : ''}
-                                                
-                                                </div>
+                                    
+                                    ${recap.reflection ? `
+                                        <div style="margin-bottom: 16px;">
+                                            <strong>Reflection:</strong>
+                                            <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${recap.reflection}</div>
                                         </div>
-                                        `}).join('')}
+                                    ` : ''}
+                                    
+                                    ${recap.highlights && recap.highlights.length > 0 && recap.highlights.some(h => h) ? `
+                                        <div style="margin-bottom: 16px;">
+                                            <strong>Highlights:</strong>
+                                            <div class="recap-highlights-container" style="margin-top: 8px;">
+                                                ${recap.highlights.filter(h => h).map(h => `<span class="recap-highlight-tag">${h}</span>`).join('')}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${recap.track ? `
+                                        <div style="margin-bottom: 16px;">
+                                            <strong>Day's Soundtrack:</strong>
+                                            <div class="bso-result" style="display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 12px; border: 2px solid #000; background: #f9f9f9;">
+                                                <img src="${recap.track.artwork}" style="width: 50px; height: 50px; border: 2px solid #000;">
+                                                <div style="flex: 1;">
+                                                    <div style="font-weight: bold; font-size: 13px;">${recap.track.name}</div>
+                                                    <div style="font-size: 11px; color: #666;">${recap.track.artist}</div>
+                                                </div>
+                                                <a href="${recap.track.url}" target="_blank" style="text-decoration: none; font-size: 18px;">🔗</a>
+                                            </div>
+                                        </div>
+                                    ` : ''}
                                 </div>
                             </div>
-                        </div> `;
-                }).join('')}
-            </div> </div>
+                        `).join('')}
+                        
+                        <div class="day-content ${expandedClass}" id="day-content-${dayKey}">
+                            ${regularEntries.map(entry => {
+                                const heightStyle = entry.isTimedActivity && entry.duration ? `min-height: ${Math.max(120, Math.min(150 + entry.duration * 0.5, 300))}px;` : '';
+                                const trackClass = entry.isQuickTrack ? 'track-event' : '';
+                                const spentClass = entry.isSpent ? 'spent-event' : '';
+                                const crumbClass = (!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap') ? 'crumb-event' : '';
+                                
+                                const noteContent = entry.note || '';
+                                const optionalNoteContent = entry.optionalNote || '';
+                                const needsReadMore = noteContent.length > 200 || noteContent.split('\n').length > 4;
+                                const needsReadMoreOptional = optionalNoteContent.length > 200 || optionalNoteContent.split('\n').length > 4;
+
+                                return `
+                                <div class="breadcrumb-entry ${entry.isTimedActivity ? 'time-event' : ''} ${trackClass} ${spentClass} ${crumbClass}" style="${heightStyle}" data-id="${entry.id}">
+                                    ${'' /* REMOVED: Edit button was here */}
+                                    
+                                    ${'' /* REMOVED: Preview button was here */}
+
+                                    ${entry.isTimedActivity ? 
+                                        `<div>
+                                            <div class="breadcrumb-time">⏰ ${formatTime(entry.timestamp)} - ${calculateEndTime(entry.timestamp, entry.duration)}</div>
+                                            <div class="time-event-duration">Duration: ${entry.duration} minutes</div>
+                                            <div class="time-event-activity-box">${entry.activity}</div>
+                                        </div>
+                                        ${entry.optionalNote ? `
+                                            <div class="time-event-note-box">${entry.optionalNote}</div>
+                                            ${'' /* Read More button removed for this specific note type */}
+                                        ` : ''}` :
+                                        `<div class="breadcrumb-time">
+                                            ${entry.isQuickTrack ?
+                                                `<span class="compact-time">⏰ ${formatTime(entry.timestamp)} ${entry.note}</span>` :
+                                                `⏰ ${formatTime(entry.timestamp)}`
+                                            }
+                                            ${entry.isSpent ? `<span class="spent-badge">💰 €${entry.spentAmount.toFixed(2)}</span>` : ''}
+                                        </div>`
+                                    }
+                                    
+                                    ${entry.isQuickTrack && entry.optionalNote ? `
+                                        <div class="optional-note">${optionalNoteContent}</div>
+                                        ${needsReadMoreOptional ? `<button class="read-more-btn">Read more</button>` : ''}
+                                    ` : ''}
+                                    
+                                    ${!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap' ? `
+                                        <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
+                                            ${entry.mood ? `<span class="mood-display">${entry.mood.emoji}</span>` : ''}
+                                            <div style="flex: 1;">
+                                                <div class="breadcrumb-note">${noteContent}</div>
+                                                ${needsReadMore ? `<button class="read-more-btn">Read more</button>` : ''}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${(entry.weather || entry.location) ? `
+                                        <div class="breadcrumb-meta">
+                                            ${entry.weather ? `<span>${entry.weather}</span>` : ''}
+                                            ${entry.weather && entry.location ? ` • ` : ''}
+                                            ${entry.location ? `<span>📍 ${entry.location}</span>` : ''}
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${entry.audio ? `
+                                        <div style="margin-top: 12px; margin-bottom: 12px; text-align: left;">
+                                            <audio controls style="width: 100%; max-width: 300px;">
+                                                <source src="${entry.audio}">
+                                            </audio>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    <div class="breadcrumb-preview" style="text-align: left;">
+                                        ${entry.images && entry.images.length > 0 ? entry.images.map((img, idx) => `
+                                            <img src="${img}" class="preview-image-thumb" alt="Thumbnail ${idx+1}" data-index="${idx}">
+                                        `).join('') : ''}
+                                        ${entry.coords ? `<div class="preview-map-thumb" id="mini-map-${entry.id}"></div>` : ''}
+                                        
+                                        </div>
+                                </div>
+                                `}).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
     `;
 
     container.innerHTML = html;
