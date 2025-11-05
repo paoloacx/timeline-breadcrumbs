@@ -123,14 +123,14 @@
     border: 3px solid #000;
     padding: 10px 16px;
     position: relative;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+    /* Note: Specific headers will add box-shadow and margin-bottom */
 }
 
 /* Circle dot for all nested headers */
 .nested-header::before {
     content: '';
     position: absolute;
-    left: -33px;
+    left: -27px; /* Aligned with timeline-line center */
     top: 50%;
     transform: translateY(-50%);
     width: 16px;
@@ -163,6 +163,7 @@
 .year-header {
     background: #e0e0e0;
     font-size: 20px;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
     margin-bottom: 12px;
 }
 
@@ -178,6 +179,7 @@
 .month-header {
     background: #f0f0f0;
     font-size: 18px;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
     margin-bottom: 12px;
 }
 
@@ -200,6 +202,7 @@
 .week-header {
     background: #f9f9f9;
     font-size: 16px;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
     margin-bottom: 12px;
 }
 
