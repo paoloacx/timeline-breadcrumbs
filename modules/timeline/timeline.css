@@ -23,15 +23,15 @@
     position: absolute;
     left: -5px; /* Center the line */
     top: -45px;  /* MODIFIED: Start from the horizontal line */
-    bottom: 0;
+    bottom: -50px;
     width: 4px;
     background: #000;
     z-index: 1;  /* Sit above horizontal line */
 }
 
 .day-block {
-    margin-bottom: 30px;
-    margin-right: -5px;
+    margin-bottom: 20px;
+    margin-right: 0px;
     position: relative;
     /* NEW: Moved shadow and border to the block container */
     background: #fff;
