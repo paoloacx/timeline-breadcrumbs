@@ -120,9 +120,14 @@ function renderTimeline(entries) {
     });
 
     // Helper function to create icon HTML
-    const createIcon = (iconName, altText) => {
-        return `<img src="assets/icons/${iconName}.svg" alt="${altText}" class="icon-mac" style="vertical-align: middle; margin-right: 4px;">`;
+    const createIcon = (iconName, altText, extraStyle = '') => {
+        return `<img src="assets/icons/${iconName}.svg" alt="${altText}" class="icon-mac" style="vertical-align: middle; margin-right: 4px; ${extraStyle}">`;
     };
+    
+    // CAMBIADO: Helper function para icono de location
+    const createLocationIcon = () => {
+         return `<img src="assets/icons/keep.svg" class="icon-mac" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 2px;">`;
+    }
 
     const html = `
         <div class="timeline">
@@ -243,8 +248,8 @@ function renderTimeline(entries) {
                                     ${entry.weather || entry.location ? `
                                         <div style="font-size: 12px; color: ${entry.isQuickTrack ? '#ccc' : '#666'}; margin-bottom: 8px;">
                                             ${entry.weather ? `${entry.weather}` : ''}
-                                            ${entry.weather && entry.location && entry.location.length < 20 ? ` • 📍 ${entry.location}` : ''}
-                                            ${!entry.weather && entry.location ? `📍 ${entry.location}` : ''}
+                                            ${entry.weather && entry.location && entry.location.length < 20 ? ` • ${createLocationIcon()} ${entry.location}` : ''}
+                                            ${!entry.weather && entry.location ? `${createLocationIcon()} ${entry.location}` : ''}
                                         </div>
                                     ` : ''}
                                     
