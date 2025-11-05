@@ -91,3 +91,51 @@ export function getWeatherEmoji(code) {
     if (code > 800) return '☁️';
     return '🌤️';
 }
+
+
+// --- NEW: Nesting Date Functions ---
+
+/**
+ * Gets the year key (YYYY) from a timestamp.
+ * @param {string} timestamp - ISO date string.
+ * @returns {string} Year key.
+ */
+export function getYearKey(timestamp) {
+    return new Date(timestamp).getFullYear().toString();
+}
+
+/**
+ * Gets the month key (YYYY-MM) from a timestamp.
+ * @param {string} timestamp - ISO date string.
+ * @returns {string} Month key.
+ */
+export function getMonthKey(timestamp) {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+}
+
+/**
+ * Gets the start of the week key (YYYY-MM-DD) from a timestamp (assuming Monday is start of week).
+ * @param {string} timestamp - ISO date string.
+ * @returns {string} Date key for the start of the week.
+ */
+export function getWeekKey(timestamp) {
+    const date = new Date(timestamp);
+    const dayOfWeek = date.getDay(); // Sunday = 0, Monday = 1, ...
+    const diff = date.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust to Monday
+    const monday = new Date(date.setDate(diff));
+    return monday.toISOString().split('T')[0];
+}
+
+/**
+ * Gets the full month name from a month key (e.g., "YYYY-MM").
+ * @param {string} monthKey - The "YYYY-MM" string.
+ * @returns {string} Full month name (e.g., "January").
+ */
+export function getMonthName(monthKey) {
+    const [year, month] = monthKey.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+    return date.toLocaleDateString('en', { month: 'long' });
+}
