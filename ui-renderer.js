@@ -15,12 +15,27 @@ export function renderMoodSelector() {
     const container = document.getElementById('mood-selector');
     if (!container) return; // Guard clause
     
-    container.innerHTML = settings.moods.map((mood, index) => `
-        <div class="mood-option ${selectedMood === index ? 'selected' : ''}" data-index="${index}">
-            ${mood.emoji}
-            <span class="mood-label">${mood.label}</span>
-        </div>
-    `).join('');
+    // CHANGED: Use icons instead of emojis
+    const moodIcons = [
+        'assets/icons/mood-happy.svg',
+        'assets/icons/mood-sad.svg',
+        'assets/icons/mood-angry.svg',
+        'assets/icons/mood-neutral.svg',
+        'assets/icons/mood-tired.svg',
+        // ADDED: Default icon in case settings has more moods
+        'assets/icons/mood-neutral.svg' 
+    ];
+
+    container.innerHTML = settings.moods.map((mood, index) => {
+        // Use happy icon as default if index is out of bounds
+        const iconSrc = moodIcons[index] || moodIcons[0]; 
+        return `
+            <div class="mood-option ${selectedMood === index ? 'selected' : ''}" data-index="${index}">
+                <img src="${iconSrc}" alt="${mood.label}" class="icon-mac">
+                <span class="mood-label">${mood.label}</span>
+            </div>
+        `;
+    }).join('');
 }
 
 /**
@@ -32,10 +47,13 @@ export function renderImagePreviews() {
     const container = document.getElementById('image-previews');
     if (!container) return;
     
+    // CHANGED: Use close.svg icon instead of '✕'
     container.innerHTML = currentImages.map((img, idx) => `
         <div class="image-preview">
             <img src="${img}" alt="Preview image ${idx+1}">
-            <div class="image-remove" data-index="${idx}">✕</div>
+            <div class="image-remove" data-index="${idx}">
+                <img src="assets/icons/close.svg" alt="Remove" style="width: 12px; height: 12px; filter: invert(1);">
+            </div>
         </div>
     `).join('');
 }
@@ -50,12 +68,15 @@ export function renderAudioPreview() {
     if (!container) return;
     
     if (currentAudio) {
+        // CHANGED: Use close.svg icon for remove button
         container.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
                 <audio controls style="flex: 1;">
                     <source src="${currentAudio}">
                 </audio>
-                <button class="mac-button audio-remove" style="padding: 4px 8px;">✕</button>
+                <button class="mac-button audio-remove" style="padding: 4px 8px;">
+                    <img src="assets/icons/close.svg" alt="Remove" class="icon-mac">
+                </button>
             </div>
         `;
     } else {
@@ -72,6 +93,7 @@ export function renderBSOResults(results) {
     if (!resultsDiv) return;
     
     if (results.length > 0) {
+        // CHANGED: Use caret-right icon instead of '▶️'
         const html = results.map(track => `
             <div class="bso-result" 
                  data-name="${track.trackName.replace(/'/g, "\\'")}" 
@@ -85,7 +107,7 @@ export function renderBSOResults(results) {
                     <div style="font-weight: bold; font-size: 13px;">${track.trackName}</div>
                     <div style="font-size: 11px; color: #666;">${track.artistName}</div>
                 </div>
-                <div style="font-size: 18px;">▶️</div>
+                <img src="assets/icons/caret-right.svg" alt="Play" class="icon-mac" style="filter: grayscale(0%);">
             </div>
         `).join('');
         resultsDiv.innerHTML = html;
@@ -101,6 +123,8 @@ export function renderBSOResults(results) {
 export function selectTrackUI(trackData) {
     const { name, artist, url, artwork } = trackData;
     document.getElementById('recap-selected-track').value = JSON.stringify(trackData);
+    
+    // CHANGED: Use link.svg icon instead of '🔗'
     document.getElementById('recap-bso-results').innerHTML = `
         <div class="bso-result" style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 3px solid #000; background: #f0f0f0;">
             <img src="${artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
@@ -108,7 +132,9 @@ export function selectTrackUI(trackData) {
                 <div style="font-weight: bold;">${name}</div>
                 <div style="font-size: 12px; color: #666;">${artist}</div>
             </div>
-            <a href="${url}" target="_blank" style="text-decoration: none; font-size: 20px;">🔗</a>
+            <a href="${url}" target="_blank" style="text-decoration: none;">
+                <img src="assets/icons/link.svg" alt="Link" class="icon-mac" style="filter: grayscale(0%);">
+            </a>
         </div>
     `;
 }
@@ -118,6 +144,7 @@ export function selectTrackUI(trackData) {
 /**
  * Displays a mini-map in the specified container.
  * @param {number} lat - Latitude.
+ *." alt="Link" class="icon-mac">
  * @param {number} lon - Longitude.
  * @param {string} containerId - The ID of the map container element.
  */
