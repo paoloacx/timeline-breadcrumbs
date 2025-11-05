@@ -1,0 +1,5 @@
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="black" stroke-width="1">
+  <circle cx="10" cy="10" r="3"/>
+  <circle cx="10" cy="10" r="7"/>
+  <path d="M10 3V1 M10 19V17 M3 10H1 M19 10H17"/>
+</svg>
