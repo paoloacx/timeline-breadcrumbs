@@ -31,7 +31,8 @@
 
 .day-block {
     margin-bottom: 30px;
-    margin-right: -5px;
+    /* CAMBIADO: Eliminado el margin-right: -5px; que ocultaba la sombra */
+    /* margin-right: -5px; */ 
     position: relative;
     /* NEW: Moved shadow and border to the block container */
     background: #fff;
@@ -46,9 +47,8 @@
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    /* REMOVED: border */
-    /* CAMBIADO: Añadida la sombra para consistencia con los otros bloques */
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+    /* CAMBIADO: Eliminada la sombra duplicada que añadí por error */
+    /* box-shadow: 5px 5px 0 rgba(0,0,0,0.3); */
     display: flex;
     justify-content: space-between;
     align-items: center;
