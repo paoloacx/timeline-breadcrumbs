@@ -317,7 +317,7 @@ export function renderTimeline() {
                         <div class="timeline-node"></div>
                         <div class="year-block" data-year="${yearKey}">
                             <div class="nested-content ${yearExpandedClass}" id="year-content-${yearKey}">
-                                ${sortedMonthKeys.map((monthIdx, monthKey) => {
+                                ${sortedMonthKeys.map((monthKey, monthIdx) => { // <-- BUG FIX: (monthKey, monthIdx)
                                     const monthData = yearData[monthKey];
                                     // MODIFIED Sort Weeks: Newest at the top (descending)
                                     const sortedWeekKeys = Object.keys(monthData).sort((a, b) => b.localeCompare(a));
@@ -331,7 +331,7 @@ export function renderTimeline() {
                                         <div class="timeline-node"></div>
                                         <div class="month-block" data-month="${monthKey}">
                                             <div class="nested-content ${monthExpandedClass}" id="month-content-${monthKey}">
-                                                ${sortedWeekKeys.map((weekKey, weekIdx) => {
+                                                ${sortedWeekKeys.map((weekKey, weekIdx) => { // <-- BUG FIX: (weekKey, weekIdx)
                                                     const weekData = monthData[weekKey];
                                                     // MODIFIED Sort Days: Newest at the top (descending)
                                                     const sortedDayKeys = Object.keys(weekData).sort((a, b) => b.localeCompare(a));
