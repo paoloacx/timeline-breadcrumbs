@@ -31,7 +31,9 @@
 
 .day-block {
     margin-bottom: 30px;
-    margin-right: -5px; /* Mantenemos el ancho extra */
+    /* CAMBIADO: Usamos calc() para la anchura en lugar de margin */
+    /* margin-right: -5px; */
+    width: calc(100% + 5px);
     position: relative;
     /* NEW: Moved shadow and border to the block container */
     background: #fff;
@@ -54,7 +56,7 @@
     position: relative;
     /* NEW: Add separator line */
     border-bottom: 3px solid #000;
-    /* CAMBIADO: Sombra añadida aquí, igual que los .nested-header */
+    /* CAMBIADO: Sombra añadida aquí y unificada */
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
 
@@ -151,7 +153,9 @@
 /* Year Styles */
 .year-block {
     margin-bottom: 20px;
-    margin-right: -5px; /* Mantenemos el ancho extra */
+    /* CAMBIADO: Usamos calc() para la anchura en lugar de margin */
+    /* margin-right: -5px; */
+    width: calc(100% + 5px);
 }
 
 .year-header {
@@ -167,13 +171,13 @@
 /* Month Styles */
 .month-block {
     margin-bottom: 16px;
-    /* Este bloque NO lleva margen negativo, está anidado */
+    /* Este bloque NO lleva margen/ancho extra, está anidado */
 }
 
 .month-header {
     background: #f0f0f0; /* Lighter grey */
     font-size: 18px;
-    /* CAMBIADO: Sombra unificada a 0.3 de opacidad */
+    /* CAMBIADO: Sombra unificada */
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
 
@@ -184,13 +188,13 @@
 /* Week Styles */
 .week-block {
     margin-bottom: 12px;
-    /* Este bloque NO lleva margen negativo, está anidado */
+    /* Este bloque NO lleva margen/ancho extra, está anidado */
 }
 
 .week-header {
     background: #f9f9f9; /* Off-white */
     font-size: 16px;
-    /* CAMBIADO: Sombra unificada a 0.3 de opacidad */
+    /* CAMBIADO: Sombra unificada */
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
 
