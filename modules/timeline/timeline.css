@@ -1,95 +1,153 @@
-/* ===== TIMELINE STRUCTURE STYLES ===== */
+/* ===== TIMELINE LAYOUT ===== */
 
-.timeline {
+/* MODIFIED: Changed from .timeline to .timeline-content */
+.timeline-content {
     position: relative;
-    padding-left: 16px; /* Space for the line and dots */
-    /* REMOVED: background, padding, border (moved to blocks) */
-    margin-bottom: 20px;
+    width: 100%;
 }
 
-.timeline-line {
-    position: absolute;
-    left: -5px; /* Center the line */
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: #000;
-}
+/* REMOVED: .timeline-line (replaced by .timeline-spine) */
+
 
 .day-block {
-    margin-bottom: 30px;
-    margin-right: -5px;
-    position: relative;
-    /* NEW: Moved shadow and border to the block container */
-    background: #fff;
+    margin-bottom: 12px;
+    background: white;
     border: 3px solid #000;
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+    position: relative;
+    /* NEW: Add margin for the spine */
+    margin-left: 20px; 
 }
 
 .day-header {
-    background: #000;
-    color: white;
+    background: #fff;
+    border-bottom: 2px solid #000;
     padding: 12px 16px;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    /* REMOVED: border, box-shadow */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: relative;
-    /* NEW: Add separator line */
-    border-bottom: 3px solid #000;
+    position: sticky;
+    top: 0;
+    z-index: 5; /* Above entries */
 }
 
-.day-header::before {
-    content: '';
-    position: absolute;
-    left: -33px; /* Adjust to align with the line */
-    top: 50%;
-    transform: translateY(-50%);
-    width: 16px;
-    height: 16px;
-    background: #000;
-    border: 3px solid white;
-    border-radius: 50%;
-    box-shadow: 0 0 0 3px #000;
-    z-index: 2;
-}
-
-.day-header:hover {
-    background: #333;
-}
-
-/* Collapsible day content animation */
 .day-content {
+    /* MODIFIED: Use max-height for animation */
     max-height: 0;
     overflow: hidden;
-    opacity: 0;
-    transform: translateY(-6px);
-    transition:
-        max-height 0.45s ease,
-        opacity 0.4s ease,
-        transform 0.4s ease;
-    /* CHANGED: Removed dotted background, now solid white */
-    background: #fff;
-    /* REMOVED: padding: 0 16px; (padding is added on expand) */
+    padding: 0 12px; /* Add padding for content */
+    transition: max-height 0.3s ease-out;
 }
 
 .day-content.expanded {
-    max-height: 5000px !important; /* Large enough value */
-    opacity: 1 !important;
-    transform: translateY(0) !important;
-    /* CHANGED: Removed !important, just padding */
-    padding: 10px; 
+    /* MODIFIED: Set height for animation */
+    max-height: 5000px; /* Large value */
+    padding: 12px 12px;
+    transition: max-height 0.5s ease-in;
 }
 
-/* Chevron animation */
 .chevron {
     display: inline-block;
     transition: transform 0.3s ease;
+    font-size: 12px;
 }
 
 .chevron.expanded {
     transform: rotate(180deg);
+}
+
+
+/* --- NEW: Left Spine Timeline Design --- */
+
+.timeline {
+    position: relative;
+    /* NEW: Add padding for the spine */
+    padding-left: 30px; 
+}
+
+.timeline-spine {
+    position: absolute;
+    top: 0;
+    left: 10px; /* Position spine on the far left */
+    width: 20px;
+    height: 100%;
+    z-index: 1;
+}
+
+.timeline-line-vertical {
+    position: absolute;
+    top: 0;
+    left: 8px; /* Centered in 20px width (10px - 2px) */
+    width: 4px;
+    background: #000;
+    height: 100%;
+}
+
+.timeline-line-horizontal {
+    position: absolute;
+    /* Connects from top of spine to the main header */
+    top: -10px; /* Adjust as needed to align with header bottom */
+    left: 8px; /* Align with vertical line */
+    height: 4px;
+    width: 100vw; /* Span full width */
+    background: #000;
+    /* This connects it "behind" the main header window */
+    z-index: -1; 
+}
+
+/* Specific adjustment for the very first horizontal line */
+.timeline-content > .timeline-day-wrapper:first-child .timeline-node {
+     /* This value should be roughly (header_height + day_header_height / 2) */
+     /* Let's try to align with the first day-header center */
+     top: 25px; 
+}
+
+
+.timeline-day-wrapper {
+    position: relative;
+    /* Ensures the wrapper doesn't collapse */
+    padding-top: 1px;
+    margin-top: -1px;
+}
+
+.timeline-node {
+    position: absolute;
+    top: 25px; /* Aligns with middle of day-header (40px / 2) -ish */
+    left: -22px; /* Pulls it left into the spine area */
+    width: 20px;
+    height: 20px;
+    
+    /* Mac Radio Button Style */
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 50%;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3; /* Above vertical line */
+}
+
+/* The horizontal connector from spine to day block */
+.timeline-node::before {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 8px; /* Center (20px / 2) - 2px */
+    width: 20px; /* Connects to the day-block */
+    height: 4px;
+    background: #000;
+    z-index: 2;
+}
+
+/* Style the dot inside the node */
+.timeline-node::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: #000;
+    border-radius: 50%;
 }
