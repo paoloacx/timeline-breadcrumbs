@@ -36,8 +36,8 @@
 }
 
 .preview-content {
-    /* P-FIX: ELIMINADO EL FONDO DE AQUÍ */
-    /* background: #f9f8f7; */ 
+    /* P-FIX: Color de fondo */
+    background: #f9f8f7;
     border: 3px solid #000;
     max-width: 90%;
     width: 600px; /* Fixed width for larger screens */
