@@ -96,10 +96,11 @@ export function renderPreview(entry) {
                 ${moodHTML}
             </div>
         ` : ''}
+        
         ${!entry.isTimedActivity ? `
             <div style="margin-bottom: 16px;">
                 <strong>Note:</strong>
-                <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${entry.note || ''}</div>
+                <div class="breadcrumb-note" style="margin-top: 8px; max-height: none; display: block; -webkit-line-clamp: unset; white-space: pre-wrap;">${entry.note || ''}</div>
             </div>
         ` : ''}
         
@@ -151,7 +152,7 @@ export function renderPreview(entry) {
         ${(entry.isTimedActivity || entry.isQuickTrack) && entry.optionalNote ? `
             <div style="margin-bottom: 16px;">
                 <strong>Note:</strong>
-                <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap; font-style: italic;">${entry.optionalNote}</div>
+                <div class="optional-note" style="margin-top: 8px; max-height: none; display: block; -webkit-line-clamp: unset; white-space: pre-wrap;">${entry.optionalNote}</div>
             </div>
         ` : ''}
         
