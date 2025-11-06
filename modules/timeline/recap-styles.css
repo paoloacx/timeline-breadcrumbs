@@ -47,15 +47,27 @@
     transform: rotate(180deg);
 }
 
-/* --- NEW: Highlight Tags --- */
-.recap-highlights-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    /* Replaces the padding-left of the old ul */
-    padding-left: 0; 
+/* --- NEW: Highlight Tags (P1 Fix) --- */
+
+/* Wrapper for the marker and tag */
+.recap-highlight-item {
+    display: block; /* Make item block-level */
+    position: relative;
+    margin-bottom: 8px; /* Space between items */
+    padding-left: 20px; /* Space for the marker */
 }
 
+/* The marker (bullet) */
+.recap-highlight-marker {
+    position: absolute;
+    left: 8px;
+    top: 7px; /* Align with first line of text */
+    font-size: 16px; /* Larger bullet */
+    color: #333;
+    line-height: 1;
+}
+
+/* The tag itself */
 .recap-highlight-tag {
     background: #eee;
     border: 2px solid #ccc;
@@ -64,5 +76,13 @@
     font-size: 12px;
     font-weight: bold;
     box-shadow: 1px 1px 0 rgba(0,0,0,0.1);
-    display: inline-block;
+    
+    /* P1: Allow wrapping inside the tag */
+    display: inline; /* Allows text to wrap */
+    line-height: 1.6;
+    
+    /* P1: Indentation trick for wrapping */
+    /* This creates a "hanging indent" */
+    padding-left: 10px; 
+    text-indent: 0; 
 }
