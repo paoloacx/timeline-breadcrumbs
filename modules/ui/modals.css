@@ -50,7 +50,7 @@
     
     /* P-FIX: Create stacking context */
     isolation: isolate;
-    overflow: hidden; /* Needed for pseudo-element */
+    /* REMOVED: overflow: hidden; <-- Este era el error */
     
     /* Pop-in animation (This applies to ALL modal contents) */
     transform: scale(0.95) translateY(8px);
