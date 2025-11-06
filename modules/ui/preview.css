@@ -22,3 +22,20 @@
     border: 2px solid #000;
     cursor: pointer;
 }
+
+/* --- CAMBIO: Reglas de consistencia de fuentes --- */
+
+/* 1. Controlar el tamaño del emoji */
+/* (Ahora que hemos quitado el estilo inline de 24px) */
+#preview-body .mood-emoji-visual {
+    font-size: 18px; /* Tamaño más consistente */
+    vertical-align: middle; /* Ayuda a alinear con el texto */
+}
+
+/* 2. Controlar el tamaño de la nota */
+/* Esto anula el 'font-size: 14px' de entry-card.css */
+#preview-body .breadcrumb-note,
+#preview-body .optional-note {
+    font-size: 16px; /* Para que coincida con el resto del texto */
+    /* El font-family: Helvetica ya lo hereda de global.css */
+}
