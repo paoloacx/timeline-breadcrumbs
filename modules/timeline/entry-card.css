@@ -75,8 +75,13 @@
     border: 1px solid #202834;
     color: white;
     text-shadow: 0 1px 0 rgba(0,0,0,0.6);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    max-width: 420px;
+    
+    /* --- CAMBIOS --- */
+    /* 1. Usar la misma sombra "Mac" que las otras tarjetas */
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+    /* 2. Quitar el ancho máximo para que se adapte */
+    /* max-width: 420px; <-- REMOVED */
+    /* --- FIN CAMBIOS --- */
 }
 /* --- FIN CAMBIO --- */
 
