@@ -5,6 +5,11 @@
 import { getState } from '../../core/state.js';
 import { openModal, closeModal } from '../ui/modal-manager.js'; // Sube uno y entra a 'ui'
 import { getDayKey, formatTime } from '../../utils.js';
+// P3 - Necesitaremos renderTimeline para mostrar resultados.
+// Esto puede causar una dependencia circular si timeline.js importa data-tools.
+// Por ahora, lo comentamos y usaremos un alert.
+// import { renderTimeline } from '../timeline/timeline.js';
+
 
 // --- Stats Functions ---
 
@@ -434,6 +439,77 @@ export function importFullBackup(file) {
             reject(new Error('Error reading file.'));
         };
         
-        reader.readAsText(file);
+        reader.readText(file);
     });
+}
+
+// --- P3: Universal Search ---
+
+/**
+ * NEW: Initializes the universal search functionality.
+ * NOTE: Call this from app.js or your main init script.
+ */
+export function initUniversalSearch() {
+    const searchInput = document.getElementById('universal-search');
+    const searchButton = document.getElementById('btn-universal-search');
+    
+    if (searchButton) {
+        searchButton.addEventListener('click', performSearch);
+    }
+    if (searchInput) {
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    }
+}
+
+/**
+ * NEW: Performs the search/filter based on input.
+ * This is a placeholder. Logic needs to be defined.
+ */
+function performSearch() {
+    const { entries } = getState();
+    const query = document.getElementById('universal-search').value.toLowerCase().trim();
+    
+    // This function needs to set a global filter and re-render the timeline
+    // For now, it just filters and alerts.
+    
+    if (!query) {
+        // Reset filter
+        console.log('Search query empty. Resetting filters.');
+        // renderTimeline(entries); // This function needs to be available
+        alert('Search reset. (Functionality to re-render timeline is pending integration).');
+        closeModal('tools-modal');
+        return;
+    }
+    
+    console.log(`Searching for: ${query}`);
+    
+    // TODO: Implement advanced filtering logic
+    // 1. Check for date patterns (May 2024, 2023, last week)
+    // 2. Check for text content
+    
+    const filteredEntries = entries.filter(entry => {
+        // Simple text search
+        let textMatch = false;
+        if (entry.note) textMatch = entry.note.toLowerCase().includes(query);
+        if (entry.activity) textMatch = textMatch || entry.activity.toLowerCase().includes(query);
+        if (entry.location) textMatch = textMatch || entry.location.toLowerCase().includes(query);
+        if (entry.reflection) textMatch = textMatch || entry.reflection.toLowerCase().includes(query);
+        if (entry.highlights) textMatch = textMatch || entry.highlights.join(' ').toLowerCase().includes(query);
+        
+        // TODO: Date filtering
+        
+        return textMatch;
+    });
+    
+    console.log(`Found ${filteredEntries.length} entries.`);
+    
+    // We need to re-render the timeline with these entries
+    // renderTimeline(filteredEntries); // This function needs to be available
+    
+    alert(`Search functionality not fully implemented.\nFound ${filteredEntries.length} entries matching "${query}".\n\n(Timeline filter is not yet applied)`);
+    closeModal('tools-modal');
 }
