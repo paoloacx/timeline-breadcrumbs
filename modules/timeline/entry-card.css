@@ -101,12 +101,35 @@
     display: inline-block;
 }
 
+/* P2: Size and Layout Change */
 .breadcrumb-meta {
-    font-size: 12px; /* Smaller meta text */
+    font-size: 14px; /* CHANGED from 12px */
     margin-bottom: 8px;
     color: #666; /* Grey text */
     text-align: left; /* Reset for non-time-events */
+    
+    /* NEW: Align items */
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px; /* Space between weather, dot, and location */
 }
+
+/* P2: Target the span that contains the location icon */
+.breadcrumb-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px; /* Space icon and text */
+}
+
+/* P2: Size icons within the meta block */
+.breadcrumb-meta .icon-mac {
+    width: 14px;
+    height: 14px;
+}
+/* End P2 Change */
+
+
 /* Overwrite for track event meta */
 .breadcrumb-entry.track-event .breadcrumb-meta {
      color: #ccc !important; /* Lighter grey for dark background */
