@@ -241,8 +241,8 @@ h1 {
     font-size: 12px;
     font-weight: bold;
     cursor: pointer;
-    margin-right: 4px;
-    margin-bottom: 4px;
+    margin-right: 0px;
+    margin-bottom: 0px;
     /* ADDED: Ensure vertical alignment for text and future icons */
     display: inline-flex;
     align-items: center;
@@ -282,7 +282,7 @@ h1 {
     /* CHANGED: Use inherited font */
     font-family: inherit;
     font-size: 16px;
-    margin-bottom: 12px;
+    margin-bottom: 1px;
 }
 
 .mac-textarea {
