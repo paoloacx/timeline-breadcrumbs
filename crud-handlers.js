@@ -23,7 +23,8 @@ export function handleSaveCrumb() {
         return;
     }
 
-    const moodData = selectedMood !== null ? settings.moods[selectedMood] : null;
+    // P-FIX: We don't need moodData, we will save selectedMood (the index) directly
+    // const moodData = selectedMood !== null ? settings.moods[selectedMood] : null;
     const timestamp = getTimestampFromInput('datetime-input');
 
     const entryData = {
@@ -34,7 +35,7 @@ export function handleSaveCrumb() {
         images: [...currentImages],
         audio: currentAudio,
         coords: currentCoords ? { ...currentCoords } : null,
-        mood: moodData,
+        mood: selectedMood, // P-FIX: Save the index (number) not the object
         isTimedActivity: false, isQuickTrack: false, isSpent: false, type: null
     };
 
@@ -302,8 +303,21 @@ export function handleEditEntry(entryId) {
         setAudio(entry.audio || null);
         setCoords(entry.coords ? { ...entry.coords } : null);
         
-        const moodIndex = entry.mood ? getState().settings.moods.findIndex(m => m.emoji === entry.mood.emoji) : -1;
+        // P-FIX: Robust mood index finding
+        // Handles both old data (object) and new data (index)
+        let moodIndex = null;
+        if (entry.mood !== null && entry.mood !== undefined) {
+            if (typeof entry.mood === 'object') {
+                // Handle old data: find index by label (emoji is unreliable)
+                const { settings } = getState();
+                moodIndex = settings.moods.findIndex(m => m.label === entry.mood.label);
+            } else {
+                // Handle new data: it's already the index
+                moodIndex = entry.mood;
+            }
+        }
         setSelectedMood(moodIndex !== -1 ? moodIndex : null);
+        // End P-FIX
 
         renderImagePreviews();
         renderAudioPreview();
