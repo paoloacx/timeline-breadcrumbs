@@ -13,31 +13,26 @@
     cursor: pointer; /* NEW: Indicate the card is clickable */
 }
 
-/* P-FIX: Grain texture for normal (crumb) entries (New Version) */
+/* P-FIX: Grain texture for normal (crumb) entries */
 .breadcrumb-entry.crumb-event {
-    background: #faf8f6;
-    position: relative; /* Needed for ::before */
-    overflow: hidden; /* Clip the ::before pseudo-element */
-    /* REMOVED: background-image properties */
+    background: #f9f8f7; /* Fallback background */
+    position: relative; 
+    isolation: isolate; /* Create stacking context */
+    overflow: hidden; 
 }
 
-/* P-FIX: NEW robust way to add grain with opacity */
+/* P-FIX: Apply filter to pseudo-element BEHIND content */
 .breadcrumb-entry.crumb-event::before {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
-    background-repeat: repeat;
-    /* REMOVED: background-size */
-    opacity: 0.2; /* Visible opacity */
-    z-index: 0; /* Behind content */
-}
-
-/* P-FIX: Ensure all content is *above* the grain */
-.breadcrumb-entry.crumb-event > * {
-    position: relative;
-    z-index: 1;
+    
+    /* Apply background AND filter here */
+    background: #f9f8f7;
+    filter: url(#grain);
+    
+    z-index: -1; /* Send it behind */
 }
 
 
