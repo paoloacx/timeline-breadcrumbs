@@ -27,16 +27,32 @@
     background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
 }
 
+/* P2: Animation Style Change */
 .recap-content {
     background: #fffef0; /* Very light yellow */
-    padding: 16px;
     position: relative;
     border-bottom: none; /* Remove bottom border */
+
+    /* Animation: Collapsed state */
+    overflow: hidden;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.2s ease;
 }
 
-.recap-content.hidden {
-    display: none;
+/* P2: Remove 'display: none' rule */
+/* .recap-content.hidden { ... } */
+
+/* P2: Animation: Expanded state */
+.recap-content.expanded {
+    max-height: 1500px; /* Arbitrary large number */
+    padding: 16px;
+    opacity: 1;
 }
+/* End P2 Change */
+
 
 .chevron-recap {
     display: inline-block;
