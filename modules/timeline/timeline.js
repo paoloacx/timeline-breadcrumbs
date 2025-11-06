@@ -98,15 +98,24 @@ export function initTimeline() {
 
 /**
  * Renders the entire timeline based on the global state.
+ * @param {Array} [entriesToRender] - Optional array of entries to render. If null, uses global state.
  */
-export function renderTimeline() {
+export function renderTimeline(entriesToRender = null) {
     const { entries } = getState();
+    const renderData = entriesToRender || entries;
     const container = document.getElementById('timeline-container');
     const emptyState = document.getElementById('empty-state');
 
-    if (entries.length === 0) {
-        container.innerHTML = '';
-        emptyState.classList.remove('hidden');
+    if (renderData.length === 0) {
+        // Check if it's an empty filter result
+        if (entriesToRender) {
+            container.innerHTML = `<div class="mac-window" style="margin: 16px;"><div class="mac-content"><p><strong>No entries found</strong></p><p>Your search or filter returned no results.</p></div></div>`;
+            emptyState.classList.add('hidden');
+        } else {
+            // It's genuinely empty
+            container.innerHTML = '';
+            emptyState.classList.remove('hidden');
+        }
         return;
     }
 
@@ -114,7 +123,7 @@ export function renderTimeline() {
 
     // Group by day
     const grouped = {};
-    entries.forEach(entry => {
+    renderData.forEach(entry => {
         const dayKey = getDayKey(entry.timestamp);
         if (!grouped[dayKey]) grouped[dayKey] = [];
         grouped[dayKey].push(entry);
@@ -130,8 +139,9 @@ export function renderTimeline() {
             <div class="timeline-line"></div>
             ${sortedDayKeys.map(dayKey => {
                 const dayEntries = grouped[dayKey];
+                // P2: Expand all day blocks if we are showing search results
                 const isToday = (dayKey === todayKey);
-                const expandedClass = isToday ? 'expanded' : '';
+                const expandedClass = (isToday || entriesToRender) ? 'expanded' : '';
                 
                 const recaps = dayEntries.filter(e => e.type === 'recap');
                 const regularEntries = dayEntries.filter(e => e.type !== 'recap');
@@ -174,7 +184,7 @@ export function renderTimeline() {
                                             <div class="recap-highlights-list" style="margin: 8px 0; padding-left: 0;">
                                                 ${recap.highlights.filter(h => h).map(h => `
                                                     <div class="recap-highlight-item">
-                                                        <span class="recap-highlight-marker">▶</span>
+                                                        <span class="recap-highlight-marker">•</span>
                                                         <span class="recap-highlight-tag">${h}</span>
                                                     </div>
                                                 `).join('')}
@@ -205,6 +215,7 @@ export function renderTimeline() {
                                             </div>
                                         </div>
                                     ` : ''}
+                                    
                                     ${recap.gratitude ? `
                                         <div>
                                             <strong>Gratitude:</strong>
@@ -300,7 +311,7 @@ export function renderTimeline() {
     container.innerHTML = html;
     
     // Mini-maps
-    entries.forEach(entry => {
+    renderData.forEach(entry => {
         if (entry.coords) {
             setTimeout(() => {
                 const mapEl = document.getElementById(`mini-map-${entry.id}`);
