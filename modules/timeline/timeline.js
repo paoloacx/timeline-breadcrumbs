@@ -6,6 +6,8 @@ import {
     formatDate, formatTime, calculateEndTime, getDayKey
 } from '../../utils.js';
 import { handleEditEntry, handlePreviewEntry } from '../../crud-handlers.js';
+// P-FIX: Import the centralized icon list
+import { MOOD_ICONS } from '../../ui-renderer.js';
 
 // --- Icon Helper Functions ---
 const createIcon = (iconName, altText, extraStyle = '') => {
@@ -103,7 +105,7 @@ export function initTimeline() {
  * @param {Array} [entriesToRender] - Optional array of entries to render. If null, uses global state.
  */
 export function renderTimeline(entriesToRender = null) {
-    const { entries } = getState();
+    const { entries, settings } = getState(); // P-FIX: Get settings
     const renderData = entriesToRender || entries;
     const container = document.getElementById('timeline-container');
     const emptyState = document.getElementById('empty-state');
@@ -245,6 +247,17 @@ export function renderTimeline(entriesToRender = null) {
                                 const needsReadMore = noteContent.length > 200 || noteContent.split('\n').length > 4;
                                 const needsReadMoreOptional = optionalNoteContent.length > 200 || optionalNoteContent.split('\n').length > 4;
 
+                                // P-FIX: Get icon path and label from centralized lists
+                                let moodIconPath = '';
+                                let moodAltText = 'Mood';
+                                if (entry.mood !== undefined && entry.mood !== null) {
+                                    moodIconPath = MOOD_ICONS[entry.mood]; // Get path from array
+                                    if (settings.moods[entry.mood]) {
+                                        moodAltText = settings.moods[entry.mood].label; // Get label
+                                    }
+                                }
+                                // --- End P-FIX ---
+
                                 return `
                                 <div class="breadcrumb-entry ${entry.isTimedActivity ? 'time-event' : ''} ${trackClass} ${spentClass} ${crumbClass}" style="${heightStyle}" data-id="${entry.id}">
                                     ${entry.isTimedActivity ? 
@@ -272,8 +285,8 @@ export function renderTimeline(entriesToRender = null) {
                                     
                                     ${!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap' ? `
                                         <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
-                                            ${entry.mood !== undefined && entry.mood !== null ? 
-                                                `<img src="assets/icons/mood-icon-${entry.mood}.svg" alt="Mood" class="icon-mac" style="width: 32px; height: 32px; flex-shrink: 0;">` 
+                                            ${moodIconPath ? 
+                                                `<img src="${moodIconPath}" alt="${moodAltText}" class="icon-mac" style="width: 32px; height: 32px; flex-shrink: 0;">` 
                                                 : ''}
                                             <div style="flex: 1;">
                                                 <div class="breadcrumb-note">${noteContent}</div>
