@@ -51,45 +51,37 @@
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
 }
 
-/* --- Versión final del grano --- */
+/* P-FIX: Grain overlay (New Version) */
 .preview-content::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  
-  /* Textura de grano */
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
   background-repeat: repeat;
-  opacity: 0.15; 
-  animation: grainMove 10s steps(6) infinite;
   
-  /* Z-index 1: Encima del fondo #faf8f6 (z-index 0) */
-  z-index: 1; 
+  opacity: 0.15;
+  
+  animation: grainMove 10s steps(6) infinite;
+  z-index: 1; /* Place it above the background (#faf8f6) */
 }
-
 
 /* P-FIX: Ensure modal content is above the grain */
 .preview-content .mac-title-bar,
 .preview-content .mac-content,
 .preview-content .mac-footer-bar {
     position: relative;
-    /* Z-index 2: Encima del grano (z-index 1) */
-    z-index: 2; 
+    z-index: 2; /* Content (z-index 2) is above grain (z-index 1) */
 }
 
-/* --- CAMBIO: Aumento de Especificidad --- */
-/* Esta regla ahora es más específica que la de global.css
-   y forzará la transparencia para que veamos el grano (z-index 1)
-   y el fondo (z-index 0) a través del contenido (z-index 2). */
-.preview-modal.show .preview-content .mac-content {
-    background: transparent !important;
+/* Dejamos de intentar forzar la transparencia aquí,
+   lo haremos en global.css */
+.preview-content .mac-content {
+    /* background: transparent !important; <- REMOVED */
 }
-
-.preview-modal.show .preview-content #preview-body {
-    background: transparent !important;
+.preview-content #preview-body {
+    /* background: transparent !important; <- REMOVED */
 }
-/* --- FIN CAMBIO --- */
 
 
 .preview-modal.show .preview-content {
@@ -100,23 +92,17 @@
 .preview-content .mac-title-bar {
     position: sticky;
     top: 0;
-    z-index: 10; /* Sticky header debe estar encima de todo */
-    /* REMOVED: Flexbox layout rules */
+    z-index: 10; 
 }
-
-/* REMOVED: .preview-content .mac-title-bar .mac-title */
-
-/* REMOVED: Old #btn-preview-edit style */
-
 
 /* P4: Modal Width Change */
 .form-modal .preview-content {
     border: none;
     box-shadow: none;
     background: transparent;
-    width: 600px; /* CHANGED: Was 'auto' to ensure consistent width */
+    width: 600px; 
     max-width: 600px;
-    overflow: visible; /* Override overflow:hidden for form modals */
+    overflow: visible; 
 }
 
 /* P-FIX: Disable grain overlay for form modals */
@@ -139,7 +125,7 @@
 .mac-footer-bar {
     position: sticky;
     bottom: 0;
-    z-index: 10; /* Sticky footer debe estar encima de todo */
+    z-index: 10;
     display: flex;
     justify-content: flex-end; /* Aligns button to the right */
     padding: 6px;
