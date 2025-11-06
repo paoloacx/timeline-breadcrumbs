@@ -212,6 +212,7 @@
                         </label>
                         <input type="text" class="mac-input" id="weather-input" placeholder="Sunny, cloudy...">
                     </div>
+                    
                     <div class="form-section-header" data-target="images-collapsible-content">
                         <label class="mac-label">
                             <img src="assets/icons/image.svg" alt="Images" class="icon-mac" style="vertical-align: sub;"> Images:
@@ -385,7 +386,7 @@
             </div>
             <div class="mac-content">
                 
-                <details class="settings-collapsible" open>
+                <details class="settings-collapsible">
                     <summary>Time Durations</summary>
                     <div class="config-panel" id="time-durations-config"></div>
                 </details>
@@ -449,10 +450,13 @@
             <div class="mac-content" id="tools-body">
 
                 <div class="universal-search-container">
-                    <input type="text" class="mac-input" id="universal-search" placeholder="Search or filter (e.g., 'May 2024')">
-                    <button class="mac-button" id="btn-universal-search">
+                    <input type="text" class="mac-input" id="universal-search" placeholder="Search text...">
+                    <select id="filter-year" class="mac-input"><option value="">Year</option></select>
+                    <select id="filter-month" class="mac-input"><option value="">Month</option></select>
+                    <button class="mac-button" id="btn-universal-search" title="Search/Filter">
                         <img src="assets/icons/search.svg" alt="Search" class="icon-mac">
                     </button>
+                    <button class="mac-button" id="btn-universal-clear" title="Clear Filter">✕</button>
                 </div>
                 <button class="mac-button" id="btn-tools-stats" style="width: 100%; margin-bottom: 8px;">
                     <img src="assets/icons/stats.svg" alt="Stats" class="icon-mac"> Stats
@@ -532,7 +536,7 @@
             </div>
         </div>
     </div>
-
+    
     <script type="module" src="core/app.js"></script>
 
 </body>
