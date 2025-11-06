@@ -171,12 +171,16 @@ export function renderTimeline() {
                                     ${recap.highlights && recap.highlights.length > 0 && recap.highlights.some(h => h) ? `
                                         <div style="margin-bottom: 16px;">
                                             <strong>Highlights:</strong>
-                                            <ul style="margin: 8px 0; padding-left: 20px;">
-                                                ${recap.highlights.filter(h => h).map(h => `<li style="margin-bottom: 4px;">${h}</li>`).join('')}
-                                            </ul>
+                                            <div class="recap-highlights-list" style="margin: 8px 0; padding-left: 0;">
+                                                ${recap.highlights.filter(h => h).map(h => `
+                                                    <div class="recap-highlight-item">
+                                                        <span class="recap-highlight-marker">▶</span>
+                                                        <span class="recap-highlight-tag">${h}</span>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
                                         </div>
                                     ` : ''}
-                                    
                                     ${recap.lowlights && recap.lowlights.length > 0 && recap.lowlights.some(l => l) ? `
                                         <div style="margin-bottom: 16px;">
                                             <strong>Lowlights:</strong>
@@ -186,22 +190,21 @@ export function renderTimeline() {
                                         </div>
                                     ` : ''}
                                     
-                                    ${recap.bso ? `
+                                    ${recap.track ? `
                                         <div style="margin-bottom: 16px;">
-                                            <strong>BSO of the Day:</strong>
+                                            <strong>Song of the Day (BSO):</strong>
                                             <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 12px; border: 2px solid #000; background: #f9f9f9;">
-                                                <img src="${recap.bso.artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
+                                                <img src="${recap.track.artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
                                                 <div style="flex: 1;">
-                                                    <div style="font-weight: bold;">${recap.bso.name}</div>
-                                                    <div style="font-size: 12px; color: #666;">${recap.bso.artist}</div>
+                                                    <div style="font-weight: bold;">${recap.track.name}</div>
+                                                    <div style="font-size: 12px; color: #666;">${recap.track.artist}</div>
                                                 </div>
-                                                <a href="${recap.bso.url}" target="_blank" style="text-decoration: none;">
+                                                <a href="${recap.track.url}" target="_blank" style="text-decoration: none;">
                                                     ${createIcon('link', 'Listen')}
                                                 </a>
                                             </div>
                                         </div>
                                     ` : ''}
-                                    
                                     ${recap.gratitude ? `
                                         <div>
                                             <strong>Gratitude:</strong>
