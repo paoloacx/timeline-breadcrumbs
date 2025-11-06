@@ -36,7 +36,7 @@
 }
 
 .preview-content {
-    /* P-FIX: Fondo base (será tapado por .mac-content) */
+    /* Fondo base (será tapado) */
     background: #faf8f6;
     border: 3px solid #000;
     max-width: 90%;
@@ -44,15 +44,13 @@
     max-height: 90vh; /* Limit height */
     overflow-y: auto;
     position: relative;
-    overflow: hidden; /* Needed for pseudo-element */
+    overflow: hidden; 
     
-    /* Pop-in animation (This applies to ALL modal contents) */
     transform: scale(0.95) translateY(8px);
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
 }
 
-/* --- CAMBIO RADICAL: Se elimina .preview-content::after --- */
-/* Ya no aplicamos el grano al padre. */
+/* REMOVED: .preview-content::after (Ya no se usa aquí) */
 
 
 /* P-FIX: Ensure modal content is above the grain */
@@ -60,22 +58,42 @@
 .preview-content .mac-content,
 .preview-content .mac-footer-bar {
     position: relative;
-    /* Z-index 2 (o auto) es correcto */
     z-index: 2; 
 }
 
-/* --- NUEVA ESTRATEGIA: Aplicar grano al .mac-content --- */
-/* Forzamos al .mac-content DENTRO del preview modal
-   a tener el fondo beige Y la textura de grano.
-   Esto ignora el 'background: white' de .mac-window */
+/* --- NUEVA ESTRATEGIA: Grano en .mac-content --- */
+
+/* 1. Preparamos .mac-content */
 .preview-modal .mac-content {
-    background-color: #faf8f6;
+    /* Fondo base beige */
+    background: #faf8f6 !important;
+    /* Creamos un contexto de apilamiento */
+    position: relative;
+    /* Aseguramos que el ::after quede contenido */
+    overflow: hidden; 
+    
+    /* REMOVED: Quitamos la animación de aquí */
+}
+
+/* 2. Creamos la capa de grano ::after DENTRO de .mac-content */
+.preview-modal .mac-content::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    
+    /* La imagen de grano Base64 (sí se ve, es un patrón 14x14) */
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
     background-repeat: repeat;
+    opacity: 0.15;
+    
+    /* La animación SÓLO se aplica a esta capa */
     animation: grainMove 10s steps(6) infinite;
-    /* !important para ganar al 'background: white' de .mac-window */
-    background: #faf8f6 url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==") repeat !important;
+    
+    /* Z-index 1: Encima del fondo beige de .mac-content */
+    z-index: 1;
 }
+/* --- FIN NUEVA ESTRATEGIA --- */
 
 
 .preview-modal.show .preview-content {
@@ -91,7 +109,6 @@
 
 
 /* P4: Modal Width Change */
-/* Los form-modal NO se verán afectados por la regla .preview-modal .mac-content */
 .form-modal .preview-content {
     border: none;
     box-shadow: none;
@@ -101,12 +118,6 @@
     overflow: visible; 
 }
 
-/* P-FIX: Disable grain overlay for form modals (Regla ya no necesaria) */
-/* .form-modal .preview-content::after {
-    display: none;
-} */
-
-
 /* Estilo para el botón de cerrar del modal */
 .btn-modal-close {
     background: #fff; 
@@ -115,7 +126,6 @@
     cursor: pointer;
     color: #000; 
 }
-
 
 /* --- NEW: Footer bar for modals --- */
 .mac-footer-bar {
