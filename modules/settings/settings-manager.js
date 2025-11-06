@@ -81,12 +81,11 @@ export function saveSettings() {
         if (val) newSettings.trackItems.tasks.push(val);
     });
     
-    // Save Moods
+    // P-FIX: Save Moods (label only)
     document.querySelectorAll('#mood-config-list .config-item').forEach(item => {
-        const emoji = item.querySelector('input[name="mood-emoji"]').value.trim();
         const label = item.querySelector('input[name="mood-label"]').value.trim();
-        if (emoji && label) {
-            newSettings.moods.push({ emoji, label });
+        if (label) {
+            newSettings.moods.push({ label });
         }
     });
 
@@ -210,7 +209,6 @@ function renderMoodConfigInternal(container) {
     const { settings } = getState();
     container.innerHTML = settings.moods.map((mood, index) => `
         <div class="config-item mood-item">
-            <input type="text" name="mood-emoji" class="mac-input" value="${mood.emoji}" style="flex: 0 0 60px; text-align: center; font-size: 20px;">
             <input type="text" name="mood-label" class="mac-input" value="${mood.label}">
             <button class="mac-button delete-button" onclick="this.closest('.config-item').remove()">✕</button>
         </div>
@@ -218,8 +216,8 @@ function renderMoodConfigInternal(container) {
     
     // (El listener se añade dinámicamente)
     container.querySelector('#btn-add-mood').addEventListener('click', (e) => {
+        // P-FIX: Removed emoji input from new item
         const newItem = `<div class="config-item mood-item">
-            <input type="text" name="mood-emoji" class="mac-input" value="🙂" style="flex: 0 0 60px; text-align: center; font-size: 20px;">
             <input type="text" name="mood-label" class="mac-input" value="New Mood">
             <button class="mac-button delete-button" onclick="this.closest('.config-item').remove()">✕</button>
         </div>`;
