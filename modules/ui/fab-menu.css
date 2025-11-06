@@ -1,5 +1,21 @@
 /* ===== FAB BUTTONS ===== */
 
+/* P2: Keyframe animation for FAB pulse */
+@keyframes fabPulse {
+    0% {
+        box-shadow: 4px 4px 0 rgba(0,0,0,0.3), 0 0 0 0px rgba(255, 120, 0, 0.7);
+        border-color: #000;
+    }
+    50% {
+        box-shadow: 4px 4px 0 rgba(0,0,0,0.3), 0 0 0 10px rgba(255, 120, 0, 0);
+        border-color: #FF7800; /* Orange border */
+    }
+    100% {
+        box-shadow: 4px 4px 0 rgba(0,0,0,0.3), 0 0 0 0px rgba(255, 120, 0, 0);
+        border-color: #000;
+    }
+}
+
 .fab-container {
     position: fixed;
     /* CHANGED: Positioned lower, footer is gone */
@@ -51,10 +67,14 @@
     
     /* CAMBIO: Hacer el botón clickeable */
     pointer-events: auto;
+
+    /* P2: Add pulsing animation */
+    animation: fabPulse 2.5s infinite ease-out;
 }
 
 .fab-main:hover {
     transform: scale(1.1) rotate(90deg);
+    animation: none; /* Stop pulsing on hover */
 }
 
 /* P1: Size Change */
@@ -77,7 +97,7 @@
     
     transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Bounce effect */
 
-    /* P1: Align centers */
+    /* P1: Align centers (with 30px icons) */
     /* (64px main fab - 55px action fab) / 2 = 4.5px. Rounded to 5px. */
     margin-right: 5px; /* CHANGED from 8px */
 }
@@ -108,11 +128,9 @@
         height: 55px; /* Make consistent */
     }
 
-    /* P1: Adjust margin for mobile */
-    .fab-action-wrapper {
-        /* (56px main fab - 55px action fab) / 2 = 0.5px. Rounded to 0px. */
-        margin-right: 0px; /* CHANGED from 6px */
-    }
+    /* P1: Adjust margin for mobile (with 30px icons) */
+    /* (56px main fab - 55px action fab) / 2 = 0.5px. Rounded to 0px. */
+    margin-right: 0px; /* CHANGED from 6px */
 }
 
 
