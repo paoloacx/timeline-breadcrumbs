@@ -14,7 +14,7 @@
 }
 
 .breadcrumb-entry.track-event {
-    background: #4a4a4a;
+    background: #8cafe1;
     color: white;
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
@@ -41,7 +41,7 @@
 }
 
 .breadcrumb-entry.time-event {
-    background: #fff8dc;
+    background: #c4c4c4;
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
     /* REMOVED: text-align: center; */
 }
@@ -156,7 +156,7 @@
 /* --- NEW: Time Event Redesign --- */
 .time-event-duration {
     font-size: 13px;
-    color: #666;
+    color: #2e2e2e;
     margin-bottom: 16px;
     text-align: center; /* MODIFIED: Explicitly centered */
 }
