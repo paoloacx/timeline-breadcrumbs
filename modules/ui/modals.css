@@ -95,3 +95,19 @@
     padding: 2px 8px !important;
     font-size: 11px !important;
 }
+
+/* --- NEW: P1 - GPS Button Group --- */
+.location-input-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.location-input-group input {
+    flex: 1; /* Input takes available space */
+    min-width: 0; /* Fix flexbox overflow */
+}
+
+.location-input-group button {
+    flex-shrink: 0; /* Button does not shrink */
+}
