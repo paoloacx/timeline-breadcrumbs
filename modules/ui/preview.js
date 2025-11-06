@@ -2,9 +2,9 @@
 
 // Imports
 import { formatDate, formatTime } from '../../utils.js';
-// P-FIX: Import state and centralized icons
+// P-FIX: Import state and centralized icon map
 import { getState } from '../../core/state.js';
-import { MOOD_ICONS } from '../../ui-renderer.js';
+import { MOOD_ICON_MAP } from '../../ui-renderer.js';
 
 // CAMBIO: Variable para guardar la instancia del mapa
 let previewMapInstance = null;
@@ -53,26 +53,34 @@ function renderPreviewMap(coords) {
 export function renderPreview(entry) {
     const body = document.getElementById('preview-body');
     const { settings } = getState(); // P-FIX: Get settings
-
-    // P-FIX: Find mood icon and label based on index
-    let moodIconPath = '';
-    let moodLabel = '';
-    let moodIndex = null;
-
+    
+    // P-FIX: Robust mood rendering logic
+    let moodHTML = '';
     if (entry.mood !== undefined && entry.mood !== null) {
+        let visual = null;
+        let label = 'Mood';
+        
         if (typeof entry.mood === 'object') {
-            // Handle old data: find index by label
-            moodIndex = settings.moods.findIndex(m => m.label === entry.mood.label);
-        } else {
-            // Handle new data: it's already the index
-            moodIndex = entry.mood;
+            // Type 1 (New): { visual: 'happy', label: 'Happy' }
+            // Type 2 (Old): { emoji: '🙂', label: 'Happy' }
+            visual = entry.mood.visual || entry.mood.emoji; // Use 'visual' first, fallback to 'emoji'
+            label = entry.mood.label;
+        } else if (typeof entry.mood === 'number') {
+            // Type 3 (Broken Fix): 0
+            if (settings.moods[entry.mood]) {
+                visual = settings.moods[entry.mood].visual;
+                label = settings.moods[entry.mood].label;
+            }
         }
-    }
-
-    if (moodIndex !== null && moodIndex !== -1 && moodIndex < MOOD_ICONS.length) {
-        moodIconPath = MOOD_ICONS[moodIndex]; // Get path from array
-        if (settings.moods[moodIndex]) {
-            moodLabel = settings.moods[moodIndex].label; // Get label
+        
+        if (visual) {
+            const iconSrc = MOOD_ICON_MAP[visual]; // Check if it's a keyword
+            if (iconSrc) {
+                moodHTML = `<img src="${iconSrc}" alt="${label}" class="icon-mac" style="width: 24px; height: 24px;"> <span>${label}</span>`;
+            } else {
+                // It's an emoji
+                moodHTML = `<span class="mood-emoji-visual" style="font-size: 24px; line-height: 1;">${visual}</span> <span>${label}</span>`;
+            }
         }
     }
     // --- End P-FIX ---
@@ -82,11 +90,10 @@ export function renderPreview(entry) {
             <strong>Time:</strong> ${formatDate(entry.timestamp)} at ${formatTime(entry.timestamp)}
         </div>
         
-        ${moodIconPath ? `
+        ${moodHTML ? `
             <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
                 <strong>Mood:</strong> 
-                <img src="${moodIconPath}" alt="${moodLabel}" class="icon-mac" style="width: 24px; height: 24px;">
-                <span>${moodLabel}</span>
+                ${moodHTML}
             </div>
         ` : ''}
         ${!entry.isTimedActivity ? `
