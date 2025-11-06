@@ -764,15 +764,3 @@ input[type="range"]:active::-moz-range-thumb {
     width: auto; /* Sobrescribe el width: 100% si lo tuviera */
 }
 
-/* --- CAMBIO: FIX DEL FONDO DE GRANO DEL MODAL --- */
-/* Esta regla se añade al final de global.css para ganar la "batalla de especificidad".
-   Anula la regla `.mac-window { background: white; }` (línea 222)
-   específicamente para el contenido del modal de preview.
-   Esto fuerza al .mac-content (z-index: 2) a ser transparente,
-   dejando ver la textura de grano (z-index: 1) y el fondo (z-index: 0).
-*/
-.preview-modal .preview-content .mac-content,
-.preview-modal .preview-content #preview-body {
-    background: transparent !important;
-}
-/* --- FIN DEL CAMBIO --- */
