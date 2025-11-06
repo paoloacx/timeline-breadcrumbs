@@ -209,7 +209,7 @@ export function toggleMoodConfig() {
 function renderMoodConfigInternal(container) {
     const { settings } = getState();
     container.innerHTML = settings.moods.map((mood, index) => `
-        <div class="config-item">
+        <div class="config-item mood-item">
             <input type="text" name="mood-emoji" class="mac-input" value="${mood.emoji}" style="flex: 0 0 60px; text-align: center; font-size: 20px;">
             <input type="text" name="mood-label" class="mac-input" value="${mood.label}">
             <button class="mac-button delete-button" onclick="this.closest('.config-item').remove()">✕</button>
@@ -218,7 +218,7 @@ function renderMoodConfigInternal(container) {
     
     // (El listener se añade dinámicamente)
     container.querySelector('#btn-add-mood').addEventListener('click', (e) => {
-        const newItem = `<div class="config-item">
+        const newItem = `<div class="config-item mood-item">
             <input type="text" name="mood-emoji" class="mac-input" value="🙂" style="flex: 0 0 60px; text-align: center; font-size: 20px;">
             <input type="text" name="mood-label" class="mac-input" value="New Mood">
             <button class="mac-button delete-button" onclick="this.closest('.config-item').remove()">✕</button>
