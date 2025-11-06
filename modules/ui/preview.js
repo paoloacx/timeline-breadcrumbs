@@ -2,6 +2,9 @@
 
 // Imports
 import { formatDate, formatTime } from '../../utils.js';
+// P-FIX: Import state and centralized icons
+import { getState } from '../../core/state.js';
+import { MOOD_ICONS } from '../../ui-renderer.js';
 
 // CAMBIO: Variable para guardar la instancia del mapa
 let previewMapInstance = null;
@@ -49,18 +52,43 @@ function renderPreviewMap(coords) {
  */
 export function renderPreview(entry) {
     const body = document.getElementById('preview-body');
+    const { settings } = getState(); // P-FIX: Get settings
+
+    // P-FIX: Find mood icon and label based on index
+    let moodIconPath = '';
+    let moodLabel = '';
+    let moodIndex = null;
+
+    if (entry.mood !== undefined && entry.mood !== null) {
+        if (typeof entry.mood === 'object') {
+            // Handle old data: find index by label
+            moodIndex = settings.moods.findIndex(m => m.label === entry.mood.label);
+        } else {
+            // Handle new data: it's already the index
+            moodIndex = entry.mood;
+        }
+    }
+
+    if (moodIndex !== null && moodIndex !== -1 && moodIndex < MOOD_ICONS.length) {
+        moodIconPath = MOOD_ICONS[moodIndex]; // Get path from array
+        if (settings.moods[moodIndex]) {
+            moodLabel = settings.moods[moodIndex].label; // Get label
+        }
+    }
+    // --- End P-FIX ---
     
     let html = `
         <div style="margin-bottom: 16px;">
             <strong>Time:</strong> ${formatDate(entry.timestamp)} at ${formatTime(entry.timestamp)}
         </div>
         
-        ${entry.mood ? `
-            <div style="margin-bottom: 16px;">
-                <strong>Mood:</strong> <span style="font-size: 24px;">${entry.mood.emoji}</span> ${entry.mood.label}
+        ${moodIconPath ? `
+            <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                <strong>Mood:</strong> 
+                <img src="${moodIconPath}" alt="${moodLabel}" class="icon-mac" style="width: 24px; height: 24px;">
+                <span>${moodLabel}</span>
             </div>
         ` : ''}
-        
         ${!entry.isTimedActivity ? `
             <div style="margin-bottom: 16px;">
                 <strong>Note:</strong>
