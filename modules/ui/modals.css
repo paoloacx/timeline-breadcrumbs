@@ -1,12 +1,11 @@
 /* ===== MODAL STYLES ===== */
 
-/* P-FIX: Keyframes for grain animation */
+/* P-FIX: Keyframes for grain animation (New Version) */
 @keyframes grainMove {
   0% { transform: translate(0,0); }
-  20% { transform: translate(-2%, -2%); }
-  40% { transform: translate(1%, -3%); }
-  60% { transform: translate(-3%, 1%); }
-  80% { transform: translate(2%, 2%); }
+  25% { transform: translate(1%, -1%); }
+  50% { transform: translate(-1%, 1%); }
+  75% { transform: translate(1%, 1%); }
   100% { transform: translate(0,0); }
 }
 
@@ -37,7 +36,7 @@
 }
 
 .preview-content {
-    /* P-FIX: Grain background */
+    /* P-FIX: Grain background (New Version) */
     background: #faf8f6;
     border: 3px solid #000;
     max-width: 90%;
@@ -52,17 +51,17 @@
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
 }
 
-/* P-FIX: Grain overlay */
+/* P-FIX: Grain overlay (New Version) */
 .preview-content::after {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAIElEQVR42mNkYGD4z0AEYBxVSFUBC4RRMFQEYoYhNEgAAN/RCx8SdskyAAAAAElFTkSuQmCC");
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
   background-repeat: repeat;
-  background-size: 200px;
-  opacity: 0.18; /* controla la fuerza del grano */
-  animation: grainMove 8s steps(6) infinite;
+  background-size: 900px;
+  opacity: 0.05; /* esta vez controlado */
+  animation: grainMove 10s steps(6) infinite;
   z-index: 1; /* Place it above the background */
 }
 
