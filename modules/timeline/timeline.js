@@ -13,8 +13,9 @@ import { MOOD_ICON_MAP } from '../../ui-renderer.js';
 const createIcon = (iconName, altText, extraStyle = '') => {
     return `<img src="assets/icons/${iconName}.svg" alt="${altText}" class="icon-mac" style="vertical-align: middle; margin-right: 4px; ${extraStyle}">`;
 };
+// P2: Removed inline width/height style
 const createLocationIcon = () => {
-     return `<img src="assets/icons/keep.svg" class="icon-mac" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 2px;">`;
+     return `<img src="assets/icons/keep.svg" class="icon-mac">`;
 }
 
 // --- Pagination State ---
