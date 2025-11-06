@@ -9,7 +9,7 @@
 }
 
 .recap-header {
-    background: linear-gradient(90deg, #fff8d1 0%, #e6e6e6 80%); /* Gold gradient */
+    background: linear-gradient(90deg, #ffffff 0%, #ababab 80%); /* Gold gradient */
     color: #000;
     /* P4: Height Change: 12px -> 8px */
     padding: 8px 16px; /* Total height = 16 (pad) + 15 (font) + 6 (gap) = ~37px */
