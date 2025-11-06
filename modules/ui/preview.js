@@ -52,16 +52,21 @@ function renderPreviewMap(coords) {
  */
 export function renderPreview(entry) {
     const body = document.getElementById('preview-body');
-    const { settings } = getState(); // P-FIX: Get settings
-    
-    // --- ¡¡¡NUEVO FIX JAVASCRIPT!!! ---
-    // Si CSS falla, JS lo fuerza.
-    // Buscamos el contenedor .mac-content del modal y forzamos el fondo transparente.
+    if (!body) return; // Safety check
+
+    // --- ¡¡¡NUEVO FIX JAVASCRIPT v2!!! ---
+    // Forzamos la transparencia en EL CONTENEDOR HIJO (#preview-body)
+    // Y en EL CONTENEDOR PADRE (.mac-content)
+    // Usamos setProperty con '!important' para anular CUALQUIER otra regla CSS.
+    body.style.setProperty('background', 'transparent', 'important');
+
     const modalContent = body.closest('.mac-content');
     if (modalContent) {
-        modalContent.style.background = 'transparent';
+        modalContent.style.setProperty('background', 'transparent', 'important');
     }
     // --- FIN DEL FIX ---
+
+    const { settings } = getState(); // P-FIX: Get settings
     
     // P-FIX: Robust mood rendering logic
     let moodHTML = '';
@@ -194,18 +199,22 @@ export function renderPreview(entry) {
  */
 export function renderImagePreviewModal(entry, imageIndex) {
     const body = document.getElementById('preview-body');
+    if (!body) return; // Safety check
+    
+    // --- ¡¡¡NUEVO FIX JAVASCRIPT v2!!! ---
+    // Aplicamos el fix también al modal de imagen
+    body.style.setProperty('background', 'transparent', 'important');
+    
+    const modalContent = body.closest('.mac-content');
+    if (modalContent) {
+        modalContent.style.setProperty('background', 'transparent', 'important');
+    }
+    // --- FIN DEL FIX ---
+    
     if (!entry || !entry.images || !entry.images[imageIndex]) {
         body.innerHTML = 'Error: Image not found.';
         return;
     }
-    
-    // --- ¡¡¡NUEVO FIX JAVASCRIPT!!! ---
-    // Aplicamos el fix también al modal de imagen
-    const modalContent = body.closest('.mac-content');
-    if (modalContent) {
-        modalContent.style.background = 'transparent';
-    }
-    // --- FIN DEL FIX ---
     
     body.innerHTML = `
         <div style="text-align: center; padding: 20px;">
