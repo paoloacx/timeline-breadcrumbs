@@ -21,6 +21,14 @@
     
     </head>
 <body>
+
+    <svg width="0" height="0" style="position: absolute; left: -999px;">
+      <filter id="grain">
+        <feTurbulence type="fractalNoise" baseFrequency="5" numOctaves="4" result="noise" />
+        <feColorMatrix type="saturate" values="0" />
+      </filter>
+    </svg>
+
     <div id="auth-container" class="auth-panel" style="display: none;">
         <div style="text-align: center; margin-bottom: 20px;">
             <h2 style="font-size: 20px;">Breadcrumbs Timeline</h2>
@@ -545,3 +553,5 @@
 
 </body>
 </html>
+
+}
