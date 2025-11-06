@@ -1,11 +1,12 @@
 // ===== modules/settings/settings-manager.js (Settings Logic) =====
 
 // Imports
-// CAMBIO: Las rutas ahora suben dos niveles (../../) y apuntan a 'core/'
+// CAMBIO: Rutas ahora suben dos niveles (../../) y apuntan a 'core/'
 import { getState, setSettings, setEntries } from '../../core/state.js';
 import { saveData } from '../../core/storage.js';
 import { openModal, closeModal } from '../ui/modal-manager.js';
-import { renderMoodSelector } from '../../ui-renderer.js';
+// P-FIX: Importar el MAPA de iconos además del renderizador
+import { renderMoodSelector, MOOD_ICON_MAP } from '../../ui-renderer.js';
 import { importFullBackup } from '../data/data-tools.js';
 import { renderTimeline } from '../timeline/timeline.js';
 
@@ -82,6 +83,7 @@ export function saveSettings() {
     });
     
     // P-FIX: Save Moods (visual AND label)
+    // Esto funciona porque encontrará el input[type="text"] o el input[type="hidden"]
     document.querySelectorAll('#mood-config-list .config-item').forEach(item => {
         const visual = item.querySelector('input[name="mood-visual"]').value.trim();
         const label = item.querySelector('input[name="mood-label"]').value.trim();
@@ -208,17 +210,38 @@ export function toggleMoodConfig() {
  */
 function renderMoodConfigInternal(container) {
     const { settings } = getState();
-    container.innerHTML = settings.moods.map((mood, index) => `
-        <div class="config-item mood-item">
-            <input type="text" name="mood-visual" class="mac-input" value="${mood.visual}">
-            <input type="text" name="mood-label" class="mac-input" value="${mood.label}">
-            <button class="mac-button delete-button" onclick="this.closest('.config-item').remove()">✕</button>
-        </div>
-    `).join('') + `<button class="mac-button" id="btn-add-mood">➕ Add Mood</button>`;
     
-    // (El listener se añade dinámicamente)
+    container.innerHTML = settings.moods.map((mood, index) => {
+        // P-FIX: Comprobar si 'mood.visual' es una clave de icono o un emoji
+        const iconSrc = MOOD_ICON_MAP[mood.visual];
+        let visualHTML = '';
+
+        if (iconSrc) {
+            // Es un icono predefinido. Mostrar el icono y un input oculto.
+            visualHTML = `
+                <div class="config-mood-visual-icon">
+                    <img src="${iconSrc}" alt="${mood.label}" class="icon-mac" style="width: 24px; height: 24px;">
+                </div>
+                <input type="hidden" name="mood-visual" value="${mood.visual}">
+            `;
+        } else {
+            // Es un emoji. Mostrar un input de texto.
+            visualHTML = `
+                <input type="text" name="mood-visual" class="mac-input" value="${mood.visual}">
+            `;
+        }
+        
+        return `
+            <div class="config-item mood-item">
+                ${visualHTML}
+                <input type="text" name="mood-label" class="mac-input" value="${mood.label}">
+                <button class="mac-button delete-button" onclick="this.closest('.config-item').remove()">✕</button>
+            </div>
+        `;
+    }).join('') + `<button class="mac-button" id="btn-add-mood">➕ Add Mood</button>`;
+    
+    // El 'Add Mood' sigue creando un emoji por defecto
     container.querySelector('#btn-add-mood').addEventListener('click', (e) => {
-        // P-FIX: Add both fields for new item
         const newItem = `<div class="config-item mood-item">
             <input type="text" name="mood-visual" class="mac-input" value="🙂">
             <input type="text" name="mood-label" class="mac-input" value="New Mood">
