@@ -75,6 +75,10 @@
     pointer-events: none;  
     
     transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Bounce effect */
+
+    /* P5: NEW - Align centers */
+    /* (64px main fab - 48px action fab) / 2 = 8px */
+    margin-right: 8px;
 }
 
 .fab-action-wrapper.show {
@@ -100,6 +104,12 @@
     .fab-action {
         width: 44px;
         height: 44px;
+    }
+
+    /* P5: Adjust margin for mobile */
+    .fab-action-wrapper {
+        /* (56px main fab - 44px action fab) / 2 = 6px */
+        margin-right: 6px;
     }
 }
 
