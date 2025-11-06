@@ -54,11 +54,8 @@
 /* P-FIX: Grain overlay (New Version) */
 .preview-content::after {
   content: "";
-  /* --- CAMBIO: De 'fixed' a 'absolute' --- */
-  /* Esto asegura que la textura de grano se posicione 
-     relativa al .preview-content y no a toda la ventana. */
+  /* CAMBIO: De 'fixed' a 'absolute' (Correcto) */
   position: absolute;
-  /* --- FIN CAMBIO --- */
   inset: 0;
   pointer-events: none;
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
@@ -69,7 +66,7 @@
   opacity: 0.15; /* CHANGED from 0.05 */
   
   animation: grainMove 10s steps(6) infinite;
-  z-index: 1; /* Place it above the background */
+  z-index: 1; /* Place it above the background (#faf8f6) */
 }
 
 /* P-FIX: Ensure modal content is above the grain */
@@ -77,8 +74,17 @@
 .preview-content .mac-content,
 .preview-content .mac-footer-bar {
     position: relative;
-    z-index: 2;
+    z-index: 2; /* Content (z-index 2) is above grain (z-index 1) */
 }
+
+/* --- CAMBIO: Forzar fondo transparente en .mac-content --- */
+/* El .mac-content (z-index: 2) debe ser transparente
+   para que se vea el fondo (z-index: 0) y la textura (z-index: 1)
+   del .preview-content (padre). */
+.preview-content .mac-content {
+    background: transparent;
+}
+/* --- FIN CAMBIO --- */
 
 
 .preview-modal.show .preview-content {
@@ -89,7 +95,7 @@
 .preview-content .mac-title-bar {
     position: sticky;
     top: 0;
-    z-index: 10; 
+    z-index: 10; /* Z-index alto para sticky (sobreescribe el 2) */ 
     /* REMOVED: Flexbox layout rules */
 }
 
@@ -128,7 +134,7 @@
 .mac-footer-bar {
     position: sticky;
     bottom: 0;
-    z-index: 10;
+    z-index: 10; /* Z-index alto para sticky (sobreescribe el 2) */
     display: flex;
     justify-content: flex-end; /* Aligns button to the right */
     padding: 6px;
