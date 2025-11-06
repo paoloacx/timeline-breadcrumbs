@@ -308,6 +308,7 @@ export function renderTimeline(entriesToRender = null) {
                                         ` : ''}` :
                                         `<div class="breadcrumb-time">
                                             ${entry.isQuickTrack ?
+                                                /* SYNTAX FIX HERE: Added comma */
                                                 `<span class="compact-time">${createIcon('time', 'Time')} ${formatTime(entry.timestamp)} ${entry.note}</span>` :
                                                 `${createIcon('time', 'Time')} ${formatTime(entry.timestamp)}`
                                             }
