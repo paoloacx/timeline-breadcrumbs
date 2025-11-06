@@ -168,9 +168,8 @@ export function renderTimeline(entriesToRender = null) {
             <div class="timeline-line"></div>
             ${displayedDayKeys.map(dayKey => {
                 const dayEntries = grouped[dayKey];
-                // P2: Expand all day blocks if we are showing search results
-                const isToday = (dayKey === todayKey);
-                const expandedClass = (isToday || entriesToRender) ? 'expanded' : '';
+                // P2: Only expand if showing search results
+                const expandedClass = entriesToRender ? 'expanded' : '';
                 
                 const recaps = dayEntries.filter(e => e.type === 'recap');
                 const regularEntries = dayEntries.filter(e => e.type !== 'recap');
@@ -186,9 +185,9 @@ export function renderTimeline(entriesToRender = null) {
                             <div class="recap-block" data-id="${recap.id}">
                                 <div class="recap-header">
                                     <span>${createIcon('star', 'Recap')} Day Recap</span>
-                                    <span class="chevron-recap expanded" id="chevron-recap-${recap.id}">▼</span>
+                                    <span class="chevron-recap" id="chevron-recap-${recap.id}">▼</span>
                                 </div>
-                                <div class="recap-content expanded" id="recap-content-${recap.id}">
+                                <div class="recap-content" id="recap-content-${recap.id}">
                                     <button class="mac-button edit-button btn-edit">
                                         ${createIcon('edit', 'Edit')} Edit
                                     </button>
