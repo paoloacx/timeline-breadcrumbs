@@ -13,12 +13,26 @@
     cursor: pointer; /* NEW: Indicate the card is clickable */
 }
 
-/* P-FIX: Grain texture for normal (crumb) entries (SVG Filter) */
+/* P-FIX: Grain texture for normal (crumb) entries */
 .breadcrumb-entry.crumb-event {
+    background: #f9f8f7; /* Fallback background */
+    position: relative; 
+    isolation: isolate; /* Create stacking context */
+    overflow: hidden; 
+}
+
+/* P-FIX: Apply filter to pseudo-element BEHIND content */
+.breadcrumb-entry.crumb-event::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    
+    /* Apply background AND filter here */
     background: #f9f8f7;
     filter: url(#grain);
-    /* REMOVED: background-image properties */
-    /* REMOVED: ::before pseudo-element */
+    
+    z-index: -1; /* Send it behind */
 }
 
 
