@@ -28,7 +28,7 @@
 .preview-content {
     background: white;
     border: 3px solid #000;
-    max-width: 90%;
+    max-width: 100%;
     width: 600px; /* Fixed width for larger screens */
     max-height: 90vh; /* Limit height */
     overflow-y: auto;
