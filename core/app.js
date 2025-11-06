@@ -8,6 +8,8 @@ import { getState, setOfflineMode, setCurrentUser, clearCurrentUser } from './st
 import { initTimeline, renderTimeline } from '../modules/timeline/timeline.js';
 // --- CHANGED: Import 'handleRedirectResult' and 'tryRestoreSession' ---
 import { initGoogleAuth, syncOnLogin, handleRedirectResult, tryRestoreSession } from '../modules/services/gdrive-service.js';
+// P2: Importar el inicializador del buscador
+import { initUniversalSearch } from '../modules/data/data-tools.js';
 
 /**
  * Initializes the application.
@@ -45,6 +47,8 @@ function initApp() {
         // Initialize UI and Timeline
         initUI(runOfflineMode);
         initTimeline();
+        // P2: Inicializar buscador (Ruta 1)
+        initUniversalSearch();
         
         // Initialize auth and handle the code
         initGoogleAuth(onGdriveSignIn);
@@ -63,6 +67,9 @@ function initApp() {
     
     // 3. Initialize Timeline listeners
     initTimeline();
+
+    // P2: Inicializar buscador (Ruta 2)
+    initUniversalSearch();
 
     // 4. Load local data *first* so UI is ready if we go offline
     loadLocalSettings();
