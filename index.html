@@ -195,23 +195,23 @@
                     <label class="mac-label">Note:</label>
                     <textarea class="mac-textarea" id="note-input" placeholder="What's happening?"></textarea>
                     
-                    <div style="position: relative; margin-bottom: 12px;">
-                        <button class="mac-button" id="btn-get-gps" style="position: absolute; top: 0px; right: 0px;">
-                            <img src="assets/icons/gps.svg" alt="GPS" class="icon-mac"> Use GPS
-                        </button>
-                        
+                    <div style="margin-bottom: 12px;">
                         <label class="mac-label">
                             <img src="assets/icons/keep.svg" alt="Location" class="icon-mac"> Location:
                         </label>
-                        <input type="text" class="mac-input" id="location-input" placeholder="Place" style="max-width: calc(100% - 130px);">
-                        <div id="form-map" class="mini-map" style="display: none;"></div>
+                        <div class="location-input-group">
+                            <input type="text" class="mac-input" id="location-input" placeholder="Place" style="margin-bottom: 0;">
+                            <button class="mac-button" id="btn-get-gps">
+                                <img src="assets/icons/gps.svg" alt="GPS" class="icon-mac"> GPS
+                            </button>
+                        </div>
+                        <div id="form-map" class="mini-map" style="display: none; margin-top: 8px;"></div>
                         
                         <label class="mac-label" style="margin-top: 12px;">
                             <img src="assets/icons/weather.svg" alt="Weather" class="icon-mac"> Weather:
                         </label>
                         <input type="text" class="mac-input" id="weather-input" placeholder="Sunny, cloudy...">
                     </div>
-                    
                     <div class="form-section-header" data-target="images-collapsible-content">
                         <label class="mac-label">
                             <img src="assets/icons/image.svg" alt="Images" class="icon-mac" style="vertical-align: sub;"> Images:
@@ -374,6 +374,7 @@
             </div>
         </div>
     </div>
+    
     <div id="settings-modal" class="preview-modal">
         <div class="preview-content">
             <div class="mac-title-bar">
@@ -383,21 +384,33 @@
                 </button>
             </div>
             <div class="mac-content">
-                <h3 style="margin-bottom: 16px;">Time Durations</h3>
-                <div id="time-durations-config"></div>
-                <h3 style="margin-top: 24px; margin-bottom: 16px;">Time Activities</h3>
-                <div id="time-activities-config"></div>
-                <h3 style="margin-top: 24px; margin-bottom: 16px;">Track Items</h3>
-                <div id="track-items-config"></div>
-                <h3 style="margin-top: 24px; margin-bottom: 16px;">Moods</h3>
-                <div id="mood-config-list"></div> 
+                
+                <details class="settings-collapsible" open>
+                    <summary>Time Durations</summary>
+                    <div class="config-panel" id="time-durations-config"></div>
+                </details>
+                
+                <details class="settings-collapsible">
+                    <summary>Time Activities</summary>
+                    <div class="config-panel" id="time-activities-config"></div>
+                </details>
+                
+                <details class="settings-collapsible">
+                    <summary>Track Items</summary>
+                    <div class="config-panel" id="track-items-config"></div>
+                </details>
+                
+                <details class="settings-collapsible">
+                    <summary>Moods</summary>
+                    <div class="config-panel" id="mood-config-list"></div> 
+                </details>
+
                 <button class="mac-button mac-button-primary" id="btn-save-settings" style="width: 100%; margin-top: 24px;">
                     <img src="assets/icons/save.svg" alt="Save" class="icon-mac"> Save Settings
                 </button>
             </div>
         </div>
     </div>
-
     <div id="stats-modal" class="preview-modal">
         <div class="preview-content">
             <div class="mac-title-bar">
@@ -434,6 +447,13 @@
                 </div>
             </div>
             <div class="mac-content" id="tools-body">
+
+                <div class="universal-search-container">
+                    <input type="text" class="mac-input" id="universal-search" placeholder="Search or filter (e.g., 'May 2024')">
+                    <button class="mac-button" id="btn-universal-search">
+                        <img src="assets/icons/search.svg" alt="Search" class="icon-mac">
+                    </button>
+                </div>
                 <button class="mac-button" id="btn-tools-stats" style="width: 100%; margin-bottom: 8px;">
                     <img src="assets/icons/stats.svg" alt="Stats" class="icon-mac"> Stats
                 </button>
