@@ -47,23 +47,8 @@ function renderPreviewMap(coords) {
 }
 
 
-// --- CAMBIO: Función helper para aplicar estilos ---
-/**
- * Applies styles to the preview body to ensure it sits above the grain.
- * @param {HTMLElement} bodyEl - The #preview-body element.
- */
-function stylePreviewBody(bodyEl) {
-    if (!bodyEl) return;
-    
-    // 1. Fondo transparente (para ver el grano del padre .mac-content)
-    bodyEl.style.setProperty('background', 'transparent', 'important');
-    
-    // 2. Posición relativa (para que z-index funcione)
-    bodyEl.style.position = 'relative';
-    
-    // 3. Z-index 2 (para estar DELANTE del grano, que está en z-index 1)
-    bodyEl.style.zIndex = '2';
-}
+// --- CAMBIO: Se elimina la función 'stylePreviewBody' ---
+/* El CSS (modals.css) ahora se encarga de TODO el apilamiento */
 // --- FIN CAMBIO ---
 
 
@@ -74,10 +59,8 @@ function stylePreviewBody(bodyEl) {
 export function renderPreview(entry) {
     const body = document.getElementById('preview-body');
     
-    // --- CAMBIO: Aplicar estilos ---
-    stylePreviewBody(body);
-    // --- FIN CAMBIO ---
-
+    // --- CAMBIO: Se elimina la llamada a stylePreviewBody() ---
+    
     const { settings } = getState(); // P-FIX: Get settings
     
     // P-FIX: Robust mood rendering logic
@@ -212,9 +195,7 @@ export function renderPreview(entry) {
 export function renderImagePreviewModal(entry, imageIndex) {
     const body = document.getElementById('preview-body');
     
-    // --- CAMBIO: Aplicar estilos ---
-    stylePreviewBody(body);
-    // --- FIN CAMBIO ---
+    // --- CAMBIO: Se elimina la llamada a stylePreviewBody() ---
     
     if (!entry || !entry.images || !entry.images[imageIndex]) {
         body.innerHTML = 'Error: Image not found.';
