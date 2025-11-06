@@ -88,7 +88,10 @@ export function renderPreview(entry) {
                 moodHTML = `<img src="${iconSrc}" alt="${label}" class="icon-mac" style="width: 24px; height: 24px;"> <span>${label}</span>`;
             } else {
                 // It's an emoji
-                moodHTML = `<span class="mood-emoji-visual" style="font-size: 24px; line-height: 1;">${visual}</span> <span>${label}</span>`;
+                
+                // --- CAMBIO: Eliminado estilo inline 'font-size: 24px' ---
+                moodHTML = `<span class="mood-emoji-visual">${visual}</span> <span>${label}</span>`;
+                // --- FIN CAMBIO ---
             }
         }
     }
