@@ -51,16 +51,14 @@
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
 }
 
-/* --- CAMBIO: Versión final del grano --- */
-/* P-FIX: Grain overlay (New Version) */
+/* --- Versión final del grano --- */
 .preview-content::after {
   content: "";
-  /* Posición correcta */
   position: absolute;
   inset: 0;
   pointer-events: none;
   
-  /* Textura de grano (vuelta a la normalidad) */
+  /* Textura de grano */
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
   background-repeat: repeat;
   opacity: 0.15; 
@@ -69,7 +67,6 @@
   /* Z-index 1: Encima del fondo #faf8f6 (z-index 0) */
   z-index: 1; 
 }
-/* --- FIN CAMBIO --- */
 
 
 /* P-FIX: Ensure modal content is above the grain */
@@ -81,14 +78,15 @@
     z-index: 2; 
 }
 
-/* --- CAMBIO: Forzar fondo transparente con !important --- */
-/* Esto anulará cualquier regla de fondo en global.css o preview.css */
-.preview-content .mac-content {
+/* --- CAMBIO: Aumento de Especificidad --- */
+/* Esta regla ahora es más específica que la de global.css
+   y forzará la transparencia para que veamos el grano (z-index 1)
+   y el fondo (z-index 0) a través del contenido (z-index 2). */
+.preview-modal.show .preview-content .mac-content {
     background: transparent !important;
 }
 
-/* Y también en el body por si acaso */
-.preview-content #preview-body {
+.preview-modal.show .preview-content #preview-body {
     background: transparent !important;
 }
 /* --- FIN CAMBIO --- */
