@@ -28,31 +28,33 @@
     transition: opacity 0.25s ease;
 }
 
+/* --- CAMBIO BUG FOOTER: Layout Flex --- */
 .preview-content {
     background: #faf8f6;
     border: 3px solid #000;
     max-width: 90%;
     width: 600px; /* Fixed width for larger screens */
-    max-height: 90vh; /* Limit height */
+    max-height: 90vh; /* Altura máxima */
     position: relative;
     
-    /* --- CAMBIO BUG FOOTER --- */
-    /* Dejamos SÓLO el overflow-y: auto */
-    /* Esto permite el scroll Y respeta el sticky footer */
-    overflow-y: auto; 
-    /* REMOVED: overflow-x: hidden; */
-    /* --- FIN CAMBIO --- */
+    /* 1. Convertir en contenedor Flex vertical */
+    display: flex;
+    flex-direction: column;
+    
+    /* 2. Ocultar el scroll de la ventana (el scroll será interno) */
+    overflow: hidden; 
     
     transform: scale(0.95) translateY(8px);
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
 }
+/* --- FIN CAMBIO --- */
 
 /* P-FIX: Ensure modal content is above the grain */
 .preview-content .mac-title-bar,
 .preview-content .mac-content,
 .preview-content .mac-footer-bar {
     position: relative;
-    z-index: 2; /* <-- Esto es z-index 2 */
+    /* Z-index 2 (o auto) es correcto, pero el footer ya no es sticky */
 }
 
 /* --- NUEVA ESTRATEGIA: Grano en .mac-content::after --- */
@@ -60,13 +62,13 @@
 .preview-modal .mac-content {
     /* 1. Fondo base beige */
     background: #faf8f6 !important;
-    
-    /* 2. Creamos contexto de apilamiento */
     position: relative; 
     
-    /* --- CAMBIO BUG GRANO --- */
-    /* 3. Forzamos un contexto de apilamiento limpio */
-    isolation: isolate;
+    /* --- CAMBIO BUG FOOTER --- */
+    /* 2. Hacer que esta sección crezca */
+    flex-grow: 1;
+    /* 3. Añadir el scroll INTERNO */
+    overflow-y: auto;
     /* --- FIN CAMBIO --- */
 }
 
@@ -82,10 +84,17 @@
     /* Lo ponemos DETRÁS del texto (z-index: 1) */
     z-index: 1; 
     
-    /* Importante: para poder hacer click "a través" de él */
     pointer-events: none; 
 }
-/* --- FIN NUEVA ESTRATEGIA --- */
+
+/* --- CAMBIO BUG GRANO: Forzar texto encima --- */
+/* Esta regla CSS reemplaza el fix de JS */
+.preview-modal #preview-body {
+    position: relative; /* Necesario para z-index */
+    z-index: 2; /* Pone el texto (z-index 2) sobre el grano (z-index 1) */
+    background: transparent !important; /* Asegura transparencia */
+}
+/* --- FIN CAMBIO --- */
 
 
 .preview-modal.show .preview-content {
@@ -94,8 +103,8 @@
 
 /* Make modal headers sticky when scrolling */
 .preview-content .mac-title-bar {
-    position: sticky;
-    top: 0;
+    /* REMOVED: position: sticky; (ya no es necesario) */
+    flex-shrink: 0; /* Evita que se encoja */
     z-index: 10; 
 }
 
@@ -121,9 +130,9 @@
 
 /* --- NEW: Footer bar for modals --- */
 .mac-footer-bar {
-    position: sticky;
-    bottom: 0;
-    z-index: 10; /* Z-index alto para estar sobre el contenido */
+    /* REMOVED: position: sticky; (ya no es necesario) */
+    flex-shrink: 0; /* Evita que se encoja */
+    z-index: 10; 
     display: flex;
     justify-content: flex-end; /* Aligns button to the right */
     padding: 6px;
