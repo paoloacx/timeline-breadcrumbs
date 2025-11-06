@@ -6,7 +6,7 @@
     margin-left: 8px;
 }
 
-/* --- P2: Settings Collapsible Styles --- */
+/* --- P3: Settings Collapsible Styles --- */
 
 .settings-collapsible {
     border: 2px solid #000;
@@ -23,6 +23,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: background 0.2s ease;
+}
+.settings-collapsible > summary:hover {
+    background: #ddd;
 }
 .settings-collapsible > summary::-webkit-details-marker {
     display: none; /* Hide default arrow */
@@ -30,46 +34,57 @@
 .settings-collapsible > summary::after {
     content: '▼'; /* Custom arrow */
     font-size: 14px;
-    transition: transform 0.2s;
+    transition: transform 0.2s ease;
 }
 .settings-collapsible[open] > summary::after {
     transform: rotate(180deg);
 }
+
 .settings-collapsible[open] .config-panel {
-    display: block; /* Show when open */
+    /* P3: Animate */
+    max-height: 1000px; /* Arbitrary large number */
     padding: 16px;
-    border-top: 2px solid #000;
-    background: #ffffcc; /* Put the yellow here */
 }
 
 /* Original .config-panel styles (modified) */
 .config-panel {
-    display: none; /* Hide by default */
-    /* REMOVED: background, border, padding, margin */
+    /* P3: Animate */
+    overflow: hidden;
+    max-height: 0;
+    padding: 0 16px;
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+
+    /* P3: Removed yellow background */
+    display: block; /* Required for animation */
+    border-top: 2px solid #000;
 }
 
-/* P2: Change to config items */
+/* P3: Change to config items */
 .config-item {
     display: flex;
-    flex-direction: column; /* Stack input and button */
-    align-items: flex-end; /* Align button to right */
-    gap: 4px;
+    flex-direction: row; /* Back to row */
+    align-items: center; /* Align input and button */
+    gap: 8px;
     margin-bottom: 12px;
 }
 
 .config-item input[type="text"],
 .config-item input[type="number"] {
-    flex: 1;
+    flex: 1; /* Input takes available space */
     padding: 4px;
     border: 2px inset #999;
     font-family: 'Courier New', monospace;
-    width: 100%; /* Make input full width */
-    box-sizing: border-box; /* Include padding in width */
+    width: auto; /* Allow flex to control width */
+    box-sizing: border-box; 
+}
+.config-item .delete-button {
+    flex-shrink: 0; /* Stop button from shrinking */
 }
 
-/* P2: Special override for mood items */
+
+/* P3: Special override for mood items */
 .config-item.mood-item {
-    flex-direction: row; /* Keep mood config side-by-side */
+    flex-direction: row; /* Already default, but good for clarity */
     align-items: center;
     gap: 8px;
 }
@@ -87,15 +102,23 @@
     width: auto; /* Override 100% width */
 }
 
-/* --- P3: Universal Search in Tools --- */
+/* --- P2: Universal Search in Tools --- */
 .universal-search-container {
     display: flex;
+    flex-wrap: wrap; /* Allow wrapping */
     gap: 8px;
     margin-bottom: 16px;
     border-bottom: 2px solid #999;
     padding-bottom: 16px;
 }
 .universal-search-container input {
-    flex: 1;
+    flex: 1 1 150px; /* Grow, shrink, basis */
     margin-bottom: 0 !important; /* Override global.css */
+}
+.universal-search-container select {
+    flex: 1 1 80px; /* Grow, shrink, basis */
+    margin-bottom: 0 !important;
+}
+.universal-search-container button {
+    flex-shrink: 0;
 }
