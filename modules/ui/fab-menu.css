@@ -57,9 +57,10 @@
     transform: scale(1.1) rotate(90deg);
 }
 
+/* P1: Size Change */
 .fab-action {
-    width: 48px;
-    height: 48px;
+    width: 55px; /* CHANGED from 48px */
+    height: 55px; /* CHANGED from 48px */
     font-size: 20px;
     pointer-events: auto; /* Esto ya estaba, es correcto */
 }
@@ -76,9 +77,9 @@
     
     transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Bounce effect */
 
-    /* P5: NEW - Align centers */
-    /* (64px main fab - 48px action fab) / 2 = 8px */
-    margin-right: 8px;
+    /* P1: Align centers */
+    /* (64px main fab - 55px action fab) / 2 = 4.5px. Rounded to 5px. */
+    margin-right: 5px; /* CHANGED from 8px */
 }
 
 .fab-action-wrapper.show {
@@ -101,15 +102,16 @@
         height: 56px;
     }
 
+    /* P1: Size Change (Mobile) */
     .fab-action {
-        width: 44px;
-        height: 44px;
+        width: 55px; /* Make consistent */
+        height: 55px; /* Make consistent */
     }
 
-    /* P5: Adjust margin for mobile */
+    /* P1: Adjust margin for mobile */
     .fab-action-wrapper {
-        /* (56px main fab - 44px action fab) / 2 = 6px */
-        margin-right: 6px;
+        /* (56px main fab - 55px action fab) / 2 = 0.5px. Rounded to 0px. */
+        margin-right: 0px; /* CHANGED from 6px */
     }
 }
 
@@ -142,7 +144,7 @@
     }
 }
 
-/* NEW: Styles for the FAB overlay */
+/* P1: Overlay Style Change */
 .fab-overlay {
     display: none;
     position: fixed;
@@ -150,8 +152,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    /* Use a very subtle background to indicate clickability */
-    background: rgba(0,0,0,0.1);
+    /* CHANGED: Darker background */
+    background: rgba(0,0,0,0.4);
     z-index: 9997; /* Just below fab-container (9998) */
     opacity: 0;
     transition: opacity 0.3s ease;
