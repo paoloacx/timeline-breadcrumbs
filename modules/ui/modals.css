@@ -1,5 +1,16 @@
 /* ===== MODAL STYLES ===== */
 
+/* P-FIX: Keyframes for grain animation */
+@keyframes grainMove {
+  0% { transform: translate(0,0); }
+  20% { transform: translate(-2%, -2%); }
+  40% { transform: translate(1%, -3%); }
+  60% { transform: translate(-3%, 1%); }
+  80% { transform: translate(2%, 2%); }
+  100% { transform: translate(0,0); }
+}
+
+
 /* Modal animation (smooth pop-in) */
 .preview-modal {
     visibility: hidden; /* Use visibility to allow animation */
@@ -26,18 +37,43 @@
 }
 
 .preview-content {
-    background: white;
+    /* P-FIX: Grain background */
+    background: #faf8f6;
     border: 3px solid #000;
-    max-width: 100%;
+    max-width: 90%;
     width: 600px; /* Fixed width for larger screens */
     max-height: 90vh; /* Limit height */
     overflow-y: auto;
     position: relative;
+    overflow: hidden; /* Needed for pseudo-element */
     
     /* Pop-in animation (This applies to ALL modal contents) */
     transform: scale(0.95) translateY(8px);
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
 }
+
+/* P-FIX: Grain overlay */
+.preview-content::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAIElEQVR42mNkYGD4z0AEYBxVSFUBC4RRMFQEYoYhNEgAAN/RCx8SdskyAAAAAElFTkSuQmCC");
+  background-repeat: repeat;
+  background-size: 200px;
+  opacity: 0.18; /* controla la fuerza del grano */
+  animation: grainMove 8s steps(6) infinite;
+  z-index: 1; /* Place it above the background */
+}
+
+/* P-FIX: Ensure modal content is above the grain */
+.preview-content .mac-title-bar,
+.preview-content .mac-content,
+.preview-content .mac-footer-bar {
+    position: relative;
+    z-index: 2;
+}
+
 
 .preview-modal.show .preview-content {
     transform: scale(1) translateY(0);
@@ -63,7 +99,14 @@
     background: transparent;
     width: 600px; /* CHANGED: Was 'auto' to ensure consistent width */
     max-width: 600px;
+    overflow: visible; /* Override overflow:hidden for form modals */
 }
+
+/* P-FIX: Disable grain overlay for form modals */
+.form-modal .preview-content::after {
+    display: none;
+}
+
 
 /* Estilo para el botón de cerrar del modal */
 .btn-modal-close {
