@@ -54,6 +54,15 @@ export function renderPreview(entry) {
     const body = document.getElementById('preview-body');
     const { settings } = getState(); // P-FIX: Get settings
     
+    // --- ¡¡¡NUEVO FIX JAVASCRIPT!!! ---
+    // Si CSS falla, JS lo fuerza.
+    // Buscamos el contenedor .mac-content del modal y forzamos el fondo transparente.
+    const modalContent = body.closest('.mac-content');
+    if (modalContent) {
+        modalContent.style.background = 'transparent';
+    }
+    // --- FIN DEL FIX ---
+    
     // P-FIX: Robust mood rendering logic
     let moodHTML = '';
     if (entry.mood !== undefined && entry.mood !== null) {
@@ -189,6 +198,14 @@ export function renderImagePreviewModal(entry, imageIndex) {
         body.innerHTML = 'Error: Image not found.';
         return;
     }
+    
+    // --- ¡¡¡NUEVO FIX JAVASCRIPT!!! ---
+    // Aplicamos el fix también al modal de imagen
+    const modalContent = body.closest('.mac-content');
+    if (modalContent) {
+        modalContent.style.background = 'transparent';
+    }
+    // --- FIN DEL FIX ---
     
     body.innerHTML = `
         <div style="text-align: center; padding: 20px;">
