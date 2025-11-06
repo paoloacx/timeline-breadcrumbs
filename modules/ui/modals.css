@@ -1,6 +1,6 @@
 /* ===== MODAL STYLES ===== */
 
-/* P-FIX: Re-introducing the ANIMATED grain for the modal */
+/* P-FIX: Tus keyframes para la animación del grano */
 @keyframes grainMove {
   0% { transform: translate(0,0); }
   25% { transform: translate(1%, -1%); }
@@ -36,10 +36,8 @@
 }
 
 .preview-content {
-    /* P-FIX: Background color only */
+    /* P-FIX: Color de fondo */
     background: #f9f8f7;
-    /* REMOVED: filter: url(#grain); */
-
     border: 3px solid #000;
     max-width: 90%;
     width: 600px; /* Fixed width for larger screens */
@@ -52,30 +50,30 @@
     
     /* P-FIX: Create stacking context */
     isolation: isolate;
+    overflow: hidden; /* Needed for pseudo-element */
     
     /* Pop-in animation (This applies to ALL modal contents) */
     transform: scale(0.95) translateY(8px);
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
 }
 
-/* P-FIX: Grain overlay (Animated base64 version) */
+/* P-FIX: Capa de grano (SVG + Animación) */
 .preview-content::after {
-  content: "";
-  position: absolute; /* Changed from fixed */
-  inset: 0;
-  pointer-events: none;
-  
-  /* The animated texture */
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
-  background-repeat: repeat;
-  /* REMOVED: background-size: 900px; (This was the error) */
-  
-  /* P-FIX: Opacity increased to be visible */
-  opacity: 0.15; /* <-- Visible, but still subtle */
-  
-  animation: grainMove 10s steps(6) infinite;
-  
-  z-index: -1; /* Send it behind the content */
+    content: "";
+    position: absolute; 
+    inset: -10%; /* Hacemos la capa más grande que el modal */
+    pointer-events: none;
+    
+    /* Aplicamos el filtro SVG */
+    filter: url(#grain);
+    
+    /* Aplicamos la animación de movimiento */
+    animation: grainMove 10s steps(6) infinite;
+    
+    /* Opacidad (ajusta esto si es muy fuerte/débil) */
+    opacity: 0.15; 
+    
+    z-index: -1; /* Detrás del contenido */
 }
 
 
@@ -88,12 +86,7 @@
     position: sticky;
     top: 0;
     z-index: 10; 
-    /* REMOVED: Flexbox layout rules */
 }
-
-/* REMOVED: .preview-content .mac-title-bar .mac-title */
-
-/* REMOVED: Old #btn-preview-edit style */
 
 
 /* P4: Modal Width Change */
@@ -101,11 +94,9 @@
     border: none;
     box-shadow: none;
     background: transparent;
-    width: 600px; /* CHANGED: Was 'auto' to ensure consistent width */
+    width: 600px; 
     max-width: 600px;
-    overflow: visible; /* Override overflow:hidden for form modals */
-    
-    /* P-FIX: Disable isolation and restore original height */
+    overflow: visible; 
     isolation: auto;
     max-height: 90vh; 
 }
