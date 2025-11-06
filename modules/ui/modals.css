@@ -1,6 +1,6 @@
 /* ===== MODAL STYLES ===== */
 
-/* P-FIX: Keyframes for grain animation (REMOVED) */
+/* P-FIX: Keyframes (REMOVED) */
 /* @keyframes grainMove { ... } */
 
 
@@ -30,59 +30,38 @@
 }
 
 .preview-content {
-    /* P-FIX: Grain background (New Technique) */
-    background: #faf8f6; /* Tu color de fondo */
+    /* P-FIX: Grain background (SVG Filter) */
+    background: #f9f8f7;
+    filter: url(#grain);
+
     border: 3px solid #000;
     max-width: 90%;
     width: 600px; /* Fixed width for larger screens */
-    max-height: 90vh; /* Limit height */
+    
+    /* P-FIX: Footer Bug Fix */
+    max-height: 70vh; /* CHANGED from 90vh */
+    
     overflow-y: auto;
     position: relative;
-    overflow: hidden; /* Needed for pseudo-element */
+    /* REMOVED: overflow: hidden; */
     
     /* Pop-in animation (This applies to ALL modal contents) */
     transform: scale(0.95) translateY(8px);
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
 }
 
-/* P-FIX: Grain overlay (New Technique) */
-.preview-content::after {
-    content: "";
-    position: absolute; /* Changed from fixed */
-    inset: 0;
-    pointer-events: none;
-    
-    /* Generador de ruido CSS */
-    background-image: linear-gradient(
-        45deg, 
-        rgba(0, 0, 0, 0.25) 25%, 
-        transparent 25%, 
-        transparent 75%, 
-        rgba(0, 0, 0, 0.25) 75%
-    ),
-    linear-gradient(
-        45deg, 
-        rgba(0, 0, 0, 0.25) 25%, 
-        transparent 25%, 
-        transparent 75%, 
-        rgba(0, 0, 0, 0.25) 75%
-    );
-    background-size: 2px 2px; /* Tamaño del "píxel" de ruido */
-    background-position: 0 0, 1px 1px; /* Desfase para crear el patrón */
-    
-    opacity: 0.1; /* Controla la intensidad. Súbelo si sigue sin verse (ej: 0.2) */
-    
-    z-index: 1;
-    /* REMOVED: animation */
-}
+/* P-FIX: Grain overlay (REMOVED) */
+/* .preview-content::after { ... } */
 
-/* P-FIX: Ensure modal content is above the grain */
+/* P-FIX: Ensure modal content is above the grain (REMOVED) */
+/*
 .preview-content .mac-title-bar,
 .preview-content .mac-content,
 .preview-content .mac-footer-bar {
     position: relative;
     z-index: 2;
 }
+*/
 
 
 .preview-modal.show .preview-content {
@@ -110,12 +89,14 @@
     width: 600px; /* CHANGED: Was 'auto' to ensure consistent width */
     max-width: 600px;
     overflow: visible; /* Override overflow:hidden for form modals */
+    
+    /* P-FIX: Disable grain filter for form modals */
+    filter: none; 
+    max-height: 90vh; /* Restore original height for forms */
 }
 
-/* P-FIX: Disable grain overlay for form modals */
-.form-modal .preview-content::after {
-    display: none;
-}
+/* P-FIX: Disable grain overlay for form modals (REMOVED) */
+/* .form-modal .preview-content::after { ... } */
 
 
 /* Estilo para el botón de cerrar del modal */
