@@ -18,7 +18,7 @@
     background: #faf8f6;
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
     background-repeat: repeat;
-    background-size: 1200px;
+    /* REMOVED: background-size: 1200px; <-- This was the error */
 }
 
 
