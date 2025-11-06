@@ -30,7 +30,7 @@
 /* ===== DAY BLOCK ===== */
 .day-block {
     margin-bottom: 20px;
-    margin-right: 0px;
+    margin-right: -5px;
     position: relative;
     background: #fff;
     border: 3px solid #000;
