@@ -11,8 +11,7 @@ export const MOOD_ICONS = [
     'assets/icons/mood-sad.svg',
     'assets/icons/mood-relax.svg',
     'assets/icons/mood-anxious.svg',
-    'assets/icons/mood-tired.svg',
-    'assets/icons/mood-angry.svg'
+    'assets/icons/mood-tired.svg'
 ];
 // --- End P-FIX ---
 
@@ -73,7 +72,7 @@ export function renderAudioPreview() {
     if (currentAudio) {
         // CHANGED: Use close.svg icon for remove button
         container.innerHTML = `
-            <div style="display: flex; align-itemsf: center; gap: 8px; margin-top: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
                 <audio controls style="flex: 1;">
                     <source src="${currentAudio}">
                 </audio>
