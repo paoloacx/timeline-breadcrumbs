@@ -4,6 +4,18 @@
 // CAMBIO: Rutas actualizadas para apuntar a 'core/'
 import { getState } from './core/state.js';
 
+// --- P-FIX: Centralized list of mood icons ---
+// This order MUST match the default order in state.js
+export const MOOD_ICONS = [
+    'assets/icons/mood-happy.svg',
+    'assets/icons/mood-sad.svg',
+    'assets/icons/mood-relax.svg',
+    'assets/icons/mood-anxious.svg',
+    'assets/icons/mood-tired.svg',
+    'assets/icons/mood-angry.svg'
+];
+// --- End P-FIX ---
+
 // --- Form Renderers ---
 
 /**
@@ -15,20 +27,11 @@ export function renderMoodSelector() {
     const container = document.getElementById('mood-selector');
     if (!container) return; // Guard clause
     
-    // CHANGED: Use icons instead of emojis
-    // Ensure these names match your files (e.g., mood-happy.svg)
-    const moodIcons = [
-        'assets/icons/mood-happy.svg',
-        'assets/icons/mood-sad.svg',
-        'assets/icons/mood-angry.svg',
-        'assets/icons/mood-neutral.svg',
-        'assets/icons/mood-tired.svg',
-        'assets/icons/mood-stressed.svg' // Assuming 6th icon
-    ];
-
+    // P-FIX: Use the centralized icon list and labels from settings
     container.innerHTML = settings.moods.map((mood, index) => {
-        // Use neutral icon as fallback if index is out of bounds
-        const iconSrc = moodIcons[index] || 'assets/icons/mood-neutral.svg'; 
+        // Use the icon from the MOOD_ICONS list based on index
+        // Fallback to a default icon if settings are out of sync
+        const iconSrc = MOOD_ICONS[index] || 'assets/icons/mood-neutral.svg'; 
         return `
             <div class="mood-option ${selectedMood === index ? 'selected' : ''}" data-index="${index}">
                 <img src="${iconSrc}" alt="${mood.label}" class="icon-mac">
@@ -145,26 +148,4 @@ export function selectTrackUI(trackData) {
  * Displays a mini-map in the specified container.
  * @param {number} lat - Latitude.
  * @param {number} lon - Longitude.
- * @param {string} containerId - The ID of the map container element.
- */
-export function showMiniMap(lat, lon, containerId) {
-    const mapContainer = document.getElementById(containerId);
-    if (!mapContainer) return;
-
-    mapContainer.innerHTML = '';
-    mapContainer.style.display = 'block';
-
-    try {
-        const map = L.map(containerId).setView([lat, lon], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap',
-            maxZoom: 19
-        }).addTo(map);
-        L.marker([lat, lon]).addTo(map);
-
-        setTimeout(() => map.invalidateSize(), 100);
-    } catch(e) {
-        console.error("Error initializing Leaflet map:", e);
-        mapContainer.innerHTML = "Map failed to load. Are you online?";
-    }
-}
+ *...
