@@ -46,27 +46,37 @@ function renderPreviewMap(coords) {
     }, 100); // Espera a que el modal sea visible
 }
 
+
+// --- CAMBIO: Función helper para aplicar estilos ---
+/**
+ * Applies styles to the preview body to ensure it sits above the grain.
+ * @param {HTMLElement} bodyEl - The #preview-body element.
+ */
+function stylePreviewBody(bodyEl) {
+    if (!bodyEl) return;
+    
+    // 1. Fondo transparente (para ver el grano del padre .mac-content)
+    bodyEl.style.setProperty('background', 'transparent', 'important');
+    
+    // 2. Posición relativa (para que z-index funcione)
+    bodyEl.style.position = 'relative';
+    
+    // 3. Z-index 2 (para estar DELANTE del grano, que está en z-index 1)
+    bodyEl.style.zIndex = '2';
+}
+// --- FIN CAMBIO ---
+
+
 /**
  * Renders the content for the general preview modal.
  * @param {object} entry - The entry object to preview.
  */
 export function renderPreview(entry) {
     const body = document.getElementById('preview-body');
-    if (!body) return; // Safety check
-
-    // --- ¡¡¡NUEVO FIX JAVASCRIPT v2.1!!! ---
-    // El CSS ahora pone el grano en .mac-content.
-    // Este JS se asegura que #preview-body (el hijo)
-    // sea transparente para dejar ver el grano del padre.
-    body.style.setProperty('background', 'transparent', 'important');
     
-    /* Ya no necesitamos tocar .mac-content, el CSS se encarga.
-    const modalContent = body.closest('.mac-content');
-    if (modalContent) {
-        modalContent.style.setProperty('background', 'transparent', 'important');
-    }
-    */
-    // --- FIN DEL FIX ---
+    // --- CAMBIO: Aplicar estilos ---
+    stylePreviewBody(body);
+    // --- FIN CAMBIO ---
 
     const { settings } = getState(); // P-FIX: Get settings
     
@@ -201,19 +211,10 @@ export function renderPreview(entry) {
  */
 export function renderImagePreviewModal(entry, imageIndex) {
     const body = document.getElementById('preview-body');
-    if (!body) return; // Safety check
     
-    // --- ¡¡¡NUEVO FIX JAVASCRIPT v2.1!!! ---
-    // Aplicamos el fix también al modal de imagen
-    body.style.setProperty('background', 'transparent', 'important');
-    
-    /*
-    const modalContent = body.closest('.mac-content');
-    if (modalContent) {
-        modalContent.style.setProperty('background', 'transparent', 'important');
-    }
-    */
-    // --- FIN DEL FIX ---
+    // --- CAMBIO: Aplicar estilos ---
+    stylePreviewBody(body);
+    // --- FIN CAMBIO ---
     
     if (!entry || !entry.images || !entry.images[imageIndex]) {
         body.innerHTML = 'Error: Image not found.';
