@@ -6,8 +6,8 @@ import {
     formatDate, formatTime, calculateEndTime, getDayKey
 } from '../../utils.js';
 import { handleEditEntry, handlePreviewEntry } from '../../crud-handlers.js';
-// P-FIX: Import the centralized icon list
-import { MOOD_ICONS } from '../../ui-renderer.js';
+// P-FIX: Import the icon map
+import { MOOD_ICON_MAP } from '../../ui-renderer.js';
 
 // --- Icon Helper Functions ---
 const createIcon = (iconName, altText, extraStyle = '') => {
@@ -169,8 +169,7 @@ export function renderTimeline(entriesToRender = null) {
             ${displayedDayKeys.map(dayKey => {
                 const dayEntries = grouped[dayKey];
                 // P2: Only expand if showing search results
-                const isToday = (dayKey === todayKey);
-                const expandedClass = (isToday || entriesToRender) ? 'expanded' :
+                const expandedClass = entriesToRender ? 'expanded' : '';
                 
                 const recaps = dayEntries.filter(e => e.type === 'recap');
                 const regularEntries = dayEntries.filter(e => e.type !== 'recap');
@@ -225,16 +224,16 @@ export function renderTimeline(entriesToRender = null) {
                                         </div>
                                     ` : ''}
                                     
-                                    ${recap.bso ? `
+                                    ${recap.track ? `
                                         <div style="margin-bottom: 16px;">
                                             <strong>BSO of the Day:</strong>
                                             <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 12px; border: 2px solid #000; background: #f9f9f9;">
-                                                <img src="${recap.bso.artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
+                                                <img src="${recap.track.artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
                                                 <div style="flex: 1;">
-                                                    <div style="font-weight: bold;">${recap.bso.name}</div>
-                                                    <div style="font-size: 12px; color: #666;">${recap.bso.artist}</div>
+                                                    <div style="font-weight: bold;">${recap.track.name}</div>
+                                                    <div style="font-size: 12px; color: #666;">${recap.track.artist}</div>
                                                 </div>
-                                                <a href="${recap.bso.url}" target="_blank" style="text-decoration: none;">
+                                                <a href="${recap.track.url}" target="_blank" style="text-decoration: none;">
                                                     ${createIcon('link', 'Listen')}
                                                 </a>
                                             </div>
@@ -265,25 +264,33 @@ export function renderTimeline(entriesToRender = null) {
                                 const needsReadMore = noteContent.length > 200 || noteContent.split('\n').length > 4;
                                 const needsReadMoreOptional = optionalNoteContent.length > 200 || optionalNoteContent.split('\n').length > 4;
 
-                                // P-FIX: Get icon path and label from centralized lists
-                                let moodIconPath = '';
-                                let moodAltText = 'Mood';
-                                let moodIndex = null;
-                                
+                                // P-FIX: Robust mood rendering logic
+                                let moodHTML = '';
+                                let moodLabel = 'Mood';
                                 if (entry.mood !== undefined && entry.mood !== null) {
+                                    let visual = null;
+                                    
                                     if (typeof entry.mood === 'object') {
-                                        // Handle old data: find index by label
-                                        moodIndex = settings.moods.findIndex(m => m.label === entry.mood.label);
-                                    } else {
-                                        // Handle new data: it's already the index
-                                        moodIndex = entry.mood;
+                                        // Type 1 (New): { visual: 'happy', label: 'Happy' }
+                                        // Type 2 (Old): { emoji: '🙂', label: 'Happy' }
+                                        visual = entry.mood.visual || entry.mood.emoji; // Use 'visual' first, fallback to 'emoji'
+                                        moodLabel = entry.mood.label;
+                                    } else if (typeof entry.mood === 'number') {
+                                        // Type 3 (Broken Fix): 0
+                                        if (settings.moods[entry.mood]) {
+                                            visual = settings.moods[entry.mood].visual;
+                                            moodLabel = settings.moods[entry.mood].label;
+                                        }
                                     }
-                                }
-
-                                if (moodIndex !== null && moodIndex !== -1 && moodIndex < MOOD_ICONS.length) {
-                                    moodIconPath = MOOD_ICONS[moodIndex]; // Get path from array
-                                    if (settings.moods[moodIndex]) {
-                                        moodAltText = settings.moods[moodIndex].label; // Get label
+                                    
+                                    if (visual) {
+                                        const iconSrc = MOOD_ICON_MAP[visual]; // Check if it's a keyword
+                                        if (iconSrc) {
+                                            moodHTML = `<img src="${iconSrc}" alt="${moodLabel}" class="icon-mac" style="width: 32px; height: 32px; flex-shrink: 0;">`;
+                                        } else {
+                                            // It's an emoji
+                                            moodHTML = `<span class="mood-emoji-visual" style="font-size: 32px; line-height: 1; flex-shrink: 0;">${visual}</span>`;
+                                        }
                                     }
                                 }
                                 // --- End P-FIX ---
@@ -315,9 +322,7 @@ export function renderTimeline(entriesToRender = null) {
                                     
                                     ${!entry.isTimedActivity && !entry.isQuickTrack && !entry.isSpent && entry.type !== 'recap' ? `
                                         <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
-                                            ${moodIconPath ? 
-                                                `<img src="${moodIconPath}" alt="${moodAltText}" class="icon-mac" style="width: 32px; height: 32px; flex-shrink: 0;">` 
-                                                : ''}
+                                            ${moodHTML}
                                             <div style="flex: 1;">
                                                 <div class="breadcrumb-note">${noteContent}</div>
                                                 ${needsReadMore ? `<button class="read-more-btn">Read more</button>` : ''}
