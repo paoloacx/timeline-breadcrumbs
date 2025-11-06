@@ -42,7 +42,9 @@ export function initTimeline() {
             if (recapBlock) {
                 const content = recapBlock.querySelector('.recap-content');
                 const chevron = recapBlock.querySelector('.chevron-recap');
-                if (content) content.classList.toggle('hidden');
+                
+                // P2: Change toggle class for animation
+                if (content) content.classList.toggle('expanded');
                 if (chevron) chevron.classList.toggle('expanded');
             }
             return;
@@ -153,13 +155,16 @@ export function renderTimeline(entriesToRender = null) {
                             <span class="chevron ${expandedClass}" id="chevron-${dayKey}">▼</span>
                         </div>
                         
-                        ${recaps.map(recap => `
+                        ${recaps.map(recap => {
+                            // P2: Expand recap if showing search results
+                            const recapExpandedClass = entriesToRender ? 'expanded' : '';
+                            return `
                             <div class="recap-block" data-id="${recap.id}">
                                 <div class="recap-header">
                                     <span>${createIcon('star', 'Recap')} Day Recap</span>
-                                    <span class="chevron-recap" id="chevron-recap-${recap.id}">▼</span>
+                                    <span class="chevron-recap ${recapExpandedClass}" id="chevron-recap-${recap.id}">▼</span>
                                 </div>
-                                <div class="recap-content hidden" id="recap-content-${recap.id}">
+                                <div class="recap-content ${recapExpandedClass}" id="recap-content-${recap.id}">
                                     <button class="mac-button edit-button btn-edit">
                                         ${createIcon('edit', 'Edit')} Edit
                                     </button>
@@ -224,7 +229,7 @@ export function renderTimeline(entriesToRender = null) {
                                     ` : ''}
                                 </div>
                             </div>
-                        `).join('')}
+                        `}).join('')}
                         
                         <div class="day-content ${expandedClass}" id="day-content-${dayKey}">
                             ${regularEntries.map(entry => {
