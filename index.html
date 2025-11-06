@@ -412,6 +412,7 @@
             </div>
         </div>
     </div>
+
     <div id="stats-modal" class="preview-modal">
         <div class="preview-content">
             <div class="mac-title-bar">
@@ -450,13 +451,16 @@
             <div class="mac-content" id="tools-body">
 
                 <div class="universal-search-container">
-                    <input type="text" class="mac-input" id="universal-search" placeholder="Search text...">
-                    <select id="filter-year" class="mac-input"><option value="">Year</option></select>
-                    <select id="filter-month" class="mac-input"><option value="">Month</option></select>
-                    <button class="mac-button" id="btn-universal-search" title="Search/Filter">
-                        <img src="assets/icons/search.svg" alt="Search" class="icon-mac">
-                    </button>
-                    <button class="mac-button" id="btn-universal-clear" title="Clear Filter">✕</button>
+                    <div class="search-row">
+                        <input type="text" class="mac-input" id="universal-search" placeholder="Search text...">
+                        <button class="mac-button" id="btn-universal-search" title="Search/Filter">
+                            <img src="assets/icons/search.svg" alt="Search" class="icon-mac">
+                        </button>
+                    </div>
+                    <div class="search-row">
+                        <select id="filter-year" class="mac-input"><option value="">Year</option></select>
+                        <select id="filter-month" class="mac-input"><option value="">Month</option></select>
+                    </div>
                 </div>
                 <button class="mac-button" id="btn-tools-stats" style="width: 100%; margin-bottom: 8px;">
                     <img src="assets/icons/stats.svg" alt="Stats" class="icon-mac"> Stats
