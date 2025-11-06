@@ -34,12 +34,13 @@
     max-width: 90%;
     width: 600px; /* Fixed width for larger screens */
     max-height: 90vh; /* Limit height */
-    overflow-y: auto; /* Permite scroll vertical */
     position: relative;
     
     /* --- CAMBIO BUG FOOTER --- */
-    /* overflow: hidden; -> Interrumpía el sticky footer */
-    overflow-x: hidden; /* Previene scroll horizontal */
+    /* Dejamos SÓLO el overflow-y: auto */
+    /* Esto permite el scroll Y respeta el sticky footer */
+    overflow-y: auto; 
+    /* REMOVED: overflow-x: hidden; */
     /* --- FIN CAMBIO --- */
     
     transform: scale(0.95) translateY(8px);
@@ -63,8 +64,10 @@
     /* 2. Creamos contexto de apilamiento */
     position: relative; 
     
-    /* 3. El contenido (texto) estará en z-index: 2 (ver preview.js) */
-    /* El filtro estará en z-index: 1 (en el ::after) */
+    /* --- CAMBIO BUG GRANO --- */
+    /* 3. Forzamos un contexto de apilamiento limpio */
+    isolation: isolate;
+    /* --- FIN CAMBIO --- */
 }
 
 /* 4. Creamos la capa de filtro ::after */
