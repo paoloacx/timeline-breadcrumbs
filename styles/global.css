@@ -35,7 +35,7 @@ html, body {
 }
 
 body {
-    /* CHANGED: Global font changed to Space Mono */
+    /* P3: Global font is Space Mono (System) */
     font-family: 'Space Mono', monospace;
     background: repeating-linear-gradient(
         0deg,
@@ -50,6 +50,16 @@ body {
     position: relative;
     min-height: 100vh;
 }
+
+/* P3: NEW - Font Override for User Content */
+.mac-input,
+.mac-textarea,
+.breadcrumb-note,
+.optional-note,
+.recap-highlight-tag {
+    font-family: Helvetica, Arial, sans-serif;
+}
+
 
 /* REMOVED: .header-image */
 /* REMOVED: .header-container */
@@ -279,7 +289,7 @@ h1 {
     width: 100%;
     border: 2px inset #999;
     padding: 8px;
-    /* CHANGED: Use inherited font */
+    /* CHANGED: Use inherited font (overridden by new rule) */
     font-family: inherit;
     font-size: 16px;
     margin-bottom: 1px;
@@ -382,10 +392,12 @@ h1 {
     color: white; /* Make emoji/label white */
 }
 
-.mood-label {
+/* P3: User-generated content font override */
+.mood-option .mood-label {
     font-size: 8px;
     display: block;
     margin-top: 2px;
+    font-family: 'Space Mono', monospace; /* Labels are system, not user content */
 }
 
 .mood-display {
@@ -668,13 +680,13 @@ input[type="range"]:active::-moz-range-thumb {
 }
 
 /* Icon containers (buttons) */
-.mac-button svg,
-.mac-button img,
+/* P1: FAB Icon Fix: Removed .mac-button selectors */
 .fab svg,
 .fab img {
-    /* P1: FAB Icon Size Change */
-    width: 30px;  /* CHANGED from 20px */
-    height: 30px; /* CHANGED from 20px */
+    /* P1: Size is now 30px, but this rule is NOT NEEDED */
+    /* It's handled by fab-menu.css */
+    /* width: 30px;  */
+    /* height: 30px; */
     pointer-events: none;
 }
 
