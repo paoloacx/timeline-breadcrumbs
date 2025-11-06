@@ -59,7 +59,7 @@
   pointer-events: none;
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
   background-repeat: repeat;
-  background-size: 900px;
+  /* REMOVED: background-size: 900px; <-- This was the error */
   opacity: 0.05; /* esta vez controlado */
   animation: grainMove 10s steps(6) infinite;
   z-index: 1; /* Place it above the background */
