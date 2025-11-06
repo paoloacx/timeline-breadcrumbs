@@ -23,8 +23,8 @@ export function handleSaveCrumb() {
         return;
     }
 
-    // P-FIX: We don't need moodData, we will save selectedMood (the index) directly
-    // const moodData = selectedMood !== null ? settings.moods[selectedMood] : null;
+    // P-FIX: Get the full mood OBJECT from the index (selectedMood)
+    const moodData = selectedMood !== null ? settings.moods[selectedMood] : null;
     const timestamp = getTimestampFromInput('datetime-input');
 
     const entryData = {
@@ -35,7 +35,7 @@ export function handleSaveCrumb() {
         images: [...currentImages],
         audio: currentAudio,
         coords: currentCoords ? { ...currentCoords } : null,
-        mood: selectedMood, // P-FIX: Save the index (number) not the object
+        mood: moodData, // P-FIX: Save the full object
         isTimedActivity: false, isQuickTrack: false, isSpent: false, type: null
     };
 
@@ -303,20 +303,21 @@ export function handleEditEntry(entryId) {
         setAudio(entry.audio || null);
         setCoords(entry.coords ? { ...entry.coords } : null);
         
-        // P-FIX: Robust mood index finding
-        // Handles both old data (object) and new data (index)
-        let moodIndex = null;
+        // P-FIX: Robust mood index finding. Handles ALL data types.
+        let moodIndex = -1;
+        const { settings } = getState();
         if (entry.mood !== null && entry.mood !== undefined) {
             if (typeof entry.mood === 'object') {
-                // Handle old data: find index by label (emoji is unreliable)
-                const { settings } = getState();
-                moodIndex = settings.moods.findIndex(m => m.label === entry.mood.label);
-            } else {
-                // Handle new data: it's already the index
+                // Type 1 (New): { visual: 'happy', label: 'Happy' }
+                // Type 2 (Old): { emoji: '🙂', label: 'Happy' }
+                const keyToFind = entry.mood.visual || entry.mood.emoji; // Use 'visual' first, fallback to 'emoji'
+                moodIndex = settings.moods.findIndex(m => m.visual === keyToFind || m.label === entry.mood.label);
+            } else if (typeof entry.mood === 'number') {
+                // Type 3 (Broken Fix): 0
                 moodIndex = entry.mood;
             }
         }
-        setSelectedMood(moodIndex !== -1 ? moodIndex : null);
+        setSelectedMood(moodIndex !== -1 && moodIndex < settings.moods.length ? moodIndex : null);
         // End P-FIX
 
         renderImagePreviews();
