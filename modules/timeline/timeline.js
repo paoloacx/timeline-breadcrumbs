@@ -168,8 +168,10 @@ export function renderTimeline(entriesToRender = null) {
             <div class="timeline-line"></div>
             ${displayedDayKeys.map(dayKey => {
                 const dayEntries = grouped[dayKey];
-                // P2: Only expand if showing search results
-                const expandedClass = entriesToRender ? 'expanded' : '';
+                
+                // P-FIX: This is the line you asked about, with the 'else' part
+                const isToday = (dayKey === todayKey); 
+                const expandedClass = (isToday || entriesToRender) ? 'expanded' : '';
                 
                 const recaps = dayEntries.filter(e => e.type === 'recap');
                 const regularEntries = dayEntries.filter(e => e.type !== 'recap');
@@ -181,13 +183,16 @@ export function renderTimeline(entriesToRender = null) {
                             <span class="chevron ${expandedClass}" id="chevron-${dayKey}">▼</span>
                         </div>
                         
-                        ${recaps.map(recap => `
+                        ${recaps.map(recap => {
+                            // P-FIX: Expand recap if showing search results
+                            const recapExpandedClass = entriesToRender ? 'expanded' : '';
+                            return `
                             <div class="recap-block" data-id="${recap.id}">
                                 <div class="recap-header">
                                     <span>${createIcon('star', 'Recap')} Day Recap</span>
-                                    <span class="chevron-recap" id="chevron-recap-${recap.id}">▼</span>
+                                    <span class="chevron-recap ${recapExpandedClass}" id="chevron-recap-${recap.id}">▼</span>
                                 </div>
-                                <div class="recap-content" id="recap-content-${recap.id}">
+                                <div class="recap-content ${recapExpandedClass}" id="recap-content-${recap.id}">
                                     <button class="mac-button edit-button btn-edit">
                                         ${createIcon('edit', 'Edit')} Edit
                                     </button>
@@ -248,7 +253,7 @@ export function renderTimeline(entriesToRender = null) {
                                     ` : ''}
                                 </div>
                             </div>
-                        `).join('')}
+                        `}).join('')}
                         
                         <div class="day-content ${expandedClass}" id="day-content-${dayKey}">
                             ${regularEntries.map(entry => {
