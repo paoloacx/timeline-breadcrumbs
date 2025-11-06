@@ -36,8 +36,8 @@
 }
 
 .preview-content {
-    /* P-FIX: Color de fondo */
-    background: #f9f8f7;
+    /* P-FIX: ELIMINADO EL FONDO DE AQUÍ */
+    /* background: #f9f8f7; */ 
     border: 3px solid #000;
     max-width: 90%;
     width: 600px; /* Fixed width for larger screens */
@@ -50,7 +50,7 @@
     
     /* P-FIX: Create stacking context */
     isolation: isolate;
-    /* REMOVED: overflow: hidden; <-- Este era el error */
+    overflow: hidden; /* Needed for pseudo-element */
     
     /* Pop-in animation (This applies to ALL modal contents) */
     transform: scale(0.95) translateY(8px);
@@ -63,6 +63,9 @@
     position: absolute; 
     inset: -10%; /* Hacemos la capa más grande que el modal */
     pointer-events: none;
+    
+    /* P-FIX: EL FONDO VA AQUÍ */
+    background: #f9f8f7;
     
     /* Aplicamos el filtro SVG */
     filter: url(#grain);
