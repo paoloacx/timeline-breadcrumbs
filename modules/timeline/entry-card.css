@@ -63,11 +63,22 @@
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
 
+/* --- CAMBIO: Estilo de evento de tiempo (Fondo + Rayas) --- */
 .breadcrumb-entry.time-event {
-    background: #c4c4c4;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
-    /* REMOVED: text-align: center; */
+    /* Fondo combinado: Rayas sobre gradiente */
+    background:
+        repeating-linear-gradient(rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 8px),
+        repeating-linear-gradient(to right, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 8px),
+        linear-gradient(to bottom, #4c5c70 0%, #303d4f 100%);
+    
+    /* Otros estilos solicitados */
+    border: 1px solid #202834;
+    color: white;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    max-width: 420px;
 }
+/* --- FIN CAMBIO --- */
 
 .breadcrumb-time {
     font-weight: bold;
@@ -81,6 +92,7 @@
 /* MODIFIED: Override for time-event */
 .breadcrumb-entry.time-event .breadcrumb-time {
     margin-bottom: 16px;
+    color: white; /* CAMBIO: Asegurar texto blanco sobre fondo oscuro */
 }
 
 /* Overwrite for track event time */
@@ -202,14 +214,14 @@
 /* --- NEW: Time Event Redesign --- */
 .time-event-duration {
     font-size: 13px;
-    color: #2e2e2e;
+    color: #f0f0f0; /* CAMBIO: Texto más claro */
     margin-bottom: 16px;
     text-align: center; /* MODIFIED: Explicitly centered */
 }
 
 .time-event-activity-box {
-    background: #4a4a4a; /* Dark grey */
-    color: white;
+    background: rgba(255,255,255,0.9); /* CAMBIO: Fondo claro */
+    color: #000; /* CAMBIO: Texto oscuro */
     font-weight: bold;
     font-size: 18px;
     padding: 12px 20px;
@@ -296,6 +308,14 @@
     border-color: #cc9900 !important;
     background: #fffacd !important;
 }
+
+/* CAMBIO: Asegurar que las notas opcionales en time-events sean legibles */
+.breadcrumb-entry.time-event .optional-note {
+    color: #333 !important; 
+    border-color: #cc9900 !important;
+    background: #fffacd !important;
+}
+
 
 @media (max-width: 768px) {
     .preview-image-thumb,
