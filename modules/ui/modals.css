@@ -1,13 +1,6 @@
 /* ===== MODAL STYLES ===== */
 
-/* P-FIX: Keyframes for grain animation (New Version) */
-@keyframes grainMove {
-  0% { transform: translate(0,0); }
-  25% { transform: translate(1%, -1%); }
-  50% { transform: translate(-1%, 1%); }
-  75% { transform: translate(1%, 1%); }
-  100% { transform: translate(0,0); }
-}
+/* REMOVED: @keyframes grainMove */
 
 
 /* Modal animation (smooth pop-in) */
@@ -36,7 +29,6 @@
 }
 
 .preview-content {
-    /* Fondo base (será tapado) */
     background: #faf8f6;
     border: 3px solid #000;
     max-width: 90%;
@@ -58,39 +50,25 @@
     z-index: 2; 
 }
 
-/* --- ESTRATEGIA: Grano en .mac-content --- */
+/* --- NUEVA ESTRATEGIA: Usar el filtro SVG #grain existente --- */
 
-/* 1. Preparamos .mac-content */
 .preview-modal .mac-content {
-    /* Fondo base beige */
+    /* 1. Fondo base beige */
     background: #faf8f6 !important;
-    /* Creamos un contexto de apilamiento */
-    position: relative;
-    /* Aseguramos que el ::after quede contenido */
-    overflow: hidden; 
+    
+    /* 2. Aplicamos el filtro que SÍ funciona en las entry-cards */
+    filter: url(#grain);
+    
+    /* 3. Creamos contexto de apilamiento */
+    position: relative; 
+    overflow: hidden;
+    
+    /* 4. Lo ponemos DETRÁS del texto */
+    z-index: 1; 
 }
 
-/* 2. Creamos la capa de grano ::after DENTRO de .mac-content */
-.preview-modal .mac-content::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    
-    /* --- CAMBIO: NUEVA IMAGEN BASE64 --- */
-    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAnElEQVR42mP4//8/AyUYhoEARgYWViY0NQ2jBwYm/v//PxCDgYGERMHIwAhgZWVlYABiYFD4/x8DEMDGxsa8/w8BGIYVgGACYtAYwGFo/f//f2AYYGBg4P//PwMDw58GopAINgYYGJgYGGZgZGVlAmJgUPj/HwMQwMbGxrj/DxBgGGAYYGBg+P//PzMwMPwZKHr8+PE/AwPDAQAGM5BQr07f/wAAAABJRU5ErkJggg==");
-    background-repeat: repeat;
-    
-    /* --- PRUEBA: Opacidad al 100% --- */
-    opacity: 1; 
-    
-    /* La animación SÓLO se aplica a esta capa */
-    animation: grainMove 10s steps(6) infinite;
-    
-    /* Z-index 1: Encima del fondo beige de .mac-content */
-    z-index: 1;
-}
-/* --- FIN ESTRATEGIA --- */
+/* REMOVED: .preview-modal .mac-content::after */
+/* --- FIN NUEVA ESTRATEGIA --- */
 
 
 .preview-modal.show .preview-content {
