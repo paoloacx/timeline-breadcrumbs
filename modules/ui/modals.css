@@ -36,7 +36,7 @@
 }
 
 .preview-content {
-    /* P-FIX: Grain background (New Version) */
+    /* P-FIX: Fondo base (será tapado por .mac-content) */
     background: #faf8f6;
     border: 3px solid #000;
     max-width: 90%;
@@ -51,28 +51,30 @@
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
 }
 
-/* P-FIX: Grain overlay (New Version) */
-.preview-content::after {
-  content: "";
-  /* CAMBIO: De 'fixed' a 'absolute' */
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
-  background-repeat: repeat;
-  
-  opacity: 0.15;
-  
-  animation: grainMove 10s steps(6) infinite;
-  z-index: 1; /* Place it above the background */
-}
+/* --- CAMBIO RADICAL: Se elimina .preview-content::after --- */
+/* Ya no aplicamos el grano al padre. */
+
 
 /* P-FIX: Ensure modal content is above the grain */
 .preview-content .mac-title-bar,
 .preview-content .mac-content,
 .preview-content .mac-footer-bar {
     position: relative;
-    z-index: 2; /* Contenido está sobre el grano (z-index 1) */
+    /* Z-index 2 (o auto) es correcto */
+    z-index: 2; 
+}
+
+/* --- NUEVA ESTRATEGIA: Aplicar grano al .mac-content --- */
+/* Forzamos al .mac-content DENTRO del preview modal
+   a tener el fondo beige Y la textura de grano.
+   Esto ignora el 'background: white' de .mac-window */
+.preview-modal .mac-content {
+    background-color: #faf8f6;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
+    background-repeat: repeat;
+    animation: grainMove 10s steps(6) infinite;
+    /* !important para ganar al 'background: white' de .mac-window */
+    background: #faf8f6 url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==") repeat !important;
 }
 
 
@@ -89,6 +91,7 @@
 
 
 /* P4: Modal Width Change */
+/* Los form-modal NO se verán afectados por la regla .preview-modal .mac-content */
 .form-modal .preview-content {
     border: none;
     box-shadow: none;
@@ -98,10 +101,10 @@
     overflow: visible; 
 }
 
-/* P-FIX: Disable grain overlay for form modals */
-.form-modal .preview-content::after {
+/* P-FIX: Disable grain overlay for form modals (Regla ya no necesaria) */
+/* .form-modal .preview-content::after {
     display: none;
-}
+} */
 
 
 /* Estilo para el botón de cerrar del modal */
