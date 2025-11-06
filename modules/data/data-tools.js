@@ -436,7 +436,8 @@ export function importFullBackup(file) {
             reject(new Error('Error reading file.'));
         };
         
-        reader.readText(file);
+        // P3: FIX - Change 'readText' to 'readAsText'
+        reader.readAsText(file);
     });
 }
 
