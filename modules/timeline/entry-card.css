@@ -59,7 +59,7 @@
 }
 
 .breadcrumb-entry.spent-event {
-    background: #d4edda;
+    background: #eeeeee;
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
 
@@ -268,7 +268,7 @@
 .spent-badge {
     background: #4caf50; /* Green badge */
     color: black;
-    padding: 3px 8px;
+    padding: 5px 9px;
     border-radius: 3px;
     font-size: 13px;
     font-weight: bold;
