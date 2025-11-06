@@ -51,47 +51,51 @@
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
 }
 
-/* P-FIX: Grain overlay (New Version) */
+/* --- CAMBIO DE DEPURACIÓN --- */
+/* Vamos a forzar que la capa ::after sea visible */
 .preview-content::after {
   content: "";
-  /* CAMBIO: De 'fixed' a 'absolute' (Correcto) */
   position: absolute;
   inset: 0;
   pointer-events: none;
+  
+  /* PRUEBA: Fondo rojo y opacidad total */
+  background: red !important;
+  opacity: 1 !important;
+  
+  /* PRUEBA: z-index muy alto */
+  z-index: 5 !important; 
+  
+  /* Ignoramos la animación y la textura por ahora */
+  /*
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
   background-repeat: repeat;
-  /* REMOVED: background-size: 900px; */
-  
-  /* P-FIX: Opacity increased to be visible */
-  opacity: 0.15; /* CHANGED from 0.05 */
-  
+  opacity: 0.15;
   animation: grainMove 10s steps(6) infinite;
-  z-index: 1; /* Place it above the background (#faf8f6) */
+  z-index: 1; 
+  */
 }
+/* --- FIN CAMBIO DE DEPURACIÓN --- */
+
 
 /* P-FIX: Ensure modal content is above the grain */
 .preview-content .mac-title-bar,
 .preview-content .mac-content,
 .preview-content .mac-footer-bar {
     position: relative;
-    z-index: 2; /* Content (z-index 2) is above grain (z-index 1) */
+    /* Dejamos z-index: 2 para que el rojo (z-index 5) se ponga por encima */
+    z-index: 2; 
 }
 
-/* --- CAMBIO: Forzar fondo transparente en .mac-content --- */
-/* El .mac-content (z-index: 2) debe ser transparente
-   para que se vea el fondo (z-index: 0) y la textura (z-index: 1)
-   del .preview-content (padre). */
+/* Forzar fondo transparente en .mac-content (mantenemos esto) */
 .preview-content .mac-content {
     background: transparent;
 }
 
-/* --- NUEVO CAMBIO: Forzar transparencia también en #preview-body --- */
-/* #preview-body es donde se inyecta el HTML, y podría
-   tener su propio fondo (blanco?) que tapa la textura. */
+/* Forzar transparencia también en #preview-body (mantenemos esto) */
 .preview-content #preview-body {
     background: transparent;
 }
-/* --- FIN CAMBIO --- */
 
 
 .preview-modal.show .preview-content {
@@ -102,7 +106,7 @@
 .preview-content .mac-title-bar {
     position: sticky;
     top: 0;
-    z-index: 10; /* Z-index alto para sticky (sobreescribe el 2) */ 
+    z-index: 10; /* La barra de título SÍ debe estar por encima del rojo */
     /* REMOVED: Flexbox layout rules */
 }
 
@@ -141,7 +145,7 @@
 .mac-footer-bar {
     position: sticky;
     bottom: 0;
-    z-index: 10; /* Z-index alto para sticky (sobreescribe el 2) */
+    z-index: 10; /* El pie de página SÍ debe estar por encima del rojo */
     display: flex;
     justify-content: flex-end; /* Aligns button to the right */
     padding: 6px;
