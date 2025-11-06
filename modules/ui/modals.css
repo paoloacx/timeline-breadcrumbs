@@ -1,6 +1,6 @@
 /* ===== MODAL STYLES ===== */
 
-/* REMOVED: @keyframes grainMove */
+/* REMOVED: @keyframes grainMove (ya no se usa) */
 
 
 /* Modal animation (smooth pop-in) */
@@ -34,9 +34,13 @@
     max-width: 90%;
     width: 600px; /* Fixed width for larger screens */
     max-height: 90vh; /* Limit height */
-    overflow-y: auto;
+    overflow-y: auto; /* Permite scroll vertical */
     position: relative;
-    overflow: hidden; 
+    
+    /* --- CAMBIO BUG FOOTER --- */
+    /* overflow: hidden; -> Interrumpía el sticky footer */
+    overflow-x: hidden; /* Previene scroll horizontal */
+    /* --- FIN CAMBIO --- */
     
     transform: scale(0.95) translateY(8px);
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
@@ -47,27 +51,37 @@
 .preview-content .mac-content,
 .preview-content .mac-footer-bar {
     position: relative;
-    z-index: 2; 
+    z-index: 2; /* <-- Esto es z-index 2 */
 }
 
-/* --- NUEVA ESTRATEGIA: Usar el filtro SVG #grain existente --- */
+/* --- NUEVA ESTRATEGIA: Grano en .mac-content::after --- */
 
 .preview-modal .mac-content {
     /* 1. Fondo base beige */
     background: #faf8f6 !important;
     
-    /* 2. Aplicamos el filtro que SÍ funciona en las entry-cards */
-    filter: url(#grain);
-    
-    /* 3. Creamos contexto de apilamiento */
+    /* 2. Creamos contexto de apilamiento */
     position: relative; 
-    overflow: hidden;
     
-    /* 4. Lo ponemos DETRÁS del texto */
-    z-index: 1; 
+    /* 3. El contenido (texto) estará en z-index: 2 (ver preview.js) */
+    /* El filtro estará en z-index: 1 (en el ::after) */
 }
 
-/* REMOVED: .preview-modal .mac-content::after */
+/* 4. Creamos la capa de filtro ::after */
+.preview-modal .mac-content::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    
+    /* Aplicamos el filtro que SÍ funciona */
+    filter: url(#grain);
+    
+    /* Lo ponemos DETRÁS del texto (z-index: 1) */
+    z-index: 1; 
+    
+    /* Importante: para poder hacer click "a través" de él */
+    pointer-events: none; 
+}
 /* --- FIN NUEVA ESTRATEGIA --- */
 
 
@@ -106,7 +120,7 @@
 .mac-footer-bar {
     position: sticky;
     bottom: 0;
-    z-index: 10;
+    z-index: 10; /* Z-index alto para estar sobre el contenido */
     display: flex;
     justify-content: flex-end; /* Aligns button to the right */
     padding: 6px;
