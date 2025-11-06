@@ -54,16 +54,18 @@ export function renderPreview(entry) {
     const body = document.getElementById('preview-body');
     if (!body) return; // Safety check
 
-    // --- ¡¡¡NUEVO FIX JAVASCRIPT v2!!! ---
-    // Forzamos la transparencia en EL CONTENEDOR HIJO (#preview-body)
-    // Y en EL CONTENEDOR PADRE (.mac-content)
-    // Usamos setProperty con '!important' para anular CUALQUIER otra regla CSS.
+    // --- ¡¡¡NUEVO FIX JAVASCRIPT v2.1!!! ---
+    // El CSS ahora pone el grano en .mac-content.
+    // Este JS se asegura que #preview-body (el hijo)
+    // sea transparente para dejar ver el grano del padre.
     body.style.setProperty('background', 'transparent', 'important');
-
+    
+    /* Ya no necesitamos tocar .mac-content, el CSS se encarga.
     const modalContent = body.closest('.mac-content');
     if (modalContent) {
         modalContent.style.setProperty('background', 'transparent', 'important');
     }
+    */
     // --- FIN DEL FIX ---
 
     const { settings } = getState(); // P-FIX: Get settings
@@ -201,14 +203,16 @@ export function renderImagePreviewModal(entry, imageIndex) {
     const body = document.getElementById('preview-body');
     if (!body) return; // Safety check
     
-    // --- ¡¡¡NUEVO FIX JAVASCRIPT v2!!! ---
+    // --- ¡¡¡NUEVO FIX JAVASCRIPT v2.1!!! ---
     // Aplicamos el fix también al modal de imagen
     body.style.setProperty('background', 'transparent', 'important');
     
+    /*
     const modalContent = body.closest('.mac-content');
     if (modalContent) {
         modalContent.style.setProperty('background', 'transparent', 'important');
     }
+    */
     // --- FIN DEL FIX ---
     
     if (!entry || !entry.images || !entry.images[imageIndex]) {
