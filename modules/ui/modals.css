@@ -1,7 +1,13 @@
 /* ===== MODAL STYLES ===== */
 
-/* P-FIX: Keyframes (REMOVED) */
-/* @keyframes grainMove { ... } */
+/* P-FIX: Re-introducing the ANIMATED grain for the modal */
+@keyframes grainMove {
+  0% { transform: translate(0,0); }
+  25% { transform: translate(1%, -1%); }
+  50% { transform: translate(-1%, 1%); }
+  75% { transform: translate(1%, 1%); }
+  100% { transform: translate(0,0); }
+}
 
 
 /* Modal animation (smooth pop-in) */
@@ -30,8 +36,10 @@
 }
 
 .preview-content {
-    /* P-FIX: Grain background */
+    /* P-FIX: Background color only */
     background: #f9f8f7;
+    /* REMOVED: filter: url(#grain); */
+
     border: 3px solid #000;
     max-width: 90%;
     width: 600px; /* Fixed width for larger screens */
@@ -41,7 +49,6 @@
     
     overflow-y: auto;
     position: relative;
-    /* REMOVED: overflow: hidden; */
     
     /* P-FIX: Create stacking context */
     isolation: isolate;
@@ -51,19 +58,24 @@
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
 }
 
-/* P-FIX: Grain overlay (New Technique) */
+/* P-FIX: Grain overlay (Animated base64 version) */
 .preview-content::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    
-    /* Apply background AND filter to the pseudo-element */
-    background: #f9f8f7;
-    filter: url(#grain);
-    
-    /* Send it behind the content */
-    z-index: -1; 
+  content: "";
+  position: absolute; /* Changed from fixed */
+  inset: 0;
+  pointer-events: none;
+  
+  /* The animated texture */
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
+  background-repeat: repeat;
+  /* REMOVED: background-size: 900px; (This was the error) */
+  
+  /* P-FIX: Opacity increased to be visible */
+  opacity: 0.15; /* <-- Visible, but still subtle */
+  
+  animation: grainMove 10s steps(6) infinite;
+  
+  z-index: -1; /* Send it behind the content */
 }
 
 
