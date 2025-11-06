@@ -17,12 +17,15 @@ const state = {
             meals: ['🍳 Breakfast', '🥗 Lunch', '🍽️ Dinner', '☕ Snack'],
             tasks: ['💊 Medicine', '💧 Water', '🚶 Walk', '📞 Call']
         },
+        // P-FIX: Changed default moods to 6 labels (no emojis)
+        // This order MUST match the icon list in ui-renderer.js and timeline.js
         moods: [
-            { emoji: '😊', label: 'Happy' },
-            { emoji: '😢', label: 'Sad' },
-            { emoji: '😡', label: 'Angry' },
-            { emoji: '😰', label: 'Anxious' },
-            { emoji: '😴', label: 'Tired' }
+            { label: 'Happy' },     // -> mood-happy.svg
+            { label: 'Sad' },       // -> mood-sad.svg
+            { label: 'Relax' },     // -> mood-relax.svg
+            { label: 'Anxious' },   // -> mood-anxious.svg
+            { label: 'Tired' },     // -> mood-tired.svg
+            { label: 'Angry' }      // -> mood-angry.svg
         ]
     },
     
