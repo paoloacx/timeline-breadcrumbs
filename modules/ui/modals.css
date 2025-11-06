@@ -56,12 +56,12 @@
 /* REMOVED: Old #btn-preview-edit style */
 
 
-/* Estilo para los modales de formulario */
+/* P4: Modal Width Change */
 .form-modal .preview-content {
     border: none;
     box-shadow: none;
     background: transparent;
-    width: auto; 
+    width: 600px; /* CHANGED: Was 'auto' to ensure consistent width */
     max-width: 600px;
 }
 
