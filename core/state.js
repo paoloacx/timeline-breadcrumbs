@@ -17,20 +17,20 @@ const state = {
             meals: ['🍳 Breakfast', '🥗 Lunch', '🍽️ Dinner', '☕ Snack'],
             tasks: ['💊 Medicine', '💧 Water', '🚶 Walk', '📞 Call']
         },
-        // P-FIX: Changed to 5 moods, labels only.
-        // This order MUST match the icon list in ui-renderer.js
+        // P-FIX: Changed to 5 moods with 'visual' (keyword) and 'label'
+        // This 'visual' keyword will map to an icon in ui-renderer.js
         moods: [
-            { label: 'Happy' },     // -> mood-happy.svg
-            { label: 'Sad' },       // -> mood-sad.svg
-            { label: 'Relax' },     // -> mood-relax.svg
-            { label: 'Anxious' },   // -> mood-anxious.svg
-            { label: 'Tired' }      // -> mood-tired.svg
+            { visual: 'happy',   label: 'Happy' },
+            { visual: 'sad',     label: 'Sad' },
+            { visual: 'relax',   label: 'Relax' },
+            { visual: 'anxious', label: 'Anxious' },
+            { visual: 'tired',   label: 'Tired' }
         ]
     },
     
     // UI State
     editingEntryId: null,
-    selectedMood: null,
+    selectedMood: null, // This will now be the index (0, 1, 2...)
     selectedDuration: null,
     selectedActivity: null,
     selectedTrackItem: null,
