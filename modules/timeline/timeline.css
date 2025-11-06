@@ -64,6 +64,7 @@
     border-radius: 50%;
     box-shadow: 0 0 0 3px #000;
     z-index: 2;
+    display: block;
 }
 
 .day-header:hover {
@@ -158,6 +159,7 @@
     border-radius: 50%;
     box-shadow: 0 0 0 3px #000;
     z-index: 2;
+    display: block;
 }
 
 .year-content {
@@ -188,6 +190,7 @@
     border-radius: 50%;
     box-shadow: 0 0 0 3px #000;
     z-index: 2;
+    display: block;
 }
 
 .month-content {
@@ -225,6 +228,7 @@
     border-radius: 50%;
     box-shadow: 0 0 0 3px #000;
     z-index: 2;
+    display: block;
 }
 
 .week-content {
