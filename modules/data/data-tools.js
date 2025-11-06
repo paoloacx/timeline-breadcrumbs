@@ -1,14 +1,11 @@
 // ===== modules/data/data-tools.js (Stats & Export Logic) =====
 
 // Imports
-// CAMBIO: Las rutas ahora suben dos niveles (../../) y apuntan a 'core/'
 import { getState } from '../../core/state.js';
-import { openModal, closeModal } from '../ui/modal-manager.js'; // Sube uno y entra a 'ui'
+import { openModal, closeModal } from '../ui/modal-manager.js';
 import { getDayKey, formatTime } from '../../utils.js';
-// P3 - Necesitaremos renderTimeline para mostrar resultados.
-// Esto puede causar una dependencia circular si timeline.js importa data-tools.
-// Por ahora, lo comentamos y usaremos un alert.
-// import { renderTimeline } from '../timeline/timeline.js';
+// P2: Import renderTimeline to show results
+import { renderTimeline } from '../timeline/timeline.js'; 
 
 
 // --- Stats Functions ---
@@ -443,7 +440,7 @@ export function importFullBackup(file) {
     });
 }
 
-// --- P3: Universal Search ---
+// --- P2: Universal Search ---
 
 /**
  * NEW: Initializes the universal search functionality.
@@ -452,9 +449,13 @@ export function importFullBackup(file) {
 export function initUniversalSearch() {
     const searchInput = document.getElementById('universal-search');
     const searchButton = document.getElementById('btn-universal-search');
+    const clearButton = document.getElementById('btn-universal-clear');
     
     if (searchButton) {
         searchButton.addEventListener('click', performSearch);
+    }
+    if (clearButton) {
+        clearButton.addEventListener('click', clearSearch);
     }
     if (searchInput) {
         searchInput.addEventListener('keydown', (e) => {
@@ -463,53 +464,125 @@ export function initUniversalSearch() {
             }
         });
     }
+
+    // Populate date filters when tools modal is opened
+    // This assumes 'btn-open-tools' is the trigger
+    const toolsButton = document.getElementById('btn-open-tools');
+    if (toolsButton) {
+        toolsButton.addEventListener('click', populateDateFilters);
+    }
 }
 
 /**
- * NEW: Performs the search/filter based on input.
- * This is a placeholder. Logic needs to be defined.
+ * P2: Populates the Year and Month filter dropdowns based on available entries.
+ */
+function populateDateFilters() {
+    const { entries } = getState();
+    const yearSelect = document.getElementById('filter-year');
+    const monthSelect = document.getElementById('filter-month');
+    
+    const availableYears = new Set();
+    const availableMonths = new Set();
+    
+    entries.forEach(entry => {
+        const date = new Date(entry.timestamp);
+        availableYears.add(date.getFullYear());
+        availableMonths.add(date.getMonth()); // 0-11
+    });
+
+    // --- Populate Years ---
+    const sortedYears = Array.from(availableYears).sort((a, b) => b - a);
+    // Preserve current value if it exists
+    const currentYear = yearSelect.value;
+    yearSelect.innerHTML = '<option value="">Year</option>'; // Reset
+    sortedYears.forEach(year => {
+        yearSelect.innerHTML += `<option value="${year}">${year}</option>`;
+    });
+    yearSelect.value = currentYear;
+
+    // --- Populate Months ---
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const sortedMonths = Array.from(availableMonths).sort((a, b) => a - b);
+     // Preserve current value if it exists
+    const currentMonth = monthSelect.value;
+    monthSelect.innerHTML = '<option value="">Month</option>'; // Reset
+    sortedMonths.forEach(monthIndex => {
+        monthSelect.innerHTML += `<option value="${monthIndex}">${monthNames[monthIndex]}</option>`;
+    });
+    monthSelect.value = currentMonth;
+}
+
+
+/**
+ * P2: Performs the search/filter based on input.
  */
 function performSearch() {
     const { entries } = getState();
     const query = document.getElementById('universal-search').value.toLowerCase().trim();
-    
-    // This function needs to set a global filter and re-render the timeline
-    // For now, it just filters and alerts.
-    
-    if (!query) {
-        // Reset filter
-        console.log('Search query empty. Resetting filters.');
-        // renderTimeline(entries); // This function needs to be available
-        alert('Search reset. (Functionality to re-render timeline is pending integration).');
-        closeModal('tools-modal');
+    const year = document.getElementById('filter-year').value;
+    const month = document.getElementById('filter-month').value;
+
+    if (!query && !year && !month) {
+        alert("Please enter a search term or select a filter.");
         return;
     }
     
-    console.log(`Searching for: ${query}`);
-    
-    // TODO: Implement advanced filtering logic
-    // 1. Check for date patterns (May 2024, 2023, last week)
-    // 2. Check for text content
+    console.log(`Searching for: query='${query}', year='${year}', month='${month}'`);
     
     const filteredEntries = entries.filter(entry => {
-        // Simple text search
-        let textMatch = false;
-        if (entry.note) textMatch = entry.note.toLowerCase().includes(query);
-        if (entry.activity) textMatch = textMatch || entry.activity.toLowerCase().includes(query);
-        if (entry.location) textMatch = textMatch || entry.location.toLowerCase().includes(query);
-        if (entry.reflection) textMatch = textMatch || entry.reflection.toLowerCase().includes(query);
-        if (entry.highlights) textMatch = textMatch || entry.highlights.join(' ').toLowerCase().includes(query);
+        const entryDate = new Date(entry.timestamp);
         
-        // TODO: Date filtering
+        // 1. Filter by Year
+        if (year && entryDate.getFullYear() != year) {
+            return false;
+        }
         
-        return textMatch;
+        // 2. Filter by Month
+        if (month && entryDate.getMonth() != month) {
+            return false;
+        }
+        
+        // 3. Filter by Text Query
+        if (query) {
+            let textMatch = false;
+            if (entry.note) textMatch = entry.note.toLowerCase().includes(query);
+            if (entry.activity) textMatch = textMatch || entry.activity.toLowerCase().includes(query);
+            if (entry.location) textMatch = textMatch || entry.location.toLowerCase().includes(query);
+            if (entry.reflection) textMatch = textMatch || entry.reflection.toLowerCase().includes(query);
+            if (entry.highlights) textMatch = textMatch || entry.highlights.join(' ').toLowerCase().includes(query);
+            if (entry.optionalNote) textMatch = textMatch || entry.optionalNote.toLowerCase().includes(query);
+            
+            if (!textMatch) {
+                return false;
+            }
+        }
+        
+        // If it passed all filters, keep it
+        return true;
     });
     
     console.log(`Found ${filteredEntries.length} entries.`);
     
-    // We need to re-render the timeline with these entries
-    // renderTimeline(filteredEntries); // This function needs to be available
+    // Render the timeline with the filtered results
+    renderTimeline(filteredEntries);
     
-    alert(`Search functionality not fully implemented.\nFound ${filteredEntries.length} entries matching "${query}".\n\n(Timeline filter is not yet applied)`);
+    // Close the modal to show the results
+    closeModal('tools-modal');
+}
+
+/**
+ * P2: Clears all search filters and re-renders the timeline.
+ */
+function clearSearch() {
+    console.log('Clearing search filters...');
+    // Reset inputs
+    document.getElementById('universal-search').value = '';
+    document.getElementById('filter-year').value = '';
+    document.getElementById('filter-month').value = '';
+    
+    // Re-render the full timeline (null uses all entries)
+    renderTimeline(null);
+    
+    // Close the modal
     closeModal('tools-modal');
 }
