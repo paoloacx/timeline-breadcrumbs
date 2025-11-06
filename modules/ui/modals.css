@@ -84,6 +84,13 @@
 .preview-content .mac-content {
     background: transparent;
 }
+
+/* --- NUEVO CAMBIO: Forzar transparencia también en #preview-body --- */
+/* #preview-body es donde se inyecta el HTML, y podría
+   tener su propio fondo (blanco?) que tapa la textura. */
+.preview-content #preview-body {
+    background: transparent;
+}
 /* --- FIN CAMBIO --- */
 
 
