@@ -440,7 +440,7 @@ export function importFullBackup(file) {
     });
 }
 
-// --- P2: Universal Search ---
+// --- P2/P4: Universal Search ---
 
 /**
  * NEW: Initializes the universal search functionality.
@@ -449,14 +449,13 @@ export function importFullBackup(file) {
 export function initUniversalSearch() {
     const searchInput = document.getElementById('universal-search');
     const searchButton = document.getElementById('btn-universal-search');
-    const clearButton = document.getElementById('btn-universal-clear');
+    const yearSelect = document.getElementById('filter-year');
+    const monthSelect = document.getElementById('filter-month');
     
     if (searchButton) {
         searchButton.addEventListener('click', performSearch);
     }
-    if (clearButton) {
-        clearButton.addEventListener('click', clearSearch);
-    }
+    // P2: Removed clearButton listener
     if (searchInput) {
         searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
@@ -465,8 +464,15 @@ export function initUniversalSearch() {
         });
     }
 
+    // P4: Add listeners to selectors
+    if (yearSelect) {
+        yearSelect.addEventListener('change', performSearch);
+    }
+    if (monthSelect) {
+        monthSelect.addEventListener('change', performSearch);
+    }
+
     // Populate date filters when tools modal is opened
-    // This assumes 'btn-open-tools' is the trigger
     const toolsButton = document.getElementById('btn-open-tools');
     if (toolsButton) {
         toolsButton.addEventListener('click', populateDateFilters);
@@ -492,7 +498,6 @@ function populateDateFilters() {
 
     // --- Populate Years ---
     const sortedYears = Array.from(availableYears).sort((a, b) => b - a);
-    // Preserve current value if it exists
     const currentYear = yearSelect.value;
     yearSelect.innerHTML = '<option value="">Year</option>'; // Reset
     sortedYears.forEach(year => {
@@ -503,7 +508,6 @@ function populateDateFilters() {
     // --- Populate Months ---
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const sortedMonths = Array.from(availableMonths).sort((a, b) => a - b);
-     // Preserve current value if it exists
     const currentMonth = monthSelect.value;
     monthSelect.innerHTML = '<option value="">Month</option>'; // Reset
     sortedMonths.forEach(monthIndex => {
@@ -514,7 +518,7 @@ function populateDateFilters() {
 
 
 /**
- * P2: Performs the search/filter based on input.
+ * P2/P4: Performs the search/filter based on input.
  */
 function performSearch() {
     const { entries } = getState();
@@ -522,8 +526,12 @@ function performSearch() {
     const year = document.getElementById('filter-year').value;
     const month = document.getElementById('filter-month').value;
 
+    // P4: Change logic. Only run if *any* value is present.
     if (!query && !year && !month) {
-        alert("Please enter a search term or select a filter.");
+        // If all are empty, render the full timeline (reset filter)
+        console.log('All search fields empty. Resetting timeline.');
+        renderTimeline(null);
+        closeModal('tools-modal'); // Close modal only if reset
         return;
     }
     
@@ -572,6 +580,7 @@ function performSearch() {
 
 /**
  * P2: Clears all search filters and re-renders the timeline.
+ * (This function is no longer called by a button, but kept in case)
  */
 function clearSearch() {
     console.log('Clearing search filters...');
