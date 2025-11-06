@@ -54,7 +54,11 @@
 /* P-FIX: Grain overlay (New Version) */
 .preview-content::after {
   content: "";
-  position: fixed;
+  /* --- CAMBIO: De 'fixed' a 'absolute' --- */
+  /* Esto asegura que la textura de grano se posicione 
+     relativa al .preview-content y no a toda la ventana. */
+  position: absolute;
+  /* --- FIN CAMBIO --- */
   inset: 0;
   pointer-events: none;
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
