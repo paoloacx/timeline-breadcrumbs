@@ -672,8 +672,9 @@ input[type="range"]:active::-moz-range-thumb {
 .mac-button img,
 .fab svg,
 .fab img {
-    width: 20px;
-    height: 20px;
+    /* P1: FAB Icon Size Change */
+    width: 30px;  /* CHANGED from 20px */
+    height: 30px; /* CHANGED from 20px */
     pointer-events: none;
 }
 
