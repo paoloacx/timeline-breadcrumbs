@@ -250,12 +250,22 @@ export function renderTimeline(entriesToRender = null) {
                                 // P-FIX: Get icon path and label from centralized lists
                                 let moodIconPath = '';
                                 let moodAltText = 'Mood';
+                                let moodIndex = null;
+                                
                                 if (entry.mood !== undefined && entry.mood !== null) {
-                                    // Use index (entry.mood) to get path from centralized array
-                                    moodIconPath = MOOD_ICONS[entry.mood]; 
-                                    // Use index (entry.mood) to get label from settings
-                                    if (settings.moods[entry.mood]) {
-                                        moodAltText = settings.moods[entry.mood].label;
+                                    if (typeof entry.mood === 'object') {
+                                        // Handle old data: find index by label
+                                        moodIndex = settings.moods.findIndex(m => m.label === entry.mood.label);
+                                    } else {
+                                        // Handle new data: it's already the index
+                                        moodIndex = entry.mood;
+                                    }
+                                }
+
+                                if (moodIndex !== null && moodIndex !== -1 && moodIndex < MOOD_ICONS.length) {
+                                    moodIconPath = MOOD_ICONS[moodIndex]; // Get path from array
+                                    if (settings.moods[moodIndex]) {
+                                        moodAltText = settings.moods[moodIndex].label; // Get label
                                     }
                                 }
                                 // --- End P-FIX ---
@@ -273,7 +283,7 @@ export function renderTimeline(entriesToRender = null) {
                                         ` : ''}` :
                                         `<div class="breadcrumb-time">
                                             ${entry.isQuickTrack ?
-                                                `<span class="compact-time">${createIcon('time',Time')} ${formatTime(entry.timestamp)} ${entry.note}</span>` :
+                                                `<span class="compact-time">${createIcon('time', 'Time')} ${formatTime(entry.timestamp)} ${entry.note}</span>` :
                                                 `${createIcon('time', 'Time')} ${formatTime(entry.timestamp)}`
                                             }
                                             ${entry.isSpent ? `<span class="spent-badge">${createIcon('money', 'Spent')} €${entry.spentAmount.toFixed(2)}</span>` : ''}
