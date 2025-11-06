@@ -251,9 +251,11 @@ export function renderTimeline(entriesToRender = null) {
                                 let moodIconPath = '';
                                 let moodAltText = 'Mood';
                                 if (entry.mood !== undefined && entry.mood !== null) {
-                                    moodIconPath = MOOD_ICONS[entry.mood]; // Get path from array
+                                    // Use index (entry.mood) to get path from centralized array
+                                    moodIconPath = MOOD_ICONS[entry.mood]; 
+                                    // Use index (entry.mood) to get label from settings
                                     if (settings.moods[entry.mood]) {
-                                        moodAltText = settings.moods[entry.mood].label; // Get label
+                                        moodAltText = settings.moods[entry.mood].label;
                                     }
                                 }
                                 // --- End P-FIX ---
@@ -271,7 +273,7 @@ export function renderTimeline(entriesToRender = null) {
                                         ` : ''}` :
                                         `<div class="breadcrumb-time">
                                             ${entry.isQuickTrack ?
-                                                `<span class="compact-time">${createIcon('time', 'Time')} ${formatTime(entry.timestamp)} ${entry.note}</span>` :
+                                                `<span class="compact-time">${createIcon('time',Time')} ${formatTime(entry.timestamp)} ${entry.note}</span>` :
                                                 `${createIcon('time', 'Time')} ${formatTime(entry.timestamp)}`
                                             }
                                             ${entry.isSpent ? `<span class="spent-badge">${createIcon('money', 'Spent')} €${entry.spentAmount.toFixed(2)}</span>` : ''}
