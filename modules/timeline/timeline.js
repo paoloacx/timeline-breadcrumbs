@@ -17,11 +17,24 @@ const createLocationIcon = () => {
      return `<img src="assets/icons/keep.svg" class="icon-mac" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 2px;">`;
 }
 
+// --- Pagination State ---
+let currentDaysShown = 30; // Start with 30 days
+
 /**
  * Initializes all event listeners for the timeline container.
  */
 export function initTimeline() {
-    document.getElementById('timeline-container').addEventListener('click', (e) => {
+    const container = document.getElementById('timeline-container');
+    
+    container.addEventListener('click', (e) => {
+        
+        // Handle Load More button
+        if (e.target.closest('#load-more-btn')) {
+            e.preventDefault();
+            currentDaysShown += 30;
+            renderTimeline();
+            return;
+        }
         
         // Handle Toggle Day
         const dayHeader = e.target.closest('.day-header');
@@ -101,6 +114,13 @@ export function initTimeline() {
 }
 
 /**
+ * Resets pagination to initial state
+ */
+export function resetPagination() {
+    currentDaysShown = 30;
+}
+
+/**
  * Renders the entire timeline based on the global state.
  * @param {Array} [entriesToRender] - Optional array of entries to render. If null, uses global state.
  */
@@ -136,12 +156,17 @@ export function renderTimeline(entriesToRender = null) {
     // Sort days: newest first
     const sortedDayKeys = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
     
+    // Apply pagination (only if not showing filtered results)
+    const displayedDayKeys = entriesToRender ? sortedDayKeys : sortedDayKeys.slice(0, currentDaysShown);
+    const hasMoreDays = !entriesToRender && sortedDayKeys.length > currentDaysShown;
+    const isEndOfTimeline = !entriesToRender && sortedDayKeys.length <= currentDaysShown;
+    
     const todayKey = getDayKey(new Date().toISOString());
 
     const html = `
         <div class="timeline">
             <div class="timeline-line"></div>
-            ${sortedDayKeys.map(dayKey => {
+            ${displayedDayKeys.map(dayKey => {
                 const dayEntries = grouped[dayKey];
                 // P2: Expand all day blocks if we are showing search results
                 const isToday = (dayKey === todayKey);
@@ -157,16 +182,13 @@ export function renderTimeline(entriesToRender = null) {
                             <span class="chevron ${expandedClass}" id="chevron-${dayKey}">▼</span>
                         </div>
                         
-                        ${recaps.map(recap => {
-                            // P2: Expand recap if showing search results
-                            const recapExpandedClass = entriesToRender ? 'expanded' : '';
-                            return `
+                        ${recaps.map(recap => `
                             <div class="recap-block" data-id="${recap.id}">
                                 <div class="recap-header">
                                     <span>${createIcon('star', 'Recap')} Day Recap</span>
-                                    <span class="chevron-recap ${recapExpandedClass}" id="chevron-recap-${recap.id}">▼</span>
+                                    <span class="chevron-recap expanded" id="chevron-recap-${recap.id}">▼</span>
                                 </div>
-                                <div class="recap-content ${recapExpandedClass}" id="recap-content-${recap.id}">
+                                <div class="recap-content expanded" id="recap-content-${recap.id}">
                                     <button class="mac-button edit-button btn-edit">
                                         ${createIcon('edit', 'Edit')} Edit
                                     </button>
@@ -188,16 +210,12 @@ export function renderTimeline(entriesToRender = null) {
                                     ${recap.highlights && recap.highlights.length > 0 && recap.highlights.some(h => h) ? `
                                         <div style="margin-bottom: 16px;">
                                             <strong>Highlights:</strong>
-                                            <div class="recap-highlights-list" style="margin: 8px 0; padding-left: 0;">
-                                                ${recap.highlights.filter(h => h).map(h => `
-                                                    <div class="recap-highlight-item">
-                                                        <span class="recap-highlight-marker">•</span>
-                                                        <span class="recap-highlight-tag">${h}</span>
-                                                    </div>
-                                                `).join('')}
-                                            </div>
+                                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                                ${recap.highlights.filter(h => h).map(h => `<li style="margin-bottom: 4px;">${h}</li>`).join('')}
+                                            </ul>
                                         </div>
                                     ` : ''}
+                                    
                                     ${recap.lowlights && recap.lowlights.length > 0 && recap.lowlights.some(l => l) ? `
                                         <div style="margin-bottom: 16px;">
                                             <strong>Lowlights:</strong>
@@ -207,16 +225,16 @@ export function renderTimeline(entriesToRender = null) {
                                         </div>
                                     ` : ''}
                                     
-                                    ${recap.track ? `
+                                    ${recap.bso ? `
                                         <div style="margin-bottom: 16px;">
-                                            <strong>Song of the Day (BSO):</strong>
+                                            <strong>BSO of the Day:</strong>
                                             <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 12px; border: 2px solid #000; background: #f9f9f9;">
-                                                <img src="${recap.track.artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
+                                                <img src="${recap.bso.artwork}" style="width: 60px; height: 60px; border: 2px solid #000;">
                                                 <div style="flex: 1;">
-                                                    <div style="font-weight: bold;">${recap.track.name}</div>
-                                                    <div style="font-size: 12px; color: #666;">${recap.track.artist}</div>
+                                                    <div style="font-weight: bold;">${recap.bso.name}</div>
+                                                    <div style="font-size: 12px; color: #666;">${recap.bso.artist}</div>
                                                 </div>
-                                                <a href="${recap.track.url}" target="_blank" style="text-decoration: none;">
+                                                <a href="${recap.bso.url}" target="_blank" style="text-decoration: none;">
                                                     ${createIcon('link', 'Listen')}
                                                 </a>
                                             </div>
@@ -231,7 +249,7 @@ export function renderTimeline(entriesToRender = null) {
                                     ` : ''}
                                 </div>
                             </div>
-                        `}).join('')}
+                        `).join('')}
                         
                         <div class="day-content ${expandedClass}" id="day-content-${dayKey}">
                             ${regularEntries.map(entry => {
@@ -335,6 +353,20 @@ export function renderTimeline(entriesToRender = null) {
                     </div>
                 `;
             }).join('')}
+            
+            ${hasMoreDays ? `
+                <div class="load-more-container">
+                    <button id="load-more-btn" class="mac-button load-more-btn">
+                        Load 30 more days
+                    </button>
+                </div>
+            ` : ''}
+            
+            ${isEndOfTimeline ? `
+                <div class="timeline-footer">
+                    <img src="footer.png" alt="End of timeline" class="footer-banner">
+                </div>
+            ` : ''}
         </div>
     `;
     
