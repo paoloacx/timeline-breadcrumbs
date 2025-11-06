@@ -27,7 +27,7 @@ export function initTimeline() {
             const header = e.target.closest('.year-header');
             const yearBlock = header.closest('.year-block');
             const content = yearBlock.querySelector('.year-content');
-            const chevron = header.querySelector('.chevron-up');
+            const chevron = header.querySelector('.chevron-down');
             if (content) content.classList.toggle('expanded');
             if (chevron) chevron.classList.toggle('expanded');
             return;
@@ -37,7 +37,7 @@ export function initTimeline() {
             const header = e.target.closest('.month-header');
             const monthBlock = header.closest('.month-block');
             const content = monthBlock.querySelector('.month-content');
-            const chevron = header.querySelector('.chevron-up');
+            const chevron = header.querySelector('.chevron-down');
             if (content) content.classList.toggle('expanded');
             if (chevron) chevron.classList.toggle('expanded');
             return;
@@ -47,7 +47,7 @@ export function initTimeline() {
             const header = e.target.closest('.week-header');
             const weekBlock = header.closest('.week-block');
             const content = weekBlock.querySelector('.week-content');
-            const chevron = header.querySelector('.chevron-up');
+            const chevron = header.querySelector('.chevron-down');
             if (content) content.classList.toggle('expanded');
             if (chevron) chevron.classList.toggle('expanded');
             return;
@@ -296,7 +296,7 @@ function renderDayBlock(dayKey, dayEntries) {
 }
 
 /**
- * Renders the entire timeline with nesting
+ * Renders the entire timeline with nesting - NON-INVERTED structure
  */
 export function renderTimeline() {
     const { entries } = getState();
@@ -342,6 +342,10 @@ export function renderTimeline() {
                 
                 return `
                 <div class="year-block">
+                    <div class="year-header">
+                        <span>${yearKey}</span>
+                        <span class="chevron-down ${yearExpandedClass}">▼</span>
+                    </div>
                     <div class="year-content ${yearExpandedClass}">
                         ${sortedMonthKeys.map((monthKey, monthIdx) => {
                             const monthData = yearData[monthKey];
@@ -350,6 +354,10 @@ export function renderTimeline() {
                             
                             return `
                             <div class="month-block">
+                                <div class="month-header">
+                                    <span>${getMonthName(monthKey)}</span>
+                                    <span class="chevron-down ${monthExpandedClass}">▼</span>
+                                </div>
                                 <div class="month-content ${monthExpandedClass}">
                                     ${sortedWeekKeys.map((weekKey, weekIdx) => {
                                         const weekData = monthData[weekKey];
@@ -360,30 +368,22 @@ export function renderTimeline() {
                                         
                                         return `
                                         <div class="week-block">
+                                            <div class="week-header">
+                                                <span>Week ${weekNum}</span>
+                                                <span class="chevron-down ${weekExpandedClass}">▼</span>
+                                            </div>
                                             <div class="week-content ${weekExpandedClass}">
                                                 ${sortedDayKeys.map(dayKey => {
                                                     return renderDayBlock(dayKey, weekData[dayKey]);
                                                 }).join('')}
                                             </div>
-                                            <div class="week-header">
-                                                <span>Week ${weekNum}</span>
-                                                <span class="chevron-up ${weekExpandedClass}">▼</span>
-                                            </div>
                                         </div>
                                         `;
                                     }).join('')}
                                 </div>
-                                <div class="month-header">
-                                    <span>${getMonthName(monthKey)}</span>
-                                    <span class="chevron-up ${monthExpandedClass}">▼</span>
-                                </div>
                             </div>
                             `;
                         }).join('')}
-                    </div>
-                    <div class="year-header">
-                        <span>${yearKey}</span>
-                        <span class="chevron-up ${yearExpandedClass}">▼</span>
                     </div>
                 </div>
                 `;
