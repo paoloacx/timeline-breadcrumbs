@@ -77,8 +77,8 @@
     inset: 0;
     pointer-events: none;
     
-    /* La imagen de grano Base64 */
-    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
+    /* --- CAMBIO: NUEVA IMAGEN BASE64 --- */
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAnElEQVR42mP4//8/AyUYhoEARgYWViY0NQ2jBwYm/v//PxCDgYGERMHIwAhgZWVlYABiYFD4/x8DEMDGxsa8/w8BGIYVgGACYtAYwGFo/f//f2AYYGBg4P//PwMDw58GopAINgYYGJgYGGZgZGVlAmJgUPj/HwMQwMbGxrj/DxBgGGAYYGBg+P//PzMwMPwZKHr8+PE/AwPDAQAGM5BQr07f/wAAAABJRU5ErkJggg==");
     background-repeat: repeat;
     
     /* --- PRUEBA: Opacidad al 100% --- */
