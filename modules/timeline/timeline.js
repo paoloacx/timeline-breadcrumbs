@@ -169,7 +169,8 @@ export function renderTimeline(entriesToRender = null) {
             ${displayedDayKeys.map(dayKey => {
                 const dayEntries = grouped[dayKey];
                 // P2: Only expand if showing search results
-                const expandedClass = entriesToRender ? 'expanded' : '';
+                const isToday = (dayKey === todayKey);
+                const expandedClass = (isToday || entriesToRender) ? 'expanded' :
                 
                 const recaps = dayEntries.filter(e => e.type === 'recap');
                 const regularEntries = dayEntries.filter(e => e.type !== 'recap');
