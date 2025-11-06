@@ -763,4 +763,3 @@ input[type="range"]:active::-moz-range-thumb {
     margin-bottom: 0;
     width: auto; /* Sobrescribe el width: 100% si lo tuviera */
 }
-
