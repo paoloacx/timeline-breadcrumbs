@@ -54,6 +54,7 @@
 /* P-FIX: Grain overlay (New Version) */
 .preview-content::after {
   content: "";
+  /* CAMBIO: De 'fixed' a 'absolute' */
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -63,7 +64,7 @@
   opacity: 0.15;
   
   animation: grainMove 10s steps(6) infinite;
-  z-index: 1; /* Place it above the background (#faf8f6) */
+  z-index: 1; /* Place it above the background */
 }
 
 /* P-FIX: Ensure modal content is above the grain */
@@ -71,16 +72,7 @@
 .preview-content .mac-content,
 .preview-content .mac-footer-bar {
     position: relative;
-    z-index: 2; /* Content (z-index 2) is above grain (z-index 1) */
-}
-
-/* Dejamos de intentar forzar la transparencia aquí,
-   lo haremos en global.css */
-.preview-content .mac-content {
-    /* background: transparent !important; <- REMOVED */
-}
-.preview-content #preview-body {
-    /* background: transparent !important; <- REMOVED */
+    z-index: 2; /* Contenido está sobre el grano (z-index 1) */
 }
 
 
@@ -94,6 +86,7 @@
     top: 0;
     z-index: 10; 
 }
+
 
 /* P4: Modal Width Change */
 .form-modal .preview-content {
