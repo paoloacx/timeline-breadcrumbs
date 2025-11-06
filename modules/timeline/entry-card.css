@@ -13,12 +13,12 @@
     cursor: pointer; /* NEW: Indicate the card is clickable */
 }
 
-/* P-FIX: Grain texture for normal (crumb) entries */
+/* P-FIX: Grain texture for normal (crumb) entries (New Version) */
 .breadcrumb-entry.crumb-event {
     background: #faf8f6;
-    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAIElEQVR42mNkYGD4z0AEYBxVSFUBC4RRMFQEYoYhNEgAAN/RCx8SdskyAAAAAElFTkSuQmCC");
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
     background-repeat: repeat;
-    background-size: 180px; /* ajusta el tamaño del grano */
+    background-size: 1200px;
 }
 
 
