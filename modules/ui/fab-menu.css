@@ -85,6 +85,14 @@
     pointer-events: auto; /* Esto ya estaba, es correcto */
 }
 
+/* P1: NEW Rule to set FAB ACTION icon size to 30px */
+.fab-action img.icon-mac,
+.fab-action svg.icon-mac {
+    width: 30px;
+    height: 30px;
+}
+
+
 .fab-action-wrapper {
     display: flex;
     align-items: center;
