@@ -91,11 +91,17 @@
     gap: 8px;
 }
 
-.config-item.mood-item input[name="mood-emoji"] {
-    flex: 0 0 60px; /* Fixed width */
-    width: 60px;
+/* P-FIX: ADDED THIS RULE BACK */
+/* This fixes the "enormous box" */
+.config-item.mood-item input[name="mood-visual"] {
+    flex: 0 0 80px; /* Fixed width (don't grow, don't shrink) */
+    width: 80px;
     text-align: center;
-    font-size: 20px;
+    font-size: 20px; /* Good for emojis */
+    padding: 4px;
+    border: 2px inset #999;
+    font-family: 'Courier New', monospace;
+    box-sizing: border-box; 
 }
 
 /* P1 FIX: Target mood label input specifically */
