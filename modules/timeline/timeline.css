@@ -27,174 +27,14 @@
     z-index: 1;
 }
 
-/* ===== TIMELINE DOT (Used for all headers) ===== */
-.timeline-dot {
-    position: absolute;
-    left: -33px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 16px;
-    height: 16px;
-    background: #000;
-    border: 3px solid white;
-    border-radius: 50%;
-    box-shadow: 0 0 0 3px #000;
-    z-index: 2;
-    pointer-events: none;
-}
-
-/* ===== CHEVRON ANIMATIONS ===== */
-.chevron {
-    display: inline-block;
-    transition: transform 0.3s ease;
-}
-
-.chevron.expanded {
-    transform: rotate(180deg);
-}
-
-.chevron-down {
-    display: inline-block;
-    transition: transform 0.3s ease;
-}
-
-.chevron-down.expanded {
-    transform: rotate(180deg);
-}
-
-/* ===== YEAR BLOCK ===== */
-.year-block {
-    margin-bottom: 20px;
-    overflow: visible;
-}
-
-.year-header {
-    background: #e0e0e0;
-    color: #000;
-    padding: 12px 16px;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    border: 3px solid #000;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
-    margin-bottom: 0;
-}
-
-.year-header:hover {
-    background: #d0d0d0;
-}
-
-.year-content {
-    max-height: 0;
-    overflow: visible;
-    transition: max-height 0.5s ease-out;
-    background: repeating-linear-gradient(
-        0deg,
-        #f8f8f8,
-        #f8f8f8 1px,
-        #fefefe 1px,
-        #fefefe 2px
-    );
-}
-
-.year-content.expanded {
-    max-height: 50000px;
-    transition: max-height 0.8s ease-in;
-}
-
-/* ===== MONTH BLOCK ===== */
-.month-block {
-    margin-bottom: 16px;
-    overflow: visible;
-}
-
-.month-header {
-    background: #f0f0f0;
-    color: #000;
-    padding: 12px 16px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    border: 3px solid #000;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
-    margin-bottom: 0;
-}
-
-.month-header:hover {
-    background: #e0e0e0;
-}
-
-.month-content {
-    max-height: 0;
-    overflow: visible;
-    transition: max-height 0.5s ease-out;
-    background: repeating-linear-gradient(
-        0deg,
-        #fcfcfc,
-        #fcfcfc 1px,
-        #ffffff 1px,
-        #ffffff 2px
-    );
-}
-
-.month-content.expanded {
-    max-height: 30000px;
-    transition: max-height 0.8s ease-in;
-}
-
-/* ===== WEEK BLOCK ===== */
-.week-block {
-    margin-bottom: 12px;
-    overflow: visible;
-}
-
-.week-header {
-    background: #f9f9f9;
-    color: #000;
-    padding: 12px 16px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    border: 3px solid #000;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
-    margin-bottom: 0;
-}
-
-.week-header:hover {
-    background: #efefef;
-}
-
-.week-content {
-    max-height: 0;
-    overflow: visible;
-    transition: max-height 0.5s ease-out;
-}
-
-.week-content.expanded {
-    max-height: 10000px;
-    transition: max-height 0.8s ease-in;
-}
-
 /* ===== DAY BLOCK ===== */
 .day-block {
     margin-bottom: 20px;
+    margin-right: 0px;
     position: relative;
     background: #fff;
     border: 3px solid #000;
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
-    overflow: visible;
 }
 
 .day-header {
@@ -211,13 +51,28 @@
     border-bottom: 3px solid #000;
 }
 
+.day-header::before {
+    content: '';
+    position: absolute;
+    left: -33px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    background: #000;
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px #000;
+    z-index: 2;
+}
+
 .day-header:hover {
     background: #333;
 }
 
 .day-content {
     max-height: 0;
-    overflow: visible;
+    overflow: hidden;
     opacity: 0;
     transform: translateY(-6px);
     transition:
@@ -232,4 +87,14 @@
     opacity: 1 !important;
     transform: translateY(0) !important;
     padding: 10px; 
+}
+
+/* ===== CHEVRON ANIMATIONS ===== */
+.chevron {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.chevron.expanded {
+    transform: rotate(180deg);
 }
