@@ -1,6 +1,6 @@
 /* ===== MODAL STYLES ===== */
 
-/* P-FIX: Tus keyframes para la animación del grano */
+/* P-FIX: Keyframes for grain animation (New Version) */
 @keyframes grainMove {
   0% { transform: translate(0,0); }
   25% { transform: translate(1%, -1%); }
@@ -36,20 +36,14 @@
 }
 
 .preview-content {
-    /* P-FIX: Color de fondo */
-    background: #f9f8f7;
+    /* P-FIX: Grain background (New Version) */
+    background: #faf8f6;
     border: 3px solid #000;
     max-width: 90%;
     width: 600px; /* Fixed width for larger screens */
-    
-    /* P-FIX: Footer Bug Fix */
-    max-height: 70vh; /* CHANGED from 90vh */
-    
+    max-height: 90vh; /* Limit height */
     overflow-y: auto;
     position: relative;
-    
-    /* P-FIX: Create stacking context */
-    isolation: isolate;
     overflow: hidden; /* Needed for pseudo-element */
     
     /* Pop-in animation (This applies to ALL modal contents) */
@@ -57,26 +51,29 @@
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
 }
 
-/* P-FIX: Capa de grano (SVG + Animación) */
+/* P-FIX: Grain overlay (New Version) */
 .preview-content::after {
-    content: "";
-    position: absolute; 
-    inset: -10%; /* Hacemos la capa más grande que el modal */
-    pointer-events: none;
-    
-    /* P-FIX: EL FONDO VA AQUÍ */
-    background: #f9f8f7;
-    
-    /* Aplicamos el filtro SVG */
-    filter: url(#grain);
-    
-    /* Aplicamos la animación de movimiento */
-    animation: grainMove 10s steps(6) infinite;
-    
-    /* Opacidad (ajusta esto si es muy fuerte/débil) */
-    opacity: 0.15; 
-    
-    z-index: -1; /* Detrás del contenido */
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQElEQVR42mNgGAWjYBSMAgZgYGB4z0AEYgxUMRQjCIqgCYiAGsQGxAYmBCOQxgYhNEgAMmAH4lQxYABBgAE3cSBYXQAAAABJRU5ErkJggg==");
+  background-repeat: repeat;
+  /* REMOVED: background-size: 900px; */
+  
+  /* P-FIX: Opacity increased to be visible */
+  opacity: 0.15; /* CHANGED from 0.05 */
+  
+  animation: grainMove 10s steps(6) infinite;
+  z-index: 1; /* Place it above the background */
+}
+
+/* P-FIX: Ensure modal content is above the grain */
+.preview-content .mac-title-bar,
+.preview-content .mac-content,
+.preview-content .mac-footer-bar {
+    position: relative;
+    z-index: 2;
 }
 
 
@@ -89,7 +86,12 @@
     position: sticky;
     top: 0;
     z-index: 10; 
+    /* REMOVED: Flexbox layout rules */
 }
+
+/* REMOVED: .preview-content .mac-title-bar .mac-title */
+
+/* REMOVED: Old #btn-preview-edit style */
 
 
 /* P4: Modal Width Change */
@@ -97,11 +99,9 @@
     border: none;
     box-shadow: none;
     background: transparent;
-    width: 600px; 
+    width: 600px; /* CHANGED: Was 'auto' to ensure consistent width */
     max-width: 600px;
-    overflow: visible; 
-    isolation: auto;
-    max-height: 90vh; 
+    overflow: visible; /* Override overflow:hidden for form modals */
 }
 
 /* P-FIX: Disable grain overlay for form modals */
