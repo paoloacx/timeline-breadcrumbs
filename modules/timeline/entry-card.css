@@ -13,7 +13,7 @@
     cursor: pointer; /* NEW: Indicate the card is clickable */
 }
 
-/* P-FIX: Grain texture for normal (crumb) entries */
+/* P-FIX: Grain texture for normal (crumb) entries (SVG Filter) */
 .breadcrumb-entry.crumb-event {
     background: #f9f8f7; /* Fallback background */
     position: relative; 
@@ -31,6 +31,7 @@
     /* Apply background AND filter here */
     background: #f9f8f7;
     filter: url(#grain);
+    opacity: 0.15; /* Opacidad para el grano estático */
     
     z-index: -1; /* Send it behind */
 }
@@ -63,10 +64,21 @@
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
 
+/* P-FIX: TIME EVENT STYLES */
 .breadcrumb-entry.time-event {
-    background: #c4c4c4;
-    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
-    /* REMOVED: text-align: center; */
+    /* Tu nuevo fondo (combinado) */
+    background-color: #303d4f;
+    background-image: 
+        /* Scanlines (arriba) */
+        repeating-linear-gradient(rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 8px),
+        repeating-linear-gradient(to right, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 8px),
+        /* Gradiente (fondo) */
+        linear-gradient(to bottom, #4c5c70 0%, #303d4f 100%);
+    
+    border: 1px solid #202834;
+    color: white;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3); /* Mantenemos el shadow de la app */
 }
 
 .breadcrumb-time {
@@ -81,6 +93,7 @@
 /* MODIFIED: Override for time-event */
 .breadcrumb-entry.time-event .breadcrumb-time {
     margin-bottom: 16px;
+    color: white; /* P-FIX: Asegurar color blanco */
 }
 
 /* Overwrite for track event time */
@@ -202,7 +215,8 @@
 /* --- NEW: Time Event Redesign --- */
 .time-event-duration {
     font-size: 13px;
-    color: #2e2e2e;
+    /* P-FIX: Adaptar al nuevo fondo */
+    color: #ccc; /* CHANGED from #2e2e2e */
     margin-bottom: 16px;
     text-align: center; /* MODIFIED: Explicitly centered */
 }
@@ -223,9 +237,10 @@
 }
 
 .time-event-note-box {
-    background: #eee; /* Light grey */
-    color: #000;
-    border: 2px solid #ccc;
+    /* P-FIX: Adaptar al nuevo fondo */
+    background: #2a3440; /* CHANGED from #eee */
+    color: #ddd; /* CHANGED from #000 */
+    border: 1px solid #555; /* CHANGED from #ccc */
     padding: 8px 12px;
     font-size: 14px;
     font-style: italic;
