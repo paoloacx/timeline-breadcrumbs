@@ -28,72 +28,67 @@
     transition: opacity 0.25s ease;
 }
 
-/* --- CAMBIO BUG FOOTER: Layout Flex --- */
+/* --- CAMBIO: Arquitectura de Apilamiento --- */
 .preview-content {
-    background: #faf8f6;
+    /* 1. Fondo beige (será tapado por el ::after) */
+    background: #faf8f6; 
     border: 3px solid #000;
     max-width: 90%;
-    width: 600px; /* Fixed width for larger screens */
-    max-height: 90vh; /* Altura máxima */
-    position: relative;
+    width: 600px; 
+    max-height: 90vh; 
     
-    /* 1. Convertir en contenedor Flex vertical */
+    /* 2. Contenedor Flex vertical */
     display: flex;
     flex-direction: column;
-    
-    /* 2. Ocultar el scroll de la ventana (el scroll será interno) */
     overflow: hidden; 
+    
+    /* 3. Necesario para el ::after absoluto */
+    position: relative; 
     
     transform: scale(0.95) translateY(8px);
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
 }
+
+/* 4. Capa de GRANO (Fija, z-index: 1) */
+/* Se aplica al padre, se queda fija y no hace scroll */
+.preview-content::after {
+    content: "";
+    position: absolute;
+    inset: 0; /* Cubre todo el modal */
+    
+    /* Fondo beige + Filtro de grano */
+    background: #faf8f6;
+    filter: url(#grain);
+    
+    z-index: 1; /* DETRÁS del contenido */
+    pointer-events: none;
+}
 /* --- FIN CAMBIO --- */
 
-/* P-FIX: Ensure modal content is above the grain */
+
+/* --- CAMBIO: Contenido (z-index: 2) --- */
 .preview-content .mac-title-bar,
 .preview-content .mac-content,
 .preview-content .mac-footer-bar {
+    /* Todos los hijos directos deben ser relativos */
+    /* para poder apilarse sobre el ::after */
     position: relative;
-    /* Z-index 2 (o auto) es correcto, pero el footer ya no es sticky */
+    z-index: 2; /* ENCIMA del grano */
 }
-
-/* --- NUEVA ESTRATEGIA: Grano en .mac-content::after --- */
 
 .preview-modal .mac-content {
-    /* 1. Fondo base beige */
-    background: #faf8f6 !important;
-    position: relative; 
+    /* El área de scroll DEBE ser transparente */
+    background: transparent !important;
     
-    /* --- CAMBIO BUG FOOTER --- */
-    /* 2. Hacer que esta sección crezca */
+    /* Layout de scroll interno */
     flex-grow: 1;
-    /* 3. Añadir el scroll INTERNO */
     overflow-y: auto;
-    /* --- FIN CAMBIO --- */
+    
+    /* REMOVED: Ya no necesita ::after ni isolation */
 }
 
-/* 4. Creamos la capa de filtro ::after */
-.preview-modal .mac-content::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    
-    /* Aplicamos el filtro que SÍ funciona */
-    filter: url(#grain);
-    
-    /* Lo ponemos DETRÁS del texto (z-index: 1) */
-    z-index: 1; 
-    
-    pointer-events: none; 
-}
-
-/* --- CAMBIO BUG GRANO: Forzar texto encima --- */
-/* Esta regla CSS reemplaza el fix de JS */
-.preview-modal #preview-body {
-    position: relative; /* Necesario para z-index */
-    z-index: 2; /* Pone el texto (z-index 2) sobre el grano (z-index 1) */
-    background: transparent !important; /* Asegura transparencia */
-}
+/* REMOVED: .preview-modal .mac-content::after */
+/* REMOVED: .preview-modal #preview-body (lo hace el JS) */
 /* --- FIN CAMBIO --- */
 
 
@@ -101,11 +96,9 @@
     transform: scale(1) translateY(0);
 }
 
-/* Make modal headers sticky when scrolling */
 .preview-content .mac-title-bar {
-    /* REMOVED: position: sticky; (ya no es necesario) */
-    flex-shrink: 0; /* Evita que se encoja */
-    z-index: 10; 
+    flex-shrink: 0; /* No se encoje */
+    z-index: 10; /* Extra seguro */
 }
 
 
@@ -119,6 +112,12 @@
     overflow: visible; 
 }
 
+/* El .form-modal no tendrá el ::after porque no tiene .preview-content */
+.form-modal.preview-content::after {
+    display: none;
+}
+
+
 /* Estilo para el botón de cerrar del modal */
 .btn-modal-close {
     background: #fff; 
@@ -130,9 +129,8 @@
 
 /* --- NEW: Footer bar for modals --- */
 .mac-footer-bar {
-    /* REMOVED: position: sticky; (ya no es necesario) */
-    flex-shrink: 0; /* Evita que se encoja */
-    z-index: 10; 
+    flex-shrink: 0; /* No se encoje */
+    z-index: 10; /* Extra seguro */
     display: flex;
     justify-content: flex-end; /* Aligns button to the right */
     padding: 6px;
