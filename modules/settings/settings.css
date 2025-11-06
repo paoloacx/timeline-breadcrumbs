@@ -68,13 +68,15 @@
     margin-bottom: 12px;
 }
 
-.config-item input[type="text"],
+/* P1 FIX: Target text inputs that ARE NOT mood labels */
+.config-item input[type="text"]:not([name="mood-label"]),
 .config-item input[type="number"] {
     flex: 1; /* Input takes available space */
+    width: auto; /* IMPORTANT: Override .mac-input's width: 100% */
+    min-width: 50px; /* Don't shrink to nothing */
     padding: 4px;
     border: 2px inset #999;
     font-family: 'Courier New', monospace;
-    width: auto; /* Allow flex to control width */
     box-sizing: border-box; 
 }
 .config-item .delete-button {
@@ -89,36 +91,49 @@
     gap: 8px;
 }
 
-.config-item.mood-item input[name="mood-emoji"],
-.config-item input[type="text"]:first-child { /* Style for emoji input */
+.config-item.mood-item input[name="mood-emoji"] {
     flex: 0 0 60px; /* Fixed width */
     width: 60px;
     text-align: center;
     font-size: 20px;
 }
 
+/* P1 FIX: Target mood label input specifically */
 .config-item.mood-item input[name="mood-label"] {
-    flex: 1;
-    width: auto; /* Override 100% width */
+    flex: 1; /* Input takes available space */
+    width: auto; /* IMPORTANT: Override .mac-input's width: 100% */
+    min-width: 50px; /* Don't shrink to nothing */
 }
 
-/* --- P2: Universal Search in Tools --- */
+/* --- P2/P3: Universal Search in Tools --- */
 .universal-search-container {
     display: flex;
-    flex-wrap: wrap; /* Allow wrapping */
-    gap: 8px;
+    flex-direction: column; /* Stack the rows */
+    gap: 8px; /* Space between rows */
     margin-bottom: 16px;
     border-bottom: 2px solid #999;
     padding-bottom: 16px;
 }
-.universal-search-container input {
-    flex: 1 1 150px; /* Grow, shrink, basis */
-    margin-bottom: 0 !important; /* Override global.css */
+
+.search-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
 }
-.universal-search-container select {
-    flex: 1 1 80px; /* Grow, shrink, basis */
+
+/* Row 1 (Text + Lupa) */
+.search-row #universal-search {
+    flex: 1; /* Text input takes all space */
+    min-width: 150px;
     margin-bottom: 0 !important;
 }
-.universal-search-container button {
-    flex-shrink: 0;
+.search-row #btn-universal-search {
+    flex-shrink: 0; /* Lupa button doesn't shrink */
+}
+
+/* Row 2 (Selects) */
+.search-row #filter-year,
+.search-row #filter-month {
+    flex: 1; /* Selects share space equally */
+    margin-bottom: 0 !important;
 }
