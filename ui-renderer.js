@@ -4,16 +4,16 @@
 // CAMBIO: Rutas actualizadas para apuntar a 'core/'
 import { getState } from './core/state.js';
 
-// --- P-FIX: Centralized list of mood icons ---
-// This order MUST match the default order in state.js
-export const MOOD_ICONS = [
-    'assets/icons/mood-happy.svg',
-    'assets/icons/mood-sad.svg',
-    'assets/icons/mood-relax.svg',
-    'assets/icons/mood-anxious.svg',
-    'assets/icons/mood-tired.svg'
-];
-// --- End P-FIX ---
+// P-FIX: Map of visual KEYWORDS to icon paths
+const MOOD_ICON_MAP = {
+    'happy': 'assets/icons/mood-happy.svg',
+    'sad': 'assets/icons/mood-sad.svg',
+    'relax': 'assets/icons/mood-relax.svg',
+    'anxious': 'assets/icons/mood-anxious.svg',
+    'tired': 'assets/icons/mood-tired.svg'
+};
+// P-FIX: Export the map so timeline.js and preview.js can use it
+export { MOOD_ICON_MAP };
 
 // --- Form Renderers ---
 
@@ -26,14 +26,22 @@ export function renderMoodSelector() {
     const container = document.getElementById('mood-selector');
     if (!container) return; // Guard clause
     
-    // P-FIX: Use the centralized icon list and labels from settings
+    // P-FIX: Use the new hybrid system
     container.innerHTML = settings.moods.map((mood, index) => {
-        // Use the icon from the MOOD_ICONS list based on index
-        // Fallback to a default icon if settings are out of sync
-        const iconSrc = MOOD_ICONS[index] || 'assets/icons/mood-neutral.svg'; 
+        let visualHTML = '';
+        const iconSrc = MOOD_ICON_MAP[mood.visual]; // Check if visual is a keyword
+        
+        if (iconSrc) {
+            // It's a keyword, render the icon
+            visualHTML = `<img src="${iconSrc}" alt="${mood.label}" class="icon-mac">`;
+        } else {
+            // It's not a keyword, assume emoji, render as text
+            visualHTML = `<span class="mood-emoji-visual">${mood.visual}</span>`;
+        }
+        
         return `
             <div class="mood-option ${selectedMood === index ? 'selected' : ''}" data-index="${index}">
-                <img src="${iconSrc}" alt="${mood.label}" class="icon-mac">
+                ${visualHTML}
                 <span class="mood-label">${mood.label}</span>
             </div>
         `;
