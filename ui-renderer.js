@@ -73,7 +73,7 @@ export function renderAudioPreview() {
     if (currentAudio) {
         // CHANGED: Use close.svg icon for remove button
         container.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+            <div style="display: flex; align-itemsf: center; gap: 8px; margin-top: 8px;">
                 <audio controls style="flex: 1;">
                     <source src="${currentAudio}">
                 </audio>
@@ -148,4 +148,26 @@ export function selectTrackUI(trackData) {
  * Displays a mini-map in the specified container.
  * @param {number} lat - Latitude.
  * @param {number} lon - Longitude.
- *...
+ * @param {string} containerId - The ID of the map container element.
+ */
+export function showMiniMap(lat, lon, containerId) {
+    const mapContainer = document.getElementById(containerId);
+    if (!mapContainer) return;
+
+    mapContainer.innerHTML = '';
+    mapContainer.style.display = 'block';
+
+    try {
+        const map = L.map(containerId).setView([lat, lon], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19
+        }).addTo(map);
+        L.marker([lat, lon]).addTo(map);
+
+        setTimeout(() => map.invalidateSize(), 100);
+    } catch(e) {
+        console.error("Error initializing Leaflet map:", e);
+        mapContainer.innerHTML = "Map failed to load. Are you online?";
+    }
+}
