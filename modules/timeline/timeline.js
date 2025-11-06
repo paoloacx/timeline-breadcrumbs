@@ -142,6 +142,7 @@ function renderDayBlock(dayKey, dayEntries) {
     return `
         <div class="day-block" data-day="${dayKey}">
             <div class="day-header">
+                <div class="timeline-dot"></div>
                 <span>${formatDate(dayKey + 'T12:00:00')}</span>
                 <span class="chevron ${expandedClass}" id="chevron-${dayKey}">▼</span>
             </div>
@@ -296,7 +297,7 @@ function renderDayBlock(dayKey, dayEntries) {
 }
 
 /**
- * Renders the entire timeline with nesting - NON-INVERTED structure
+ * Renders the entire timeline with nesting
  */
 export function renderTimeline() {
     const { entries } = getState();
@@ -343,6 +344,7 @@ export function renderTimeline() {
                 return `
                 <div class="year-block">
                     <div class="year-header">
+                        <div class="timeline-dot"></div>
                         <span>${yearKey}</span>
                         <span class="chevron-down ${yearExpandedClass}">▼</span>
                     </div>
@@ -355,6 +357,7 @@ export function renderTimeline() {
                             return `
                             <div class="month-block">
                                 <div class="month-header">
+                                    <div class="timeline-dot"></div>
                                     <span>${getMonthName(monthKey)}</span>
                                     <span class="chevron-down ${monthExpandedClass}">▼</span>
                                 </div>
@@ -369,6 +372,7 @@ export function renderTimeline() {
                                         return `
                                         <div class="week-block">
                                             <div class="week-header">
+                                                <div class="timeline-dot"></div>
                                                 <span>Week ${weekNum}</span>
                                                 <span class="chevron-down ${weekExpandedClass}">▼</span>
                                             </div>
