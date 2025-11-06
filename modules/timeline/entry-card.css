@@ -13,6 +13,15 @@
     cursor: pointer; /* NEW: Indicate the card is clickable */
 }
 
+/* P-FIX: Grain texture for normal (crumb) entries */
+.breadcrumb-entry.crumb-event {
+    background: #faf8f6;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAIElEQVR42mNkYGD4z0AEYBxVSFUBC4RRMFQEYoYhNEgAAN/RCx8SdskyAAAAAElFTkSuQmCC");
+    background-repeat: repeat;
+    background-size: 180px; /* ajusta el tamaño del grano */
+}
+
+
 .breadcrumb-entry.track-event {
     background: #8cafe1;
     color: white;
