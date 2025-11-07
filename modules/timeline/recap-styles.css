@@ -92,13 +92,8 @@
     font-size: 13px;
     font-weight: bold;
     box-shadow: 1px 1px 0 rgba(0,0,0,0.1);
-    
-    /* P1: Allow wrapping inside the tag */
-    display: inline; /* Allows text to wrap */
+    display: inline;
     line-height: 1.6;
-    
-    /* P1: Indentation trick for wrapping */
-    /* This creates a "hanging indent" */
     padding-left: 10px; 
     text-indent: 0; 
 }
