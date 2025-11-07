@@ -28,44 +28,36 @@
     transition: opacity 0.25s ease;
 }
 
-/* --- Arquitectura de Apilamiento --- */
+/* --- Arquitectura de Apilamiento (Preview Modal) --- */
 .preview-content {
-    /* 1. Fondo beige (será tapado por el ::after) */
     background: #faf8f6; 
     border: 3px solid #000;
     max-width: 90%;
     width: 600px; 
     max-height: 90vh; 
-    
-    /* 2. Contenedor Flex vertical */
     display: flex;
     flex-direction: column;
     overflow: hidden; 
-    
-    /* 3. Necesario para el ::after absoluto */
     position: relative; 
-    
     transform: scale(0.95) translateY(8px);
     transition: all 0.25s cubic-bezier(.18,.89,.32,1.28);
 }
 
-/* 4. Capa de GRANO (Fija, z-index: 1) */
 .preview-content::after {
     content: "";
     position: absolute;
-    inset: 0; /* Cubre todo el modal */
+    inset: 0;
     background: #faf8f6;
     filter: url(#grain);
-    z-index: 1; /* DETRÁS del contenido */
+    z-index: 1;
     pointer-events: none;
 }
 
-/* --- Contenido (z-index: 2) --- */
 .preview-content .mac-title-bar,
 .preview-content .mac-content,
 .preview-content .mac-footer-bar {
     position: relative;
-    z-index: 2; /* ENCIMA del grano */
+    z-index: 2;
 }
 
 .preview-modal .mac-content {
@@ -75,18 +67,17 @@
     overflow-y: auto;
 }
 
-
 .preview-modal.show .preview-content {
     transform: scale(1) translateY(0);
 }
 
 .preview-content .mac-title-bar {
-    flex-shrink: 0; /* No se encoje */
-    z-index: 10; /* Extra seguro */
+    flex-shrink: 0;
+    z-index: 10;
 }
 
 
-/* P4: Modal Width Change */
+/* --- P4: Modal Width Change & FIX OVERFLOW --- */
 .form-modal .preview-content {
     border: none;
     box-shadow: none;
@@ -94,14 +85,12 @@
     width: 600px; 
     max-width: 600px;
     
-    /* --- CAMBIO: Limitar altura del modal de formulario --- */
-    /* Reemplaza overflow: visible por scroll si es necesario */
-    overflow-y: auto; 
-    max-height: 90vh;
+    /* --- CAMBIO: Fix para modal gigante --- */
+    max-height: 90vh; /* Limita la altura al 90% de la pantalla */
+    overflow-y: auto; /* Añade scroll interno si se pasa */
     /* --- FIN CAMBIO --- */
 }
 
-/* El .form-modal no tendrá el ::after porque no tiene .preview-content */
 .form-modal.preview-content::after {
     display: none;
 }
@@ -118,13 +107,11 @@
 
 /* --- NEW: Footer bar for modals --- */
 .mac-footer-bar {
-    flex-shrink: 0; /* No se encoje */
-    z-index: 10; /* Extra seguro */
+    flex-shrink: 0;
+    z-index: 10;
     display: flex;
-    justify-content: flex-end; /* Aligns button to the right */
+    justify-content: flex-end;
     padding: 6px;
-    
-    /* Mimic header style */
     background: #ccc;
     border-top: 3px ridge #999;
 }
