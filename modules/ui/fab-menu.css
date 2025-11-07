@@ -107,7 +107,7 @@
 
     /* P1: Align centers (with 30px icons) */
     /* (64px main fab - 55px action fab) / 2 = 4.5px. Rounded to 5px. */
-    margin-right: 5px; /* CHANGED from 8px */
+    margin-right: 0px; /* CHANGED from 8px */
 }
 
 .fab-action-wrapper.show {
@@ -120,7 +120,7 @@
 
 @media (max-width: 768px) {
     .fab-container {
-        right: 16px;
+        right: 20px;
         /* CHANGED: Adjusted for mobile (no footer) */
         bottom: 20px; 
     }
