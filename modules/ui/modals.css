@@ -79,7 +79,7 @@
 .preview-modal .mac-content {
     /* El área de scroll DEBE ser transparente */
     background: transparent !important;
-    
+    font-size: 15px;
     /* Layout de scroll interno */
     flex-grow: 1;
     overflow-y: auto;
