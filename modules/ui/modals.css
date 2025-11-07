@@ -28,7 +28,7 @@
     transition: opacity 0.25s ease;
 }
 
-/* --- CAMBIO: Arquitectura de Apilamiento --- */
+/* --- Arquitectura de Apilamiento --- */
 .preview-content {
     /* 1. Fondo beige (será tapado por el ::after) */
     background: #faf8f6; 
@@ -50,46 +50,30 @@
 }
 
 /* 4. Capa de GRANO (Fija, z-index: 1) */
-/* Se aplica al padre, se queda fija y no hace scroll */
 .preview-content::after {
     content: "";
     position: absolute;
     inset: 0; /* Cubre todo el modal */
-    
-    /* Fondo beige + Filtro de grano */
     background: #faf8f6;
     filter: url(#grain);
-    
     z-index: 1; /* DETRÁS del contenido */
     pointer-events: none;
 }
-/* --- FIN CAMBIO --- */
 
-
-/* --- CAMBIO: Contenido (z-index: 2) --- */
+/* --- Contenido (z-index: 2) --- */
 .preview-content .mac-title-bar,
 .preview-content .mac-content,
 .preview-content .mac-footer-bar {
-    /* Todos los hijos directos deben ser relativos */
-    /* para poder apilarse sobre el ::after */
     position: relative;
     z-index: 2; /* ENCIMA del grano */
 }
 
 .preview-modal .mac-content {
-    /* El área de scroll DEBE ser transparente */
     background: transparent !important;
     font-size: 14px;
-    /* Layout de scroll interno */
     flex-grow: 1;
     overflow-y: auto;
-    
-    /* REMOVED: Ya no necesita ::after ni isolation */
 }
-
-/* REMOVED: .preview-modal .mac-content::after */
-/* REMOVED: .preview-modal #preview-body (lo hace el JS) */
-/* --- FIN CAMBIO --- */
 
 
 .preview-modal.show .preview-content {
@@ -109,7 +93,12 @@
     background: transparent;
     width: 600px; 
     max-width: 600px;
-    overflow: visible; 
+    
+    /* --- CAMBIO: Limitar altura del modal de formulario --- */
+    /* Reemplaza overflow: visible por scroll si es necesario */
+    overflow-y: auto; 
+    max-height: 90vh;
+    /* --- FIN CAMBIO --- */
 }
 
 /* El .form-modal no tendrá el ::after porque no tiene .preview-content */
