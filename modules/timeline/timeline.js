@@ -208,14 +208,14 @@ export function renderTimeline(entriesToRender = null) {
                                     ${recap.reflection ? `
                                         <div style="margin-bottom: 16px;">
                                             <strong>Reflection:</strong>
-                                            <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${recap.reflection}</div>
+                                            <div class="recap-user-text" style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${recap.reflection}</div>
                                         </div>
                                     ` : ''}
                                     
                                     ${recap.highlights && recap.highlights.length > 0 && recap.highlights.some(h => h) ? `
                                         <div style="margin-bottom: 16px;">
                                             <strong>Highlights:</strong>
-                                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                            <ul class="recap-user-text" style="margin: 8px 0; padding-left: 20px;">
                                                 ${recap.highlights.filter(h => h).map(h => `<li style="margin-bottom: 4px;">${h}</li>`).join('')}
                                             </ul>
                                         </div>
@@ -224,7 +224,7 @@ export function renderTimeline(entriesToRender = null) {
                                     ${recap.lowlights && recap.lowlights.length > 0 && recap.lowlights.some(l => l) ? `
                                         <div style="margin-bottom: 16px;">
                                             <strong>Lowlights:</strong>
-                                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                            <ul class="recap-user-text" style="margin: 8px 0; padding-left: 20px;">
                                                 ${recap.lowlights.filter(l => l).map(l => `<li style="margin-bottom: 4px;">${l}</li>`).join('')}
                                             </ul>
                                         </div>
@@ -249,7 +249,7 @@ export function renderTimeline(entriesToRender = null) {
                                     ${recap.gratitude ? `
                                         <div>
                                             <strong>Gratitude:</strong>
-                                            <div style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${recap.gratitude}</div>
+                                            <div class="recap-user-text" style="margin-top: 8px; line-height: 1.6; white-space: pre-wrap;">${recap.gratitude}</div>
                                         </div>
                                     ` : ''}
                                 </div>
@@ -277,12 +277,9 @@ export function renderTimeline(entriesToRender = null) {
                                     let visual = null;
                                     
                                     if (typeof entry.mood === 'object') {
-                                        // Type 1 (New): { visual: 'happy', label: 'Happy' }
-                                        // Type 2 (Old): { emoji: '🙂', label: 'Happy' }
-                                        visual = entry.mood.visual || entry.mood.emoji; // Use 'visual' first, fallback to 'emoji'
+                                        visual = entry.mood.visual || entry.mood.emoji;
                                         moodLabel = entry.mood.label;
                                     } else if (typeof entry.mood === 'number') {
-                                        // Type 3 (Broken Fix): 0
                                         if (settings.moods[entry.mood]) {
                                             visual = settings.moods[entry.mood].visual;
                                             moodLabel = settings.moods[entry.mood].label;
@@ -290,12 +287,13 @@ export function renderTimeline(entriesToRender = null) {
                                     }
                                     
                                     if (visual) {
-                                        const iconSrc = MOOD_ICON_MAP[visual]; // Check if it's a keyword
+                                        const iconSrc = MOOD_ICON_MAP[visual];
                                         if (iconSrc) {
-                                            moodHTML = `<img src="${iconSrc}" alt="${moodLabel}" class="icon-mac" style="width: 32px; height: 32px; flex-shrink: 0;">`;
+                                            // CAMBIO: Eliminado style inline de width/height para que use CSS (25px)
+                                            moodHTML = `<img src="${iconSrc}" alt="${moodLabel}" class="icon-mac mood-emoji-visual">`;
                                         } else {
-                                            // It's an emoji
-                                            moodHTML = `<span class="mood-emoji-visual" style="font-size: 32px; line-height: 1; flex-shrink: 0;">${visual}</span>`;
+                                            // CAMBIO: Eliminado style inline de font-size para que use CSS (25px)
+                                            moodHTML = `<span class="mood-emoji-visual">${visual}</span>`;
                                         }
                                     }
                                 }
