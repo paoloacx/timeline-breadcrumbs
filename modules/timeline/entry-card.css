@@ -74,7 +74,7 @@
     /* Otros estilos solicitados */
     border: 1px solid #202834;
     color: white;
-    text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+    text-shadow: 0 0px 0 rgba(0,0,0,0.6);
     
     /* --- CAMBIOS --- */
     /* 1. Usar la misma sombra "Mac" que las otras tarjetas */
