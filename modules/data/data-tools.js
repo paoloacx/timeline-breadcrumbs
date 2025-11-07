@@ -294,7 +294,15 @@ function exportICSData(entries, icsFormat) {
                 if (entry.isTimedActivity) desc += `(Time) ${entry.activity} - ${entry.duration}min`;
                 else if (entry.isQuickTrack) desc += `(Track) ${entry.note}`;
                 else if (entry.isSpent) desc += `(Spent) ${entry.note} - €${entry.spentAmount}`;
-                else if (entry.type === 'recap') desc += `(Recap) Rating: ${entry.rating}/10`;
+                else if (entry.type === 'recap') {
+                    // --- CAMBIO: Más detalles en el export 'single' ---
+                    desc += `[Day Recap] Rating: ${entry.rating}/10`;
+                    if (entry.reflection) desc += ` | Reflection: ${entry.reflection}`;
+                    if (entry.highlights && entry.highlights.some(h=>h)) desc += ` | Highlights: ${entry.highlights.filter(h=>h).join(', ')}`;
+                    if (entry.lowlights && entry.lowlights.some(l=>l)) desc += ` | Lowlights: ${entry.lowlights.filter(l=>l).join(', ')}`;
+                    if (entry.track) desc += ` | BSO: ${entry.track.name} - ${entry.track.artist}`;
+                    // --- FIN CAMBIO ---
+                }
                 else desc += entry.note;
                 return desc.replace(/\n/g, ' ');
             }).join('\\n');
@@ -326,7 +334,6 @@ function exportICSData(entries, icsFormat) {
             } else if (entry.isSpent) {
                 summary = `Spent: ${entry.note} (€${entry.spentAmount})`;
             } else if (entry.type === 'recap') {
-                // --- CAMBIO: Exportación completa del Recap ---
                 summary = `Day Recap: Rating ${entry.rating}/10`;
                 description = '';
                 if (entry.reflection) {
@@ -345,7 +352,6 @@ function exportICSData(entries, icsFormat) {
                     description += `Gratitude:\\n${entry.gratitude.replace(/\n/g, '\\n')}`;
                 }
                 description = description.trim();
-                // --- FIN CAMBIO ---
             }
 
             icsContent.push(
