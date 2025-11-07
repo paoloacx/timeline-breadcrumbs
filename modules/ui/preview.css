@@ -36,6 +36,7 @@
 /* Esto anula el 'font-size: 14px' de entry-card.css */
 #preview-body .breadcrumb-note,
 #preview-body .optional-note {
-    font-size: 15px; /* Para que coincida con el resto del texto */
+    font-size: 15px;
+    font-weight: bold;
     /* El font-family: Helvetica ya lo hereda de global.css */
 }
