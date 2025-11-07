@@ -63,7 +63,7 @@
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
 }
 
-/* --- CAMBIO: Estilo de evento de tiempo (Fondo + Rayas) --- */
+/* --- Estilo de evento de tiempo (Fondo + Rayas) --- */
 .breadcrumb-entry.time-event {
     /* Fondo combinado: Rayas sobre gradiente */
     background:
@@ -71,33 +71,36 @@
         repeating-linear-gradient(to right, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 8px),
         linear-gradient(to bottom, #4c5c70 0%, #ffffff 100%);
     
-    /* Otros estilos solicitados */
     border: 1px solid #202834;
     color: white;
     text-shadow: 0 0px 0 rgba(0,0,0,0.6);
-    
-    /* --- CAMBIOS --- */
-    /* 1. Usar la misma sombra "Mac" que las otras tarjetas */
     box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
-    /* 2. Quitar el ancho máximo para que se adapte */
-    /* max-width: 420px; <-- REMOVED */
-    /* --- FIN CAMBIOS --- */
 }
-/* --- FIN CAMBIO --- */
 
 .breadcrumb-time {
     font-weight: bold;
-    font-size: 14px;
+    /* CAMBIO: Aumentado de 14px a 16px */
+    font-size: 16px;
     color: #000;
     display: block;
     margin-bottom: 8px;
-    text-align: left; /* NEW: Ensure left */
+    text-align: left; 
+    /* Añadido para alinear mejor el icono grande */
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* --- CAMBIO: Icono del reloj más grande (25px) --- */
+.breadcrumb-time .icon-mac {
+    width: 25px;
+    height: 25px;
 }
 
 /* MODIFIED: Override for time-event */
 .breadcrumb-entry.time-event .breadcrumb-time {
     margin-bottom: 16px;
-    color: white; /* CAMBIO: Asegurar texto blanco sobre fondo oscuro */
+    color: white; 
 }
 
 /* Overwrite for track event time */
@@ -143,7 +146,8 @@
 
 /* P2: Size and Layout Change */
 .breadcrumb-meta {
-    font-size: 14px; /* CHANGED from 12px */
+    /* CAMBIO: Reducido de 14px a 13px */
+    font-size: 13px;
     margin-bottom: 8px;
     color: #666; /* Grey text */
     text-align: left; /* Reset for non-time-events */
@@ -153,6 +157,13 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 6px; /* Space between weather, dot, and location */
+}
+
+/* --- CAMBIO: Tamaño del emoji en breadcrumb entry (25px) --- */
+.breadcrumb-entry .mood-emoji-visual {
+    font-size: 25px;
+    line-height: 1;
+    vertical-align: middle;
 }
 
 /* P2: Target the span that contains the location icon */
