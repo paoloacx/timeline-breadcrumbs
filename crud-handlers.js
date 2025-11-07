@@ -237,7 +237,11 @@ export function handleEditEntry(entryId) {
         
         document.getElementById('datetime-input-time').value = isoString;
         document.getElementById('time-optional-note').value = entry.optionalNote || '';
-        document.getElementById('btn-save-time').textContent = '💾 Update Event';
+        
+        // --- CAMBIO: Icono en lugar de emoji ---
+        document.getElementById('btn-save-time').innerHTML = `<img src="assets/icons/save.svg" alt="Save" class="icon-mac"> Update Event`;
+        // --- FIN CAMBIO ---
+        
         document.getElementById('btn-delete-time').classList.remove('hidden');
         setSelectedDuration(entry.duration);
         setSelectedActivity(entry.activity);
@@ -251,7 +255,11 @@ export function handleEditEntry(entryId) {
 
         document.getElementById('datetime-input-track').value = isoString;
         document.getElementById('track-optional-note').value = entry.optionalNote || '';
-        document.getElementById('btn-save-track').textContent = '💾 Update Track';
+        
+        // --- CAMBIO: Icono en lugar de emoji ---
+        document.getElementById('btn-save-track').innerHTML = `<img src="assets/icons/save.svg" alt="Save" class="icon-mac"> Update Track`;
+        // --- FIN CAMBIO ---
+        
         document.getElementById('btn-delete-track').classList.remove('hidden');
         setSelectedTrackItem(entry.note);
         updateTrackOptions();
@@ -265,6 +273,11 @@ export function handleEditEntry(entryId) {
         document.getElementById('datetime-input-spent').value = isoString;
         document.getElementById('spent-description').value = entry.note;
         document.getElementById('spent-amount').value = entry.spentAmount;
+        
+        // --- CAMBIO: Icono en lugar de emoji ---
+        document.getElementById('btn-save-spent').innerHTML = `<img src="assets/icons/save.svg" alt="Save" class="icon-mac"> Update Spent`;
+        // --- FIN CAMBIO ---
+        
         document.getElementById('btn-delete-spent').classList.remove('hidden');
         openSpentForm(entry);
 
@@ -285,12 +298,16 @@ export function handleEditEntry(entryId) {
         if (entry.track) {
             selectTrackUI(entry.track);
         }
+        
+        // --- CAMBIO: Icono en lugar de emoji ---
+        document.getElementById('btn-save-recap').innerHTML = `<img src="assets/icons/save.svg" alt="Save" class="icon-mac"> Update Recap`;
+        // --- FIN CAMBIO ---
+        
         document.getElementById('btn-delete-recap').classList.remove('hidden');
         openRecapForm(entry);
 
     } else {
         // --- Populate Crumb Form ---
-        // *** CAMBIO CRÍTICO: Limpia el estado ANTES de setear el nuevo ID ***
         clearFormState();
         setEditingId(entry.id);
 
@@ -303,22 +320,18 @@ export function handleEditEntry(entryId) {
         setAudio(entry.audio || null);
         setCoords(entry.coords ? { ...entry.coords } : null);
         
-        // P-FIX: Robust mood index finding. Handles ALL data types.
+        // P-FIX: Robust mood index finding.
         let moodIndex = -1;
         const { settings } = getState();
         if (entry.mood !== null && entry.mood !== undefined) {
             if (typeof entry.mood === 'object') {
-                // Type 1 (New): { visual: 'happy', label: 'Happy' }
-                // Type 2 (Old): { emoji: '🙂', label: 'Happy' }
-                const keyToFind = entry.mood.visual || entry.mood.emoji; // Use 'visual' first, fallback to 'emoji'
+                const keyToFind = entry.mood.visual || entry.mood.emoji;
                 moodIndex = settings.moods.findIndex(m => m.visual === keyToFind || m.label === entry.mood.label);
             } else if (typeof entry.mood === 'number') {
-                // Type 3 (Broken Fix): 0
                 moodIndex = entry.mood;
             }
         }
         setSelectedMood(moodIndex !== -1 && moodIndex < settings.moods.length ? moodIndex : null);
-        // End P-FIX
 
         renderImagePreviews();
         renderAudioPreview();
@@ -328,7 +341,11 @@ export function handleEditEntry(entryId) {
         }
 
         document.getElementById('btn-delete-crumb').classList.remove('hidden');
-        document.getElementById('btn-save-crumb').textContent = '💾 Update';
+        
+        // --- CAMBIO: Icono en lugar de emoji ---
+        document.getElementById('btn-save-crumb').innerHTML = `<img src="assets/icons/save.svg" alt="Save" class="icon-mac"> Update`;
+        // --- FIN CAMBIO ---
+        
         openCrumbForm(entry);
     }
 }
