@@ -326,11 +326,26 @@ function exportICSData(entries, icsFormat) {
             } else if (entry.isSpent) {
                 summary = `Spent: ${entry.note} (€${entry.spentAmount})`;
             } else if (entry.type === 'recap') {
+                // --- CAMBIO: Exportación completa del Recap ---
                 summary = `Day Recap: Rating ${entry.rating}/10`;
-                description = (entry.reflection || '').replace(/\n/g, '\\n');
-                if (entry.highlights) {
-                    description += `\\n\\nHighlights:\\n- ${entry.highlights.join('\\n- ')}`;
+                description = '';
+                if (entry.reflection) {
+                    description += `Reflection:\\n${entry.reflection.replace(/\n/g, '\\n')}\\n\\n`;
                 }
+                if (entry.highlights && entry.highlights.some(h => h)) {
+                    description += `Highlights:\\n- ${entry.highlights.filter(h => h).join('\\n- ')}\\n\\n`;
+                }
+                if (entry.lowlights && entry.lowlights.some(l => l)) {
+                    description += `Lowlights:\\n- ${entry.lowlights.filter(l => l).join('\\n- ')}\\n\\n`;
+                }
+                if (entry.track) {
+                    description += `BSO: ${entry.track.name} - ${entry.track.artist}\\nListen: ${entry.track.url}\\n\\n`;
+                }
+                if (entry.gratitude) {
+                    description += `Gratitude:\\n${entry.gratitude.replace(/\n/g, '\\n')}`;
+                }
+                description = description.trim();
+                // --- FIN CAMBIO ---
             }
 
             icsContent.push(
