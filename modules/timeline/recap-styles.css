@@ -28,20 +28,11 @@
     background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
 }
 
-/* --- CAMBIO: Tamaño del icono de edit en el recap (20px) --- */
-.recap-header .icon-mac {
-    width: 20px;
-    height: 20px;
-}
-
 /* P2: Animation Style Change */
 .recap-content {
     background: #fffef0; /* Very light yellow */
     position: relative;
     border-bottom: none; /* Remove bottom border */
-    
-    /* --- CAMBIO: Texto del usuario en Helvetica --- */
-    font-family: Helvetica, Arial, sans-serif;
 
     /* Animation: Collapsed state */
     overflow: hidden;
@@ -111,3 +102,9 @@
     padding-left: 10px; 
     text-indent: 0; 
 }
+
+/* --- CAMBIO: Clase para texto del usuario en el Recap --- */
+.recap-user-text {
+    font-family: Helvetica, Arial, sans-serif;
+}
+/* --- FIN CAMBIO --- */
