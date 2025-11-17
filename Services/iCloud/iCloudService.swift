@@ -58,13 +58,6 @@ class iCloudService {
                 return
             }
 
-            // Create backup data
-            let backupData: [String: Any] = [
-                "version": "1.0.0",
-                "createdAt": ISO8601DateFormatter().string(from: Date()),
-                "entriesCount": entries.count
-            ]
-
             // Encode entries and settings
             guard let entriesData = try? JSONEncoder().encode(entries),
                   let settingsData = try? JSONEncoder().encode(settings) else {
@@ -74,7 +67,9 @@ class iCloudService {
 
             // Create or update record
             let record = CKRecord(recordType: self.backupRecordType, recordID: self.backupRecordID)
-            record["metadata"] = backupData as CKRecordValue
+            record["version"] = "1.0.0"
+            record["createdAt"] = ISO8601DateFormatter().string(from: Date())
+            record["entriesCount"] = entries.count
             record["entries"] = String(data: entriesData, encoding: .utf8)
             record["settings"] = String(data: settingsData, encoding: .utf8)
             record["lastModified"] = Date()
@@ -139,14 +134,14 @@ class iCloudService {
     // MARK: - Sync on Login (Auto-restore if needed)
 
     func syncOnLogin(currentEntries: [Entry], completion: @escaping (Bool, String?) -> Void) {
-        restoreFromiCloud { [weak self] remoteEntries, remoteSettings, error in
+        restoreFromiCloud { remoteEntries, _, error in
             if let error = error {
                 completion(false, error.localizedDescription)
                 return
             }
 
             // No remote backup found - do initial backup
-            guard let remoteEntries = remoteEntries, let remoteSettings = remoteSettings else {
+            guard let remoteEntries = remoteEntries else {
                 print("No remote backup found. Creating initial backup...")
                 completion(true, "No backup found. Local data preserved.")
                 return
