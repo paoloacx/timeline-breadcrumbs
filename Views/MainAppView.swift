@@ -12,7 +12,7 @@ struct MainAppView: View {
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            // Fondo a rayas (Mac Classic style)
+            // Fondo a rayas HORIZONTALES (Mac Classic style)
             StripedBackground()
                 .ignoresSafeArea()
 
@@ -23,9 +23,10 @@ struct MainAppView: View {
                 // Timeline
                 ScrollView {
                     TimelineView()
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, 18)
                         .padding(.bottom, 100) // Space for FAB
                 }
+                .background(Color.clear)
             }
 
             // FAB Menu (Floating Action Button)
@@ -40,104 +41,70 @@ struct MacWindowHeader: View {
     @EnvironmentObject var appState: AppState
 
     var body: some View {
-        HStack {
-            HStack(spacing: 8) {
-                Text("Breadcrumbs Timeline")
-                    .font(.custom("Courier", size: 16))
-                    .fontWeight(.bold)
-
-                Button(action: {
-                    appState.loadLocalData()
-                    appState.loadLocalSettings()
-                }) {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 14))
-                }
-                .macButtonStyle()
-            }
+        HStack(alignment: .center) {
+            Text("Breadcrumbs Timeline")
+                .font(.system(size: 20, weight: .bold, design: .monospaced))
+                .foregroundColor(Color(hex: "ffd700")) // Amarillo
 
             Spacer()
 
-            HStack(spacing: 8) {
-                // Stats button
-                Button(action: {
-                    appState.showStatsModal = true
-                }) {
-                    Image(systemName: "chart.bar.fill")
-                        .font(.system(size: 18))
-                }
-                .macButtonStyle()
-
-                // Settings button
-                Button(action: {
-                    appState.showSettingsModal = true
-                }) {
-                    Image(systemName: "slider.horizontal.3")
-                        .font(.system(size: 18))
-                }
-                .macButtonStyle()
-
-                // Tools button (search, export, backup)
-                Button(action: {
-                    appState.showToolsModal = true
-                }) {
-                    Image(systemName: "wrench.and.screwdriver.fill")
-                        .font(.system(size: 18))
-                }
-                .macButtonStyle()
+            // Tools button (Happy Mac)
+            Button(action: {
+                appState.showToolsModal = true
+            }) {
+                Image(systemName: "wrench.and.screwdriver.fill")
+                    .font(.system(size: 18))
+                    .foregroundColor(Color(hex: "ffd700"))
             }
+            .buttonStyle(PlainButtonStyle())
+            .frame(width: 30, height: 30)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color(hex: "e0e0e0"))
-        .overlay(
-            Rectangle()
-                .stroke(Color.black, lineWidth: 3)
+        .frame(minHeight: 40)
+        .padding(.leading, 16)
+        .padding(.trailing, 5)
+        .background(
+            // Fondo negro con patrón de puntos
+            ZStack {
+                Color.black
+                DottedPattern()
+            }
         )
     }
 }
 
-// MARK: - Mac Button Style
+// MARK: - Dotted Pattern (Title Bar)
 
-struct MacButtonModifier: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(Color.white)
-            .overlay(
-                RoundedRectangle(cornerRadius: 0)
-                    .stroke(Color.black, lineWidth: 2)
-            )
-            .foregroundColor(.black)
+struct DottedPattern: View {
+    var body: some View {
+        GeometryReader { geometry in
+            Canvas { context, size in
+                let dotSize: CGFloat = 2
+                let spacing: CGFloat = 2
+
+                for y in stride(from: 0, to: size.height, by: spacing) {
+                    for x in stride(from: 0, to: size.width, by: spacing) {
+                        let rect = CGRect(x: x, y: y, width: dotSize, height: dotSize)
+                        context.fill(Path(rect), with: .color(Color(hex: "333333")))
+                    }
+                }
+            }
+        }
     }
 }
 
-extension View {
-    func macButtonStyle() -> some View {
-        self.modifier(MacButtonModifier())
-    }
-}
-
-// MARK: - Striped Background (Mac Classic style)
+// MARK: - Striped Background (HORIZONTAL lines - Mac Classic style)
 
 struct StripedBackground: View {
     var body: some View {
         GeometryReader { geometry in
-            Path { path in
-                let stripeWidth: CGFloat = 4
-                let stripeSpacing: CGFloat = 4
-                let totalWidth = stripeWidth + stripeSpacing
-                let numberOfStripes = Int(geometry.size.width / totalWidth) + 1
-
-                for i in 0..<numberOfStripes {
-                    let x = CGFloat(i) * totalWidth
-                    path.move(to: CGPoint(x: x, y: 0))
-                    path.addLine(to: CGPoint(x: x, y: geometry.size.height))
+            Canvas { context, size in
+                // Rayas horizontales alternando colores cada 2px
+                for y in stride(from: 0, to: size.height, by: 2) {
+                    let color = (Int(y) / 2) % 2 == 0 ? Color(hex: "c0c0c0") : Color(hex: "d0d0d0")
+                    let rect = CGRect(x: 0, y: y, width: size.width, height: 1)
+                    context.fill(Path(rect), with: .color(color))
                 }
             }
-            .stroke(Color.black.opacity(0.05), lineWidth: 4)
-            .background(Color(hex: "f5f5f5"))
         }
     }
 }

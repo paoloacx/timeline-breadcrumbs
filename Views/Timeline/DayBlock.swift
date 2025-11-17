@@ -14,60 +14,68 @@ struct DayBlock: View {
     let toggleAction: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Day Header
-            Button(action: toggleAction) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
+        ZStack(alignment: .topLeading) {
+            VStack(alignment: .leading, spacing: 0) {
+                // Day Header (fondo negro, texto blanco)
+                Button(action: toggleAction) {
+                    HStack {
                         Text(formattedDayTitle(day))
-                            .font(.custom("Courier", size: 16))
-                            .fontWeight(.bold)
+                            .font(.system(size: 16, weight: .bold, design: .monospaced))
+                            .foregroundColor(.white)
 
-                        Text(formattedDaySubtitle(day))
-                            .font(.custom("Courier", size: 12))
-                            .foregroundColor(.gray)
+                        Spacer()
+
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
                     }
-
-                    Spacer()
-
-                    // Entry count badge
-                    Text("\(entries.count)")
-                        .font(.custom("Courier", size: 12))
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.black)
-
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 14, weight: .bold))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .buttonStyle(PlainButtonStyle())
-            .background(Color(hex: "e0e0e0"))
-            .overlay(
-                Rectangle()
-                    .stroke(Color.black, lineWidth: 3)
-            )
-
-            // Entries (Collapsible)
-            if isExpanded {
-                VStack(spacing: 0) {
-                    ForEach(entries) { entry in
-                        EntryCard(entry: entry)
-                            .padding(.top, 8)
-                    }
-                }
-                .padding(12)
-                .background(Color.white)
+                .buttonStyle(PlainButtonStyle())
+                .background(Color.black)
                 .overlay(
                     Rectangle()
                         .strokeBorder(Color.black, lineWidth: 3)
                 )
+
+                // Entries (Collapsible)
+                if isExpanded {
+                    VStack(spacing: 5) {
+                        ForEach(entries) { entry in
+                            EntryCard(entry: entry)
+                        }
+                    }
+                    .padding(10)
+                    .background(Color.white)
+                }
             }
+            .background(Color.white)
+            .overlay(
+                Rectangle()
+                    .stroke(Color.black, lineWidth: 3)
+            )
+            .shadow(color: Color.black.opacity(0.3), radius: 0, x: 5, y: 5)
+
+            // Bolita circular en el header (a la izquierda)
+            Circle()
+                .fill(Color.black)
+                .frame(width: 11, height: 11)
+                .overlay(
+                    Circle()
+                        .stroke(Color.white, lineWidth: 3)
+                )
+                .background(
+                    Circle()
+                        .stroke(Color.black, lineWidth: 3)
+                        .frame(width: 17, height: 17)
+                )
+                .offset(x: -28, y: 20)
         }
+        .padding(.leading, 21)
+        .padding(.trailing, -10)
+        .padding(.bottom, 20)
     }
 
     private func formattedDayTitle(_ dayString: String) -> String {

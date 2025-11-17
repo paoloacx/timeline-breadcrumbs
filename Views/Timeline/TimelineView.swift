@@ -22,33 +22,64 @@ struct TimelineView: View {
             let sortedDays = grouped.keys.sorted(by: >)
             let limitedDays = Array(sortedDays.prefix(daysToShow))
 
-            VStack(spacing: 16) {
-                ForEach(limitedDays, id: \.self) { day in
-                    DayBlock(
-                        day: day,
-                        entries: grouped[day] ?? [],
-                        isExpanded: expandedDays.contains(day)
-                    ) {
-                        toggleDay(day)
-                    }
-                }
+            ZStack(alignment: .topLeading) {
+                // Línea vertical negra (timeline)
+                Rectangle()
+                    .fill(Color.black)
+                    .frame(width: 4)
+                    .offset(x: -7, y: -45)
+                    .zIndex(1)
 
-                // Load More button
-                if sortedDays.count > daysToShow {
-                    Button(action: {
-                        daysToShow += 30
-                    }) {
-                        HStack {
-                            Image(systemName: "arrow.down")
-                            Text("Load More")
+                // Línea horizontal superior
+                Rectangle()
+                    .fill(Color.black)
+                    .frame(height: 4)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .offset(x: -3, y: -45)
+                    .zIndex(0)
+
+                VStack(spacing: 0) {
+                    ForEach(limitedDays, id: \.self) { day in
+                        DayBlock(
+                            day: day,
+                            entries: grouped[day] ?? [],
+                            isExpanded: expandedDays.contains(day)
+                        ) {
+                            toggleDay(day)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .font(.custom("Courier", size: 14))
                     }
-                    .macButtonStyle()
-                    .padding(.top, 16)
+
+                    // Load More button
+                    if sortedDays.count > daysToShow {
+                        Button(action: {
+                            daysToShow += 30
+                        }) {
+                            HStack {
+                                Image(systemName: "arrow.down")
+                                Text("Load More")
+                                    .font(.system(size: 16, weight: .bold, design: .monospaced))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(16)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .background(Color(hex: "ddd"))
+                        .overlay(
+                            Rectangle()
+                                .strokeBorder(Color.white, lineWidth: 3, antialiased: false)
+                                .background(
+                                    Rectangle()
+                                        .stroke(Color.black, lineWidth: 3)
+                                        .offset(x: 3, y: 3)
+                                )
+                        )
+                        .padding(.top, 30)
+                        .padding(.horizontal, -5)
+                        .padding(.bottom, 40)
+                    }
                 }
+                .padding(.top, 45)
+                .zIndex(2)
             }
         }
     }
