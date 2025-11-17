@@ -41,7 +41,7 @@ struct MacWindowHeader: View {
     @EnvironmentObject var appState: AppState
 
     var body: some View {
-        HStack(alignment: .center) {
+        HStack(alignment: .center, spacing: 0) {
             Text("Breadcrumbs Timeline")
                 .font(.system(size: 20, weight: .bold, design: .monospaced))
                 .foregroundColor(Color(hex: "ffd700")) // Amarillo
@@ -57,11 +57,12 @@ struct MacWindowHeader: View {
             .buttonStyle(PlainButtonStyle())
             .frame(width: 30, height: 30)
         }
-        .frame(minHeight: 40)
+        .frame(minHeight: 40, maxHeight: 40)
         .padding(.leading, 16)
         .padding(.trailing, 5)
+        .padding(.vertical, 0) // padding: 0 vertical
         .background(
-            // Fondo negro con patrón de puntos
+            // Fondo negro con patrón de puntos (2px x 2px)
             ZStack {
                 Color.black
                 DottedPattern()
@@ -97,57 +98,113 @@ extension View {
     }
 }
 
-// MARK: - Happy Mac SVG
+// MARK: - Happy Mac SVG (EXACTO del HTML original)
 
 struct HappyMacIcon: View {
     var body: some View {
+        // viewBox="12 7 76 86" -> width=76, height=86, offset x=12, y=7
         Canvas { context, size in
-            // Fondo blanco del Mac
+            let scaleX = size.width / 76
+            let scaleY = size.height / 86
+            let offsetX: CGFloat = -12 * scaleX
+            let offsetY: CGFloat = -7 * scaleY
+
+            func scale(_ x: CGFloat, _ y: CGFloat) -> CGPoint {
+                CGPoint(x: x * scaleX + offsetX, y: y * scaleY + offsetY)
+            }
+
+            // rect x="15" y="10" width="70" height="70" rx="5" fill="white" stroke="black"
             context.fill(
-                Path(roundedRect: CGRect(x: 3, y: 3, width: size.width - 6, height: size.height * 0.75),
-                     cornerRadius: 5),
+                Path(roundedRect: CGRect(
+                    x: 15 * scaleX + offsetX,
+                    y: 10 * scaleY + offsetY,
+                    width: 70 * scaleX,
+                    height: 70 * scaleY
+                ), cornerRadius: 5),
                 with: .color(.white)
             )
             context.stroke(
-                Path(roundedRect: CGRect(x: 3, y: 3, width: size.width - 6, height: size.height * 0.75),
-                     cornerRadius: 5),
+                Path(roundedRect: CGRect(
+                    x: 15 * scaleX + offsetX,
+                    y: 10 * scaleY + offsetY,
+                    width: 70 * scaleX,
+                    height: 70 * scaleY
+                ), cornerRadius: 5),
                 with: .color(.black),
-                lineWidth: 2
+                lineWidth: 1.5
             )
 
-            // Pantalla
-            let screenRect = CGRect(x: size.width * 0.2, y: size.height * 0.15,
-                                   width: size.width * 0.6, height: size.height * 0.45)
+            // rect x="25" y="20" width="50" height="40" fill="white" stroke="black" (pantalla)
+            let screenRect = CGRect(
+                x: 25 * scaleX + offsetX,
+                y: 20 * scaleY + offsetY,
+                width: 50 * scaleX,
+                height: 40 * scaleY
+            )
             context.fill(Path(screenRect), with: .color(.white))
-            context.stroke(Path(screenRect), with: .color(.black), lineWidth: 2)
+            context.stroke(Path(screenRect), with: .color(.black), lineWidth: 1.5)
 
-            // Ojos
-            let eyeY = size.height * 0.3
-            context.fill(Path(ellipseIn: CGRect(x: size.width * 0.35, y: eyeY, width: 3, height: 3)),
-                        with: .color(.black))
-            context.fill(Path(ellipseIn: CGRect(x: size.width * 0.60, y: eyeY, width: 3, height: 3)),
-                        with: .color(.black))
-
-            // Sonrisa (curva)
-            var smilePath = Path()
-            smilePath.move(to: CGPoint(x: size.width * 0.35, y: size.height * 0.45))
-            smilePath.addQuadCurve(
-                to: CGPoint(x: size.width * 0.65, y: size.height * 0.45),
-                control: CGPoint(x: size.width * 0.5, y: size.height * 0.52)
-            )
-            context.stroke(smilePath, with: .color(.black), lineWidth: 2)
-
-            // Base
+            // circle cx="40" cy="35" r="1" fill="black" (ojo izquierdo)
             context.fill(
-                Path(CGRect(x: size.width * 0.25, y: size.height * 0.8,
-                           width: size.width * 0.5, height: size.height * 0.15)),
-                with: .color(.white)
+                Path(ellipseIn: CGRect(
+                    x: (40 - 1) * scaleX + offsetX,
+                    y: (35 - 1) * scaleY + offsetY,
+                    width: 2 * scaleX,
+                    height: 2 * scaleY
+                )),
+                with: .color(.black)
             )
-            context.stroke(
-                Path(CGRect(x: size.width * 0.25, y: size.height * 0.8,
-                           width: size.width * 0.5, height: size.height * 0.15)),
-                with: .color(.black),
-                lineWidth: 2
+
+            // circle cx="60" cy="35" r="1" fill="black" (ojo derecho)
+            context.fill(
+                Path(ellipseIn: CGRect(
+                    x: (60 - 1) * scaleX + offsetX,
+                    y: (35 - 1) * scaleY + offsetY,
+                    width: 2 * scaleX,
+                    height: 2 * scaleY
+                )),
+                with: .color(.black)
+            )
+
+            // path d="M40 48 Q50 53 60 48" (sonrisa)
+            var smilePath = Path()
+            smilePath.move(to: scale(40, 48))
+            smilePath.addQuadCurve(
+                to: scale(60, 48),
+                control: scale(50, 53)
+            )
+            context.stroke(smilePath, with: .color(.black), lineWidth: 1)
+
+            // rect x="20" y="80" width="60" height="10" fill="white" stroke="black" (base)
+            let baseRect = CGRect(
+                x: 20 * scaleX + offsetX,
+                y: 80 * scaleY + offsetY,
+                width: 60 * scaleX,
+                height: 10 * scaleY
+            )
+            context.fill(Path(baseRect), with: .color(.white))
+            context.stroke(Path(baseRect), with: .color(.black), lineWidth: 1.5)
+
+            // rect x="28" y="75" width="5" height="2" fill="black"
+            context.fill(
+                Path(CGRect(
+                    x: 28 * scaleX + offsetX,
+                    y: 75 * scaleY + offsetY,
+                    width: 5 * scaleX,
+                    height: 2 * scaleY
+                )),
+                with: .color(.black)
+            )
+
+            // rect x="55" y="70" width="20" height="0.1" fill="black"
+            context.fill(
+                Path(CGRect(
+                    x: 55 * scaleX + offsetX,
+                    y: 70 * scaleY + offsetY,
+                    width: 20 * scaleX,
+                    height: 0.5 * scaleY
+                )),
+                with: .color(.black)
             )
         }
         .frame(width: 30, height: 30)

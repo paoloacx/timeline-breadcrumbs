@@ -18,7 +18,7 @@ struct ToolsView: View {
     @State private var showingImportPicker = false
 
     // iCloud state
-    @State private var iCloudStatus = "Checking..."
+    @State private var iCloudStatus = "Not checked"
 
     var body: some View {
         NavigationView {
@@ -247,9 +247,9 @@ struct ToolsView: View {
         ) { result in
             handleImport(result)
         }
-        .onAppear {
-            checkiCloudStatus()
-        }
+        // .onAppear {
+        //     checkiCloudStatus()
+        // }
     }
 
     // MARK: - Computed Properties
