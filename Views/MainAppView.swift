@@ -48,13 +48,11 @@ struct MacWindowHeader: View {
 
             Spacer()
 
-            // Tools button (Happy Mac)
+            // Tools button (Happy Mac logo)
             Button(action: {
                 appState.showToolsModal = true
             }) {
-                Image(systemName: "wrench.and.screwdriver.fill")
-                    .font(.system(size: 18))
-                    .foregroundColor(Color(hex: "ffd700"))
+                HappyMacIcon()
             }
             .buttonStyle(PlainButtonStyle())
             .frame(width: 30, height: 30)
@@ -69,6 +67,90 @@ struct MacWindowHeader: View {
                 DottedPattern()
             }
         )
+    }
+}
+
+// MARK: - Mac Button Style
+
+struct MacButtonModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color(hex: "ddd"))
+            .overlay(
+                Rectangle()
+                    .stroke(Color.white, lineWidth: 3)
+                    .padding(3)
+                    .background(
+                        Rectangle()
+                            .stroke(Color.black, lineWidth: 3)
+                    )
+            )
+            .foregroundColor(.black)
+    }
+}
+
+extension View {
+    func macButtonStyle() -> some View {
+        self.modifier(MacButtonModifier())
+    }
+}
+
+// MARK: - Happy Mac SVG
+
+struct HappyMacIcon: View {
+    var body: some View {
+        Canvas { context, size in
+            // Fondo blanco del Mac
+            context.fill(
+                Path(roundedRect: CGRect(x: 3, y: 3, width: size.width - 6, height: size.height * 0.75),
+                     cornerRadius: 5),
+                with: .color(.white)
+            )
+            context.stroke(
+                Path(roundedRect: CGRect(x: 3, y: 3, width: size.width - 6, height: size.height * 0.75),
+                     cornerRadius: 5),
+                with: .color(.black),
+                lineWidth: 2
+            )
+
+            // Pantalla
+            let screenRect = CGRect(x: size.width * 0.2, y: size.height * 0.15,
+                                   width: size.width * 0.6, height: size.height * 0.45)
+            context.fill(Path(screenRect), with: .color(.white))
+            context.stroke(Path(screenRect), with: .color(.black), lineWidth: 2)
+
+            // Ojos
+            let eyeY = size.height * 0.3
+            context.fill(Path(ellipseIn: CGRect(x: size.width * 0.35, y: eyeY, width: 3, height: 3)),
+                        with: .color(.black))
+            context.fill(Path(ellipseIn: CGRect(x: size.width * 0.60, y: eyeY, width: 3, height: 3)),
+                        with: .color(.black))
+
+            // Sonrisa (curva)
+            var smilePath = Path()
+            smilePath.move(to: CGPoint(x: size.width * 0.35, y: size.height * 0.45))
+            smilePath.addQuadCurve(
+                to: CGPoint(x: size.width * 0.65, y: size.height * 0.45),
+                control: CGPoint(x: size.width * 0.5, y: size.height * 0.52)
+            )
+            context.stroke(smilePath, with: .color(.black), lineWidth: 2)
+
+            // Base
+            context.fill(
+                Path(CGRect(x: size.width * 0.25, y: size.height * 0.8,
+                           width: size.width * 0.5, height: size.height * 0.15)),
+                with: .color(.white)
+            )
+            context.stroke(
+                Path(CGRect(x: size.width * 0.25, y: size.height * 0.8,
+                           width: size.width * 0.5, height: size.height * 0.15)),
+                with: .color(.black),
+                lineWidth: 2
+            )
+        }
+        .frame(width: 30, height: 30)
     }
 }
 
