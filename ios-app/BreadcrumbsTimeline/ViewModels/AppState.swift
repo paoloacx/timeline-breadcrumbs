@@ -59,6 +59,7 @@ class AppState: ObservableObject {
     @Published var searchText: String = ""
     @Published var filterYear: String = ""
     @Published var filterMonth: String = ""
+    @Published var filteredEntries: [Entry]? = nil
 
     private init() {
         // Private singleton init
@@ -145,6 +146,14 @@ class AppState: ObservableObject {
     }
 
     // MARK: - Persistence (LocalStorage equivalent)
+
+    func saveData() {
+        saveLocalData()
+    }
+
+    func saveSettings() {
+        saveLocalSettings()
+    }
 
     func saveLocalData() {
         if let encoded = try? JSONEncoder().encode(entries) {
