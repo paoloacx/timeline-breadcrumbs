@@ -139,7 +139,7 @@ struct PreviewView: View {
                         }
 
                         // Optional Note for Time Event
-                        if let optionalNote = entry.note, !optionalNote.isEmpty {
+                        if let optionalNote = entry.optionalNote, !optionalNote.isEmpty {
                             macSection(label: "Note") {
                                 Text(optionalNote)
                                     .font(.custom("Courier", size: 14))
