@@ -63,11 +63,7 @@ struct PreviewView: View {
                     if let coords = entry.coords {
                         macSection(label: "Map") {
                             MapView(
-                                coordinate: CLLocationCoordinate2D(
-                                    latitude: coords.lat,
-                                    longitude: coords.lon
-                                ),
-                                isMiniMap: false,
+                                coordinates: coords,
                                 isInteractive: false
                             )
                             .frame(height: 300)

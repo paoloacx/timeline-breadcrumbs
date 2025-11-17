@@ -54,7 +54,7 @@ struct SettingsView: View {
                     }
                 } header: {
                     Text("Time Durations")
-                        .font(.custom("Courier", size: 14, weight: .bold))
+                        .font(.custom("Courier", size: 14)).bold()
                 }
 
                 // MARK: - Time Activities
@@ -87,7 +87,7 @@ struct SettingsView: View {
                     }
                 } header: {
                     Text("Time Activities")
-                        .font(.custom("Courier", size: 14, weight: .bold))
+                        .font(.custom("Courier", size: 14)).bold()
                 }
 
                 // MARK: - Track Items - Meals
@@ -120,7 +120,7 @@ struct SettingsView: View {
                     }
                 } header: {
                     Text("Track Items - Meals")
-                        .font(.custom("Courier", size: 14, weight: .bold))
+                        .font(.custom("Courier", size: 14)).bold()
                 }
 
                 // MARK: - Track Items - Tasks
@@ -153,7 +153,7 @@ struct SettingsView: View {
                     }
                 } header: {
                     Text("Track Items - Tasks")
-                        .font(.custom("Courier", size: 14, weight: .bold))
+                        .font(.custom("Courier", size: 14)).bold()
                 }
 
                 // MARK: - Moods
@@ -206,14 +206,14 @@ struct SettingsView: View {
                     }
                 } header: {
                     Text("Moods")
-                        .font(.custom("Courier", size: 14, weight: .bold))
+                        .font(.custom("Courier", size: 14)).bold()
                 }
 
                 // MARK: - Save Button
                 Section {
                     Button(action: saveSettings) {
                         Text("Save Settings")
-                            .font(.custom("Courier", size: 16, weight: .bold))
+                            .font(.custom("Courier", size: 16)).bold()
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()

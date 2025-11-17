@@ -25,7 +25,7 @@ struct StatsView: View {
                     if !stats.moodCounts.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Mood Distribution")
-                                .font(.custom("Courier", size: 16, weight: .bold))
+                                .font(.custom("Courier", size: 16)).bold()
                                 .padding(.horizontal)
 
                             LazyVGrid(columns: [
@@ -47,7 +47,7 @@ struct StatsView: View {
                     if !stats.activityCounts.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Top Activities")
-                                .font(.custom("Courier", size: 16, weight: .bold))
+                                .font(.custom("Courier", size: 16)).bold()
                                 .padding(.horizontal)
 
                             ForEach(stats.activityCounts.prefix(5), id: \.activity) { activity in
@@ -155,7 +155,7 @@ struct StatCard: View {
     var body: some View {
         VStack(spacing: 8) {
             Text(value)
-                .font(.custom("Courier", size: 24, weight: .bold))
+                .font(.custom("Courier", size: 24)).bold()
                 .foregroundColor(.black)
 
             Text(label)
@@ -191,7 +191,7 @@ struct MoodStatCard: View {
                     .foregroundColor(.black)
 
                 Text("\(count)")
-                    .font(.custom("Courier", size: 16, weight: .bold))
+                    .font(.custom("Courier", size: 16)).bold()
                     .foregroundColor(.gray)
             }
 
@@ -219,7 +219,7 @@ struct ActivityStatRow: View {
             Spacer()
 
             Text("\(count)")
-                .font(.custom("Courier", size: 14, weight: .bold))
+                .font(.custom("Courier", size: 14)).bold()
                 .foregroundColor(.gray)
         }
         .padding()
