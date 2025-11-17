@@ -179,7 +179,7 @@ struct PreviewView: View {
                         if let rating = entry.rating {
                             macSection(label: "Rating") {
                                 Text("\(rating)/10")
-                                    .font(.custom("Courier", size: 16, weight: .bold))
+                                    .font(.custom("Courier", size: 16)).bold()
                             }
                         }
 
@@ -218,7 +218,7 @@ struct PreviewView: View {
 
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(bso.name)
-                                            .font(.custom("Courier", size: 14, weight: .bold))
+                                            .font(.custom("Courier", size: 14)).bold()
                                         Text(bso.artist)
                                             .font(.custom("Courier", size: 12))
                                             .foregroundColor(.gray)
@@ -268,7 +268,7 @@ struct PreviewView: View {
     private func macSection<Content: View>(label: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(label + ":")
-                .font(.custom("Courier", size: 14, weight: .bold))
+                .font(.custom("Courier", size: 14)).bold()
                 .foregroundColor(.black)
 
             content()
