@@ -4,10 +4,8 @@ import AVFoundation
 
 struct PreviewView: View {
     let entry: Entry
+    @EnvironmentObject var appState: AppState
     @Environment(\.dismiss) var dismiss
-    @Binding var editingEntry: Entry?
-    @Binding var showingEditForm: Bool
-    @Binding var editFormType: String
 
     @State private var audioPlayer: AVAudioPlayer?
     @State private var isPlayingAudio = false
@@ -290,22 +288,25 @@ struct PreviewView: View {
     }
 
     private func handleEdit() {
-        // Determine form type
-        var formType = "crumb"
-        if entry.isTimedActivity {
-            formType = "time"
-        } else if entry.isQuickTrack {
-            formType = "track"
-        } else if entry.isSpent {
-            formType = "spent"
-        } else if entry.isRecap {
-            formType = "recap"
-        }
+        // Set editing state in AppState
+        appState.editingEntryId = entry.id
 
-        editFormType = formType
-        editingEntry = entry
-        showingEditForm = true
+        // Close preview
         dismiss()
+        appState.showPreviewModal = false
+
+        // Open appropriate form
+        if entry.isTimedActivity {
+            appState.showTimeModal = true
+        } else if entry.isQuickTrack {
+            appState.showTrackModal = true
+        } else if entry.isSpent {
+            appState.showSpentModal = true
+        } else if entry.isRecap {
+            appState.showRecapModal = true
+        } else {
+            appState.showCrumbModal = true
+        }
     }
 
     // MARK: - Audio Functions

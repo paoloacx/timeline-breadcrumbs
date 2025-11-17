@@ -55,14 +55,34 @@ struct MacWindowHeader: View {
 
             Spacer()
 
-            // Tools button (robot icon from web)
-            Button(action: {
-                appState.showToolsModal = true
-            }) {
-                Image(systemName: "gearshape.fill")
-                    .font(.system(size: 18))
+            HStack(spacing: 8) {
+                // Stats button
+                Button(action: {
+                    appState.showStatsModal = true
+                }) {
+                    Image(systemName: "chart.bar.fill")
+                        .font(.system(size: 18))
+                }
+                .macButtonStyle()
+
+                // Settings button
+                Button(action: {
+                    appState.showSettingsModal = true
+                }) {
+                    Image(systemName: "slider.horizontal.3")
+                        .font(.system(size: 18))
+                }
+                .macButtonStyle()
+
+                // Tools button (search, export, backup)
+                Button(action: {
+                    appState.showToolsModal = true
+                }) {
+                    Image(systemName: "wrench.and.screwdriver.fill")
+                        .font(.system(size: 18))
+                }
+                .macButtonStyle()
             }
-            .macButtonStyle()
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
