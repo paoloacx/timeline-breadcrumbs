@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreLocation
+import Combine
 
 class LocationService: NSObject, ObservableObject {
     static let shared = LocationService()

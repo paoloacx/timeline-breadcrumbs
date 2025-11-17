@@ -7,6 +7,7 @@
 
 import Foundation
 import AVFoundation
+import Combine
 
 class AudioService: NSObject, ObservableObject {
     static let shared = AudioService()
