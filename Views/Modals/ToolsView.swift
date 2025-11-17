@@ -28,7 +28,7 @@ struct ToolsView: View {
                     // MARK: - Universal Search
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Search & Filter")
-                            .font(.custom("Courier", size: 16, weight: .bold))
+                            .font(.custom("Courier", size: 16)).bold()
 
                         TextField("Search entries...", text: $searchText)
                             .font(.custom("Courier", size: 14))
@@ -70,7 +70,7 @@ struct ToolsView: View {
 
                         Button(action: performSearch) {
                             Text("Search")
-                                .font(.custom("Courier", size: 14, weight: .bold))
+                                .font(.custom("Courier", size: 14)).bold()
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding()
@@ -100,7 +100,7 @@ struct ToolsView: View {
                     // MARK: - Export Section
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Export Data")
-                            .font(.custom("Courier", size: 16, weight: .bold))
+                            .font(.custom("Courier", size: 16)).bold()
 
                         Button(action: {
                             exportFormat = .csv
@@ -145,7 +145,7 @@ struct ToolsView: View {
                     // MARK: - Backup Section
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Backup & Restore")
-                            .font(.custom("Courier", size: 16, weight: .bold))
+                            .font(.custom("Courier", size: 16)).bold()
 
                         Button(action: exportFullBackup) {
                             HStack {
@@ -186,7 +186,7 @@ struct ToolsView: View {
                     // MARK: - iCloud Section
                     VStack(alignment: .leading, spacing: 12) {
                         Text("iCloud Sync")
-                            .font(.custom("Courier", size: 16, weight: .bold))
+                            .font(.custom("Courier", size: 16)).bold()
 
                         Text("Status: \(iCloudStatus)")
                             .font(.custom("Courier", size: 12))
@@ -514,7 +514,7 @@ struct ExportOptionsView: View {
                     performExport()
                     dismiss()
                 }
-                .font(.custom("Courier", size: 16, weight: .bold))
+                .font(.custom("Courier", size: 16)).bold()
             }
             .navigationTitle("Export Options")
             .navigationBarTitleDisplayMode(.inline)
@@ -607,7 +607,7 @@ struct ExportOptionsView: View {
                             desc += " | Highlights: \(highlights.joined(separator: ", "))"
                         }
                         if let bso = entry.bso {
-                            desc += " | BSO: \(bso.name) - \(bso.artist)"
+                            desc += " | BSO: \(bso.trackName) - \(bso.artistName)"
                         }
                     } else {
                         desc += entry.note
@@ -653,7 +653,7 @@ struct ExportOptionsView: View {
                         desc += "Highlights:\\n- \(highlights.joined(separator: "\\n- "))\\n\\n"
                     }
                     if let bso = entry.bso {
-                        desc += "BSO: \(bso.name) - \(bso.artist)\\n"
+                        desc += "BSO: \(bso.trackName) - \(bso.artistName)\\n"
                     }
 
                     description = desc.trimmingCharacters(in: .whitespacesAndNewlines)

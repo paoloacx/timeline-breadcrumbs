@@ -200,7 +200,7 @@ struct PreviewView: View {
                         if let bso = entry.bso {
                             macSection(label: "BSO") {
                                 HStack(spacing: 12) {
-                                    if let artworkURL = URL(string: bso.artworkUrl) {
+                                    if let artworkUrl100 = bso.artworkUrl100, let artworkURL = URL(string: artworkUrl100) {
                                         AsyncImage(url: artworkURL) { image in
                                             image
                                                 .resizable()
@@ -217,9 +217,9 @@ struct PreviewView: View {
                                     }
 
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text(bso.name)
+                                        Text(bso.trackName)
                                             .font(.custom("Courier", size: 14)).bold()
-                                        Text(bso.artist)
+                                        Text(bso.artistName)
                                             .font(.custom("Courier", size: 12))
                                             .foregroundColor(.gray)
                                     }
