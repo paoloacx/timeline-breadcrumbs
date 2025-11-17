@@ -376,18 +376,88 @@ struct ToolsView: View {
     }
 
     private func checkiCloudStatus() {
-        // TODO: Implement actual iCloud status check
-        iCloudStatus = "Available"
+        iCloudStatus = "Checking..."
+
+        iCloudService.shared.checkiCloudStatus { available, error in
+            if available {
+                self.iCloudStatus = "Available ✓"
+            } else if let error = error {
+                self.iCloudStatus = "Error: \(error.localizedDescription)"
+            } else {
+                self.iCloudStatus = "Not Available"
+            }
+        }
     }
 
     private func syncToiCloud() {
-        // TODO: Implement iCloud backup
-        print("Syncing to iCloud...")
+        iCloudStatus = "Backing up..."
+
+        iCloudService.shared.backupToiCloud(
+            entries: appState.entries,
+            settings: appState.settings
+        ) { success, error in
+            if success {
+                self.iCloudStatus = "Backup successful ✓"
+
+                // Show success message
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    self.checkiCloudStatus()
+                }
+            } else if let error = error {
+                self.iCloudStatus = "Backup failed: \(error.localizedDescription)"
+            }
+        }
     }
 
     private func syncFromiCloud() {
-        // TODO: Implement iCloud restore
-        print("Restoring from iCloud...")
+        iCloudStatus = "Restoring..."
+
+        iCloudService.shared.restoreFromiCloud { entries, settings, error in
+            if let error = error {
+                self.iCloudStatus = "Restore failed: \(error.localizedDescription)"
+                return
+            }
+
+            guard let entries = entries, let settings = settings else {
+                self.iCloudStatus = "No backup found in iCloud"
+                return
+            }
+
+            // Ask user for confirmation before restoring
+            let message = "Found backup with \(entries.count) entries. This will replace your current data. Continue?"
+
+            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootVC = scene.windows.first?.rootViewController {
+                let alert = UIAlertController(
+                    title: "Restore from iCloud",
+                    message: message,
+                    preferredStyle: .alert
+                )
+
+                alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                    self.iCloudStatus = "Restore cancelled"
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        self.checkiCloudStatus()
+                    }
+                })
+
+                alert.addAction(UIAlertAction(title: "Restore", style: .destructive) { _ in
+                    // Replace current data
+                    self.appState.entries = entries
+                    self.appState.settings = settings
+                    self.appState.saveData()
+                    self.appState.saveSettings()
+
+                    self.iCloudStatus = "Restored \(entries.count) entries ✓"
+
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        self.checkiCloudStatus()
+                    }
+                })
+
+                rootVC.present(alert, animated: true)
+            }
+        }
     }
 }
 
@@ -502,13 +572,137 @@ struct ExportOptionsView: View {
     }
 
     private func exportICal(_ entries: [Entry], format: ICalFormat) {
-        var ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Breadcrumbs Timeline//EN\n"
+        var icsLines: [String] = [
+            "BEGIN:VCALENDAR",
+            "VERSION:2.0",
+            "PRODID:-//Breadcrumbs Timeline//EN"
+        ]
 
-        // TODO: Implement iCal generation based on format
+        if format == .single {
+            // One event per day with all entries listed
+            let groupedByDay = Dictionary(grouping: entries) { entry in
+                getDayKey(from: entry.timestamp)
+            }
 
-        ics += "END:VCALENDAR"
+            for (dayKey, dayEntries) in groupedByDay.sorted(by: { $0.key < $1.key }) {
+                let firstEntryDate = dayEntries[0].timestamp
+                let summary = "Breadcrumbs Recap (\(dayEntries.count) entries)"
 
-        shareFile(content: ics, filename: "breadcrumbs.ics")
+                let description = dayEntries.map { entry in
+                    var desc = "\(formatTimeShort(entry.timestamp)): "
+
+                    if entry.isTimedActivity {
+                        desc += "(Time) \(entry.activity ?? "Activity") - \(entry.duration ?? 0)min"
+                    } else if entry.isQuickTrack {
+                        desc += "(Track) \(entry.note)"
+                    } else if entry.isSpent {
+                        let amount = entry.amount ?? 0
+                        desc += "(Spent) \(entry.note) - €\(String(format: "%.2f", amount))"
+                    } else if entry.isRecap {
+                        desc += "[Day Recap] Rating: \(entry.rating ?? 0)/10"
+                        if let reflection = entry.reflection, !reflection.isEmpty {
+                            desc += " | Reflection: \(reflection)"
+                        }
+                        if let highlights = entry.highlights?.filter({ !$0.isEmpty }), !highlights.isEmpty {
+                            desc += " | Highlights: \(highlights.joined(separator: ", "))"
+                        }
+                        if let bso = entry.bso {
+                            desc += " | BSO: \(bso.name) - \(bso.artist)"
+                        }
+                    } else {
+                        desc += entry.note
+                    }
+
+                    return desc.replacingOccurrences(of: "\n", with: " ")
+                }.joined(separator: "\\n")
+
+                icsLines.append("BEGIN:VEVENT")
+                icsLines.append("UID:\(dayKey)@breadcrumbs.app")
+                icsLines.append("DTSTAMP:\(toICSDate(Date()))")
+                icsLines.append("DTSTART;VALUE=DATE:\(toICSDateOnly(firstEntryDate))")
+                icsLines.append("SUMMARY:\(summary)")
+                icsLines.append("DESCRIPTION:\(description)")
+                icsLines.append("END:VEVENT")
+            }
+        } else {
+            // Individual event per entry
+            for entry in entries {
+                let startDate = entry.timestamp
+                var endDate = Date(timeInterval: 15 * 60, since: startDate) // Default 15 min
+                var summary = entry.note
+                var description = (entry.note).replacingOccurrences(of: "\n", with: "\\n")
+
+                if entry.isTimedActivity, let duration = entry.duration {
+                    endDate = Date(timeInterval: Double(duration * 60), since: startDate)
+                    summary = entry.activity ?? "Activity"
+                    description = (entry.note).replacingOccurrences(of: "\n", with: "\\n")
+                } else if entry.isQuickTrack {
+                    summary = "Track: \(entry.note)"
+                    description = (entry.note).replacingOccurrences(of: "\n", with: "\\n")
+                } else if entry.isSpent {
+                    let amount = entry.amount ?? 0
+                    summary = "Spent: \(entry.note) (€\(String(format: "%.2f", amount)))"
+                } else if entry.isRecap {
+                    summary = "Day Recap: Rating \(entry.rating ?? 0)/10"
+                    var desc = ""
+
+                    if let reflection = entry.reflection, !reflection.isEmpty {
+                        desc += "Reflection:\\n\(reflection.replacingOccurrences(of: "\n", with: "\\n"))\\n\\n"
+                    }
+                    if let highlights = entry.highlights?.filter({ !$0.isEmpty }), !highlights.isEmpty {
+                        desc += "Highlights:\\n- \(highlights.joined(separator: "\\n- "))\\n\\n"
+                    }
+                    if let bso = entry.bso {
+                        desc += "BSO: \(bso.name) - \(bso.artist)\\n"
+                    }
+
+                    description = desc.trimmingCharacters(in: .whitespacesAndNewlines)
+                }
+
+                icsLines.append("BEGIN:VEVENT")
+                icsLines.append("UID:\(entry.id)@breadcrumbs.app")
+                icsLines.append("DTSTAMP:\(toICSDate(Date()))")
+                icsLines.append("DTSTART:\(toICSDate(startDate))")
+                icsLines.append("DTEND:\(toICSDate(endDate))")
+                icsLines.append("SUMMARY:\(summary.replacingOccurrences(of: "\n", with: " "))")
+                icsLines.append("DESCRIPTION:\(description)")
+                icsLines.append("LOCATION:\(entry.location?.replacingOccurrences(of: "\n", with: " ") ?? "")")
+                icsLines.append("END:VEVENT")
+            }
+        }
+
+        icsLines.append("END:VCALENDAR")
+
+        shareFile(content: icsLines.joined(separator: "\r\n"), filename: "breadcrumbs.ics")
+    }
+
+    // MARK: - Helper Functions for iCal
+
+    private func toICSDate(_ date: Date) -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withYear, .withMonth, .withDay, .withTime, .withTimeZone]
+        let isoString = formatter.string(from: date)
+        return isoString.replacingOccurrences(of: "-", with: "")
+            .replacingOccurrences(of: ":", with: "")
+            .replacingOccurrences(of: "+0000", with: "Z")
+    }
+
+    private func toICSDateOnly(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd"
+        return formatter.string(from: date)
+    }
+
+    private func getDayKey(from date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
+    }
+
+    private func formatTimeShort(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: date)
     }
 
     private func shareFile(content: String, filename: String) {
