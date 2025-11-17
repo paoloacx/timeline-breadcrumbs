@@ -217,11 +217,14 @@ struct DottedPattern: View {
     var body: some View {
         GeometryReader { geometry in
             Canvas { context, size in
-                let dotSize: CGFloat = 2
+                let dotSize: CGFloat = 1
                 let spacing: CGFloat = 2
 
-                for y in stride(from: 0, to: size.height, by: spacing) {
-                    for x in stride(from: 0, to: size.width, by: spacing) {
+                // CSS creates 1px dots at every 2px interval
+                // Pattern: 1px transparent, 1px #333 (both horizontal and vertical)
+                // Result: dots appear at positions (1,1), (3,3), (5,5), etc.
+                for y in stride(from: 1, to: size.height, by: spacing) {
+                    for x in stride(from: 1, to: size.width, by: spacing) {
                         let rect = CGRect(x: x, y: y, width: dotSize, height: dotSize)
                         context.fill(Path(rect), with: .color(Color(hex: "333333")))
                     }

@@ -71,7 +71,7 @@ struct DayBlock: View {
                         .stroke(Color.black, lineWidth: 3)
                         .frame(width: 17, height: 17)
                 )
-                .offset(x: -28, y: 20)
+                .offset(x: -31.5, y: 20)
         }
         .padding(.leading, 21)
         .padding(.trailing, -10)

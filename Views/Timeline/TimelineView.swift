@@ -27,7 +27,7 @@ struct TimelineView: View {
                 Rectangle()
                     .fill(Color.black)
                     .frame(width: 4)
-                    .offset(x: -7, y: -45)
+                    .offset(x: -7, y: -30)
                     .zIndex(1)
 
                 // Línea horizontal superior
@@ -35,7 +35,7 @@ struct TimelineView: View {
                     .fill(Color.black)
                     .frame(height: 4)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .offset(x: -3, y: -45)
+                    .offset(x: -3, y: -30)
                     .zIndex(0)
 
                 VStack(spacing: 0) {
@@ -78,7 +78,7 @@ struct TimelineView: View {
                         .padding(.bottom, 40)
                     }
                 }
-                .padding(.top, 45)
+                .padding(.top, 30)
                 .zIndex(2)
             }
         }

@@ -54,9 +54,10 @@ struct EntryCard: View {
             .padding(12)
             .background(Color.white)
             .overlay(
-                RoundedRectangle(cornerRadius: 0)
-                    .stroke(Color.black, lineWidth: 2)
+                Rectangle()
+                    .stroke(Color(hex: "999999"), lineWidth: 3)
             )
+            .shadow(color: Color.black.opacity(0.3), radius: 0, x: 5, y: 5)
         }
         .buttonStyle(PlainButtonStyle())
     }
