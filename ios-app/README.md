@@ -59,31 +59,36 @@ BreadcrumbsTimeline/
 - 📊 **Quick Track**: Habit tracking (meals, tasks)
 - 💰 **Spent**: Expense tracking
 - 🌟 **Day Recap**: Daily reflection with rating, highlights, and BSO (iTunes)
-- ☁️ **Google Drive Sync**: Backup and restore data
-- 🗺️ **Maps**: GPS coordinates with map preview
-- 🎤 **Audio**: Voice note recording
-- 📸 **Images**: Multiple image attachments
+- ☁️ **iCloud Sync**: Automatic backup and restore across devices
+- 🗺️ **Apple Maps**: Native map display with GPS coordinates
+- 🎤 **Audio**: Voice note recording with AVFoundation
+- 📸 **Images**: Multiple image attachments with Photo Library
 - 📊 **Statistics**: Entry analytics
 - 💾 **Export**: CSV and iCal export
 
-## Tech Stack
+## Tech Stack (100% Native Apple)
 
 - **SwiftUI**: Modern declarative UI
 - **Combine**: Reactive state management
 - **UserDefaults**: Local persistence
 - **CoreLocation**: GPS tracking
 - **AVFoundation**: Audio recording
-- **MapKit**: Map display
-- **Google Drive SDK**: Cloud sync
-- **URLSession**: API calls (Weather, iTunes)
+- **MapKit**: Native Apple Maps integration
+- **CloudKit + iCloud Drive**: Cloud sync with Apple ID
+- **SF Symbols**: Native iOS icons (no custom assets needed)
+- **URLSession**: API calls (OpenWeatherMap, iTunes)
+- **PhotosUI**: Native photo picker
 
 ## Design
 
 Replicates the **Mac Classic** aesthetic from the web version:
 - Monospace font (Courier/Monaco)
 - Black borders and retro UI
-- Floating Action Button (FAB) menu
+- SF Symbols for all icons (native iOS)
+- Floating Action Button (FAB) menu with spring animation
 - Collapsible timeline grouped by days
+- Native Apple Maps instead of Leaflet
+- iCloud sync instead of Google Drive
 
 ## Status
 
@@ -97,15 +102,39 @@ Replicates the **Mac Classic** aesthetic from the web version:
 - ⏳ Services (TODO)
 - ⏳ Assets (TODO)
 
+## Native Apple Technologies
+
+✅ **iCloud Drive** instead of Google Drive:
+- Uses CloudKit for seamless sync
+- Automatic authentication with Apple ID
+- No OAuth redirect needed
+- Data syncs across all user's Apple devices
+
+✅ **Apple Maps (MapKit)** instead of Leaflet:
+- Native map rendering
+- Better performance and battery life
+- Familiar iOS map interface
+- Offline map support
+
+✅ **SF Symbols** instead of custom SVG icons:
+- System-provided icons
+- Automatic light/dark mode adaptation
+- Perfect resolution at any size
+- Mood icons: face.smiling, face.dashed, figure.mind.and.body, exclamationmark.triangle, moon.zzz
+
+✅ **OpenWeatherMap API** for weather (same as web):
+- Could use WeatherKit (Apple's weather service) in the future
+- Requires Apple Developer Program membership
+
 ## Next Steps
 
 1. Implement full forms (Crumb, Time, Track, Spent, Recap)
-2. Add Google Drive authentication and sync
-3. Implement GPS and location services
-4. Add audio recording
-5. Add camera and photo picker
-6. Implement Weather API
-7. Implement iTunes API for BSO
+2. Add iCloud authentication and sync logic
+3. Implement GPS with CoreLocation
+4. Add audio recording with AVFoundation
+5. Add camera and PhotosPicker
+6. Complete Weather API integration
+7. Complete iTunes API for BSO (Apple Music search)
 8. Add statistics view
 9. Add export functionality (CSV, iCal)
 10. Polish UI to match web design exactly

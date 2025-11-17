@@ -2,7 +2,7 @@
 //  User.swift
 //  BreadcrumbsTimeline
 //
-//  User model for Google Drive authentication
+//  User model for iCloud authentication (uses Apple ID)
 //
 
 import Foundation
@@ -16,5 +16,14 @@ struct User: Codable, Equatable {
         self.name = name
         self.email = email
         self.imageUrl = imageUrl
+    }
+
+    // Create user from iCloud (Apple ID)
+    static func fromiCloud(name: String?, email: String?) -> User {
+        return User(
+            name: name ?? "iCloud User",
+            email: email ?? "Signed in with iCloud",
+            imageUrl: nil
+        )
     }
 }

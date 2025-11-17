@@ -60,16 +60,19 @@
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
 
-    <!-- URL Types for Google Drive OAuth -->
-    <key>CFBundleURLTypes</key>
-    <array>
+    <!-- iCloud Capabilities -->
+    <key>NSUbiquitousContainers</key>
+    <dict>
+        <key>iCloud.com.breadcrumbs.timeline</key>
         <dict>
-            <key>CFBundleURLSchemes</key>
-            <array>
-                <string>com.googleusercontent.apps.605014519509-37up3noc8pprtodo9to35soge15albil</string>
-            </array>
+            <key>NSUbiquitousContainerIsDocumentScopePublic</key>
+            <true/>
+            <key>NSUbiquitousContainerName</key>
+            <string>Breadcrumbs Timeline</string>
+            <key>NSUbiquitousContainerSupportedFolderLevels</key>
+            <string>Any</string>
         </dict>
-    </array>
+    </dict>
 
     <!-- Allow arbitrary loads for API calls (OpenWeatherMap, iTunes) -->
     <key>NSAppTransportSecurity</key>
