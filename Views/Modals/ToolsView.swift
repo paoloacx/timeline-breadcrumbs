@@ -469,7 +469,7 @@ struct ExportOptionsView: View {
     @Environment(\.dismiss) var dismiss
 
     @State private var dateRange: DateRange = .all
-    @State private var selectedTypes: Set<EntryType> = [.crumb, .time, .track, .spent, .recap]
+    @State private var selectedTypes: Set<EntryCategory> = [.crumb, .time, .track, .spent, .recap]
     @State private var icalFormat: ICalFormat = .single
 
     var body: some View {
@@ -486,7 +486,7 @@ struct ExportOptionsView: View {
                 }
 
                 Section("Entry Types") {
-                    ForEach(EntryType.allCases, id: \.self) { type in
+                    ForEach(EntryCategory.allCases, id: \.self) { type in
                         Toggle(type.rawValue, isOn: Binding(
                             get: { selectedTypes.contains(type) },
                             set: { isOn in
@@ -544,7 +544,7 @@ struct ExportOptionsView: View {
             }
 
             // Type filter
-            let type = EntryType.from(entry)
+            let type = EntryCategory.from(entry)
             if !selectedTypes.contains(type) {
                 return false
             }
@@ -557,7 +557,7 @@ struct ExportOptionsView: View {
         var csv = "id,timestamp,type,note,mood,location,weather,activity,duration,amount\n"
 
         for entry in entries {
-            let type = EntryType.from(entry).rawValue
+            let type = EntryCategory.from(entry).rawValue
             let mood = entry.mood?.label ?? ""
             let location = entry.location ?? ""
             let weather = entry.weather ?? ""
@@ -749,14 +749,14 @@ enum DateRange {
     }
 }
 
-enum EntryType: String, CaseIterable {
+enum EntryCategory: String, CaseIterable {
     case crumb = "Crumb"
     case time = "Time Event"
     case track = "Tracked Item"
     case spent = "Spent"
     case recap = "Day Recap"
 
-    static func from(_ entry: Entry) -> EntryType {
+    static func from(_ entry: Entry) -> EntryCategory {
         if entry.isTimedActivity { return .time }
         if entry.isQuickTrack { return .track }
         if entry.isSpent { return .spent }

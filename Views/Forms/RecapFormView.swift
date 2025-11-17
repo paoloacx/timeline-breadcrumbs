@@ -22,7 +22,7 @@ struct RecapFormView: View {
     @State private var selectedBSO: BSOTrack?
     @State private var isSearching = false
 
-    private let iTunesService = iTunesService.shared
+    private let musicService = iTunesService.shared
 
     var body: some View {
         NavigationView {
@@ -272,7 +272,7 @@ struct RecapFormView: View {
     private func searchBSO() {
         isSearching = true
 
-        iTunesService.searchSongs(query: bsoQuery, limit: 10) { results, error in
+        musicService.searchSongs(query: bsoQuery, limit: 10) { results, error in
             isSearching = false
 
             if let error = error {

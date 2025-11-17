@@ -13,7 +13,7 @@ struct TimelineView: View {
     @State private var expandedDays: Set<String> = []
 
     var body: some View {
-        let entries = appState.filteredEntries()
+        let entries = appState.getFilteredEntries()
 
         if entries.isEmpty {
             EmptyStateView()

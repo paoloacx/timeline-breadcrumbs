@@ -196,7 +196,7 @@ class AppState: ObservableObject {
 
     // MARK: - Filtered Entries
 
-    func filteredEntries() -> [Entry] {
+    func getFilteredEntries() -> [Entry] {
         var result = entries
 
         // Search filter
